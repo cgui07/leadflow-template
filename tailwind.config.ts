@@ -9,126 +9,158 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
-      // ─── Brand Colors ───────────────────────────────────────────────
       colors: {
-        // Primary — main brand color (used for CTAs, highlights, links)
+        // ─── Semantic ────────────────────────────────────────────────
+        // primary é a cor principal da marca — usada em CTAs, links e destaques
         primary: {
-          50:  "#eef5ff",
-          100: "#d9e9ff",
-          200: "#bcd5ff",
-          300: "#8eb9ff",
-          400: "#5990ff",
-          500: "#3366ff", // base
-          600: "#1a45f5",
-          700: "#1332e1",
-          800: "#1629b6",
-          900: "#172890",
-          950: "#111a57",
+          DEFAULT:  "#3366ff",
+          hover:    "#1a45f5",
+          active:   "#1332e1",
+          light:    "#8eb9ff",
+          lighter:  "#d9e9ff",
+          ghost:    "#eef5ff",
+          dark:     "#1629b6",
+          darker:   "#111a57",
+          muted:    "#5990ff",
+          contrast: "#ffffff",
         },
 
-        // Secondary — accent / supporting color
-        secondary: {
-          50:  "#f3f0ff",
-          100: "#e9e4ff",
-          200: "#d5ccff",
-          300: "#b5a6ff",
-          400: "#9173ff",
-          500: "#7247ff", // base
-          600: "#6226f7",
-          700: "#5419e3",
-          800: "#4516bf",
-          900: "#39139c",
-          950: "#220a6a",
+        // ─── Blues ───────────────────────────────────────────────────
+        blue: {
+          DEFAULT:  "#3b82f6",
+          sky:      "#38bdf8",
+          royal:    "#2563eb",
+          navy:     "#1e3a8a",
+          ice:      "#bfdbfe",
+          pale:     "#eff6ff",
+          midnight: "#172554",
         },
 
-        // Accent — highlights, badges, tags
-        accent: {
-          50:  "#fff7ed",
-          100: "#ffedd5",
-          200: "#fed7aa",
-          300: "#fdba74",
-          400: "#fb923c",
-          500: "#f97316", // base
-          600: "#ea6c0a",
-          700: "#c2570a",
-          800: "#9a4510",
-          900: "#7c3a10",
-          950: "#431c06",
+        // ─── Purples ─────────────────────────────────────────────────
+        purple: {
+          DEFAULT:  "#7c3aed",
+          violet:   "#6d28d9",
+          lavender: "#a78bfa",
+          lilac:    "#ddd6fe",
+          plum:     "#4c1d95",
+          pale:     "#f5f3ff",
+          grape:    "#5b21b6",
         },
 
-        // Success — confirmations, completed states
-        success: {
-          50:  "#f0fdf4",
-          100: "#dcfce7",
-          200: "#bbf7d0",
-          300: "#86efac",
-          400: "#4ade80",
-          500: "#22c55e", // base
-          600: "#16a34a",
-          700: "#15803d",
-          800: "#166534",
-          900: "#14532d",
-          950: "#052e16",
+        // ─── Pinks ───────────────────────────────────────────────────
+        pink: {
+          DEFAULT:  "#ec4899",
+          hot:      "#db2777",
+          blush:    "#f9a8d4",
+          rose:     "#fce7f3",
+          magenta:  "#be185d",
+          pale:     "#fdf2f8",
+          fuchsia:  "#c026d3",
         },
 
-        // Warning — alerts, pending states
-        warning: {
-          50:  "#fffbeb",
-          100: "#fef3c7",
-          200: "#fde68a",
-          300: "#fcd34d",
-          400: "#fbbf24",
-          500: "#f59e0b", // base
-          600: "#d97706",
-          700: "#b45309",
-          800: "#92400e",
-          900: "#78350f",
-          950: "#451a03",
+        // ─── Reds ────────────────────────────────────────────────────
+        red: {
+          DEFAULT:  "#ef4444",
+          crimson:  "#dc2626",
+          coral:    "#f87171",
+          blush:    "#fecaca",
+          pale:     "#fef2f2",
+          dark:     "#991b1b",
+          darker:   "#450a0a",
         },
 
-        // Danger — errors, destructive actions
-        danger: {
-          50:  "#fff1f2",
-          100: "#ffe4e6",
-          200: "#fecdd3",
-          300: "#fda4af",
-          400: "#fb7185",
-          500: "#f43f5e", // base
-          600: "#e11d48",
-          700: "#be123c",
-          800: "#9f1239",
-          900: "#881337",
-          950: "#4c0519",
+        // ─── Oranges ─────────────────────────────────────────────────
+        orange: {
+          DEFAULT:  "#f97316",
+          amber:    "#f59e0b",
+          peach:    "#fdba74",
+          light:    "#fed7aa",
+          pale:     "#fff7ed",
+          dark:     "#c2570a",
+          burn:     "#7c2d12",
         },
 
-        // Neutral — text, backgrounds, borders
+        // ─── Yellows ─────────────────────────────────────────────────
+        yellow: {
+          DEFAULT:  "#eab308",
+          gold:     "#ca8a04",
+          lemon:    "#fde047",
+          butter:   "#fef08a",
+          pale:     "#fefce8",
+          dark:     "#a16207",
+          mustard:  "#713f12",
+        },
+
+        // ─── Greens ──────────────────────────────────────────────────
+        green: {
+          DEFAULT:  "#22c55e",
+          emerald:  "#10b981",
+          lime:     "#84cc16",
+          mint:     "#86efac",
+          sage:     "#bbf7d0",
+          pale:     "#f0fdf4",
+          dark:     "#15803d",
+          forest:   "#14532d",
+        },
+
+        // ─── Teals / Cyans ───────────────────────────────────────────
+        teal: {
+          DEFAULT:  "#14b8a6",
+          cyan:     "#06b6d4",
+          aqua:     "#67e8f9",
+          mist:     "#ccfbf1",
+          pale:     "#f0fdfa",
+          dark:     "#0f766e",
+          deep:     "#134e4a",
+        },
+
+        // ─── Grays ───────────────────────────────────────────────────
+        gray: {
+          DEFAULT:  "#6b7280",
+          smoke:    "#9ca3af",
+          silver:   "#d1d5db",
+          ash:      "#e5e7eb",
+          ghost:    "#f3f4f6",
+          pale:     "#f9fafb",
+          charcoal: "#374151",
+          iron:     "#1f2937",
+          jet:      "#111827",
+        },
+
+        // ─── Neutral (slate) ─────────────────────────────────────────
         neutral: {
-          50:  "#f8fafc",
-          100: "#f1f5f9",
-          200: "#e2e8f0",
-          300: "#cbd5e1",
-          400: "#94a3b8",
-          500: "#64748b",
-          600: "#475569",
-          700: "#334155",
-          800: "#1e293b",
-          900: "#0f172a",
-          950: "#020617",
+          DEFAULT:  "#64748b",
+          muted:    "#94a3b8",
+          border:   "#e2e8f0",
+          line:     "#cbd5e1",
+          surface:  "#f8fafc",
+          pale:     "#f1f5f9",
+          dark:     "#334155",
+          deep:     "#1e293b",
+          ink:      "#0f172a",
         },
 
-        // Surface — cards, panels, modals
-        surface: {
-          DEFAULT: "#ffffff",
-          dark:    "#0f172a",
-          muted:   "#f8fafc",
+        // ─── Blacks & Whites ─────────────────────────────────────────
+        black: {
+          DEFAULT:  "#000000",
+          rich:     "#0a0a0a",
+          soft:     "#171717",
+          fade:     "#1a1a1a",
         },
 
-        // Semantic aliases (CSS vars for easy dark-mode swap)
+        white: {
+          DEFAULT:  "#ffffff",
+          off:      "#fafafa",
+          cream:    "#f5f5f5",
+          warm:     "#fffbf0",
+        },
+
+        // ─── Semantic aliases (CSS vars) ─────────────────────────────
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
 
-      // ─── Typography ─────────────────────────────────────────────────
+      // ─── Typography ──────────────────────────────────────────────────
       fontFamily: {
         sans:    ["var(--font-geist-sans)", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
         mono:    ["var(--font-geist-mono)", "JetBrains Mono", "ui-monospace", "monospace"],
@@ -136,11 +168,7 @@ const config: Config = {
         body:    ["Inter", "var(--font-geist-sans)", "ui-sans-serif", "sans-serif"],
       },
 
-      fontSize: {
-        "2xs": ["0.625rem", { lineHeight: "1rem" }],
-      },
-
-      // ─── Spacing & Sizing ────────────────────────────────────────────
+      // ─── Spacing ─────────────────────────────────────────────────────
       spacing: {
         "4.5": "1.125rem",
         "13":  "3.25rem",
@@ -157,12 +185,11 @@ const config: Config = {
         "5xl": "2.5rem",
       },
 
-      // ─── Box Shadow ──────────────────────────────────────────────────
+      // ─── Shadows ─────────────────────────────────────────────────────
       boxShadow: {
-        soft:    "0 2px 15px -3px rgba(0,0,0,.07), 0 10px 20px -2px rgba(0,0,0,.04)",
-        card:    "0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06)",
+        soft:          "0 2px 15px -3px rgba(0,0,0,.07), 0 10px 20px -2px rgba(0,0,0,.04)",
+        card:          "0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06)",
         "primary-glow": "0 0 20px rgba(51,102,255,.35)",
-        "accent-glow":  "0 0 20px rgba(249,115,22,.35)",
       },
 
       // ─── Animations ──────────────────────────────────────────────────
@@ -171,35 +198,15 @@ const config: Config = {
           from: { opacity: "0", transform: "translateY(6px)" },
           to:   { opacity: "1", transform: "translateY(0)" },
         },
-        "slide-in": {
-          from: { transform: "translateX(-100%)" },
-          to:   { transform: "translateX(0)" },
-        },
-        pulse_soft: {
-          "0%, 100%": { opacity: "1" },
-          "50%":      { opacity: ".6" },
-        },
       },
       animation: {
-        "fade-in":   "fade-in .3s ease-out both",
-        "slide-in":  "slide-in .25s ease-out both",
-        "pulse-soft": "pulse_soft 2s ease-in-out infinite",
-      },
-
-      // ─── Z-Index ─────────────────────────────────────────────────────
-      zIndex: {
-        "60":  "60",
-        "70":  "70",
-        "80":  "80",
-        "90":  "90",
-        "100": "100",
+        "fade-in": "fade-in .3s ease-out both",
       },
 
       // ─── Max Width ───────────────────────────────────────────────────
       maxWidth: {
         "8xl":  "88rem",
         "9xl":  "96rem",
-        "10xl": "104rem",
       },
     },
   },
