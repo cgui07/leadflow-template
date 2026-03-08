@@ -10,22 +10,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // ─── Semantic ────────────────────────────────────────────────
-        // primary é a cor principal da marca — usada em CTAs, links e destaques
-        primary: {
-          DEFAULT:  "#3366ff",
-          hover:    "#1a45f5",
-          active:   "#1332e1",
-          light:    "#8eb9ff",
-          lighter:  "#d9e9ff",
-          ghost:    "#eef5ff",
-          dark:     "#1629b6",
-          darker:   "#111a57",
-          muted:    "#5990ff",
-          contrast: "#ffffff",
-        },
+        primary:    "#3366ff",
+        secondary:  "#7c3aed",
+        accent:     "#f97316",
+        success:    "#22c55e",
+        warning:    "#eab308",
+        danger:     "#ef4444",
+        info:       "#38bdf8",
 
-        // ─── Blues ───────────────────────────────────────────────────
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+
         blue: {
           DEFAULT:  "#3b82f6",
           sky:      "#38bdf8",
@@ -36,7 +31,6 @@ const config: Config = {
           midnight: "#172554",
         },
 
-        // ─── Purples ─────────────────────────────────────────────────
         purple: {
           DEFAULT:  "#7c3aed",
           violet:   "#6d28d9",
@@ -47,7 +41,6 @@ const config: Config = {
           grape:    "#5b21b6",
         },
 
-        // ─── Pinks ───────────────────────────────────────────────────
         pink: {
           DEFAULT:  "#ec4899",
           hot:      "#db2777",
@@ -58,7 +51,6 @@ const config: Config = {
           fuchsia:  "#c026d3",
         },
 
-        // ─── Reds ────────────────────────────────────────────────────
         red: {
           DEFAULT:  "#ef4444",
           crimson:  "#dc2626",
@@ -69,7 +61,6 @@ const config: Config = {
           darker:   "#450a0a",
         },
 
-        // ─── Oranges ─────────────────────────────────────────────────
         orange: {
           DEFAULT:  "#f97316",
           amber:    "#f59e0b",
@@ -80,7 +71,6 @@ const config: Config = {
           burn:     "#7c2d12",
         },
 
-        // ─── Yellows ─────────────────────────────────────────────────
         yellow: {
           DEFAULT:  "#eab308",
           gold:     "#ca8a04",
@@ -91,7 +81,6 @@ const config: Config = {
           mustard:  "#713f12",
         },
 
-        // ─── Greens ──────────────────────────────────────────────────
         green: {
           DEFAULT:  "#22c55e",
           emerald:  "#10b981",
@@ -103,7 +92,6 @@ const config: Config = {
           forest:   "#14532d",
         },
 
-        // ─── Teals / Cyans ───────────────────────────────────────────
         teal: {
           DEFAULT:  "#14b8a6",
           cyan:     "#06b6d4",
@@ -114,7 +102,6 @@ const config: Config = {
           deep:     "#134e4a",
         },
 
-        // ─── Grays ───────────────────────────────────────────────────
         gray: {
           DEFAULT:  "#6b7280",
           smoke:    "#9ca3af",
@@ -127,7 +114,6 @@ const config: Config = {
           jet:      "#111827",
         },
 
-        // ─── Neutral (slate) ─────────────────────────────────────────
         neutral: {
           DEFAULT:  "#64748b",
           muted:    "#94a3b8",
@@ -140,7 +126,6 @@ const config: Config = {
           ink:      "#0f172a",
         },
 
-        // ─── Blacks & Whites ─────────────────────────────────────────
         black: {
           DEFAULT:  "#000000",
           rich:     "#0a0a0a",
@@ -154,13 +139,8 @@ const config: Config = {
           cream:    "#f5f5f5",
           warm:     "#fffbf0",
         },
-
-        // ─── Semantic aliases (CSS vars) ─────────────────────────────
-        background: "var(--background)",
-        foreground: "var(--foreground)",
       },
 
-      // ─── Typography ──────────────────────────────────────────────────
       fontFamily: {
         sans:    ["var(--font-geist-sans)", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
         mono:    ["var(--font-geist-mono)", "JetBrains Mono", "ui-monospace", "monospace"],
@@ -168,7 +148,6 @@ const config: Config = {
         body:    ["Inter", "var(--font-geist-sans)", "ui-sans-serif", "sans-serif"],
       },
 
-      // ─── Spacing ─────────────────────────────────────────────────────
       spacing: {
         "4.5": "1.125rem",
         "13":  "3.25rem",
@@ -179,34 +158,31 @@ const config: Config = {
         "144": "36rem",
       },
 
-      // ─── Border Radius ───────────────────────────────────────────────
       borderRadius: {
         "4xl": "2rem",
         "5xl": "2.5rem",
       },
 
-      // ─── Shadows ─────────────────────────────────────────────────────
       boxShadow: {
         soft:          "0 2px 15px -3px rgba(0,0,0,.07), 0 10px 20px -2px rgba(0,0,0,.04)",
         card:          "0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06)",
         "primary-glow": "0 0 20px rgba(51,102,255,.35)",
       },
 
-      // ─── Animations ──────────────────────────────────────────────────
       keyframes: {
         "fade-in": {
           from: { opacity: "0", transform: "translateY(6px)" },
           to:   { opacity: "1", transform: "translateY(0)" },
         },
       },
+
       animation: {
         "fade-in": "fade-in .3s ease-out both",
       },
 
-      // ─── Max Width ───────────────────────────────────────────────────
       maxWidth: {
-        "8xl":  "88rem",
-        "9xl":  "96rem",
+        "8xl": "88rem",
+        "9xl": "96rem",
       },
     },
   },
