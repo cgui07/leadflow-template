@@ -1,0 +1,332 @@
+"use client";
+
+import { useState, use } from "react";
+import { useRouter } from "next/navigation";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { SectionContainer } from "@/components/layout/SectionContainer";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Tabs } from "@/components/ui/Tabs";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { useFetch } from "@/lib/hooks";
+import {
+  getPipelineColorSoftClass,
+  getScoreTextClass,
+} from "@/lib/ui-colors";
+import {
+  ArrowLeft, Phone, Mail, MapPin, Home, Calendar,
+  DollarSign, Target, Clock, Send,
+} from "lucide-react";
+import Link from "next/link";
+
+interface LeadDetail {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  status: string;
+  score: number;
+  source: string;
+  value?: number;
+  region?: string;
+  priceMin?: number;
+  priceMax?: number;
+  propertyType?: string;
+  purpose?: string;
+  timeline?: string;
+  bedrooms?: number;
+  notes?: string;
+  lastContactAt?: string;
+  nextFollowUpAt?: string;
+  followUpCount: number;
+  createdAt: string;
+  pipelineStage?: { id: string; name: string; color: string };
+  conversation?: {
+    id: string;
+    status: string;
+    messages: Array<{
+      id: string;
+      direction: string;
+      sender: string;
+      content: string;
+      createdAt: string;
+    }>;
+  };
+  activities: Array<{
+    id: string;
+    type: string;
+    title: string;
+    description?: string;
+    createdAt: string;
+  }>;
+  tasks: Array<{
+    id: string;
+    title: string;
+    type: string;
+    status: string;
+    dueAt: string;
+  }>;
+}
+
+const statusOptions = [
+  { value: "new", label: "Novo" },
+  { value: "contacted", label: "Contatado" },
+  { value: "qualifying", label: "Qualificando" },
+  { value: "qualified", label: "Qualificado" },
+  { value: "proposal", label: "Proposta" },
+  { value: "negotiation", label: "Negociação" },
+  { value: "won", label: "Ganho" },
+  { value: "lost", label: "Perdido" },
+];
+
+const statusColors: Record<string, string> = {
+  new: "bg-blue-100 text-blue-700",
+  contacted: "bg-slate-100 text-slate-700",
+  qualifying: "bg-purple-100 text-purple-700",
+  qualified: "bg-green-100 text-green-700",
+  proposal: "bg-yellow-100 text-yellow-700",
+  negotiation: "bg-orange-100 text-orange-700",
+  won: "bg-emerald-100 text-emerald-700",
+  lost: "bg-red-100 text-red-700",
+};
+
+export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const router = useRouter();
+  const { data: lead, loading, refetch } = useFetch<LeadDetail>(`/api/leads/${id}`);
+  const [activeTab, setActiveTab] = useState("profile");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+
+  if (loading) return <LoadingState variant="skeleton" />;
+  if (!lead) return <div className="p-6 text-center text-slate-500">Lead não encontrado</div>;
+
+  async function updateStatus(status: string) {
+    await fetch(`/api/leads/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    refetch();
+  }
+
+  async function sendMessage(e: React.FormEvent) {
+    e.preventDefault();
+    if (!message.trim() || !lead?.conversation?.id) return;
+    setSending(true);
+    try {
+      await fetch(`/api/conversations/${lead.conversation.id}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: message }),
+      });
+      setMessage("");
+      refetch();
+    } finally {
+      setSending(false);
+    }
+  }
+
+  const scoreColor = getScoreTextClass(lead.score);
+  const messages = lead.conversation?.messages?.slice().reverse() || [];
+
+  return (
+    <PageContainer
+      title=""
+      actions={
+        <div className="flex gap-2">
+          <select
+            value={lead.status}
+            onChange={(e) => updateStatus(e.target.value)}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+          >
+            {statusOptions.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
+          <Button variant="danger" onClick={async () => {
+            if (confirm("Tem certeza que deseja excluir este lead?")) {
+              await fetch(`/api/leads/${id}`, { method: "DELETE" });
+              router.push("/leads");
+            }
+          }}>Excluir</Button>
+        </div>
+      }
+    >
+      <div className="flex items-start gap-4">
+        <Link href="/leads">
+          <Button variant="ghost" size="sm" icon={<ArrowLeft className="h-4 w-4" />}>Voltar</Button>
+        </Link>
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold">
+              {lead.name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-900">{lead.name}</h1>
+              <div className="flex items-center gap-3 text-sm text-slate-500 mt-0.5">
+                <span className="flex items-center gap-1"><Phone size={12} />{lead.phone}</span>
+                {lead.email && <span className="flex items-center gap-1"><Mail size={12} />{lead.email}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className={`text-3xl font-bold ${scoreColor}`}>{lead.score}<span className="text-sm font-normal text-slate-400">/100</span></p>
+          <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[lead.status] || ""}`}>
+            {statusOptions.find((s) => s.value === lead.status)?.label}
+          </span>
+        </div>
+      </div>
+
+      <Tabs
+        tabs={[
+          { id: "profile", label: "Perfil" },
+          { id: "messages", label: "Mensagens", count: messages.length },
+          { id: "activities", label: "Atividades", count: lead.activities.length },
+          { id: "tasks", label: "Tarefas", count: lead.tasks.length },
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+
+      {activeTab === "profile" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SectionContainer title="Perfil do Lead (IA)">
+            <div className="grid grid-cols-2 gap-4">
+              <InfoItem icon={<MapPin size={16} />} label="Região" value={lead.region} />
+              <InfoItem icon={<Home size={16} />} label="Tipo" value={lead.propertyType} />
+              <InfoItem icon={<DollarSign size={16} />} label="Faixa de valor"
+                value={lead.priceMax ? `R$ ${Number(lead.priceMin || 0).toLocaleString("pt-BR")} - R$ ${Number(lead.priceMax).toLocaleString("pt-BR")}` : undefined}
+              />
+              <InfoItem icon={<Target size={16} />} label="Finalidade" value={lead.purpose} />
+              <InfoItem icon={<Calendar size={16} />} label="Prazo" value={lead.timeline} />
+              <InfoItem icon={<Home size={16} />} label="Quartos" value={lead.bedrooms ? `${lead.bedrooms} quartos` : undefined} />
+            </div>
+            {lead.notes && (
+              <div className="mt-4 rounded-lg bg-slate-50 p-3">
+                <p className="text-xs font-medium text-slate-500 mb-1">Observações da IA</p>
+                <p className="text-sm text-slate-700">{lead.notes}</p>
+              </div>
+            )}
+          </SectionContainer>
+
+          <SectionContainer title="Informações">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between"><span className="text-slate-500">Fonte</span><span className="font-medium">{lead.source}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">Criado em</span><span className="font-medium">{new Date(lead.createdAt).toLocaleDateString("pt-BR")}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">Último contato</span><span className="font-medium">{lead.lastContactAt ? new Date(lead.lastContactAt).toLocaleDateString("pt-BR") : "—"}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">Próximo follow-up</span><span className="font-medium">{lead.nextFollowUpAt ? new Date(lead.nextFollowUpAt).toLocaleString("pt-BR") : "—"}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">Follow-ups enviados</span><span className="font-medium">{lead.followUpCount}</span></div>
+              {lead.pipelineStage && (
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Estágio</span>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getPipelineColorSoftClass(lead.pipelineStage.color)}`}
+                  >
+                    {lead.pipelineStage.name}
+                  </span>
+                </div>
+              )}
+            </div>
+          </SectionContainer>
+        </div>
+      )}
+
+      {activeTab === "messages" && (
+        <SectionContainer title="Conversa">
+          <div className="h-96 overflow-y-auto space-y-3 mb-4">
+            {messages.length === 0 ? (
+              <p className="text-center text-sm text-slate-400 py-12">Nenhuma mensagem ainda</p>
+            ) : (
+              messages.map((msg) => (
+                <div key={msg.id} className={`flex ${msg.direction === "outbound" ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
+                    msg.direction === "outbound"
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-100 text-slate-800"
+                  }`}>
+                    <p className="text-[10px] font-semibold opacity-70 mb-0.5">
+                      {msg.sender === "bot" ? "Bot" : msg.sender === "agent" ? "Você" : "Cliente"}
+                    </p>
+                    <p>{msg.content}</p>
+                    <p className="text-[10px] opacity-50 mt-1">
+                      {new Date(msg.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          <form onSubmit={sendMessage} className="flex gap-2">
+            <input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Digite uma mensagem..."
+              className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            />
+            <Button type="submit" loading={sending} icon={<Send className="h-4 w-4" />}>Enviar</Button>
+          </form>
+        </SectionContainer>
+      )}
+
+      {activeTab === "activities" && (
+        <SectionContainer title="Histórico de Atividades">
+          {lead.activities.length === 0 ? (
+            <p className="text-sm text-slate-400">Nenhuma atividade registrada</p>
+          ) : (
+            <div className="space-y-3">
+              {lead.activities.map((a) => (
+                <div key={a.id} className="flex gap-3 text-sm border-b border-slate-50 pb-3">
+                  <div className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-700">{a.title}</p>
+                    {a.description && <p className="text-slate-500 text-xs mt-0.5">{a.description}</p>}
+                  </div>
+                  <span className="text-xs text-slate-400 whitespace-nowrap">
+                    {new Date(a.createdAt).toLocaleDateString("pt-BR")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </SectionContainer>
+      )}
+
+      {activeTab === "tasks" && (
+        <SectionContainer title="Tarefas Pendentes">
+          {lead.tasks.length === 0 ? (
+            <p className="text-sm text-slate-400">Nenhuma tarefa pendente</p>
+          ) : (
+            <div className="space-y-2">
+              {lead.tasks.map((t) => (
+                <div key={t.id} className="flex items-center gap-3 rounded-lg border border-slate-100 p-3">
+                  <Clock size={16} className="text-slate-400" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-700">{t.title}</p>
+                    <p className="text-xs text-slate-400">
+                      {new Date(t.dueAt).toLocaleDateString("pt-BR")} às {new Date(t.dueAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  </div>
+                  <Badge variant="warning" size="sm">{t.type}</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </SectionContainer>
+      )}
+    </PageContainer>
+  );
+}
+
+function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string | null }) {
+  return (
+    <div className="rounded-lg bg-slate-50 p-3">
+      <div className="flex items-center gap-1.5 text-slate-400 mb-1">
+        {icon}
+        <span className="text-xs">{label}</span>
+      </div>
+      <p className="text-sm font-medium text-slate-700">{value || "—"}</p>
+    </div>
+  );
+}
