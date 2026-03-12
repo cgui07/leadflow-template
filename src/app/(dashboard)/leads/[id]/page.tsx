@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Tabs } from "@/components/ui/Tabs";
 import { LoadingState } from "@/components/ui/LoadingState";
+import { SelectField, TextField } from "@/components/forms";
 import { useFetch } from "@/lib/hooks";
 import {
   getPipelineColorSoftClass,
@@ -80,14 +81,14 @@ const statusOptions = [
 ];
 
 const statusColors: Record<string, string> = {
-  new: "bg-blue-100 text-blue-700",
-  contacted: "bg-slate-100 text-slate-700",
-  qualifying: "bg-purple-100 text-purple-700",
-  qualified: "bg-green-100 text-green-700",
-  proposal: "bg-yellow-100 text-yellow-700",
-  negotiation: "bg-orange-100 text-orange-700",
-  won: "bg-emerald-100 text-emerald-700",
-  lost: "bg-red-100 text-red-700",
+  new: "bg-info/10 text-info",
+  contacted: "bg-gray-ghost text-neutral-dark",
+  qualifying: "bg-purple-pale text-secondary",
+  qualified: "bg-green-pale text-success",
+  proposal: "bg-yellow-pale text-warning",
+  negotiation: "bg-orange-pale text-accent",
+  won: "bg-green-pale text-green-dark",
+  lost: "bg-red-pale text-danger",
 };
 
 export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -99,7 +100,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const [sending, setSending] = useState(false);
 
   if (loading) return <LoadingState variant="skeleton" />;
-  if (!lead) return <div className="p-6 text-center text-slate-500">Lead não encontrado</div>;
+  if (!lead) return <div className="p-6 text-center text-neutral-muted">Lead não encontrado</div>;
 
   async function updateStatus(status: string) {
     await fetch(`/api/leads/${id}`, {
@@ -135,15 +136,13 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       title=""
       actions={
         <div className="flex gap-2">
-          <select
+          <SelectField
+            options={statusOptions}
             value={lead.status}
-            onChange={(e) => updateStatus(e.target.value)}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
-          >
-            {statusOptions.map((s) => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
+            onChange={(value) => updateStatus(value)}
+            fullWidth={false}
+            fieldSize="sm"
+          />
           <Button variant="danger" onClick={async () => {
             if (confirm("Tem certeza que deseja excluir este lead?")) {
               await fetch(`/api/leads/${id}`, { method: "DELETE" });
@@ -159,12 +158,12 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold">
+            <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white text-lg font-bold">
               {lead.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900">{lead.name}</h1>
-              <div className="flex items-center gap-3 text-sm text-slate-500 mt-0.5">
+              <h1 className="text-xl font-bold text-neutral-ink">{lead.name}</h1>
+              <div className="flex items-center gap-3 text-sm text-neutral-muted mt-0.5">
                 <span className="flex items-center gap-1"><Phone size={12} />{lead.phone}</span>
                 {lead.email && <span className="flex items-center gap-1"><Mail size={12} />{lead.email}</span>}
               </div>
@@ -172,7 +171,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
         <div className="text-right">
-          <p className={`text-3xl font-bold ${scoreColor}`}>{lead.score}<span className="text-sm font-normal text-slate-400">/100</span></p>
+          <p className={`text-3xl font-bold ${scoreColor}`}>{lead.score}<span className="text-sm font-normal text-neutral-muted">/100</span></p>
           <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[lead.status] || ""}`}>
             {statusOptions.find((s) => s.value === lead.status)?.label}
           </span>
@@ -204,23 +203,23 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
               <InfoItem icon={<Home size={16} />} label="Quartos" value={lead.bedrooms ? `${lead.bedrooms} quartos` : undefined} />
             </div>
             {lead.notes && (
-              <div className="mt-4 rounded-lg bg-slate-50 p-3">
-                <p className="text-xs font-medium text-slate-500 mb-1">Observações da IA</p>
-                <p className="text-sm text-slate-700">{lead.notes}</p>
+              <div className="mt-4 rounded-lg bg-gray-ghost p-3">
+                <p className="text-xs font-medium text-neutral-muted mb-1">Observações da IA</p>
+                <p className="text-sm text-neutral-dark">{lead.notes}</p>
               </div>
             )}
           </SectionContainer>
 
           <SectionContainer title="Informações">
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between"><span className="text-slate-500">Fonte</span><span className="font-medium">{lead.source}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">Criado em</span><span className="font-medium">{new Date(lead.createdAt).toLocaleDateString("pt-BR")}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">Último contato</span><span className="font-medium">{lead.lastContactAt ? new Date(lead.lastContactAt).toLocaleDateString("pt-BR") : "—"}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">Próximo follow-up</span><span className="font-medium">{lead.nextFollowUpAt ? new Date(lead.nextFollowUpAt).toLocaleString("pt-BR") : "—"}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">Follow-ups enviados</span><span className="font-medium">{lead.followUpCount}</span></div>
+              <div className="flex justify-between"><span className="text-neutral-muted">Fonte</span><span className="font-medium">{lead.source}</span></div>
+              <div className="flex justify-between"><span className="text-neutral-muted">Criado em</span><span className="font-medium">{new Date(lead.createdAt).toLocaleDateString("pt-BR")}</span></div>
+              <div className="flex justify-between"><span className="text-neutral-muted">Último contato</span><span className="font-medium">{lead.lastContactAt ? new Date(lead.lastContactAt).toLocaleDateString("pt-BR") : "—"}</span></div>
+              <div className="flex justify-between"><span className="text-neutral-muted">Próximo follow-up</span><span className="font-medium">{lead.nextFollowUpAt ? new Date(lead.nextFollowUpAt).toLocaleString("pt-BR") : "—"}</span></div>
+              <div className="flex justify-between"><span className="text-neutral-muted">Follow-ups enviados</span><span className="font-medium">{lead.followUpCount}</span></div>
               {lead.pipelineStage && (
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Estágio</span>
+                  <span className="text-neutral-muted">Estágio</span>
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getPipelineColorSoftClass(lead.pipelineStage.color)}`}
                   >
@@ -237,14 +236,14 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
         <SectionContainer title="Conversa">
           <div className="h-96 overflow-y-auto space-y-3 mb-4">
             {messages.length === 0 ? (
-              <p className="text-center text-sm text-slate-400 py-12">Nenhuma mensagem ainda</p>
+              <p className="text-center text-sm text-neutral-muted py-12">Nenhuma mensagem ainda</p>
             ) : (
               messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.direction === "outbound" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
                     msg.direction === "outbound"
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-100 text-slate-800"
+                      ? "bg-primary text-white"
+                      : "bg-gray-ghost text-neutral-ink"
                   }`}>
                     <p className="text-[10px] font-semibold opacity-70 mb-0.5">
                       {msg.sender === "bot" ? "Bot" : msg.sender === "agent" ? "Você" : "Cliente"}
@@ -259,11 +258,10 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             )}
           </div>
           <form onSubmit={sendMessage} className="flex gap-2">
-            <input
+            <TextField
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Digite uma mensagem..."
-              className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
             <Button type="submit" loading={sending} icon={<Send className="h-4 w-4" />}>Enviar</Button>
           </form>
@@ -273,17 +271,17 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       {activeTab === "activities" && (
         <SectionContainer title="Histórico de Atividades">
           {lead.activities.length === 0 ? (
-            <p className="text-sm text-slate-400">Nenhuma atividade registrada</p>
+            <p className="text-sm text-neutral-muted">Nenhuma atividade registrada</p>
           ) : (
             <div className="space-y-3">
               {lead.activities.map((a) => (
-                <div key={a.id} className="flex gap-3 text-sm border-b border-slate-50 pb-3">
-                  <div className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                <div key={a.id} className="flex gap-3 text-sm border-b border-gray-ghost pb-3">
+                  <div className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
                   <div className="flex-1">
-                    <p className="font-medium text-slate-700">{a.title}</p>
-                    {a.description && <p className="text-slate-500 text-xs mt-0.5">{a.description}</p>}
+                    <p className="font-medium text-neutral-dark">{a.title}</p>
+                    {a.description && <p className="text-neutral-muted text-xs mt-0.5">{a.description}</p>}
                   </div>
-                  <span className="text-xs text-slate-400 whitespace-nowrap">
+                  <span className="text-xs text-neutral-muted whitespace-nowrap">
                     {new Date(a.createdAt).toLocaleDateString("pt-BR")}
                   </span>
                 </div>
@@ -296,15 +294,15 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       {activeTab === "tasks" && (
         <SectionContainer title="Tarefas Pendentes">
           {lead.tasks.length === 0 ? (
-            <p className="text-sm text-slate-400">Nenhuma tarefa pendente</p>
+            <p className="text-sm text-neutral-muted">Nenhuma tarefa pendente</p>
           ) : (
             <div className="space-y-2">
               {lead.tasks.map((t) => (
-                <div key={t.id} className="flex items-center gap-3 rounded-lg border border-slate-100 p-3">
-                  <Clock size={16} className="text-slate-400" />
+                <div key={t.id} className="flex items-center gap-3 rounded-lg border border-neutral-border p-3">
+                  <Clock size={16} className="text-neutral-muted" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-700">{t.title}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-sm font-medium text-neutral-dark">{t.title}</p>
+                    <p className="text-xs text-neutral-muted">
                       {new Date(t.dueAt).toLocaleDateString("pt-BR")} às {new Date(t.dueAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
@@ -321,12 +319,12 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string | null }) {
   return (
-    <div className="rounded-lg bg-slate-50 p-3">
-      <div className="flex items-center gap-1.5 text-slate-400 mb-1">
+    <div className="rounded-lg bg-gray-ghost p-3">
+      <div className="flex items-center gap-1.5 text-neutral-muted mb-1">
         {icon}
         <span className="text-xs">{label}</span>
       </div>
-      <p className="text-sm font-medium text-slate-700">{value || "—"}</p>
+      <p className="text-sm font-medium text-neutral-dark">{value || "—"}</p>
     </div>
   );
 }

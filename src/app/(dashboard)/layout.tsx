@@ -13,14 +13,14 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />
+      <div className="flex h-screen items-center justify-center bg-neutral-surface">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-line border-t-primary" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="flex h-screen bg-neutral-surface overflow-hidden">
       <Sidebar userName={user?.name} userEmail={user?.email} onLogout={logout} />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar />

@@ -63,9 +63,9 @@ export const DateField = forwardRef<HTMLInputElement, DateFieldProps>(
           required={required}
           className={cn(
             "w-full rounded-lg border bg-white transition-colors",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
             "disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed",
-            error ? "border-red-300 focus:ring-red-500" : "border-slate-300",
+            error ? "border-red-300 focus:ring-danger" : "border-slate-300",
             sizeStyles[fieldSize],
             className
           )}

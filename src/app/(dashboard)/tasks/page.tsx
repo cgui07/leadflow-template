@@ -9,6 +9,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Tabs } from "@/components/ui/Tabs";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { TextField, SelectField, DateField, TextareaField } from "@/components/forms";
 import { useFetch } from "@/lib/hooks";
 import { Plus, CheckCircle, Clock, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -31,6 +32,14 @@ const typeLabels: Record<string, string> = {
   proposal: "Proposta",
   other: "Outro",
 };
+
+const typeOptions = [
+  { value: "follow_up", label: "Follow-up" },
+  { value: "call", label: "Ligação" },
+  { value: "visit", label: "Visita" },
+  { value: "proposal", label: "Proposta" },
+  { value: "other", label: "Outro" },
+];
 
 export default function TasksPage() {
   const [tab, setTab] = useState("pending");
@@ -88,8 +97,8 @@ export default function TasksPage() {
       }
     >
       {overdue.length > 0 && tab === "pending" && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-3">
-          <p className="text-sm font-medium text-red-700">
+        <div className="rounded-lg bg-red-pale border border-red-blush p-3">
+          <p className="text-sm font-medium text-danger">
             {overdue.length} tarefa(s) atrasada(s)
           </p>
         </div>
@@ -116,35 +125,35 @@ export default function TasksPage() {
             {tasks.map((task) => {
               const isOverdue = task.status === "pending" && new Date(task.dueAt) < new Date();
               return (
-                <div key={task.id} className={`flex items-center gap-3 rounded-lg border p-3 ${isOverdue ? "border-red-200 bg-red-50" : "border-slate-100"}`}>
+                <div key={task.id} className={`flex items-center gap-3 rounded-lg border p-3 ${isOverdue ? "border-red-blush bg-red-pale" : "border-neutral-border"}`}>
                   {task.status === "pending" && (
-                    <button onClick={() => completeTask(task.id)} className="text-slate-400 hover:text-green-500 transition">
+                    <button onClick={() => completeTask(task.id)} className="text-neutral-muted hover:text-success transition">
                       <CheckCircle size={20} />
                     </button>
                   )}
                   {task.status === "completed" && (
-                    <CheckCircle size={20} className="text-green-500" />
+                    <CheckCircle size={20} className="text-success" />
                   )}
                   <div className="flex-1">
-                    <p className={`text-sm font-medium ${task.status === "completed" ? "text-slate-400 line-through" : "text-slate-700"}`}>
+                    <p className={`text-sm font-medium ${task.status === "completed" ? "text-neutral-muted line-through" : "text-neutral-dark"}`}>
                       {task.title}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant={isOverdue ? "error" : "default"} size="sm">
                         {typeLabels[task.type] || task.type}
                       </Badge>
-                      <span className={`text-xs flex items-center gap-1 ${isOverdue ? "text-red-500" : "text-slate-400"}`}>
+                      <span className={`text-xs flex items-center gap-1 ${isOverdue ? "text-danger" : "text-neutral-muted"}`}>
                         <Clock size={10} />
                         {new Date(task.dueAt).toLocaleDateString("pt-BR")}
                       </span>
                       {task.lead && (
-                        <Link href={`/leads/${task.lead.id}`} className="text-xs text-blue-500 hover:underline">
+                        <Link href={`/leads/${task.lead.id}`} className="text-xs text-primary hover:underline">
                           {task.lead.name}
                         </Link>
                       )}
                     </div>
                   </div>
-                  <button onClick={() => deleteTask(task.id)} className="text-slate-300 hover:text-red-500 transition">
+                  <button onClick={() => deleteTask(task.id)} className="text-neutral-line hover:text-danger transition">
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -156,49 +165,32 @@ export default function TasksPage() {
 
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Nova Tarefa" size="md">
         <form onSubmit={handleCreate} className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Título *</label>
-            <input
-              type="text"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Tipo</label>
-            <select
-              value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
-            >
-              <option value="follow_up">Follow-up</option>
-              <option value="call">Ligação</option>
-              <option value="visit">Visita</option>
-              <option value="proposal">Proposta</option>
-              <option value="other">Outro</option>
-            </select>
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Data/hora *</label>
-            <input
-              type="datetime-local"
-              value={form.dueAt}
-              onChange={(e) => setForm({ ...form, dueAt: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Descrição</label>
-            <textarea
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
-              rows={3}
-            />
-          </div>
+          <TextField
+            label="Título"
+            type="text"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            required
+          />
+          <SelectField
+            label="Tipo"
+            options={typeOptions}
+            value={form.type}
+            onChange={(value) => setForm({ ...form, type: value })}
+          />
+          <DateField
+            label="Data/hora"
+            fieldType="datetime-local"
+            value={form.dueAt}
+            onChange={(e) => setForm({ ...form, dueAt: e.target.value })}
+            required
+          />
+          <TextareaField
+            label="Descrição"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            rows={3}
+          />
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="outline" type="button" onClick={() => setShowCreate(false)}>Cancelar</Button>
             <Button type="submit" loading={creating}>Criar</Button>

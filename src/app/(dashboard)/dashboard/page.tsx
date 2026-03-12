@@ -147,21 +147,21 @@ export default function DashboardPage() {
             <div className="space-y-3">
               {data.recentActivities.map((activity) => (
                 <div key={activity.id} className="flex gap-3 text-sm">
-                  <div className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                  <div className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
                   <div>
-                    <p className="font-medium text-slate-700">{activity.title}</p>
+                    <p className="font-medium text-neutral-dark">{activity.title}</p>
                     {activity.description && (
-                      <p className="text-slate-500 text-xs mt-0.5">{activity.description}</p>
+                      <p className="text-neutral-muted text-xs mt-0.5">{activity.description}</p>
                     )}
                     {activity.lead && (
-                      <p className="text-slate-400 text-xs mt-0.5">{activity.lead.name}</p>
+                      <p className="text-neutral-muted text-xs mt-0.5">{activity.lead.name}</p>
                     )}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-400">Nenhuma atividade recente</p>
+            <p className="text-sm text-neutral-muted">Nenhuma atividade recente</p>
           )}
         </SectionContainer>
       </div>

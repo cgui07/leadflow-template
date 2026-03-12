@@ -11,6 +11,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Tabs } from "@/components/ui/Tabs";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { TextField, TextareaField } from "@/components/forms";
 import { useFetch } from "@/lib/hooks";
 import { getScoreBadgeClass } from "@/lib/ui-colors";
 import { Plus, Search, MessageSquare } from "lucide-react";
@@ -78,9 +79,9 @@ export default function LeadsPage() {
       label: "Lead",
       sortable: true,
       render: (_, row) => (
-        <Link href={`/leads/${row.id}`} className="font-medium text-slate-900 hover:text-blue-600">
+        <Link href={`/leads/${row.id}`} className="font-medium text-neutral-ink hover:text-primary">
           <div>{row.name}</div>
-          <div className="text-xs text-slate-400">{row.phone}</div>
+          <div className="text-xs text-neutral-muted">{row.phone}</div>
         </Link>
       ),
     },
@@ -109,7 +110,7 @@ export default function LeadsPage() {
       label: "",
       render: (_, row) => (
         row.conversation?.unreadCount ? (
-          <span className="flex items-center gap-1 text-blue-600">
+          <span className="flex items-center gap-1 text-primary">
             <MessageSquare size={14} />
             <span className="text-xs font-bold">{row.conversation.unreadCount}</span>
           </span>
@@ -148,14 +149,12 @@ export default function LeadsPage() {
       }
     >
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input
-            type="text"
+        <div className="flex-1 max-w-md">
+          <TextField
+            icon={<Search className="h-4 w-4" />}
             placeholder="Buscar por nome, telefone ou região..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         <Tabs tabs={tabs} activeTab={status} onTabChange={(t) => { setStatus(t); setPage(1); }} />
@@ -168,8 +167,8 @@ export default function LeadsPage() {
           <>
             <DataTable columns={columns} data={data.leads} rowKey="id" />
             {data.pages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100">
-                <p className="text-sm text-slate-500">
+              <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-border">
+                <p className="text-sm text-neutral-muted">
                   Página {data.page} de {data.pages}
                 </p>
                 <div className="flex gap-2">
@@ -193,54 +192,39 @@ export default function LeadsPage() {
 
       <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Novo Lead" size="md">
         <form onSubmit={handleCreate} className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Nome *</label>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-              required
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Telefone (WhatsApp) *</label>
-            <input
-              type="tel"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-              required
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Região</label>
-            <input
-              type="text"
-              value={form.region}
-              onChange={(e) => setForm({ ...form, region: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-              placeholder="Ex: Zona Sul, Barra da Tijuca"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Observações</label>
-            <textarea
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-              rows={3}
-            />
-          </div>
+          <TextField
+            label="Nome"
+            type="text"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
+          <TextField
+            label="Telefone (WhatsApp)"
+            type="tel"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            required
+          />
+          <TextField
+            label="Email"
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <TextField
+            label="Região"
+            type="text"
+            value={form.region}
+            onChange={(e) => setForm({ ...form, region: e.target.value })}
+            placeholder="Ex: Zona Sul, Barra da Tijuca"
+          />
+          <TextareaField
+            label="Observações"
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            rows={3}
+          />
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="outline" type="button" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
             <Button type="submit" loading={creating}>Criar Lead</Button>

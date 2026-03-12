@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { TextField } from "@/components/forms";
 import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
+import { Button } from "@/components/ui/Button";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
 
 interface RegisterForm {
@@ -69,63 +72,119 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-slate-900">LeadFlow</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Crie sua conta e comece a organizar seus leads
-          </p>
+    <div className="flex min-h-screen">
+      {/* Painel esquerdo decorativo */}
+      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-secondary via-primary to-blue-navy items-center justify-center p-12 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10">
+          <div className="absolute top-32 right-16 w-80 h-80 rounded-full bg-white blur-3xl" />
+          <div className="absolute bottom-16 left-20 w-64 h-64 rounded-full bg-accent blur-3xl" />
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          {error && (
-            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>
-          )}
+        <div className="relative z-10 max-w-lg text-white">
+          <h2 className="text-4xl font-bold leading-tight tracking-tight">
+            Comece a converter mais leads hoje.
+          </h2>
+          <p className="mt-6 text-lg leading-relaxed text-blue-ice/80">
+            Crie sua conta em segundos e tenha acesso a um CRM inteligente
+            feito para corretores que querem resultados.
+          </p>
 
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">Nome</label>
-              <input
+          <div className="mt-12 space-y-4">
+            <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/20">
+                <svg className="h-5 w-5 text-green-mint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-semibold">Resposta automatica via WhatsApp</p>
+                <p className="text-sm text-blue-ice/60">Nunca deixe um lead sem resposta</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/20">
+                <svg className="h-5 w-5 text-green-mint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-semibold">Qualificacao com IA</p>
+                <p className="text-sm text-blue-ice/60">Saiba quem esta pronto para comprar</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/20">
+                <svg className="h-5 w-5 text-green-mint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-semibold">Follow-ups programados</p>
+                <p className="text-sm text-blue-ice/60">Recupere leads frios automaticamente</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Painel direito - formulario */}
+      <div className="flex w-full lg:w-1/2 items-center justify-center bg-white px-6 py-12">
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-white font-bold text-sm">LF</span>
+              </div>
+              <h1 className="text-xl font-bold text-gray-iron">LeadFlow</h1>
+            </div>
+            <p className="mt-3 text-sm text-gray-smoke">
+              Crie sua conta e comece a organizar seus leads
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="flex items-center gap-2 rounded-lg bg-red-pale border border-red-blush p-3 text-sm text-danger">
+                <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+                {error}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <TextField
+                label="Nome"
                 type="text"
                 value={form.name}
                 onChange={(e) => update("name", e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                placeholder="Seu nome completo"
+                placeholder="Seu nome"
                 required
               />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => update("email", e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                placeholder="seu@email.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">Telefone (WhatsApp)</label>
-              <input
+              <TextField
+                label="WhatsApp"
                 type="tel"
                 value={form.phone}
                 onChange={(e) => update("phone", e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 placeholder="(11) 99999-9999"
               />
             </div>
 
+            <TextField
+              label="Email"
+              type="email"
+              value={form.email}
+              onChange={(e) => update("email", e.target.value)}
+              placeholder="seu@email.com"
+              required
+            />
+
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">Senha</label>
-              <input
+              <TextField
+                label="Senha"
                 type="password"
                 value={form.password}
                 onChange={(e) => update("password", e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 placeholder={`Minimo ${MIN_PASSWORD_LENGTH} caracteres`}
                 minLength={MIN_PASSWORD_LENGTH}
                 required
@@ -135,38 +194,35 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">Confirmar senha</label>
-              <input
-                type="password"
-                value={form.confirmPassword}
-                onChange={(e) => update("confirmPassword", e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                placeholder="Repita sua senha"
-                minLength={MIN_PASSWORD_LENGTH}
-                required
-              />
-              {!passwordsMatch && (
-                <p className="mt-1 text-xs text-red-600">As senhas precisam ser iguais.</p>
-              )}
-            </div>
+            <TextField
+              label="Confirmar senha"
+              type="password"
+              value={form.confirmPassword}
+              onChange={(e) => update("confirmPassword", e.target.value)}
+              placeholder="Repita sua senha"
+              minLength={MIN_PASSWORD_LENGTH}
+              error={!passwordsMatch ? "As senhas precisam ser iguais." : undefined}
+              required
+            />
+
+            <Button type="submit" loading={loading} fullWidth size="lg" disabled={!passwordsMatch}>
+              {loading ? "Criando conta..." : "Criar conta gratis"}
+            </Button>
+          </form>
+
+          <div className="mt-8 flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-ash" />
+            <span className="text-xs text-gray-smoke">ou</span>
+            <div className="h-px flex-1 bg-gray-ash" />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading || !passwordsMatch}
-            className="mt-6 w-full rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
-          >
-            {loading ? "Criando conta..." : "Criar conta"}
-          </button>
-
-          <p className="mt-4 text-center text-sm text-slate-500">
-            Ja tem conta?{" "}
-            <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+          <p className="mt-6 text-center text-sm text-gray-smoke">
+            Ja tem uma conta?{" "}
+            <Link href="/login" className="font-semibold text-primary hover:text-blue-royal transition-colors">
               Fazer login
-            </a>
+            </Link>
           </p>
-        </form>
+        </div>
       </div>
     </div>
   );

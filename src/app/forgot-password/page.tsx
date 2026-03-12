@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { TextField } from "@/components/forms";
+import { Button } from "@/components/ui/Button";
+import { KeyRound, ArrowLeft, Mail, CheckCircle } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -40,61 +44,73 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-gray-pale via-white to-blue-pale px-4">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-slate-900">Recuperar senha</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Informe seu email para gerar o link de redefinicao.
-          </p>
-        </div>
+        {/* Voltar */}
+        <Link
+          href="/login"
+          className="mb-8 inline-flex items-center gap-1.5 text-sm text-gray-smoke hover:text-gray-charcoal transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar para login
+        </Link>
 
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="rounded-2xl border border-gray-ash bg-white p-8 shadow-sm">
+          {/* Icone */}
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-6">
+            <KeyRound className="h-7 w-7 text-primary" />
+          </div>
+
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-bold text-gray-iron">Recuperar senha</h1>
+            <p className="mt-2 text-sm text-gray-smoke">
+              Informe seu email e enviaremos um link para redefinir sua senha.
+            </p>
+          </div>
+
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>
+            <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-pale border border-red-blush p-3 text-sm text-danger">
+              <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              {error}
+            </div>
           )}
 
-          {message && (
-            <div className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
-              <p>{message}</p>
+          {message ? (
+            <div className="text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/10 mb-4">
+                <CheckCircle className="h-7 w-7 text-success" />
+              </div>
+              <p className="text-sm text-gray-charcoal">{message}</p>
               {previewUrl && (
                 <a
                   href={previewUrl}
-                  className="mt-2 inline-block font-medium text-emerald-800 underline"
+                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-blue-royal transition-colors"
                 >
+                  <Mail className="h-4 w-4" />
                   Abrir link de redefinicao
                 </a>
               )}
             </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <TextField
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                icon={<Mail className="h-4 w-4" />}
+                required
+              />
+
+              <Button type="submit" loading={loading} fullWidth size="lg">
+                {loading ? "Enviando..." : "Enviar link de recuperacao"}
+              </Button>
+            </form>
           )}
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-              placeholder="seu@email.com"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-6 w-full rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
-          >
-            {loading ? "Gerando link..." : "Enviar link"}
-          </button>
-
-          <p className="mt-4 text-center text-sm text-slate-500">
-            Lembrou da senha?{" "}
-            <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              Voltar para login
-            </a>
-          </p>
-        </form>
+        </div>
       </div>
     </div>
   );

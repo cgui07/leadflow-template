@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingState } from "@/components/ui/LoadingState";
+import { TextField } from "@/components/forms";
 import { useFetch } from "@/lib/hooks";
 import { getScoreBadgeClass } from "@/lib/ui-colors";
 import { Bot, MessageSquare, Search, Send, User } from "lucide-react";
@@ -97,24 +98,20 @@ export default function ConversationsPage() {
       title="Conversas"
       subtitle="Gerencie suas conversas do WhatsApp"
     >
-      <div className="flex h-[calc(100vh-13rem)] rounded-xl border border-slate-200 bg-white overflow-hidden">
-        <div className="w-80 shrink-0 border-r border-slate-200 flex flex-col">
-          <div className="p-3 border-b border-slate-100">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Buscar conversa..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-blue-500"
-              />
-            </div>
+      <div className="flex h-[calc(100vh-13rem)] rounded-xl border border-neutral-border bg-white overflow-hidden">
+        <div className="w-80 shrink-0 border-r border-neutral-border flex flex-col">
+          <div className="p-3 border-b border-neutral-border">
+            <TextField
+              icon={<Search className="h-4 w-4" />}
+              placeholder="Buscar conversa..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
 
           <div className="flex-1 overflow-y-auto">
             {!conversations?.length ? (
-              <div className="p-6 text-center text-sm text-slate-400">
+              <div className="p-6 text-center text-sm text-neutral-muted">
                 Nenhuma conversa
               </div>
             ) : (
@@ -122,25 +119,25 @@ export default function ConversationsPage() {
                 <button
                   key={conv.id}
                   onClick={() => setSelected(conv.id)}
-                  className={`w-full flex items-start gap-3 p-3 text-left border-b border-slate-50 transition hover:bg-slate-50 ${
-                    selected === conv.id ? "bg-blue-50" : ""
+                  className={`w-full flex items-start gap-3 p-3 text-left border-b border-gray-ghost transition hover:bg-gray-ghost ${
+                    selected === conv.id ? "bg-blue-pale" : ""
                   }`}
                 >
-                  <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-600 shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-neutral-border flex items-center justify-center text-sm font-bold text-neutral-dark shrink-0">
                     {conv.lead.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-slate-900 truncate">
+                      <p className="text-sm font-semibold text-neutral-ink truncate">
                         {conv.lead.name}
                       </p>
                       {conv.unreadCount > 0 && (
-                        <span className="bg-blue-600 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        <span className="bg-primary text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
                           {conv.unreadCount}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">
+                    <p className="text-xs text-neutral-muted truncate mt-0.5">
                       {conv.messages[0]?.content || "Sem mensagens"}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
@@ -154,7 +151,7 @@ export default function ConversationsPage() {
                             ? "Manual"
                             : conv.status}
                       </Badge>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-neutral-muted">
                         {conv.lastMessageAt &&
                           new Date(conv.lastMessageAt).toLocaleTimeString(
                             "pt-BR",
@@ -173,23 +170,23 @@ export default function ConversationsPage() {
           {!selected || !selectedConv ? (
             <div className="flex-1 flex items-center justify-center">
               <EmptyState
-                icon={<MessageSquare className="h-12 w-12 text-slate-300" />}
+                icon={<MessageSquare className="h-12 w-12 text-neutral-line" />}
                 title="Selecione uma conversa"
                 description="Escolha uma conversa à esquerda para ver as mensagens"
               />
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-border">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold">
+                  <div className="h-9 w-9 rounded-full bg-neutral-border flex items-center justify-center text-sm font-bold">
                     {selectedConv.lead.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <p className="text-sm font-semibold">
                       {selectedConv.lead.name}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-neutral-muted">
                       {selectedConv.lead.phone}
                     </p>
                   </div>
@@ -234,9 +231,9 @@ export default function ConversationsPage() {
                         className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
                           msg.direction === "outbound"
                             ? msg.sender === "bot"
-                              ? "bg-purple-600 text-white"
-                              : "bg-blue-600 text-white"
-                            : "bg-slate-100 text-slate-800"
+                              ? "bg-secondary text-white"
+                              : "bg-primary text-white"
+                            : "bg-gray-ghost text-neutral-ink"
                         }`}
                       >
                         <p className="text-[10px] font-semibold opacity-70 mb-0.5">
@@ -260,13 +257,12 @@ export default function ConversationsPage() {
 
               <form
                 onSubmit={handleSend}
-                className="border-t border-slate-200 p-3 flex gap-2"
+                className="border-t border-neutral-border p-3 flex gap-2"
               >
-                <input
+                <TextField
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Digite uma mensagem..."
-                  className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-blue-500"
                 />
                 <Button
                   type="submit"

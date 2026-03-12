@@ -72,7 +72,7 @@ const conversationFlow = [
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(17,94,89,0.18),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(245,158,11,0.18),_transparent_28%),linear-gradient(180deg,_#f8f5ef_0%,_#fffdf8_46%,_#f5efe6_100%)] font-sans text-slate-900">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(17,94,89,0.18),transparent_34%),radial-gradient(circle_at_top_right,rgba(245,158,11,0.18),transparent_28%),linear-gradient(180deg,#f8f5ef_0%,#fffdf8_46%,#f5efe6_100%)] font-sans text-slate-900">
       <section className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 sm:px-10 lg:px-12">
         <header className="flex items-center justify-between border-b border-slate-200 pb-6">
           <div>
@@ -178,7 +178,9 @@ export function LandingPage() {
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <h2 className="text-base font-semibold">{lead.name}</h2>
+                          <h2 className="text-base font-semibold">
+                            {lead.name}
+                          </h2>
                           <p className="mt-1 text-sm text-slate-400">
                             {lead.stage}
                           </p>
@@ -351,9 +353,7 @@ export function LandingPage() {
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-lg text-amber-700">
                   +
                 </div>
-                <p className="mt-5 text-lg leading-7 text-slate-500">
-                  {item}
-                </p>
+                <p className="mt-5 text-lg leading-7 text-slate-500">{item}</p>
               </article>
             ))}
           </div>
@@ -362,7 +362,9 @@ export function LandingPage() {
 
       <footer className="border-t border-slate-200 px-6 py-8 sm:px-10 lg:px-12">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <p className="text-sm text-slate-400">LeadFlow — WhatsApp + IA + CRM leve</p>
+          <p className="text-sm text-slate-400">
+            LeadFlow — WhatsApp + IA + CRM leve
+          </p>
           <Link
             href="/register"
             className="rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
