@@ -2,20 +2,49 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
+import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
+
+interface RegisterForm {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phone: string;
+}
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
+  const [form, setForm] = useState<RegisterForm>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phone: "",
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function update(field: string, value: string) {
+  const passwordsMatch = !form.confirmPassword || form.password === form.confirmPassword;
+
+  function update(field: keyof RegisterForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (form.password.length < MIN_PASSWORD_LENGTH) {
+      setError(`A senha deve ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres`);
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError("As senhas nao coincidem");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -33,7 +62,7 @@ export default function RegisterPage() {
 
       router.push("/dashboard");
     } catch {
-      setError("Erro de conexão");
+      setError("Erro de conexao");
     } finally {
       setLoading(false);
     }
@@ -97,23 +126,42 @@ export default function RegisterPage() {
                 value={form.password}
                 onChange={(e) => update("password", e.target.value)}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                placeholder="Mínimo 6 caracteres"
-                minLength={6}
+                placeholder={`Minimo ${MIN_PASSWORD_LENGTH} caracteres`}
+                minLength={MIN_PASSWORD_LENGTH}
                 required
               />
+              <div className="mt-2">
+                <PasswordStrengthMeter password={form.password} />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">Confirmar senha</label>
+              <input
+                type="password"
+                value={form.confirmPassword}
+                onChange={(e) => update("confirmPassword", e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                placeholder="Repita sua senha"
+                minLength={MIN_PASSWORD_LENGTH}
+                required
+              />
+              {!passwordsMatch && (
+                <p className="mt-1 text-xs text-red-600">As senhas precisam ser iguais.</p>
+              )}
             </div>
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !passwordsMatch}
             className="mt-6 w-full rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
           >
             {loading ? "Criando conta..." : "Criar conta"}
           </button>
 
           <p className="mt-4 text-center text-sm text-slate-500">
-            Já tem conta?{" "}
+            Ja tem conta?{" "}
             <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">
               Fazer login
             </a>

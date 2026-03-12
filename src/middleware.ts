@@ -1,10 +1,15 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = [
+const PUBLIC_PATHS = new Set([
   "/",
   "/login",
   "/register",
+  "/forgot-password",
+  "/reset-password",
+]);
+
+const PUBLIC_PREFIXES = [
   "/api/auth",
   "/api/whatsapp",
   "/api/followup",
@@ -14,7 +19,7 @@ const PUBLIC_PATHS = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+  if (PUBLIC_PATHS.has(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
     return NextResponse.next();
   }
 
@@ -23,6 +28,7 @@ export function middleware(request: NextRequest) {
   }
 
   const token = request.cookies.get("leadflow_token")?.value;
+
   if (!token) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);

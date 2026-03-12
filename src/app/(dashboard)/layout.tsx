@@ -9,7 +9,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
 
   if (loading) {
     return (
@@ -21,7 +21,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
-      <Sidebar userName={user?.name} userEmail={user?.email} />
+      <Sidebar userName={user?.name} userEmail={user?.email} onLogout={logout} />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar />
         <main className="flex-1 overflow-y-auto p-6">{children}</main>

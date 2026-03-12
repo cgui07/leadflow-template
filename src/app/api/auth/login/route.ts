@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { verifyPassword, signToken, setAuthCookie } from "@/lib/auth";
+import { normalizeEmail, verifyPassword, signToken, setAuthCookie } from "@/lib/auth";
 import { json, error } from "@/lib/api";
 import { NextRequest } from "next/server";
 
@@ -8,17 +8,20 @@ export async function POST(req: NextRequest) {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return error("Email e senha são obrigatórios");
+      return error("Email e senha sao obrigatorios");
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const normalizedEmail = normalizeEmail(email);
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+
     if (!user) {
-      return error("Credenciais inválidas", 401);
+      return error("Credenciais invalidas", 401);
     }
 
     const valid = await verifyPassword(password, user.passwordHash);
+
     if (!valid) {
-      return error("Credenciais inválidas", 401);
+      return error("Credenciais invalidas", 401);
     }
 
     const token = signToken(user.id);

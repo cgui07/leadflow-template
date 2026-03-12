@@ -41,7 +41,7 @@ function LoginForm() {
 
       router.push(redirect);
     } catch {
-      setError("Erro de conexão");
+      setError("Erro de conexao");
     } finally {
       setLoading(false);
     }
@@ -88,6 +88,12 @@ function LoginForm() {
             </div>
           </div>
 
+          <div className="mt-3 text-right">
+            <a href="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+              Esqueci minha senha
+            </a>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
@@ -97,7 +103,7 @@ function LoginForm() {
           </button>
 
           <p className="mt-4 text-center text-sm text-slate-500">
-            Não tem conta?{" "}
+            Nao tem conta?{" "}
             <a href="/register" className="font-medium text-blue-600 hover:text-blue-500">
               Criar conta
             </a>

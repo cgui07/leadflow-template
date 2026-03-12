@@ -8,19 +8,21 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String
-  email        String        @unique
-  passwordHash String        @map("password_hash")
-  phone        String?
-  avatarUrl    String?       @map("avatar_url")
-  role         String        @default("agent")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
-  activities   Activity[]
-  leads        Lead[]
-  tasks        Task[]
-  settings     UserSettings?
+  id                     String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                   String
+  email                  String        @unique
+  passwordHash           String        @map("password_hash")
+  phone                  String?
+  avatarUrl              String?       @map("avatar_url")
+  role                   String        @default("agent")
+  createdAt              DateTime      @default(now()) @map("created_at")
+  updatedAt              DateTime      @updatedAt @map("updated_at")
+  passwordResetTokenHash String?       @unique @map("password_reset_token_hash")
+  passwordResetExpiresAt DateTime?     @map("password_reset_expires_at") @db.Timestamptz(6)
+  activities             Activity[]
+  leads                  Lead[]
+  tasks                  Task[]
+  settings               UserSettings?
 
   @@map("users")
 }
@@ -117,7 +119,7 @@ model PipelineStage {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
   name      String
-  color     String   @default("blue")
+  color     String   @default("#3b82f6")
   order     Int      @default(0)
   createdAt DateTime @default(now()) @map("created_at")
   leads     Lead[]

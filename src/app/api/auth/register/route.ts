@@ -1,30 +1,41 @@
 import { prisma } from "@/lib/db";
-import { hashPassword, signToken, setAuthCookie } from "@/lib/auth";
+import { hashPassword, normalizeEmail, signToken, setAuthCookie } from "@/lib/auth";
 import { json, error } from "@/lib/api";
+import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
 import { DEFAULT_PIPELINE_STAGE_COLORS } from "@/lib/ui-colors";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password, phone } = await req.json();
+    const { name, email, password, confirmPassword, phone } = await req.json();
 
-    if (!name || !email || !password) {
-      return error("Nome, email e senha são obrigatórios");
+    if (!name || !email || !password || !confirmPassword) {
+      return error("Nome, email, senha e confirmacao sao obrigatorios");
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      return error(`A senha deve ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres`);
+    }
+
+    if (password !== confirmPassword) {
+      return error("As senhas nao coincidem");
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+
     if (existing) {
-      return error("Email já cadastrado");
+      return error("Email ja cadastrado");
     }
 
     const passwordHash = await hashPassword(password);
 
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
+        name: name.trim(),
+        email: normalizedEmail,
         passwordHash,
-        phone,
+        phone: phone?.trim() || null,
         settings: { create: {} },
       },
     });
@@ -35,13 +46,13 @@ export async function POST(req: NextRequest) {
       { name: "Qualificado", color: DEFAULT_PIPELINE_STAGE_COLORS[2], order: 2 },
       { name: "Visita agendada", color: DEFAULT_PIPELINE_STAGE_COLORS[3], order: 3 },
       { name: "Proposta", color: DEFAULT_PIPELINE_STAGE_COLORS[4], order: 4 },
-      { name: "Negociação", color: DEFAULT_PIPELINE_STAGE_COLORS[5], order: 5 },
+      { name: "Negociacao", color: DEFAULT_PIPELINE_STAGE_COLORS[5], order: 5 },
       { name: "Fechado", color: DEFAULT_PIPELINE_STAGE_COLORS[6], order: 6 },
       { name: "Perdido", color: DEFAULT_PIPELINE_STAGE_COLORS[7], order: 7 },
     ];
 
     await prisma.pipelineStage.createMany({
-      data: stages.map((s) => ({ ...s, userId: user.id })),
+      data: stages.map((stage) => ({ ...stage, userId: user.id })),
     });
 
     const token = signToken(user.id);
