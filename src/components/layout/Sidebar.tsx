@@ -21,7 +21,9 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
+  iconMobile: React.ReactNode;
   badge?: number;
+  mobileVisible?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -29,16 +31,44 @@ const navItems: NavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
     icon: <LayoutDashboard size={20} />,
+    iconMobile: <LayoutDashboard size={22} />,
+    mobileVisible: true,
   },
-  { label: "Leads", href: "/leads", icon: <Users size={20} /> },
-  { label: "Pipeline", href: "/pipeline", icon: <Kanban size={20} /> },
-  { label: "Tarefas", href: "/tasks", icon: <CheckSquare size={20} /> },
+  {
+    label: "Leads",
+    href: "/leads",
+    icon: <Users size={20} />,
+    iconMobile: <Users size={22} />,
+    mobileVisible: true,
+  },
+  {
+    label: "Pipeline",
+    href: "/pipeline",
+    icon: <Kanban size={20} />,
+    iconMobile: <Kanban size={22} />,
+    mobileVisible: true,
+  },
+  {
+    label: "Tarefas",
+    href: "/tasks",
+    icon: <CheckSquare size={20} />,
+    iconMobile: <CheckSquare size={22} />,
+    mobileVisible: true,
+  },
   {
     label: "Conversas",
     href: "/conversations",
     icon: <MessageSquare size={20} />,
+    iconMobile: <MessageSquare size={22} />,
+    mobileVisible: true,
   },
-  { label: "Configuracoes", href: "/settings", icon: <Settings size={20} /> },
+  {
+    label: "Configurações",
+    href: "/settings",
+    icon: <Settings size={20} />,
+    iconMobile: <Settings size={22} />,
+    mobileVisible: false,
+  },
 ];
 
 interface SidebarProps {
@@ -48,7 +78,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({
-  userName = "Usuario",
+  userName = "Usuário",
   userEmail = "user@email.com",
   onLogout,
 }: SidebarProps) {
@@ -73,11 +103,14 @@ export function Sidebar({
     }
   }
 
+  const mobileItems = navItems.filter((item) => item.mobileVisible);
+
   return (
     <>
+      {/* ── Desktop Sidebar ── */}
       <aside
         className={cn(
-          "flex h-screen shrink-0 flex-col bg-slate-900 text-white transition-all duration-300",
+          "hidden h-screen shrink-0 flex-col bg-slate-900 text-white transition-all duration-300 md:flex",
           collapsed ? "w-17" : "w-64"
         )}
       >
@@ -153,13 +186,60 @@ export function Sidebar({
         </div>
       </aside>
 
+      {/* ── Mobile Bottom Tab Bar ── */}
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-lg md:hidden">
+        <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
+          {mobileItems.map((item) => {
+            const isActive =
+              item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-colors",
+                  isActive
+                    ? "text-blue-600"
+                    : "text-slate-400 active:text-slate-600"
+                )}
+              >
+                <span className="shrink-0">{item.iconMobile}</span>
+                <span className={cn(
+                  "text-[10px] font-medium leading-tight",
+                  isActive && "font-semibold"
+                )}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+
+          {/* Avatar / Account */}
+          <button
+            type="button"
+            onClick={() => setShowAccountModal(true)}
+            className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-slate-400 active:text-slate-600"
+          >
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+              {userName.charAt(0).toUpperCase()}
+            </div>
+            <span className="text-[10px] font-medium leading-tight">Conta</span>
+          </button>
+        </div>
+
+        {/* Safe area for phones with home indicator */}
+        <div className="h-[env(safe-area-inset-bottom)]" />
+      </nav>
+
+      {/* ── Account Modal ── */}
       <Modal
         open={showAccountModal}
         onClose={() => {
           if (!loggingOut) setShowAccountModal(false);
         }}
         title="Sua conta"
-        description="Acesse os dados da sua sessao e saia quando precisar."
+        description="Acesse os dados da sua sessão e saia quando precisar."
         size="sm"
       >
         <div className="space-y-5">
@@ -172,6 +252,15 @@ export function Sidebar({
               <p className="truncate text-sm text-slate-500">{userEmail}</p>
             </div>
           </div>
+
+          <Link
+            href="/settings"
+            onClick={() => setShowAccountModal(false)}
+            className="flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <Settings size={18} />
+            Configurações
+          </Link>
 
           <Button
             variant="danger"

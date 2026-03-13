@@ -42,11 +42,11 @@ export default function PipelinePage() {
 
   return (
     <PageContainer title="Pipeline" subtitle="Arraste os leads entre os estágios">
-      <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6">
+      <div className="flex flex-col gap-4 md:flex-row md:overflow-x-auto md:pb-4 md:-mx-6 md:px-6">
         {(stages || []).map((stage) => (
           <div
             key={stage.id}
-            className="shrink-0 w-72 flex flex-col bg-gray-ghost rounded-xl border border-neutral-border"
+            className="w-full flex flex-col bg-gray-ghost rounded-xl border border-neutral-border md:shrink-0 md:w-72"
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
               const leadId = e.dataTransfer.getData("leadId");
@@ -70,7 +70,7 @@ export default function PipelinePage() {
               )}
             </div>
 
-            <div className="p-2 flex-1 space-y-2 max-h-[calc(100vh-16rem)] overflow-y-auto">
+            <div className="p-2 flex-1 space-y-2 max-h-64 overflow-y-auto md:max-h-[calc(100vh-16rem)]">
               {stage.leads.map((lead) => (
                 <div
                   key={lead.id}

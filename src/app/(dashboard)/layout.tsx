@@ -24,7 +24,7 @@ export default function DashboardLayout({
       <Sidebar userName={user?.name} userEmail={user?.email} onLogout={logout} />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 pb-20 sm:p-6 md:pb-6">{children}</main>
       </div>
     </div>
   );

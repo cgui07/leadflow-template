@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { json, error } from "@/lib/api";
 import { createPasswordResetToken, normalizeEmail } from "@/lib/auth";
+import { sendPasswordResetEmail } from "@/lib/email";
 import { prisma } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
@@ -31,9 +32,20 @@ export async function POST(req: NextRequest) {
       });
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
-      previewUrl = `${appUrl}/reset-password?token=${token}`;
+      const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
-      console.info(`[auth] Password reset link for ${user.email}: ${previewUrl}`);
+      if (process.env.RESEND_API_KEY) {
+        try {
+          await sendPasswordResetEmail(user.email, resetUrl);
+        } catch (emailErr) {
+          console.error("[auth] Email send failed, continuing:", emailErr);
+        }
+      }
+
+      if (process.env.NODE_ENV !== "production") {
+        previewUrl = resetUrl;
+        console.info(`[auth] Password reset link for ${user.email}: ${resetUrl}`);
+      }
     }
 
     return json({

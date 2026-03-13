@@ -18,6 +18,13 @@ export async function POST(req: NextRequest) {
       return error("Credenciais invalidas", 401);
     }
 
+    if (!user.passwordHash) {
+      return error(
+        "Esta conta usa login com Google. Clique em 'Continuar com Google'.",
+        401,
+      );
+    }
+
     const valid = await verifyPassword(password, user.passwordHash);
 
     if (!valid) {
