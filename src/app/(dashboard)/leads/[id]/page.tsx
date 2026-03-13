@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
@@ -98,6 +98,12 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const [activeTab, setActiveTab] = useState("profile");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [savingPhone, setSavingPhone] = useState(false);
+
+  useEffect(() => {
+    setPhoneInput(lead?.phone || "");
+  }, [lead?.phone]);
 
   if (loading) return <LoadingState variant="skeleton" />;
   if (!lead) return <div className="p-6 text-center text-neutral-muted">Lead não encontrado</div>;
@@ -128,8 +134,27 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     }
   }
 
+  async function savePhone() {
+    if (!lead) return;
+    const nextPhone = phoneInput.trim();
+    if (!nextPhone || nextPhone === lead.phone) return;
+
+    setSavingPhone(true);
+    try {
+      await fetch(`/api/leads/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: nextPhone }),
+      });
+      refetch();
+    } finally {
+      setSavingPhone(false);
+    }
+  }
+
   const scoreColor = getScoreTextClass(lead.score);
   const messages = lead.conversation?.messages?.slice().reverse() || [];
+  const needsManualPhone = lead.phone.endsWith("@lid");
 
   return (
     <PageContainer
@@ -212,6 +237,26 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
           <SectionContainer title="Informações">
             <div className="space-y-3 text-sm">
+              <div className="rounded-xl border border-warning/30 bg-warning/5 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-warning">WhatsApp</p>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
+                  <TextField
+                    label={needsManualPhone ? "Telefone real do contato" : "Telefone do contato"}
+                    type="text"
+                    value={phoneInput}
+                    onChange={(e) => setPhoneInput(e.target.value)}
+                    placeholder="Ex: 5511999999999"
+                  />
+                  <Button onClick={savePhone} loading={savingPhone} disabled={!phoneInput.trim() || phoneInput.trim() === lead.phone}>
+                    Salvar telefone
+                  </Button>
+                </div>
+                <p className="mt-2 text-xs text-neutral-muted">
+                  {needsManualPhone
+                    ? "Este contato entrou como @lid na Evolution 1.8. Informe o numero real do WhatsApp para liberar respostas."
+                    : "Voce pode salvar so os digitos ou usar o formato 5511999999999@s.whatsapp.net."}
+                </p>
+              </div>
               <div className="flex justify-between"><span className="text-neutral-muted">Fonte</span><span className="font-medium">{lead.source}</span></div>
               <div className="flex justify-between"><span className="text-neutral-muted">Criado em</span><span className="font-medium">{new Date(lead.createdAt).toLocaleDateString("pt-BR")}</span></div>
               <div className="flex justify-between"><span className="text-neutral-muted">Último contato</span><span className="font-medium">{lead.lastContactAt ? new Date(lead.lastContactAt).toLocaleDateString("pt-BR") : "—"}</span></div>

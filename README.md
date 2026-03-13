@@ -20,6 +20,33 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Evolution API v2
+
+The project is configured to work with Evolution API `v2.3.7` through [evolution-docker-compose.yml](./evolution-docker-compose.yml).
+
+Use the local stack:
+
+```bash
+docker compose -f evolution-docker-compose.yml up -d
+```
+
+Required application env:
+
+```env
+EVOLUTION_API_URL="http://localhost:8080"
+```
+
+Webhook configuration on the Evolution instance:
+
+- URL: `http://YOUR_APP_HOST/api/whatsapp/webhook`
+- Events: `MESSAGES_UPSERT`
+
+Message routing notes:
+
+- Incoming messages may arrive with `key.remoteJid` as `@lid`.
+- On Evolution API v2, when `key.remoteJidAlt` is available, the app uses it as the preferred reply JID.
+- Outbound messages are still sent through `/message/sendText/{instance}` using the phone number in the `number` field, which is the expected v2 format.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

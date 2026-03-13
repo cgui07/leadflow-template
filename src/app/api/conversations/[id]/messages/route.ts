@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { json, error, requireAuth, handleError } from "@/lib/api";
 import { NextRequest } from "next/server";
+import { resolveSendTarget } from "@/lib/whatsapp";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -79,14 +80,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (settings?.whatsappPhoneId && settings?.whatsappToken) {
       try {
         const { sendWhatsAppMessage } = await import("@/lib/whatsapp");
+        const replyJid = resolveSendTarget(conv.whatsappChatId, conv.lead.phone);
+        if (!replyJid) {
+          throw new Error(`Cannot resolve WhatsApp recipient JID for conversation ${conv.id}`);
+        }
+
         const wa = await sendWhatsAppMessage(
           { phoneId: settings.whatsappPhoneId, token: settings.whatsappToken },
-          conv.lead.phone,
+          replyJid,
           content
         );
         await prisma.message.update({
           where: { id: message.id },
-          data: { whatsappMsgId: wa.messages?.[0]?.id },
+          data: { whatsappMsgId: wa.key?.id ?? wa.messages?.[0]?.id },
         });
       } catch (e) {
         console.error("WhatsApp send failed:", e);

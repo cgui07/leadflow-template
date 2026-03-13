@@ -86,6 +86,7 @@ async function callAI(config: AIConfig, systemPrompt: string, messages: Array<{ 
     }),
   });
   const data = await res.json();
+  console.log("[ai] OpenAI response status:", res.status, "data:", JSON.stringify(data).substring(0, 300));
   return data.choices?.[0]?.message?.content || "";
 }
 

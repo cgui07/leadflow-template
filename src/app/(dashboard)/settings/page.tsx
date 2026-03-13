@@ -78,32 +78,35 @@ export default function SettingsPage() {
       }
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SectionContainer title="WhatsApp Business" icon={<MessageSquare className="h-5 w-5 text-success" />}>
+        <SectionContainer title="WhatsApp (Evolution API)" icon={<MessageSquare className="h-5 w-5 text-success" />}>
           <div className="space-y-4">
             <TextField
-              label="Phone Number ID"
+              label="Nome da Instancia"
               type="text"
               value={form.whatsappPhoneId || ""}
               onChange={(e) => update("whatsappPhoneId", e.target.value)}
-              placeholder="ID do número do WhatsApp Business"
+              placeholder="Ex: minha-instancia"
             />
             <TextField
-              label="Access Token"
+              label="API Key (Global ou da Instancia)"
               type="password"
               value={form.whatsappToken || ""}
               onChange={(e) => update("whatsappToken", e.target.value)}
-              placeholder="Token de acesso permanente"
+              placeholder="Chave de API da Evolution"
             />
             <div>
               <TextField
-                label="Webhook Verify Token"
+                label="Webhook Token (opcional)"
                 type="text"
                 value={form.whatsappWebhookToken || ""}
                 onChange={(e) => update("whatsappWebhookToken", e.target.value)}
-                placeholder="Token para verificação do webhook"
+                placeholder="Token de seguranca para o webhook"
               />
               <p className="mt-1 text-xs text-neutral-muted">
                 URL do webhook: <code className="bg-gray-ghost px-1 rounded">{typeof window !== "undefined" ? window.location.origin : ""}/api/whatsapp/webhook</code>
+              </p>
+              <p className="mt-1 text-xs text-neutral-muted">
+                Configure esta URL na Evolution API em Webhook {"->"} URL e habilite pelo menos o evento MESSAGES_UPSERT
               </p>
             </div>
           </div>
