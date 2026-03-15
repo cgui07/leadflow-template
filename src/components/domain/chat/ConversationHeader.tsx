@@ -12,9 +12,9 @@ interface ConversationHeaderProps {
 }
 
 const statusColors: Record<string, string> = {
-  online: "bg-emerald-500",
-  offline: "bg-slate-300",
-  away: "bg-amber-500",
+  online: "bg-green-emerald",
+  offline: "bg-neutral-line",
+  away: "bg-orange-amber",
 };
 
 const statusLabels: Record<string, string> = {
@@ -34,7 +34,7 @@ export function ConversationHeader({
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-4 py-3 border-b border-slate-200 flex-shrink-0",
+        "flex items-center justify-between px-4 py-3 border-b border-neutral-border flex-shrink-0",
         className
       )}
     >
@@ -47,7 +47,7 @@ export function ConversationHeader({
               className="h-10 w-10 rounded-full object-cover"
             />
           ) : (
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
+            <div className="h-10 w-10 rounded-full bg-blue-ice flex items-center justify-center text-sm font-bold text-blue-royal">
               {name.charAt(0).toUpperCase()}
             </div>
           )}
@@ -61,10 +61,10 @@ export function ConversationHeader({
           )}
         </div>
         <div className="min-w-0">
-          <div className="text-sm font-semibold text-slate-900 truncate">
+          <div className="text-sm font-semibold text-neutral-ink truncate">
             {name}
           </div>
-          <div className="text-xs text-slate-500">
+          <div className="text-xs text-neutral">
             {subtitle ?? (status ? statusLabels[status] : "")}
           </div>
         </div>

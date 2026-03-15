@@ -23,18 +23,18 @@ export function Card({
     <div
       onClick={onClick}
       className={cn(
-        "bg-white rounded-xl border border-slate-200",
-        hoverable && "hover:border-slate-300 hover:shadow-sm transition-all",
+        "bg-white rounded-xl border border-neutral-border",
+        hoverable && "hover:border-neutral-line hover:shadow-sm transition-all",
         onClick && "cursor-pointer",
         className
       )}
     >
       {header && (
-        <div className="px-6 py-4 border-b border-slate-100">{header}</div>
+        <div className="px-6 py-4 border-b border-neutral-pale">{header}</div>
       )}
       <div className={cn(!noPadding && "p-6")}>{children}</div>
       {footer && (
-        <div className="px-6 py-4 border-t border-slate-100">{footer}</div>
+        <div className="px-6 py-4 border-t border-neutral-pale">{footer}</div>
       )}
     </div>
   );

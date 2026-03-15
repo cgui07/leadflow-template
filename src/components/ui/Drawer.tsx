@@ -74,15 +74,15 @@ export function Drawer({
         )}
       >
         {(title || description) && (
-          <div className="flex items-start justify-between px-6 py-4 border-b border-slate-200">
+          <div className="flex items-start justify-between px-6 py-4 border-b border-neutral-border">
             <div>
               {title && (
-                <div className="text-lg font-semibold text-slate-900">
+                <div className="text-lg font-semibold text-neutral-ink">
                   {title}
                 </div>
               )}
               {description && (
-                <div className="mt-1 text-sm text-slate-500">{description}</div>
+                <div className="mt-1 text-sm text-neutral">{description}</div>
               )}
             </div>
             <Button
@@ -95,7 +95,7 @@ export function Drawer({
         )}
         <div className="flex-1 overflow-y-auto p-6">{children}</div>
         {footer && (
-          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-200">
+          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-neutral-border">
             {footer}
           </div>
         )}

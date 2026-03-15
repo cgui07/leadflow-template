@@ -13,11 +13,11 @@ interface MessageBubbleProps {
 }
 
 const statusIcons: Record<MessageStatus, React.ReactNode> = {
-  sending: <Clock className="h-3 w-3 text-slate-400" />,
-  sent: <Check className="h-3 w-3 text-slate-400" />,
-  delivered: <CheckCheck className="h-3 w-3 text-slate-400" />,
-  read: <CheckCheck className="h-3 w-3 text-blue-500" />,
-  failed: <AlertCircle className="h-3 w-3 text-red-500" />,
+  sending: <Clock className="h-3 w-3 text-neutral-muted" />,
+  sent: <Check className="h-3 w-3 text-neutral-muted" />,
+  delivered: <CheckCheck className="h-3 w-3 text-neutral-muted" />,
+  read: <CheckCheck className="h-3 w-3 text-blue" />,
+  failed: <AlertCircle className="h-3 w-3 text-danger" />,
 };
 
 export function MessageBubble({
@@ -48,7 +48,7 @@ export function MessageBubble({
               className="h-7 w-7 rounded-full object-cover"
             />
           ) : (
-            <div className="h-7 w-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-500">
+            <div className="h-7 w-7 rounded-full bg-neutral-border flex items-center justify-center text-xs font-bold text-neutral">
               {senderName?.charAt(0).toUpperCase() ?? "?"}
             </div>
           )}
@@ -56,7 +56,7 @@ export function MessageBubble({
       )}
       <div>
         {!isSent && senderName && (
-          <div className="text-xs font-medium text-slate-500 mb-1 ml-1">
+          <div className="text-xs font-medium text-neutral mb-1 ml-1">
             {senderName}
           </div>
         )}
@@ -64,8 +64,8 @@ export function MessageBubble({
           className={cn(
             "px-3 py-2 rounded-2xl text-sm leading-relaxed",
             isSent
-              ? "bg-blue-600 text-white rounded-br-md"
-              : "bg-slate-100 text-slate-900 rounded-bl-md"
+              ? "bg-blue-royal text-white rounded-br-md"
+              : "bg-neutral-pale text-neutral-ink rounded-bl-md"
           )}
         >
           {content}
@@ -76,7 +76,7 @@ export function MessageBubble({
             isSent ? "justify-end" : "justify-start"
           )}
         >
-          <div className="text-[11px] text-slate-400">{timestamp}</div>
+          <div className="text-[11px] text-neutral-muted">{timestamp}</div>
           {isSent && status && statusIcons[status]}
         </div>
       </div>

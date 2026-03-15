@@ -21,38 +21,38 @@ const typeConfig: Record<
 > = {
   call: {
     icon: <Phone className="h-3.5 w-3.5" />,
-    color: "text-blue-600",
-    bg: "bg-blue-50",
+    color: "text-blue-royal",
+    bg: "bg-blue-pale",
   },
   email: {
     icon: <Mail className="h-3.5 w-3.5" />,
-    color: "text-purple-600",
-    bg: "bg-purple-50",
+    color: "text-purple-violet",
+    bg: "bg-purple-pale",
   },
   note: {
     icon: <StickyNote className="h-3.5 w-3.5" />,
-    color: "text-amber-600",
-    bg: "bg-amber-50",
+    color: "text-yellow-gold",
+    bg: "bg-yellow-pale",
   },
   meeting: {
     icon: <CalendarCheck className="h-3.5 w-3.5" />,
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
+    color: "text-green-dark",
+    bg: "bg-green-pale",
   },
   task: {
     icon: <CheckSquare className="h-3.5 w-3.5" />,
-    color: "text-slate-600",
-    bg: "bg-slate-100",
+    color: "text-neutral-steel",
+    bg: "bg-neutral-pale",
   },
   status_change: {
     icon: <ArrowRightLeft className="h-3.5 w-3.5" />,
-    color: "text-orange-600",
-    bg: "bg-orange-50",
+    color: "text-orange-dark",
+    bg: "bg-orange-pale",
   },
   message: {
     icon: <MessageSquare className="h-3.5 w-3.5" />,
-    color: "text-cyan-600",
-    bg: "bg-cyan-50",
+    color: "text-teal-dark",
+    bg: "bg-teal-pale",
   },
 };
 
@@ -88,24 +88,24 @@ export function ActivityTimeline({
                 {config.icon}
               </div>
               {!isLast && (
-                <div className="w-px flex-1 bg-slate-200 my-1" />
+                <div className="w-px flex-1 bg-neutral-border my-1" />
               )}
             </div>
             <div className={cn("pb-5 min-w-0", isLast && "pb-0")}>
-              <div className="text-sm font-medium text-slate-900">
+              <div className="text-sm font-medium text-neutral-ink">
                 {activity.title}
               </div>
               {activity.description && (
-                <div className="text-xs text-slate-500 mt-0.5 line-clamp-2">
+                <div className="text-xs text-neutral mt-0.5 line-clamp-2">
                   {activity.description}
                 </div>
               )}
               <div className="flex items-center gap-2 mt-1">
-                <div className="text-[11px] text-slate-400">
+                <div className="text-[11px] text-neutral-muted">
                   {formatTimestamp(activity.timestamp)}
                 </div>
                 {activity.user && (
-                  <div className="text-[11px] text-slate-400">
+                  <div className="text-[11px] text-neutral-muted">
                     por {activity.user.name}
                   </div>
                 )}

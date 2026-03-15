@@ -59,7 +59,7 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
               "relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors p-0",
               "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
               "disabled:opacity-50 disabled:cursor-not-allowed",
-              checked ? "bg-primary" : "bg-slate-300"
+              checked ? "bg-primary" : "bg-neutral-line"
             )}
           >
             <div
@@ -74,16 +74,16 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
               {label && (
                 <label
                   htmlFor={fieldId}
-                  className="text-sm font-medium text-slate-700 cursor-pointer"
+                  className="text-sm font-medium text-neutral-dark cursor-pointer"
                   onClick={handleToggle}
                 >
                   {label}
                 </label>
               )}
               {description && (
-                <div className="text-xs text-slate-500 mt-0.5">{description}</div>
+                <div className="text-xs text-neutral mt-0.5">{description}</div>
               )}
-              {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
+              {error && <div className="text-xs text-danger mt-1">{error}</div>}
             </div>
           )}
         </div>
@@ -107,7 +107,7 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
             "disabled:opacity-50 disabled:cursor-not-allowed",
             checked
               ? "bg-primary border-primary text-white"
-              : "border-slate-300 bg-white"
+              : "border-neutral-line bg-white"
           )}
           icon={checked ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : undefined}
         />
@@ -116,16 +116,16 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
             {label && (
               <label
                 htmlFor={fieldId}
-                className="text-sm font-medium text-slate-700 cursor-pointer"
+                className="text-sm font-medium text-neutral-dark cursor-pointer"
                 onClick={handleToggle}
               >
                 {label}
               </label>
             )}
             {description && (
-              <div className="text-xs text-slate-500 mt-0.5">{description}</div>
+              <div className="text-xs text-neutral mt-0.5">{description}</div>
             )}
-            {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
+            {error && <div className="text-xs text-danger mt-1">{error}</div>}
           </div>
         )}
       </div>

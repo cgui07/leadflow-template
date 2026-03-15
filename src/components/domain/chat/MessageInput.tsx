@@ -40,7 +40,7 @@ export function MessageInput({
   return (
     <div
       className={cn(
-        "flex items-end gap-2 px-4 py-3 border-t border-slate-200",
+        "flex items-end gap-2 px-4 py-3 border-t border-neutral-border",
         className
       )}
     >
@@ -61,10 +61,10 @@ export function MessageInput({
         disabled={disabled}
         rows={1}
         className={cn(
-          "flex-1 resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm",
-          "placeholder:text-slate-400",
-          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-          "disabled:bg-slate-50 disabled:cursor-not-allowed",
+          "flex-1 resize-none rounded-lg border border-neutral-border px-3 py-2 text-sm",
+          "placeholder:text-neutral-muted",
+          "focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent",
+          "disabled:bg-neutral-surface disabled:cursor-not-allowed",
           "max-h-32"
         )}
       />

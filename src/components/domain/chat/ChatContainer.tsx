@@ -16,7 +16,7 @@ export function ChatContainer({
   return (
     <div
       className={cn(
-        "flex flex-col h-full bg-white rounded-xl border border-slate-200 overflow-hidden",
+        "flex flex-col h-full bg-white rounded-xl border border-neutral-border overflow-hidden",
         className
       )}
     >

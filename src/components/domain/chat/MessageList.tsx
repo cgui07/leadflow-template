@@ -37,11 +37,11 @@ interface DateSeparatorProps {
 export function DateSeparator({ date }: DateSeparatorProps) {
   return (
     <div className="flex items-center gap-3 py-2">
-      <div className="flex-1 h-px bg-slate-200" />
-      <div className="text-xs font-medium text-slate-400 whitespace-nowrap">
+      <div className="flex-1 h-px bg-neutral-border" />
+      <div className="text-xs font-medium text-neutral-muted whitespace-nowrap">
         {date}
       </div>
-      <div className="flex-1 h-px bg-slate-200" />
+      <div className="flex-1 h-px bg-neutral-border" />
     </div>
   );
 }

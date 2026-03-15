@@ -61,13 +61,13 @@ export function DataTable<T>({
     <div className={cn("overflow-x-auto", className)}>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-200">
+          <tr className="border-b border-neutral-border">
             {columns.map((col) => (
               <th
                 key={String(col.key)}
                 className={cn(
-                  "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500",
-                  col.sortable && "cursor-pointer select-none hover:text-slate-700",
+                  "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral",
+                  col.sortable && "cursor-pointer select-none hover:text-neutral-dark",
                   col.className
                 )}
                 onClick={() => col.sortable && handleSort(String(col.key))}
@@ -75,7 +75,7 @@ export function DataTable<T>({
                 <div className="flex items-center gap-1">
                   {col.label}
                   {col.sortable && (
-                    <div className="text-slate-300">
+                    <div className="text-neutral-line">
                       {sortKey === String(col.key) ? (
                         sortDir === "asc" ? (
                           <ArrowUp className="h-3.5 w-3.5" />
@@ -92,13 +92,13 @@ export function DataTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-neutral-pale">
           {sortedData.map((row) => (
             <tr
               key={String(row[rowKey])}
               onClick={() => onRowClick?.(row)}
               className={cn(
-                "hover:bg-slate-50 transition-colors",
+                "hover:bg-neutral-surface transition-colors",
                 onRowClick && "cursor-pointer"
               )}
             >
@@ -107,7 +107,7 @@ export function DataTable<T>({
                 return (
                   <td
                     key={String(col.key)}
-                    className={cn("px-4 py-3 text-slate-700", col.className)}
+                    className={cn("px-4 py-3 text-neutral-dark", col.className)}
                   >
                     {col.render ? col.render(value, row) : String(value ?? "")}
                   </td>

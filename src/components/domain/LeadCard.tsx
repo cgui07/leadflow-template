@@ -48,19 +48,19 @@ export function LeadCard({
     <div
       onClick={onClick}
       className={cn(
-        "bg-white rounded-lg border border-slate-200 p-3 space-y-2.5",
-        "hover:border-slate-300 hover:shadow-sm transition-all",
+        "bg-white rounded-lg border border-neutral-border p-3 space-y-2.5",
+        "hover:border-neutral-line hover:shadow-sm transition-all",
         onClick && "cursor-pointer",
         className
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-sm font-medium text-slate-900 truncate">
+          <div className="text-sm font-medium text-neutral-ink truncate">
             {lead.name}
           </div>
           {lead.company && (
-            <div className="flex items-center gap-1 text-xs text-slate-500 mt-0.5">
+            <div className="flex items-center gap-1 text-xs text-neutral mt-0.5">
               <Building2 className="h-3 w-3" />
               {lead.company}
             </div>
@@ -70,13 +70,13 @@ export function LeadCard({
       </div>
       <div className="space-y-1">
         {lead.email && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate">
+          <div className="flex items-center gap-1.5 text-xs text-neutral truncate">
             <Mail className="h-3 w-3 flex-shrink-0" />
             {lead.email}
           </div>
         )}
         {lead.phone && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5 text-xs text-neutral">
             <Phone className="h-3 w-3 flex-shrink-0" />
             {lead.phone}
           </div>
@@ -87,7 +87,7 @@ export function LeadCard({
           {status.label}
         </Badge>
         {formattedValue && (
-          <div className="text-xs font-semibold text-slate-700">
+          <div className="text-xs font-semibold text-neutral-dark">
             {formattedValue}
           </div>
         )}

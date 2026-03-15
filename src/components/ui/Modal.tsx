@@ -73,12 +73,12 @@ export function Modal({
           <div className="flex items-start justify-between px-6 pt-6 pb-0">
             <div>
               {title && (
-                <div className="text-lg font-semibold text-slate-900">
+                <div className="text-lg font-semibold text-neutral-ink">
                   {title}
                 </div>
               )}
               {description && (
-                <div className="mt-1 text-sm text-slate-500">{description}</div>
+                <div className="mt-1 text-sm text-neutral">{description}</div>
               )}
             </div>
             <Button

@@ -56,13 +56,13 @@ export function Dropdown({
       {open && (
         <div
           className={cn(
-            "absolute z-50 mt-1 min-w-45 bg-white rounded-lg border border-slate-200 shadow-lg py-1",
+            "absolute z-50 mt-1 min-w-45 bg-white rounded-lg border border-neutral-border shadow-lg py-1",
             align === "right" ? "right-0" : "left-0",
           )}
         >
           {items.map((item, i) => {
             if (item.divider) {
-              return <div key={i} className="my-1 border-t border-slate-100" />;
+              return <div key={i} className="my-1 border-t border-neutral-pale" />;
             }
 
             return (
@@ -78,8 +78,8 @@ export function Dropdown({
                 className={cn(
                   "w-full justify-start px-3 py-2 text-sm font-normal h-auto",
                   item.danger
-                    ? "text-red-600 hover:bg-red-50"
-                    : "text-slate-700 hover:bg-slate-50"
+                    ? "text-red-crimson hover:bg-red-pale"
+                    : "text-neutral-dark hover:bg-neutral-surface"
                 )}
                 icon={item.icon ? <div className="shrink-0 w-4 h-4">{item.icon}</div> : undefined}
               >

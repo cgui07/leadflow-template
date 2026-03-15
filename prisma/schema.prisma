@@ -121,7 +121,7 @@ model PipelineStage {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
   name      String
-  color     String   @default("#3b82f6")
+  color     String   @default("blue")
   order     Int      @default(0)
   createdAt DateTime @default(now()) @map("created_at")
   leads     Lead[]

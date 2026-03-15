@@ -2,8 +2,10 @@
 @config "../../tailwind.config.ts";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: theme(colors.neutral.surface);
+  --foreground: theme(colors.neutral.ink);
+  --scrollbar-thumb: theme(colors.neutral.line);
+  --scrollbar-thumb-hover: theme(colors.neutral.muted);
 }
 
 @theme inline {
@@ -28,10 +30,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--scrollbar-thumb-hover);
 }

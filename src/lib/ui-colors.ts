@@ -1,3 +1,5 @@
+import { appColors } from "../../tailwind.config";
+
 export type PipelineColorToken =
   | "blue"
   | "amber"
@@ -13,48 +15,48 @@ const pipelineColorClasses: Record<
   { dot: string; soft: string }
 > = {
   blue: {
-    dot: "bg-blue-500",
-    soft: "bg-blue-50 text-blue-700",
+    dot: "bg-blue",
+    soft: "bg-blue-pale text-blue-navy",
   },
   amber: {
-    dot: "bg-amber-500",
-    soft: "bg-amber-50 text-amber-700",
+    dot: "bg-orange-amber",
+    soft: "bg-yellow-pale text-yellow-dark",
   },
   purple: {
-    dot: "bg-purple-500",
-    soft: "bg-purple-50 text-purple-700",
+    dot: "bg-purple",
+    soft: "bg-purple-pale text-purple-grape",
   },
   cyan: {
-    dot: "bg-cyan-500",
-    soft: "bg-cyan-50 text-cyan-700",
+    dot: "bg-teal-cyan",
+    soft: "bg-teal-pale text-teal-deep",
   },
   orange: {
-    dot: "bg-orange-500",
-    soft: "bg-orange-50 text-orange-700",
+    dot: "bg-orange",
+    soft: "bg-orange-pale text-orange-burn",
   },
   pink: {
-    dot: "bg-pink-500",
-    soft: "bg-pink-50 text-pink-700",
+    dot: "bg-pink",
+    soft: "bg-pink-pale text-pink-magenta",
   },
   emerald: {
-    dot: "bg-emerald-500",
-    soft: "bg-emerald-50 text-emerald-700",
+    dot: "bg-green-emerald",
+    soft: "bg-green-pale text-green-forest",
   },
   red: {
-    dot: "bg-red-500",
-    soft: "bg-red-50 text-red-700",
+    dot: "bg-danger",
+    soft: "bg-red-pale text-red-dark",
   },
 };
 
 const legacyPipelineColors: Record<string, PipelineColorToken> = {
-  "#3b82f6": "blue",
-  "#f59e0b": "amber",
-  "#8b5cf6": "purple",
-  "#06b6d4": "cyan",
-  "#f97316": "orange",
-  "#ec4899": "pink",
-  "#22c55e": "emerald",
-  "#ef4444": "red",
+  [appColors.blue.DEFAULT]: "blue",
+  [appColors.orange.amber]: "amber",
+  [appColors.purple.amethyst]: "purple",
+  [appColors.teal.cyan]: "cyan",
+  [appColors.orange.DEFAULT]: "orange",
+  [appColors.pink.DEFAULT]: "pink",
+  [appColors.green.DEFAULT]: "emerald",
+  [appColors.red.DEFAULT]: "red",
 };
 
 export const DEFAULT_PIPELINE_STAGE_COLORS: PipelineColorToken[] = [
@@ -94,24 +96,24 @@ export function getPipelineColorSoftClass(color?: string | null) {
 
 export function getScoreTextClass(score: number) {
   if (score >= 70) {
-    return "text-emerald-600";
+    return "text-green-dark";
   }
 
   if (score >= 40) {
-    return "text-amber-600";
+    return "text-yellow-gold";
   }
 
-  return "text-slate-400";
+  return "text-neutral-muted";
 }
 
 export function getScoreBadgeClass(score: number) {
   if (score >= 70) {
-    return "bg-emerald-50 text-emerald-700";
+    return "bg-green-pale text-green-forest";
   }
 
   if (score >= 40) {
-    return "bg-amber-50 text-amber-700";
+    return "bg-yellow-pale text-yellow-dark";
   }
 
-  return "bg-slate-50 text-slate-500";
+  return "bg-neutral-surface text-neutral";
 }

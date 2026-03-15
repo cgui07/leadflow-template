@@ -32,33 +32,33 @@ const interactionConfig: Record<
 > = {
   call_in: {
     icon: <PhoneIncoming className="h-4 w-4" />,
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
+    color: "text-green-dark",
+    bg: "bg-green-pale",
   },
   call_out: {
     icon: <PhoneOutgoing className="h-4 w-4" />,
-    color: "text-blue-600",
-    bg: "bg-blue-50",
+    color: "text-blue-royal",
+    bg: "bg-blue-pale",
   },
   call_missed: {
     icon: <PhoneMissed className="h-4 w-4" />,
-    color: "text-red-600",
-    bg: "bg-red-50",
+    color: "text-red-crimson",
+    bg: "bg-red-pale",
   },
   email: {
     icon: <Mail className="h-4 w-4" />,
-    color: "text-purple-600",
-    bg: "bg-purple-50",
+    color: "text-purple-violet",
+    bg: "bg-purple-pale",
   },
   message: {
     icon: <MessageSquare className="h-4 w-4" />,
-    color: "text-cyan-600",
-    bg: "bg-cyan-50",
+    color: "text-teal-dark",
+    bg: "bg-teal-pale",
   },
   video: {
     icon: <Video className="h-4 w-4" />,
-    color: "text-indigo-600",
-    bg: "bg-indigo-50",
+    color: "text-indigo-deep",
+    bg: "bg-indigo-pale",
   },
 };
 
@@ -75,7 +75,7 @@ export function InteractionLogItem({
   return (
     <div
       className={cn(
-        "flex items-start gap-3 py-3 border-b border-slate-100 last:border-0",
+        "flex items-start gap-3 py-3 border-b border-neutral-pale last:border-0",
         className
       )}
     >
@@ -89,17 +89,17 @@ export function InteractionLogItem({
         {config.icon}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-slate-900">{title}</div>
+        <div className="text-sm font-medium text-neutral-ink">{title}</div>
         {description && (
-          <div className="text-xs text-slate-500 mt-0.5 truncate">
+          <div className="text-xs text-neutral mt-0.5 truncate">
             {description}
           </div>
         )}
       </div>
       <div className="text-right flex-shrink-0">
-        <div className="text-xs text-slate-400">{timestamp}</div>
+        <div className="text-xs text-neutral-muted">{timestamp}</div>
         {duration && (
-          <div className="text-xs text-slate-400 mt-0.5">{duration}</div>
+          <div className="text-xs text-neutral-muted mt-0.5">{duration}</div>
         )}
       </div>
     </div>

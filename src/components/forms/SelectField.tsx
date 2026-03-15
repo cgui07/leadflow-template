@@ -150,12 +150,12 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
               variant="outline"
               className={cn(
                 "w-full justify-between items-center text-left gap-2 h-auto",
-                error ? "border-red-300" : "",
+                error ? "border-red-blush" : "",
                 sizeStyles[fieldSize],
                 className
               )}
             >
-              <div className={cn("flex-1 truncate", !hasValue && "text-slate-400")}>
+              <div className={cn("flex-1 truncate", !hasValue && "text-neutral-muted")}>
                 {multiple
                   ? selectedLabels.length > 0
                     ? selectedLabels.join(", ")
@@ -163,7 +163,7 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
                   : selectedLabel ?? placeholder}
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                {loading && <Loader2 className="h-4 w-4 text-slate-400 animate-spin" />}
+                {loading && <Loader2 className="h-4 w-4 text-neutral-muted animate-spin" />}
                 {clearable && hasValue && !loading && (
                   <Button
                     variant="ghost"
@@ -175,7 +175,7 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
                 )}
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 text-slate-400 transition-transform",
+                    "h-4 w-4 text-neutral-muted transition-transform",
                     open && "rotate-180"
                   )}
                 />
@@ -183,21 +183,21 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
             </Button>
           </div>
           {open && (
-            <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+            <div className="absolute z-50 mt-1 w-full bg-white border border-neutral-border rounded-lg shadow-lg max-h-60 overflow-auto">
               {searchable && (
-                <div className="p-2 border-b border-slate-100">
+                <div className="p-2 border-b border-neutral-pale">
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Buscar..."
-                    className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full px-2 py-1.5 text-sm border border-neutral-border rounded focus:outline-none focus:ring-1 focus:ring-primary"
                     autoFocus
                   />
                 </div>
               )}
               {filtered.length === 0 ? (
-                <div className="px-3 py-4 text-sm text-slate-400 text-center">
+                <div className="px-3 py-4 text-sm text-neutral-muted text-center">
                   Nenhuma opção encontrada
                 </div>
               ) : (
@@ -217,7 +217,7 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
                         "w-full justify-between px-3 py-2 text-sm font-normal h-auto",
                         isSelected
                           ? "bg-blue-pale text-primary"
-                          : "text-slate-700 hover:bg-slate-50"
+                          : "text-neutral-dark hover:bg-neutral-surface"
                       )}
                       iconRight={isSelected ? <Check className="h-4 w-4 shrink-0" /> : undefined}
                     >

@@ -60,8 +60,8 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
       score: 0,
       label: "Digite uma senha",
       hint: `Use pelo menos ${MIN_PASSWORD_LENGTH} caracteres`,
-      barClassName: "bg-slate-200",
-      textClassName: "text-slate-500",
+      barClassName: "bg-neutral-border",
+      textClassName: "text-neutral",
       checks,
     };
   }
@@ -71,8 +71,8 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
       score,
       label: "Muito fraca",
       hint: getHint(checks),
-      barClassName: "bg-red-500",
-      textClassName: "text-red-600",
+      barClassName: "bg-danger",
+      textClassName: "text-red-crimson",
       checks,
     };
   }
@@ -82,8 +82,8 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
       score,
       label: "Fraca",
       hint: getHint(checks),
-      barClassName: "bg-orange-500",
-      textClassName: "text-orange-600",
+      barClassName: "bg-orange",
+      textClassName: "text-orange-dark",
       checks,
     };
   }
@@ -93,8 +93,8 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
       score,
       label: "Media",
       hint: getHint(checks),
-      barClassName: "bg-amber-500",
-      textClassName: "text-amber-600",
+      barClassName: "bg-orange-amber",
+      textClassName: "text-yellow-gold",
       checks,
     };
   }
@@ -104,8 +104,8 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
       score,
       label: "Forte",
       hint: getHint(checks),
-      barClassName: "bg-emerald-500",
-      textClassName: "text-emerald-600",
+      barClassName: "bg-green-emerald",
+      textClassName: "text-green-dark",
       checks,
     };
   }
@@ -114,8 +114,8 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
     score,
     label: "Muito forte",
     hint: getHint(checks),
-    barClassName: "bg-teal-600",
-    textClassName: "text-teal-700",
+    barClassName: "bg-teal-dark",
+    textClassName: "text-teal-dark",
     checks,
   };
 }

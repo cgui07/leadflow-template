@@ -109,11 +109,11 @@ export function Sidebar({
     <>
       <aside
         className={cn(
-          "hidden h-screen shrink-0 flex-col bg-slate-900 text-white transition-all duration-300 md:flex",
+          "hidden h-screen shrink-0 flex-col bg-neutral-ink text-white transition-all duration-300 md:flex",
           collapsed ? "w-17" : "w-64"
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
+        <div className="flex h-16 items-center justify-between border-b border-neutral-deep px-4">
           {!collapsed && <div className="text-lg font-bold tracking-tight">LeadFlow</div>}
           <Button
             variant="ghost"
@@ -141,8 +141,8 @@ export function Sidebar({
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white",
+                    ? "bg-blue-royal text-white"
+                    : "text-neutral-line hover:bg-neutral-deep hover:text-white",
                   collapsed && "justify-center px-2"
                 )}
                 title={collapsed ? item.label : undefined}
@@ -152,7 +152,7 @@ export function Sidebar({
                   <>
                     <div className="flex-1 text-left">{item.label}</div>
                     {item.badge !== undefined && item.badge > 0 && (
-                      <div className="min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                      <div className="min-w-5 rounded-full bg-danger px-1.5 py-0.5 text-center text-xs font-bold text-white">
                         {item.badge}
                       </div>
                     )}
@@ -162,7 +162,7 @@ export function Sidebar({
             );
           })}
         </div>
-        <div className="border-t border-slate-800 p-3">
+        <div className="border-t border-neutral-deep p-3">
           <Button
             variant="ghost"
             onClick={() => setShowAccountModal(true)}
@@ -171,19 +171,19 @@ export function Sidebar({
               collapsed && "justify-center px-1"
             )}
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-royal text-sm font-bold">
               {userName.charAt(0).toUpperCase()}
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium">{userName}</div>
-                <div className="truncate text-xs text-slate-400">{userEmail}</div>
+                <div className="truncate text-xs text-neutral-muted">{userEmail}</div>
               </div>
             )}
           </Button>
         </div>
       </aside>
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-lg md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-border bg-white/95 backdrop-blur-lg md:hidden">
         <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
           {mobileItems.map((item) => {
             const isActive =
@@ -196,8 +196,8 @@ export function Sidebar({
                 className={cn(
                   "flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-colors",
                   isActive
-                    ? "text-blue-600"
-                    : "text-slate-400 active:text-slate-600"
+                    ? "text-blue-royal"
+                    : "text-neutral-muted active:text-neutral-steel"
                 )}
               >
                 <div className="shrink-0">{item.iconMobile}</div>
@@ -215,7 +215,7 @@ export function Sidebar({
             onClick={() => setShowAccountModal(true)}
             className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5"
           >
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-royal text-[10px] font-bold text-white">
               {userName.charAt(0).toUpperCase()}
             </div>
             <div className="text-[10px] font-medium leading-tight">Conta</div>
@@ -233,19 +233,19 @@ export function Sidebar({
         size="sm"
       >
         <div className="space-y-5">
-          <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 text-base font-bold text-white">
+          <div className="flex items-center gap-3 rounded-xl bg-neutral-surface p-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-royal text-base font-bold text-white">
               {userName.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <div className="truncate text-sm font-semibold text-slate-900">{userName}</div>
-              <div className="truncate text-sm text-slate-500">{userEmail}</div>
+              <div className="truncate text-sm font-semibold text-neutral-ink">{userName}</div>
+              <div className="truncate text-sm text-neutral">{userEmail}</div>
             </div>
           </div>
           <Link
             href="/settings"
             onClick={() => setShowAccountModal(false)}
-            className="flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="flex w-full items-center gap-3 rounded-xl border border-neutral-border px-4 py-3 text-sm font-medium text-neutral-dark transition-colors hover:bg-neutral-surface"
           >
             <Settings size={18} />
             Configurações
