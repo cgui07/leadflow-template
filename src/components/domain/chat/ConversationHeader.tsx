@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Phone, MoreVertical } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface ConversationHeaderProps {
   name: string;
@@ -76,12 +77,8 @@ export function ConversationHeader({
       <div className="flex items-center gap-1">
         {actions ?? (
           <>
-            <button className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-              <Phone className="h-4 w-4" />
-            </button>
-            <button className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-              <MoreVertical className="h-4 w-4" />
-            </button>
+            <Button variant="ghost" size="sm" icon={<Phone className="h-4 w-4" />} />
+            <Button variant="ghost" size="sm" icon={<MoreVertical className="h-4 w-4" />} />
           </>
         )}
       </div>

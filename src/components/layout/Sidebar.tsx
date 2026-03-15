@@ -116,18 +116,19 @@ export function Sidebar({
       >
         <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
           {!collapsed && <span className="text-lg font-bold tracking-tight">LeadFlow</span>}
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setCollapsed(!collapsed)}
-            className="rounded-lg p-1.5 transition-colors hover:bg-slate-800"
-          >
-            <ChevronLeft
-              className={cn(
-                "h-5 w-5 transition-transform duration-300",
-                collapsed && "rotate-180"
-              )}
-            />
-          </button>
+            icon={
+              <ChevronLeft
+                className={cn(
+                  "h-5 w-5 transition-transform duration-300",
+                  collapsed && "rotate-180"
+                )}
+              />
+            }
+          />
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
@@ -165,11 +166,11 @@ export function Sidebar({
         </nav>
 
         <div className="border-t border-slate-800 p-3">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
             onClick={() => setShowAccountModal(true)}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-slate-800",
+              "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left justify-start",
               collapsed && "justify-center px-1"
             )}
           >
@@ -182,7 +183,7 @@ export function Sidebar({
                 <p className="truncate text-xs text-slate-400">{userEmail}</p>
               </div>
             )}
-          </button>
+          </Button>
         </div>
       </aside>
 
@@ -216,16 +217,16 @@ export function Sidebar({
           })}
 
           {/* Avatar / Account */}
-          <button
-            type="button"
+          <Button
+            variant="ghost"
             onClick={() => setShowAccountModal(true)}
-            className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-slate-400 active:text-slate-600"
+            className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5"
           >
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
               {userName.charAt(0).toUpperCase()}
             </div>
             <span className="text-[10px] font-medium leading-tight">Conta</span>
-          </button>
+          </Button>
         </div>
 
         {/* Safe area for phones with home indicator */}

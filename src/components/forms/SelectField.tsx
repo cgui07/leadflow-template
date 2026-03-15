@@ -4,6 +4,7 @@ import { forwardRef, useState, useRef, useEffect, useId } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown, X, Check, Loader2 } from "lucide-react";
 import { FieldWrapper } from "./FieldWrapper";
+import { Button } from "@/components/ui/Button";
 import type { SelectOption } from "@/types";
 
 type SelectFieldSize = "sm" | "md" | "lg";
@@ -141,20 +142,20 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
       >
         <div className="relative" ref={containerRef}>
           <div ref={ref}>
-            <button
+            <Button
               type="button"
               id={fieldId}
               disabled={disabled || loading}
               onClick={() => !disabled && !loading && setOpen(!open)}
+              variant="outline"
               className={cn(
-                "flex items-center justify-between w-full rounded-lg border bg-white transition-colors text-left gap-2",
-                "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
-                "disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed",
-                error ? "border-red-300" : "border-slate-300",
+                "w-full justify-between items-center text-left gap-2 h-auto",
+                error ? "border-red-300" : "",
                 sizeStyles[fieldSize],
                 className
               )}
             >
+
               <span className={cn("flex-1 truncate", !hasValue && "text-slate-400")}>
                 {multiple
                   ? selectedLabels.length > 0
@@ -163,12 +164,15 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
                   : selectedLabel ?? placeholder}
               </span>
 
-              <div className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
                 {loading && <Loader2 className="h-4 w-4 text-slate-400 animate-spin" />}
                 {clearable && hasValue && !loading && (
-                  <X
-                    className="h-3.5 w-3.5 text-slate-400 hover:text-slate-600"
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleClear}
+                    icon={<X className="h-3.5 w-3.5" />}
+                    className="h-6 w-6 p-0"
                   />
                 )}
                 <ChevronDown
@@ -178,7 +182,7 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
                   )}
                 />
               </div>
-            </button>
+            </Button>
           </div>
 
           {open && (
@@ -206,22 +210,22 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
                     : value === opt.value;
 
                   return (
-                    <button
+                    <Button
                       key={opt.value}
                       type="button"
+                      variant="ghost"
                       disabled={opt.disabled}
                       onClick={() => handleSelect(opt.value)}
                       className={cn(
-                        "flex items-center justify-between w-full px-3 py-2 text-sm transition-colors",
+                        "w-full justify-between px-3 py-2 text-sm font-normal h-auto",
                         isSelected
                           ? "bg-blue-pale text-primary"
-                          : "text-slate-700 hover:bg-slate-50",
-                        opt.disabled && "opacity-50 cursor-not-allowed"
+                          : "text-slate-700 hover:bg-slate-50"
                       )}
+                      iconRight={isSelected ? <Check className="h-4 w-4 shrink-0" /> : undefined}
                     >
                       {opt.label}
-                      {isSelected && <Check className="h-4 w-4" />}
-                    </button>
+                    </Button>
                   );
                 })
               )}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Send, Paperclip } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface MessageInputProps {
   onSend?: (message: string) => void;
@@ -44,14 +45,13 @@ export function MessageInput({
       )}
     >
       {onAttach && (
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onAttach}
           disabled={disabled}
-          className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-50"
-        >
-          <Paperclip className="h-5 w-5" />
-        </button>
+          icon={<Paperclip className="h-5 w-5" />}
+        />
       )}
 
       <textarea
@@ -70,20 +70,11 @@ export function MessageInput({
         )}
       />
 
-      <button
-        type="button"
+      <Button
         onClick={handleSend}
         disabled={disabled || !message.trim()}
-        className={cn(
-          "p-2 rounded-lg transition-colors",
-          message.trim()
-            ? "bg-blue-600 text-white hover:bg-blue-700"
-            : "bg-slate-100 text-slate-400",
-          "disabled:opacity-50 disabled:cursor-not-allowed"
-        )}
-      >
-        <Send className="h-5 w-5" />
-      </button>
+        icon={<Send className="h-5 w-5" />}
+      />
     </div>
   );
 }

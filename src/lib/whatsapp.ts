@@ -320,6 +320,16 @@ export async function processIncomingMessage(userId: string, message: {
     }
   }
 
+  // Idempotency: skip if this whatsappMsgId was already processed
+  if (message.id) {
+    const existing = await prisma.message.findFirst({
+      where: { conversationId: conversation.id, whatsappMsgId: message.id },
+    });
+    if (existing) {
+      return { lead, conversation, message: existing };
+    }
+  }
+
   const savedMessage = await prisma.message.create({
     data: {
       conversationId: conversation.id,
@@ -343,7 +353,10 @@ export async function processIncomingMessage(userId: string, message: {
 
   await prisma.lead.update({
     where: { id: lead.id },
-    data: { lastContactAt: new Date() },
+    data: {
+      lastContactAt: new Date(),
+      followUpCount: 0,
+    },
   });
 
   return { lead, conversation, message: savedMessage };

@@ -14,6 +14,7 @@ export async function GET() {
       recentLeads,
       recentActivities,
       pendingTasks,
+      overdueTasks,
       conversationsWithUnread,
     ] = await Promise.all([
       prisma.lead.count({ where: { userId: user.id } }),
@@ -56,6 +57,7 @@ export async function GET() {
         wonLeads,
         hotLeads,
         pendingTasks,
+        overdueTasks,
         unreadConversations: conversationsWithUnread,
         pipelineValue: pipelineValue._sum.value || 0,
       },

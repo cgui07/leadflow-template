@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
+import { Button } from "./Button";
 
 type DrawerSide = "right" | "left";
 type DrawerSize = "sm" | "md" | "lg" | "xl";
@@ -88,12 +89,12 @@ export function Drawer({
                 <p className="mt-1 text-sm text-slate-500">{description}</p>
               )}
             </div>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={onClose}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+              icon={<X className="h-5 w-5" />}
+            />
           </div>
         )}
 

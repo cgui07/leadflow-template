@@ -215,9 +215,9 @@ export default function LeadsPage() {
         <div className="md:hidden w-full">
           <Dropdown
             align="left"
-            className="w-full block"
+            className="w-full"
             trigger={
-              <Button className="w-full flex items-center justify-between bg-white border border-neutral-border rounded-lg px-3 py-2 text-sm font-medium text-neutral-ink cursor-pointer transition hover:border-neutral-muted focus:outline-none focus:ring-2 focus:ring-primary/50">
+              <Button variant="outline" className="w-full flex items-center justify-between">
                 <span>
                   {tabs.find((t) => t.id === status)?.label || "Filtrar"}
                 </span>

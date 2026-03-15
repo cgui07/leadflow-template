@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "./Button";
 
 interface DropdownItem {
   label: string;
@@ -49,7 +50,9 @@ export function Dropdown({
 
   return (
     <div className={cn("relative inline-block", className)} ref={ref}>
-      <div onClick={() => setOpen(!open)}>{trigger}</div>
+      <div onClick={() => setOpen(!open)}>
+        {trigger}
+      </div>
 
       {open && (
         <div
@@ -64,26 +67,25 @@ export function Dropdown({
             }
 
             return (
-              <button
+              <Button
                 key={i}
+                type="button"
+                variant="ghost"
                 disabled={item.disabled}
                 onClick={() => {
                   item.onClick();
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex items-center gap-2 w-full px-3 py-2 text-sm text-left transition-colors",
+                  "w-full justify-start px-3 py-2 text-sm font-normal h-auto",
                   item.danger
                     ? "text-red-600 hover:bg-red-50"
-                    : "text-slate-700 hover:bg-slate-50",
-                  item.disabled && "opacity-50 cursor-not-allowed",
+                    : "text-slate-700 hover:bg-slate-50"
                 )}
+                icon={item.icon ? <span className="shrink-0 w-4 h-4">{item.icon}</span> : undefined}
               >
-                {item.icon && (
-                  <span className="shrink-0 w-4 h-4">{item.icon}</span>
-                )}
                 {item.label}
-              </button>
+              </Button>
             );
           })}
         </div>

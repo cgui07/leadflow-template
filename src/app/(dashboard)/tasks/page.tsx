@@ -127,9 +127,13 @@ export default function TasksPage() {
               return (
                 <div key={task.id} className={`flex items-center gap-3 rounded-lg border p-3 ${isOverdue ? "border-red-blush bg-red-pale" : "border-neutral-border"}`}>
                   {task.status === "pending" && (
-                    <button onClick={() => completeTask(task.id)} className="text-neutral-muted hover:text-success transition">
-                      <CheckCircle size={20} />
-                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => completeTask(task.id)}
+                      icon={<CheckCircle size={20} />}
+                      className="h-auto p-0"
+                    />
                   )}
                   {task.status === "completed" && (
                     <CheckCircle size={20} className="text-success" />
@@ -153,9 +157,13 @@ export default function TasksPage() {
                       )}
                     </div>
                   </div>
-                  <button onClick={() => deleteTask(task.id)} className="text-neutral-line hover:text-danger transition">
-                    <Trash2 size={16} />
-                  </button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteTask(task.id)}
+                    icon={<Trash2 size={16} />}
+                    className="h-auto p-0 text-neutral-line hover:text-danger"
+                  />
                 </div>
               );
             })}

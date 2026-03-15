@@ -3,6 +3,7 @@
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { Button } from "@/components/ui/Button";
 
 const priorityLeads = [
   {
@@ -110,17 +111,14 @@ export function LandingPage() {
             </div>
 
             {/* Mobile hamburger */}
-            <button
+            <Button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-600 backdrop-blur transition hover:bg-white sm:hidden"
+              variant="outline"
+              size="sm"
+              icon={menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
               aria-label="Menu"
-            >
-              {menuOpen ? (
-                <X className="h-4 w-4" />
-              ) : (
-                <Menu className="h-4 w-4" />
-              )}
-            </button>
+              className="sm:hidden"
+            />
           </div>
 
           {/* Mobile dropdown */}

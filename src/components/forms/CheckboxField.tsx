@@ -3,6 +3,7 @@
 import { forwardRef, useId } from "react";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 type CheckboxVariant = "checkbox" | "switch";
 
@@ -45,7 +46,7 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
     if (variant === "switch") {
       return (
         <div className={cn("flex items-start gap-3", className)}>
-          <button
+          <Button
             ref={ref}
             type="button"
             role="switch"
@@ -53,8 +54,9 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
             aria-checked={checked}
             disabled={disabled}
             onClick={handleToggle}
+            variant="ghost"
             className={cn(
-              "relative inline-flex h-5 w-9 flex-shrink-0 rounded-full transition-colors",
+              "relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors p-0",
               "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               checked ? "bg-primary" : "bg-slate-300"
@@ -66,7 +68,7 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
                 checked ? "translate-x-[18px]" : "translate-x-0.5"
               )}
             />
-          </button>
+          </Button>
           {(label || description) && (
             <div>
               {label && (
@@ -90,7 +92,7 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
 
     return (
       <div className={cn("flex items-start gap-3", className)}>
-        <button
+        <Button
           ref={ref}
           type="button"
           role="checkbox"
@@ -98,17 +100,17 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
           aria-checked={checked}
           disabled={disabled}
           onClick={handleToggle}
+          variant="ghost"
           className={cn(
-            "flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border transition-colors mt-0.5",
+            "flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors mt-0.5 p-0",
             "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             checked
               ? "bg-primary border-primary text-white"
               : "border-slate-300 bg-white"
           )}
-        >
-          {checked && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
-        </button>
+          icon={checked ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : undefined}
+        />
         {(label || description) && (
           <div>
             {label && (

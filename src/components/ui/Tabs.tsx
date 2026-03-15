@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "./Button";
 
 interface Tab {
   key?: string;
@@ -41,33 +42,38 @@ export function Tabs({
   return (
     <div className={className}>
       <div className="flex border-b border-slate-200">
-        {tabs.map((tab) => (
-          <button
-            key={getKey(tab)}
-            onClick={() => handleChange(getKey(tab))}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px",
-              active === getKey(tab)
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
-            )}
-          >
-            {tab.icon}
-            {tab.label}
-            {tab.count !== undefined && (
-              <span
-                className={cn(
-                  "px-1.5 py-0.5 text-xs rounded-full",
-                  active === getKey(tab)
-                    ? "bg-blue-100 text-blue-600"
-                    : "bg-slate-100 text-slate-500"
-                )}
-              >
-                {tab.count}
-              </span>
-            )}
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const isActive = active === getKey(tab);
+          return (
+            <Button
+              key={getKey(tab)}
+              type="button"
+              variant="ghost"
+              onClick={() => handleChange(getKey(tab))}
+              className={cn(
+                "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px h-auto gap-2",
+                isActive
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+              )}
+              icon={tab.icon}
+              iconRight={tab.count !== undefined && (
+                <span
+                  className={cn(
+                    "px-1.5 py-0.5 text-xs rounded-full",
+                    isActive
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-slate-100 text-slate-500"
+                  )}
+                >
+                  {tab.count}
+                </span>
+              )}
+            >
+              {tab.label}
+            </Button>
+          );
+        })}
       </div>
       {children && <div className="pt-4">{children(active)}</div>}
     </div>

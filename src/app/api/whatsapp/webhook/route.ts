@@ -16,6 +16,19 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
+    // Validate webhook token if the instance has one configured
+    const instanceName = body.instance || body.instanceName;
+    if (instanceName) {
+      const token = req.headers.get("x-webhook-token") || req.nextUrl.searchParams.get("token");
+      const settings = await prisma.userSettings.findFirst({
+        where: { whatsappPhoneId: instanceName },
+        select: { whatsappWebhookToken: true },
+      });
+      if (settings?.whatsappWebhookToken && settings.whatsappWebhookToken !== token) {
+        return NextResponse.json({ error: "Invalid webhook token" }, { status: 401 });
+      }
+    }
+
     // Evolution API webhook format
     const event = body.event;
     const data = body.data;
@@ -48,8 +61,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // Instance name = whatsappPhoneId in our settings
-    const instanceName = body.instance || body.instanceName;
+    // Instance name = whatsappPhoneId in our settings (already extracted above)
     if (!instanceName) {
       return NextResponse.json({ ok: true });
     }
@@ -74,9 +86,24 @@ export async function POST(req: NextRequest) {
       textContent = data.message.conversation;
     } else if (data.message?.extendedTextMessage?.text) {
       textContent = data.message.extendedTextMessage.text;
+    } else if (data.message?.audioMessage) {
+      textContent = "[Áudio recebido]";
+    } else if (data.message?.imageMessage) {
+      textContent = data.message.imageMessage.caption || "[Imagem recebida]";
+    } else if (data.message?.videoMessage) {
+      textContent = data.message.videoMessage.caption || "[Vídeo recebido]";
+    } else if (data.message?.documentMessage) {
+      const fileName = data.message.documentMessage.fileName || "documento";
+      textContent = `[Documento recebido: ${fileName}]`;
+    } else if (data.message?.stickerMessage) {
+      textContent = "[Sticker recebido]";
+    } else if (data.message?.contactMessage) {
+      textContent = "[Contato recebido]";
+    } else if (data.message?.locationMessage) {
+      textContent = "[Localização recebida]";
     }
 
-    // Skip non-text messages for now
+    // Skip completely unrecognized message types
     if (!textContent) {
       return NextResponse.json({ ok: true });
     }

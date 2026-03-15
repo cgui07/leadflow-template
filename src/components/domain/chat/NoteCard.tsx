@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { StickyNote, Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface NoteCardProps {
   content: string;
@@ -34,20 +35,20 @@ export function NoteCard({
         {(onEdit || onDelete) && (
           <div className="flex items-center gap-1">
             {onEdit && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={onEdit}
-                className="p-1 rounded text-amber-400 hover:text-amber-600 transition-colors"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
+                icon={<Pencil className="h-3.5 w-3.5" />}
+              />
             )}
             {onDelete && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={onDelete}
-                className="p-1 rounded text-amber-400 hover:text-red-500 transition-colors"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+                icon={<Trash2 className="h-3.5 w-3.5" />}
+              />
             )}
           </div>
         )}

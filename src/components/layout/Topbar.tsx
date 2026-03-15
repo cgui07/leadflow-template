@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Search, Bell } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface TopbarProps {
   title?: string;
@@ -35,10 +36,9 @@ export function Topbar({ title, actions, className }: TopbarProps) {
         </div>
 
         {/* Notifications */}
-        <button className="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors">
-          <Bell className="h-5 w-5" />
+        <Button variant="ghost" size="sm" icon={<Bell className="h-5 w-5" />} className="relative">
           <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full" />
-        </button>
+        </Button>
 
         {/* Actions */}
         {actions}

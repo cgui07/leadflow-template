@@ -1,14 +1,21 @@
 "use client";
 
+import { TextField } from "@/components/forms";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingState } from "@/components/ui/LoadingState";
-import { TextField } from "@/components/forms";
 import { useFetch } from "@/lib/hooks";
 import { getScoreBadgeClass } from "@/lib/ui-colors";
-import { ArrowLeft, Bot, MessageSquare, Search, Send, User } from "lucide-react";
+import {
+  ArrowLeft,
+  Bot,
+  MessageSquare,
+  Search,
+  Send,
+  User,
+} from "lucide-react";
 import { useState } from "react";
 
 interface ConversationItem {
@@ -81,12 +88,10 @@ export default function ConversationsPage() {
 
   async function toggleBotMode(convId: string, currentStatus: string) {
     const newStatus = currentStatus === "bot" ? "human" : "bot";
-    await fetch(`/api/conversations/${convId}/messages`, {
-      method: "POST",
+    await fetch(`/api/conversations/${convId}`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        content: `[Sistema: modo alterado para ${newStatus === "bot" ? "automático" : "manual"}]`,
-      }),
+      body: JSON.stringify({ status: newStatus }),
     });
     refetch();
   }
@@ -112,10 +117,11 @@ export default function ConversationsPage() {
           </div>
         ) : (
           conversations.map((conv) => (
-            <button
+            <Button
               key={conv.id}
               onClick={() => setSelected(conv.id)}
-              className={`w-full flex items-start gap-3 p-3 text-left border-b border-gray-ghost transition hover:bg-gray-ghost ${
+              variant="ghost"
+              className={`w-full justify-start px-3 py-3 text-left border-b border-gray-ghost h-auto ${
                 selected === conv.id ? "bg-blue-pale" : ""
               }`}
             >
@@ -149,14 +155,14 @@ export default function ConversationsPage() {
                   </Badge>
                   <span className="text-[10px] text-neutral-muted">
                     {conv.lastMessageAt &&
-                      new Date(conv.lastMessageAt).toLocaleTimeString(
-                        "pt-BR",
-                        { hour: "2-digit", minute: "2-digit" },
-                      )}
+                      new Date(conv.lastMessageAt).toLocaleTimeString("pt-BR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                   </span>
                 </div>
               </div>
-            </button>
+            </Button>
           ))
         )}
       </div>
@@ -168,14 +174,14 @@ export default function ConversationsPage() {
     <div className="flex flex-col h-full">
       {/* Chat header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-neutral-border gap-2 sm:px-4">
-        {/* Back button (mobile only) */}
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setSelected(null)}
-          className="shrink-0 flex h-8 w-8 items-center justify-center rounded-lg text-neutral-muted hover:bg-gray-ghost transition md:hidden"
+          icon={<ArrowLeft size={18} />}
           aria-label="Voltar"
-        >
-          <ArrowLeft size={18} />
-        </button>
+          className="md:hidden"
+        />
 
         <div className="flex items-center gap-2 min-w-0 flex-1 sm:gap-3">
           <div className="h-8 w-8 rounded-full bg-neutral-border flex items-center justify-center text-xs font-bold shrink-0 sm:h-9 sm:w-9 sm:text-sm">
@@ -198,9 +204,7 @@ export default function ConversationsPage() {
             Score: {selectedConv.lead.score}
           </span>
           <Button
-            variant={
-              selectedConv.status === "bot" ? "outline" : "secondary"
-            }
+            variant={selectedConv.status === "bot" ? "outline" : "secondary"}
             size="sm"
             icon={
               selectedConv.status === "bot" ? (
@@ -209,9 +213,7 @@ export default function ConversationsPage() {
                 <Bot size={14} />
               )
             }
-            onClick={() =>
-              toggleBotMode(selectedConv.id, selectedConv.status)
-            }
+            onClick={() => toggleBotMode(selectedConv.id, selectedConv.status)}
           >
             <span className="hidden sm:inline">
               {selectedConv.status === "bot" ? "Assumir" : "Bot"}
@@ -297,9 +299,7 @@ export default function ConversationsPage() {
         <div className="w-80 shrink-0 border-r border-neutral-border">
           {conversationList}
         </div>
-        <div className="flex-1 flex flex-col">
-          {chatPanel}
-        </div>
+        <div className="flex-1 flex flex-col">{chatPanel}</div>
       </div>
 
       {/* ── Mobile: full-screen swap ── */}
