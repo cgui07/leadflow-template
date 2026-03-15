@@ -245,7 +245,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                     placeholder="Ex: 5511999999999"
                   />
                   <Button onClick={savePhone} loading={savingPhone} disabled={!phoneInput.trim() || phoneInput.trim() === lead.phone}>
-                    Salvar telefone
+                    Salvar
                   </Button>
                 </div>
                 <div className="mt-2 text-xs text-neutral-muted">

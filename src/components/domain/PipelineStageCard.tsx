@@ -21,14 +21,14 @@ export function PipelineStageCard({
   return (
     <div
       className={cn(
-        "flex flex-col bg-neutral-surface rounded-xl min-w-[280px] w-[300px] flex-shrink-0",
+        "flex flex-col bg-neutral-surface rounded-xl min-w-70 w-75 shrink-0",
         className
       )}
     >
       <div className="px-4 py-3 border-b border-neutral-border">
         <div className="flex items-center gap-2">
           <div
-            className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+            className="h-2.5 w-2.5 rounded-full shrink-0"
             style={{ backgroundColor: stage.color }}
           />
           <div className="text-sm font-semibold text-neutral-ink truncate">
@@ -40,7 +40,7 @@ export function PipelineStageCard({
         </div>
         <div className="text-xs text-neutral mt-1">{formattedValue}</div>
       </div>
-      <div className="flex-1 p-2 space-y-2 overflow-y-auto min-h-[200px] max-h-[calc(100vh-280px)]">
+      <div className="flex-1 p-2 space-y-2 overflow-y-auto min-h-50 max-h-[calc(100vh-280px)]">
         {children}
       </div>
     </div>
