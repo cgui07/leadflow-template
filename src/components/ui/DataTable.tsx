@@ -75,7 +75,7 @@ export function DataTable<T>({
                 <div className="flex items-center gap-1">
                   {col.label}
                   {col.sortable && (
-                    <span className="text-slate-300">
+                    <div className="text-slate-300">
                       {sortKey === String(col.key) ? (
                         sortDir === "asc" ? (
                           <ArrowUp className="h-3.5 w-3.5" />
@@ -85,7 +85,7 @@ export function DataTable<T>({
                       ) : (
                         <ArrowUpDown className="h-3.5 w-3.5" />
                       )}
-                    </span>
+                    </div>
                   )}
                 </div>
               </th>

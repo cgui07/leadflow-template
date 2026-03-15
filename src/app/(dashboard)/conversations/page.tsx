@@ -98,7 +98,6 @@ export default function ConversationsPage() {
 
   if (loading) return <LoadingState variant="skeleton" />;
 
-  // ── Conversation list (shared between mobile & desktop) ──
   const conversationList = (
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-neutral-border">
@@ -109,7 +108,6 @@ export default function ConversationsPage() {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-
       <div className="flex-1 overflow-y-auto">
         {!conversations?.length ? (
           <div className="p-6 text-center text-sm text-neutral-muted">
@@ -130,18 +128,18 @@ export default function ConversationsPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-neutral-ink truncate">
+                  <div className="text-sm font-semibold text-neutral-ink truncate">
                     {conv.lead.name}
-                  </p>
+                  </div>
                   {conv.unreadCount > 0 && (
-                    <span className="bg-primary text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    <div className="bg-primary text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
                       {conv.unreadCount}
-                    </span>
+                    </div>
                   )}
                 </div>
-                <p className="text-xs text-neutral-muted truncate mt-0.5">
+                <div className="text-xs text-neutral-muted truncate mt-0.5">
                   {conv.messages[0]?.content || "Sem mensagens"}
-                </p>
+                </div>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge
                     variant={conv.status === "bot" ? "purple" : "default"}
@@ -153,13 +151,13 @@ export default function ConversationsPage() {
                         ? "Manual"
                         : conv.status}
                   </Badge>
-                  <span className="text-[10px] text-neutral-muted">
+                  <div className="text-[10px] text-neutral-muted">
                     {conv.lastMessageAt &&
                       new Date(conv.lastMessageAt).toLocaleTimeString("pt-BR", {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
-                  </span>
+                  </div>
                 </div>
               </div>
             </Button>
@@ -169,10 +167,8 @@ export default function ConversationsPage() {
     </div>
   );
 
-  // ── Chat panel ──
   const chatPanel = selectedConv ? (
     <div className="flex flex-col h-full">
-      {/* Chat header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-neutral-border gap-2 sm:px-4">
         <Button
           variant="ghost"
@@ -182,27 +178,25 @@ export default function ConversationsPage() {
           aria-label="Voltar"
           className="md:hidden"
         />
-
         <div className="flex items-center gap-2 min-w-0 flex-1 sm:gap-3">
           <div className="h-8 w-8 rounded-full bg-neutral-border flex items-center justify-center text-xs font-bold shrink-0 sm:h-9 sm:w-9 sm:text-sm">
             {selectedConv.lead.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold truncate">
+            <div className="text-sm font-semibold truncate">
               {selectedConv.lead.name}
-            </p>
-            <p className="text-xs text-neutral-muted truncate hidden sm:block">
+            </div>
+            <div className="text-xs text-neutral-muted truncate hidden sm:block">
               {selectedConv.lead.phone}
-            </p>
+            </div>
           </div>
         </div>
-
         <div className="flex items-center gap-1.5 shrink-0 sm:gap-2">
-          <span
+          <div
             className={`hidden rounded-full px-2 py-1 text-xs font-medium sm:inline-flex ${getScoreBadgeClass(selectedConv.lead.score)}`}
           >
             Score: {selectedConv.lead.score}
-          </span>
+          </div>
           <Button
             variant={selectedConv.status === "bot" ? "outline" : "secondary"}
             size="sm"
@@ -215,14 +209,12 @@ export default function ConversationsPage() {
             }
             onClick={() => toggleBotMode(selectedConv.id, selectedConv.status)}
           >
-            <span className="hidden sm:inline">
+            <div className="hidden sm:inline">
               {selectedConv.status === "bot" ? "Assumir" : "Bot"}
-            </span>
+            </div>
           </Button>
         </div>
       </div>
-
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2 sm:p-4 sm:space-y-3">
         {(messages || [])
           .slice()
@@ -241,26 +233,24 @@ export default function ConversationsPage() {
                     : "bg-gray-ghost text-neutral-ink"
                 }`}
               >
-                <p className="text-[10px] font-semibold opacity-70 mb-0.5">
+                <div className="text-[10px] font-semibold opacity-70 mb-0.5">
                   {msg.sender === "bot"
                     ? "Bot"
                     : msg.sender === "agent"
                       ? "Você"
                       : "Cliente"}
-                </p>
-                <p>{msg.content}</p>
-                <p className="text-[10px] opacity-50 mt-1">
+                </div>
+                <div>{msg.content}</div>
+                <div className="text-[10px] opacity-50 mt-1">
                   {new Date(msg.createdAt).toLocaleTimeString("pt-BR", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
-                </p>
+                </div>
               </div>
             </div>
           ))}
       </div>
-
-      {/* Input */}
       <form
         onSubmit={handleSend}
         className="border-t border-neutral-border p-2 flex gap-2 sm:p-3"
@@ -275,7 +265,7 @@ export default function ConversationsPage() {
           loading={sending}
           icon={<Send className="h-4 w-4" />}
         >
-          <span className="hidden sm:inline">Enviar</span>
+          <div className="hidden sm:inline">Enviar</div>
         </Button>
       </form>
     </div>
@@ -294,15 +284,12 @@ export default function ConversationsPage() {
       title="Conversas"
       subtitle="Gerencie suas conversas do WhatsApp"
     >
-      {/* ── Desktop: side-by-side ── */}
       <div className="hidden h-[calc(100vh-13rem)] rounded-xl border border-neutral-border bg-white overflow-hidden md:flex">
         <div className="w-80 shrink-0 border-r border-neutral-border">
           {conversationList}
         </div>
         <div className="flex-1 flex flex-col">{chatPanel}</div>
       </div>
-
-      {/* ── Mobile: full-screen swap ── */}
       <div className="md:hidden">
         {!selected ? (
           <div className="h-[calc(100vh-13rem)] rounded-xl border border-neutral-border bg-white overflow-hidden">

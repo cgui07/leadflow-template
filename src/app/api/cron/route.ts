@@ -3,8 +3,6 @@ import { processEscalations } from "@/lib/alerts";
 import { json, error } from "@/lib/api";
 import { NextRequest } from "next/server";
 
-// Unified cron endpoint — call via Vercel Cron, external scheduler, or manually
-// Runs: follow-ups + escalation rules + auto-close
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
@@ -30,7 +28,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Also support GET for Vercel Cron (which sends GET requests)
 export async function GET(req: NextRequest) {
   return POST(req);
 }

@@ -65,13 +65,11 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
         className={fullWidth ? "w-full" : undefined}
       >
         <div className="relative">
-          {/* Left icon / prefix */}
           {hasPrefix && (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center text-slate-400 pointer-events-none">
               {icon ?? prefix}
             </div>
           )}
-
           <input
             ref={ref}
             id={fieldId}
@@ -92,8 +90,6 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
             )}
             {...props}
           />
-
-          {/* Right suffix / loading */}
           {hasSuffix && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-slate-400">
               {loading ? (

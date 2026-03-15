@@ -88,20 +88,18 @@ export function InteractionLogItem({
       >
         {config.icon}
       </div>
-
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-900">{title}</p>
+        <div className="text-sm font-medium text-slate-900">{title}</div>
         {description && (
-          <p className="text-xs text-slate-500 mt-0.5 truncate">
+          <div className="text-xs text-slate-500 mt-0.5 truncate">
             {description}
-          </p>
+          </div>
         )}
       </div>
-
       <div className="text-right flex-shrink-0">
-        <p className="text-xs text-slate-400">{timestamp}</p>
+        <div className="text-xs text-slate-400">{timestamp}</div>
         {duration && (
-          <p className="text-xs text-slate-400 mt-0.5">{duration}</p>
+          <div className="text-xs text-slate-400 mt-0.5">{duration}</div>
         )}
       </div>
     </div>

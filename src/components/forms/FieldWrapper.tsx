@@ -29,15 +29,15 @@ export function FieldWrapper({
           className="block text-sm font-medium text-slate-700"
         >
           {label}
-          {required && <span className="text-red-500 ml-0.5">*</span>}
+          {required && <div className="inline text-red-500 ml-0.5">*</div>}
         </label>
       )}
       {description && (
-        <p className="text-xs text-slate-500">{description}</p>
+        <div className="text-xs text-slate-500">{description}</div>
       )}
       {children}
-      {error && <p className="text-xs text-red-500">{error}</p>}
-      {!error && hint && <p className="text-xs text-slate-400">{hint}</p>}
+      {error && <div className="text-xs text-red-500">{error}</div>}
+      {!error && hint && <div className="text-xs text-slate-400">{hint}</div>}
     </div>
   );
 }

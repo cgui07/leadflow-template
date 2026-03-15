@@ -61,13 +61,10 @@ export function Drawer({
 
   return (
     <div className="fixed inset-0 z-50 flex">
-      {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/50 transition-opacity"
         onClick={onClose}
       />
-
-      {/* Panel */}
       <div
         className={cn(
           "relative ml-auto flex h-full w-full flex-col bg-white shadow-xl",
@@ -76,17 +73,16 @@ export function Drawer({
           className
         )}
       >
-        {/* Header */}
         {(title || description) && (
           <div className="flex items-start justify-between px-6 py-4 border-b border-slate-200">
             <div>
               {title && (
-                <h2 className="text-lg font-semibold text-slate-900">
+                <div className="text-lg font-semibold text-slate-900">
                   {title}
-                </h2>
+                </div>
               )}
               {description && (
-                <p className="mt-1 text-sm text-slate-500">{description}</p>
+                <div className="mt-1 text-sm text-slate-500">{description}</div>
               )}
             </div>
             <Button
@@ -97,11 +93,7 @@ export function Drawer({
             />
           </div>
         )}
-
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-6">{children}</div>
-
-        {/* Footer */}
         {footer && (
           <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-200">
             {footer}

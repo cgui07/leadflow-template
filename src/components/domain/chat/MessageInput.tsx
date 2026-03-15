@@ -53,7 +53,6 @@ export function MessageInput({
           icon={<Paperclip className="h-5 w-5" />}
         />
       )}
-
       <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
@@ -69,7 +68,6 @@ export function MessageInput({
           "max-h-32"
         )}
       />
-
       <Button
         onClick={handleSend}
         disabled={disabled || !message.trim()}

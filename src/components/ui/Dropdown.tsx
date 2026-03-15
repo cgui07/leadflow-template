@@ -53,7 +53,6 @@ export function Dropdown({
       <div onClick={() => setOpen(!open)}>
         {trigger}
       </div>
-
       {open && (
         <div
           className={cn(
@@ -82,7 +81,7 @@ export function Dropdown({
                     ? "text-red-600 hover:bg-red-50"
                     : "text-slate-700 hover:bg-slate-50"
                 )}
-                icon={item.icon ? <span className="shrink-0 w-4 h-4">{item.icon}</span> : undefined}
+                icon={item.icon ? <div className="shrink-0 w-4 h-4">{item.icon}</div> : undefined}
               >
                 {item.label}
               </Button>

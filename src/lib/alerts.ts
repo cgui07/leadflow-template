@@ -1,8 +1,7 @@
 import { prisma } from "./db";
 
-// Check if a lead just became "hot" and create alert task + activity
 export async function checkHotLeadAlert(leadId: string, previousScore: number, newScore: number) {
-  // Only alert when crossing the threshold upward
+
   if (previousScore < 70 && newScore >= 70) {
     const lead = await prisma.lead.findUnique({
       where: { id: leadId },
@@ -10,7 +9,6 @@ export async function checkHotLeadAlert(leadId: string, previousScore: number, n
     });
     if (!lead) return;
 
-    // Create urgent task for the agent
     await prisma.task.create({
       data: {
         userId: lead.userId,
@@ -18,11 +16,10 @@ export async function checkHotLeadAlert(leadId: string, previousScore: number, n
         type: "call",
         title: `Lead quente: ${lead.name} (score ${newScore})`,
         description: `O lead ${lead.name} (${lead.phone}) atingiu score ${newScore}/100. Recomendado entrar em contato imediatamente.`,
-        dueAt: new Date(), // Due now
+        dueAt: new Date(),
       },
     });
 
-    // Log activity
     await prisma.activity.create({
       data: {
         userId: lead.userId,
@@ -36,12 +33,10 @@ export async function checkHotLeadAlert(leadId: string, previousScore: number, n
   }
 }
 
-// Check for stale leads and create escalation tasks
 export async function processEscalations() {
   const now = new Date();
   const results = [];
 
-  // Rule 1: Leads sem resposta há 48h com score >= 40 → criar tarefa urgente
   const twoDaysAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
   const staleQualified = await prisma.lead.findMany({
     where: {
@@ -78,7 +73,6 @@ export async function processEscalations() {
     results.push({ leadId: lead.id, rule: "stale_48h" });
   }
 
-  // Rule 2: Leads "new" há mais de 7 dias sem nenhuma interação → marcar como perdido
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const abandonedNew = await prisma.lead.findMany({
     where: {
@@ -109,7 +103,6 @@ export async function processEscalations() {
     results.push({ leadId: lead.id, rule: "auto_close_7d" });
   }
 
-  // Rule 3: Leads "contacted" há mais de 14 dias sem avanço → marcar como perdido
   const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
   const staleContacted = await prisma.lead.findMany({
     where: {
@@ -139,7 +132,6 @@ export async function processEscalations() {
     results.push({ leadId: lead.id, rule: "auto_close_14d" });
   }
 
-  // Rule 4: Leads "proposal" há mais de 5 dias → criar lembrete
   const fiveDaysAgo = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
   const staleProposals = await prisma.lead.findMany({
     where: {

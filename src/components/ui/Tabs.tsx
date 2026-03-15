@@ -58,7 +58,7 @@ export function Tabs({
               )}
               icon={tab.icon}
               iconRight={tab.count !== undefined && (
-                <span
+                <div
                   className={cn(
                     "px-1.5 py-0.5 text-xs rounded-full",
                     isActive
@@ -67,7 +67,7 @@ export function Tabs({
                   )}
                 >
                   {tab.count}
-                </span>
+                </div>
               )}
             >
               {tab.label}

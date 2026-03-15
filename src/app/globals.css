@@ -18,7 +18,6 @@ body {
   color: var(--foreground);
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

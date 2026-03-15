@@ -39,7 +39,6 @@ export function MessageBubble({
         className
       )}
     >
-      {/* Avatar (only for received) */}
       {!isSent && (
         <div className="flex-shrink-0 mt-auto">
           {senderAvatar ? (
@@ -55,13 +54,11 @@ export function MessageBubble({
           )}
         </div>
       )}
-
-      {/* Bubble */}
       <div>
         {!isSent && senderName && (
-          <p className="text-xs font-medium text-slate-500 mb-1 ml-1">
+          <div className="text-xs font-medium text-slate-500 mb-1 ml-1">
             {senderName}
-          </p>
+          </div>
         )}
         <div
           className={cn(
@@ -79,7 +76,7 @@ export function MessageBubble({
             isSent ? "justify-end" : "justify-start"
           )}
         >
-          <span className="text-[11px] text-slate-400">{timestamp}</span>
+          <div className="text-[11px] text-slate-400">{timestamp}</div>
           {isSent && status && statusIcons[status]}
         </div>
       </div>

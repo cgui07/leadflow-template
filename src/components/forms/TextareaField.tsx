@@ -66,9 +66,9 @@ export const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>
           {...props}
         />
         {showCount && maxLength && (
-          <p className="text-xs text-slate-400 text-right">
+          <div className="text-xs text-slate-400 text-right">
             {charCount}/{maxLength}
-          </p>
+          </div>
         )}
       </FieldWrapper>
     );

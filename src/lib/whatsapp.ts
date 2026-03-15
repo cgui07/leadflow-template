@@ -1,8 +1,8 @@
 import { prisma } from "./db";
 
 interface WhatsAppConfig {
-  phoneId: string; // Evolution API instance name
-  token: string;   // Evolution API key
+  phoneId: string;
+  token: string;
 }
 
 const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://localhost:8080";
@@ -248,14 +248,12 @@ export async function processIncomingMessage(userId: string, message: {
   timestamp: string;
   pushName?: string;
 }) {
-  // "from" can be "5521...@s.whatsapp.net" or a LID like "123456@lid"
   const remoteJid = message.from;
   const resolvedReplyJid = resolveReplyJid(remoteJid);
   const phone = resolvedReplyJid ? getPhoneIdentity(resolvedReplyJid) : remoteJid;
   const contactName = message.pushName || phone;
   const content = message.text || "";
 
-  // Try to find lead by whatsappChatId (remoteJid) first, then by phone
   let lead = await prisma.lead.findFirst({
     where: { userId, conversation: { whatsappChatId: remoteJid } },
     include: { conversation: true },
@@ -320,7 +318,6 @@ export async function processIncomingMessage(userId: string, message: {
     }
   }
 
-  // Idempotency: skip if this whatsappMsgId was already processed
   if (message.id) {
     const existing = await prisma.message.findFirst({
       where: { conversationId: conversation.id, whatsappMsgId: message.id },

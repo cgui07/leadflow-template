@@ -155,15 +155,13 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
                 className
               )}
             >
-
-              <span className={cn("flex-1 truncate", !hasValue && "text-slate-400")}>
+              <div className={cn("flex-1 truncate", !hasValue && "text-slate-400")}>
                 {multiple
                   ? selectedLabels.length > 0
                     ? selectedLabels.join(", ")
                     : placeholder
                   : selectedLabel ?? placeholder}
-              </span>
-
+              </div>
               <div className="flex items-center gap-1 shrink-0">
                 {loading && <Loader2 className="h-4 w-4 text-slate-400 animate-spin" />}
                 {clearable && hasValue && !loading && (
@@ -184,7 +182,6 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
               </div>
             </Button>
           </div>
-
           {open && (
             <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-auto">
               {searchable && (

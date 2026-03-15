@@ -119,24 +119,20 @@ function ResetPasswordForm() {
           <ArrowLeft className="h-4 w-4" />
           Voltar para login
         </Link>
-
         <div className="rounded-2xl border border-gray-ash bg-white p-8 shadow-sm">
-          {/* Icone */}
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-6">
             <ShieldCheck className="h-7 w-7 text-primary" />
           </div>
-
           <div className="text-center mb-6">
-            <h1 className="text-xl font-bold text-gray-iron">Redefinir senha</h1>
-            <p className="mt-2 text-sm text-gray-smoke">
+            <div className="text-xl font-bold text-gray-iron">Redefinir senha</div>
+            <div className="mt-2 text-sm text-gray-smoke">
               Crie uma nova senha segura para sua conta.
-            </p>
+            </div>
           </div>
-
           {status === "checking" && (
             <div className="flex flex-col items-center gap-3 py-8 text-gray-smoke">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm">Validando seu link...</p>
+              <div className="text-sm">Validando seu link...</div>
             </div>
           )}
 
@@ -145,7 +141,7 @@ function ResetPasswordForm() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-danger/10 mb-4">
                 <AlertTriangle className="h-7 w-7 text-danger" />
               </div>
-              <p className="text-sm text-gray-charcoal mb-4">{error}</p>
+              <div className="text-sm text-gray-charcoal mb-4">{error}</div>
               <Link href="/forgot-password">
                 <Button variant="outline" fullWidth>
                   Solicitar novo link
@@ -164,7 +160,6 @@ function ResetPasswordForm() {
                   {error}
                 </div>
               )}
-
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <TextField
@@ -180,7 +175,6 @@ function ResetPasswordForm() {
                     <PasswordStrengthMeter password={password} />
                   </div>
                 </div>
-
                 <TextField
                   label="Confirmar nova senha"
                   type="password"
@@ -191,7 +185,6 @@ function ResetPasswordForm() {
                   required
                   error={!passwordsMatch ? "As senhas precisam ser iguais." : undefined}
                 />
-
                 <Button
                   type="submit"
                   loading={loading}

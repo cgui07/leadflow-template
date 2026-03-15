@@ -58,13 +58,10 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/50 transition-opacity"
         onClick={onClose}
       />
-
-      {/* Content */}
       <div
         className={cn(
           "relative w-full mx-4 bg-white rounded-xl shadow-xl animate-in fade-in zoom-in-95",
@@ -72,17 +69,16 @@ export function Modal({
           className
         )}
       >
-        {/* Header */}
         {(title || description) && (
           <div className="flex items-start justify-between px-6 pt-6 pb-0">
             <div>
               {title && (
-                <h2 className="text-lg font-semibold text-slate-900">
+                <div className="text-lg font-semibold text-slate-900">
                   {title}
-                </h2>
+                </div>
               )}
               {description && (
-                <p className="mt-1 text-sm text-slate-500">{description}</p>
+                <div className="mt-1 text-sm text-slate-500">{description}</div>
               )}
             </div>
             <Button
@@ -93,11 +89,7 @@ export function Modal({
             />
           </div>
         )}
-
-        {/* Body */}
         <div className="p-6">{children}</div>
-
-        {/* Footer */}
         {footer && (
           <div className="flex items-center justify-end gap-2 px-6 pb-6">
             {footer}

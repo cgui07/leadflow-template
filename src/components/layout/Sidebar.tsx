@@ -107,7 +107,6 @@ export function Sidebar({
 
   return (
     <>
-      {/* ── Desktop Sidebar ── */}
       <aside
         className={cn(
           "hidden h-screen shrink-0 flex-col bg-slate-900 text-white transition-all duration-300 md:flex",
@@ -115,7 +114,7 @@ export function Sidebar({
         )}
       >
         <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
-          {!collapsed && <span className="text-lg font-bold tracking-tight">LeadFlow</span>}
+          {!collapsed && <div className="text-lg font-bold tracking-tight">LeadFlow</div>}
           <Button
             variant="ghost"
             size="sm"
@@ -130,8 +129,7 @@ export function Sidebar({
             }
           />
         </div>
-
-        <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
+        <div className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
           {navItems.map((item) => {
             const isActive =
               item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -149,22 +147,21 @@ export function Sidebar({
                 )}
                 title={collapsed ? item.label : undefined}
               >
-                <span className="shrink-0">{item.icon}</span>
+                <div className="shrink-0">{item.icon}</div>
                 {!collapsed && (
                   <>
-                    <span className="flex-1 text-left">{item.label}</span>
+                    <div className="flex-1 text-left">{item.label}</div>
                     {item.badge !== undefined && item.badge > 0 && (
-                      <span className="min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                      <div className="min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
                         {item.badge}
-                      </span>
+                      </div>
                     )}
                   </>
                 )}
               </Link>
             );
           })}
-        </nav>
-
+        </div>
         <div className="border-t border-slate-800 p-3">
           <Button
             variant="ghost"
@@ -179,16 +176,14 @@ export function Sidebar({
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{userName}</p>
-                <p className="truncate text-xs text-slate-400">{userEmail}</p>
+                <div className="truncate text-sm font-medium">{userName}</div>
+                <div className="truncate text-xs text-slate-400">{userEmail}</div>
               </div>
             )}
           </Button>
         </div>
       </aside>
-
-      {/* ── Mobile Bottom Tab Bar ── */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-lg md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-lg md:hidden">
         <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
           {mobileItems.map((item) => {
             const isActive =
@@ -205,18 +200,16 @@ export function Sidebar({
                     : "text-slate-400 active:text-slate-600"
                 )}
               >
-                <span className="shrink-0">{item.iconMobile}</span>
-                <span className={cn(
+                <div className="shrink-0">{item.iconMobile}</div>
+                <div className={cn(
                   "text-[10px] font-medium leading-tight",
                   isActive && "font-semibold"
                 )}>
                   {item.label}
-                </span>
+                </div>
               </Link>
             );
           })}
-
-          {/* Avatar / Account */}
           <Button
             variant="ghost"
             onClick={() => setShowAccountModal(true)}
@@ -225,15 +218,11 @@ export function Sidebar({
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
               {userName.charAt(0).toUpperCase()}
             </div>
-            <span className="text-[10px] font-medium leading-tight">Conta</span>
+            <div className="text-[10px] font-medium leading-tight">Conta</div>
           </Button>
         </div>
-
-        {/* Safe area for phones with home indicator */}
         <div className="h-[env(safe-area-inset-bottom)]" />
-      </nav>
-
-      {/* ── Account Modal ── */}
+      </div>
       <Modal
         open={showAccountModal}
         onClose={() => {
@@ -249,11 +238,10 @@ export function Sidebar({
               {userName.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-900">{userName}</p>
-              <p className="truncate text-sm text-slate-500">{userEmail}</p>
+              <div className="truncate text-sm font-semibold text-slate-900">{userName}</div>
+              <div className="truncate text-sm text-slate-500">{userEmail}</div>
             </div>
           </div>
-
           <Link
             href="/settings"
             onClick={() => setShowAccountModal(false)}
@@ -262,7 +250,6 @@ export function Sidebar({
             <Settings size={18} />
             Configurações
           </Link>
-
           <Button
             variant="danger"
             fullWidth

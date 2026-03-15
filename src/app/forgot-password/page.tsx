@@ -46,7 +46,6 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-gray-pale via-white to-blue-pale px-4">
       <div className="w-full max-w-md">
-        {/* Voltar */}
         <Link
           href="/login"
           className="mb-8 inline-flex items-center gap-1.5 text-sm text-gray-smoke hover:text-gray-charcoal transition-colors"
@@ -54,20 +53,16 @@ export default function ForgotPasswordPage() {
           <ArrowLeft className="h-4 w-4" />
           Voltar para login
         </Link>
-
         <div className="rounded-2xl border border-gray-ash bg-white p-8 shadow-sm">
-          {/* Icone */}
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-6">
             <KeyRound className="h-7 w-7 text-primary" />
           </div>
-
           <div className="text-center mb-6">
-            <h1 className="text-xl font-bold text-gray-iron">Recuperar senha</h1>
-            <p className="mt-2 text-sm text-gray-smoke">
+            <div className="text-xl font-bold text-gray-iron">Recuperar senha</div>
+            <div className="mt-2 text-sm text-gray-smoke">
               Informe seu email e enviaremos um link para redefinir sua senha.
-            </p>
+            </div>
           </div>
-
           {error && (
             <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-pale border border-red-blush p-3 text-sm text-danger">
               <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -82,7 +77,7 @@ export default function ForgotPasswordPage() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/10 mb-4">
                 <CheckCircle className="h-7 w-7 text-success" />
               </div>
-              <p className="text-sm text-gray-charcoal">{message}</p>
+              <div className="text-sm text-gray-charcoal">{message}</div>
               {previewUrl && (
                 <a
                   href={previewUrl}
@@ -104,7 +99,6 @@ export default function ForgotPasswordPage() {
                 icon={<Mail className="h-4 w-4" />}
                 required
               />
-
               <Button type="submit" loading={loading} fullWidth size="lg">
                 {loading ? "Enviando..." : "Enviar link de recuperacao"}
               </Button>

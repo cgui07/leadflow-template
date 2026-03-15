@@ -14,7 +14,7 @@ export function PasswordStrengthMeter({ password }: PasswordStrengthMeterProps) 
     <div className="space-y-2">
       <div className="flex gap-1.5">
         {Array.from({ length: 5 }).map((_, index) => (
-          <span
+          <div
             key={index}
             className={cn(
               "h-1.5 flex-1 rounded-full bg-slate-200 transition-colors",
@@ -23,10 +23,9 @@ export function PasswordStrengthMeter({ password }: PasswordStrengthMeterProps) 
           />
         ))}
       </div>
-
       <div className="flex items-start justify-between gap-3 text-xs">
-        <span className={cn("font-medium", strength.textClassName)}>{strength.label}</span>
-        <span className="text-right text-slate-500">{strength.hint}</span>
+        <div className={cn("font-medium", strength.textClassName)}>{strength.label}</div>
+        <div className="text-right text-slate-500">{strength.hint}</div>
       </div>
     </div>
   );

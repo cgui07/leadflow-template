@@ -25,24 +25,21 @@ export function PipelineStageCard({
         className
       )}
     >
-      {/* Stage Header */}
       <div className="px-4 py-3 border-b border-slate-200">
         <div className="flex items-center gap-2">
           <div
             className="h-2.5 w-2.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: stage.color }}
           />
-          <h3 className="text-sm font-semibold text-slate-900 truncate">
+          <div className="text-sm font-semibold text-slate-900 truncate">
             {stage.name}
-          </h3>
-          <span className="text-xs font-medium text-slate-400 bg-white px-1.5 py-0.5 rounded-full">
+          </div>
+          <div className="text-xs font-medium text-slate-400 bg-white px-1.5 py-0.5 rounded-full">
             {stage.leadCount}
-          </span>
+          </div>
         </div>
-        <p className="text-xs text-slate-500 mt-1">{formattedValue}</p>
+        <div className="text-xs text-slate-500 mt-1">{formattedValue}</div>
       </div>
-
-      {/* Stage Content (lead cards go here) */}
       <div className="flex-1 p-2 space-y-2 overflow-y-auto min-h-[200px] max-h-[calc(100vh-280px)]">
         {children}
       </div>

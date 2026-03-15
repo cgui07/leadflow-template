@@ -70,7 +70,7 @@ export function LoadingState({
       )}
     >
       <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
-      {label && <p className="text-sm text-slate-500">{label}</p>}
+      {label && <div className="text-sm text-slate-500">{label}</div>}
     </div>
   );
 }

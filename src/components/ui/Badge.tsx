@@ -42,7 +42,7 @@ export function Badge({
   className,
 }: BadgeProps) {
   return (
-    <span
+    <div
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap",
         variantStyles[variant],
@@ -51,9 +51,9 @@ export function Badge({
       )}
     >
       {dot && (
-        <span className={cn("h-1.5 w-1.5 rounded-full", dotColors[variant])} />
+        <div className={cn("h-1.5 w-1.5 rounded-full", dotColors[variant])} />
       )}
       {children}
-    </span>
+    </div>
   );
 }

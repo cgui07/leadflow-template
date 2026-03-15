@@ -159,7 +159,6 @@ export async function qualifyLead(leadId: string, config: AIConfig) {
     },
   });
 
-  // Check if lead became hot → create alert task
   await checkHotLeadAlert(leadId, previousScore, profile.score || 0);
 
   await prisma.activity.create({

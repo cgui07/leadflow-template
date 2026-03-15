@@ -62,7 +62,7 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
               checked ? "bg-primary" : "bg-slate-300"
             )}
           >
-            <span
+            <div
               className={cn(
                 "inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform mt-0.5",
                 checked ? "translate-x-[18px]" : "translate-x-0.5"
@@ -81,9 +81,9 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
                 </label>
               )}
               {description && (
-                <p className="text-xs text-slate-500 mt-0.5">{description}</p>
+                <div className="text-xs text-slate-500 mt-0.5">{description}</div>
               )}
-              {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+              {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
             </div>
           )}
         </div>
@@ -123,9 +123,9 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
               </label>
             )}
             {description && (
-              <p className="text-xs text-slate-500 mt-0.5">{description}</p>
+              <div className="text-xs text-slate-500 mt-0.5">{description}</div>
             )}
-            {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+            {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
           </div>
         )}
       </div>

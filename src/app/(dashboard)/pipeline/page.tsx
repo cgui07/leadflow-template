@@ -57,19 +57,18 @@ export default function PipelinePage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className={`h-3 w-3 rounded-full ${getPipelineColorDotClass(stage.color)}`} />
-                  <h3 className="text-sm font-semibold text-neutral-dark">{stage.name}</h3>
+                  <div className="text-sm font-semibold text-neutral-dark">{stage.name}</div>
                 </div>
-                <span className="text-xs text-neutral-muted bg-white rounded-full px-2 py-0.5">
+                <div className="text-xs text-neutral-muted bg-white rounded-full px-2 py-0.5">
                   {stage.leads.length}
-                </span>
+                </div>
               </div>
               {stage.leads.length > 0 && (
-                <p className="text-xs text-neutral-muted mt-1">
+                <div className="text-xs text-neutral-muted mt-1">
                   R$ {stage.leads.reduce((sum, l) => sum + Number(l.value || 0), 0).toLocaleString("pt-BR")}
-                </p>
+                </div>
               )}
             </div>
-
             <div className="p-2 flex-1 space-y-2 max-h-64 overflow-y-auto md:max-h-[calc(100vh-16rem)]">
               {stage.leads.map((lead) => (
                 <div
@@ -81,23 +80,23 @@ export default function PipelinePage() {
                   <Link href={`/leads/${lead.id}`}>
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="text-sm font-medium text-neutral-ink">{lead.name}</p>
-                        <p className="text-xs text-neutral-muted mt-0.5">{lead.phone}</p>
+                        <div className="text-sm font-medium text-neutral-ink">{lead.name}</div>
+                        <div className="text-xs text-neutral-muted mt-0.5">{lead.phone}</div>
                       </div>
-                      <span className={`rounded-full px-1.5 py-0.5 text-xs font-bold ${getScoreBadgeClass(lead.score)}`}>
+                      <div className={`rounded-full px-1.5 py-0.5 text-xs font-bold ${getScoreBadgeClass(lead.score)}`}>
                         {lead.score}
-                      </span>
+                      </div>
                     </div>
                     {lead.value && (
-                      <p className="text-xs font-medium text-neutral-dark mt-2">
+                      <div className="text-xs font-medium text-neutral-dark mt-2">
                         R$ {Number(lead.value).toLocaleString("pt-BR")}
-                      </p>
+                      </div>
                     )}
                   </Link>
                 </div>
               ))}
               {stage.leads.length === 0 && (
-                <p className="text-center text-xs text-neutral-line py-8">Arraste leads aqui</p>
+                <div className="text-center text-xs text-neutral-line py-8">Arraste leads aqui</div>
               )}
             </div>
           </div>

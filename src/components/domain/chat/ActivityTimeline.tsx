@@ -77,7 +77,6 @@ export function ActivityTimeline({
 
         return (
           <div key={activity.id} className="flex gap-3">
-            {/* Timeline line + icon */}
             <div className="flex flex-col items-center">
               <div
                 className={cn(
@@ -92,25 +91,23 @@ export function ActivityTimeline({
                 <div className="w-px flex-1 bg-slate-200 my-1" />
               )}
             </div>
-
-            {/* Content */}
             <div className={cn("pb-5 min-w-0", isLast && "pb-0")}>
-              <p className="text-sm font-medium text-slate-900">
+              <div className="text-sm font-medium text-slate-900">
                 {activity.title}
-              </p>
+              </div>
               {activity.description && (
-                <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
+                <div className="text-xs text-slate-500 mt-0.5 line-clamp-2">
                   {activity.description}
-                </p>
+                </div>
               )}
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-[11px] text-slate-400">
+                <div className="text-[11px] text-slate-400">
                   {formatTimestamp(activity.timestamp)}
-                </span>
+                </div>
                 {activity.user && (
-                  <span className="text-[11px] text-slate-400">
+                  <div className="text-[11px] text-slate-400">
                     por {activity.user.name}
-                  </span>
+                  </div>
                 )}
               </div>
             </div>

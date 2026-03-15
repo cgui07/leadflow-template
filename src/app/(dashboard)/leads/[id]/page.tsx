@@ -187,22 +187,21 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
               {lead.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-neutral-ink">{lead.name}</h1>
+              <div className="text-xl font-bold text-neutral-ink">{lead.name}</div>
               <div className="flex items-center gap-3 text-sm text-neutral-muted mt-0.5">
-                <span className="flex items-center gap-1"><Phone size={12} />{lead.phone}</span>
-                {lead.email && <span className="flex items-center gap-1"><Mail size={12} />{lead.email}</span>}
+                <div className="flex items-center gap-1"><Phone size={12} />{lead.phone}</div>
+                {lead.email && <div className="flex items-center gap-1"><Mail size={12} />{lead.email}</div>}
               </div>
             </div>
           </div>
         </div>
         <div className="text-right">
-          <p className={`text-3xl font-bold ${scoreColor}`}>{lead.score}<span className="text-sm font-normal text-neutral-muted">/100</span></p>
-          <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[lead.status] || ""}`}>
+          <div className={`text-3xl font-bold ${scoreColor}`}>{lead.score}<div className="inline text-sm font-normal text-neutral-muted">/100</div></div>
+          <div className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[lead.status] || ""}`}>
             {statusOptions.find((s) => s.value === lead.status)?.label}
-          </span>
+          </div>
         </div>
       </div>
-
       <Tabs
         tabs={[
           { id: "profile", label: "Perfil" },
@@ -213,7 +212,6 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
-
       {activeTab === "profile" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SectionContainer title="Perfil do Lead (IA)">
@@ -229,16 +227,15 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             </div>
             {lead.notes && (
               <div className="mt-4 rounded-lg bg-gray-ghost p-3">
-                <p className="text-xs font-medium text-neutral-muted mb-1">Observações da IA</p>
-                <p className="text-sm text-neutral-dark">{lead.notes}</p>
+                <div className="text-xs font-medium text-neutral-muted mb-1">Observações da IA</div>
+                <div className="text-sm text-neutral-dark">{lead.notes}</div>
               </div>
             )}
           </SectionContainer>
-
           <SectionContainer title="Informações">
             <div className="space-y-3 text-sm">
               <div className="rounded-xl border border-warning/30 bg-warning/5 p-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-warning">WhatsApp</p>
+                <div className="text-xs font-semibold uppercase tracking-wide text-warning">WhatsApp</div>
                 <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
                   <TextField
                     label={needsManualPhone ? "Telefone real do contato" : "Telefone do contato"}
@@ -251,25 +248,25 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                     Salvar telefone
                   </Button>
                 </div>
-                <p className="mt-2 text-xs text-neutral-muted">
+                <div className="mt-2 text-xs text-neutral-muted">
                   {needsManualPhone
                     ? "Este contato entrou como @lid na Evolution 1.8. Informe o numero real do WhatsApp para liberar respostas."
                     : "Voce pode salvar so os digitos ou usar o formato 5511999999999@s.whatsapp.net."}
-                </p>
+                </div>
               </div>
-              <div className="flex justify-between"><span className="text-neutral-muted">Fonte</span><span className="font-medium">{lead.source}</span></div>
-              <div className="flex justify-between"><span className="text-neutral-muted">Criado em</span><span className="font-medium">{new Date(lead.createdAt).toLocaleDateString("pt-BR")}</span></div>
-              <div className="flex justify-between"><span className="text-neutral-muted">Último contato</span><span className="font-medium">{lead.lastContactAt ? new Date(lead.lastContactAt).toLocaleDateString("pt-BR") : "—"}</span></div>
-              <div className="flex justify-between"><span className="text-neutral-muted">Próximo follow-up</span><span className="font-medium">{lead.nextFollowUpAt ? new Date(lead.nextFollowUpAt).toLocaleString("pt-BR") : "—"}</span></div>
-              <div className="flex justify-between"><span className="text-neutral-muted">Follow-ups enviados</span><span className="font-medium">{lead.followUpCount}</span></div>
+              <div className="flex justify-between"><div className="text-neutral-muted">Fonte</div><div className="font-medium">{lead.source}</div></div>
+              <div className="flex justify-between"><div className="text-neutral-muted">Criado em</div><div className="font-medium">{new Date(lead.createdAt).toLocaleDateString("pt-BR")}</div></div>
+              <div className="flex justify-between"><div className="text-neutral-muted">Último contato</div><div className="font-medium">{lead.lastContactAt ? new Date(lead.lastContactAt).toLocaleDateString("pt-BR") : "—"}</div></div>
+              <div className="flex justify-between"><div className="text-neutral-muted">Próximo follow-up</div><div className="font-medium">{lead.nextFollowUpAt ? new Date(lead.nextFollowUpAt).toLocaleString("pt-BR") : "—"}</div></div>
+              <div className="flex justify-between"><div className="text-neutral-muted">Follow-ups enviados</div><div className="font-medium">{lead.followUpCount}</div></div>
               {lead.pipelineStage && (
                 <div className="flex justify-between">
-                  <span className="text-neutral-muted">Estágio</span>
-                  <span
+                  <div className="text-neutral-muted">Estágio</div>
+                  <div
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getPipelineColorSoftClass(lead.pipelineStage.color)}`}
                   >
                     {lead.pipelineStage.name}
-                  </span>
+                  </div>
                 </div>
               )}
             </div>
@@ -281,7 +278,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
         <SectionContainer title="Conversa">
           <div className="h-96 overflow-y-auto space-y-3 mb-4">
             {messages.length === 0 ? (
-              <p className="text-center text-sm text-neutral-muted py-12">Nenhuma mensagem ainda</p>
+              <div className="text-center text-sm text-neutral-muted py-12">Nenhuma mensagem ainda</div>
             ) : (
               messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.direction === "outbound" ? "justify-end" : "justify-start"}`}>
@@ -290,13 +287,13 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                       ? "bg-primary text-white"
                       : "bg-gray-ghost text-neutral-ink"
                   }`}>
-                    <p className="text-[10px] font-semibold opacity-70 mb-0.5">
+                    <div className="text-[10px] font-semibold opacity-70 mb-0.5">
                       {msg.sender === "bot" ? "Bot" : msg.sender === "agent" ? "Você" : "Cliente"}
-                    </p>
-                    <p>{msg.content}</p>
-                    <p className="text-[10px] opacity-50 mt-1">
+                    </div>
+                    <div>{msg.content}</div>
+                    <div className="text-[10px] opacity-50 mt-1">
                       {new Date(msg.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                    </p>
+                    </div>
                   </div>
                 </div>
               ))
@@ -316,19 +313,19 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       {activeTab === "activities" && (
         <SectionContainer title="Histórico de Atividades">
           {lead.activities.length === 0 ? (
-            <p className="text-sm text-neutral-muted">Nenhuma atividade registrada</p>
+            <div className="text-sm text-neutral-muted">Nenhuma atividade registrada</div>
           ) : (
             <div className="space-y-3">
               {lead.activities.map((a) => (
                 <div key={a.id} className="flex gap-3 text-sm border-b border-gray-ghost pb-3">
                   <div className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
                   <div className="flex-1">
-                    <p className="font-medium text-neutral-dark">{a.title}</p>
-                    {a.description && <p className="text-neutral-muted text-xs mt-0.5">{a.description}</p>}
+                    <div className="font-medium text-neutral-dark">{a.title}</div>
+                    {a.description && <div className="text-neutral-muted text-xs mt-0.5">{a.description}</div>}
                   </div>
-                  <span className="text-xs text-neutral-muted whitespace-nowrap">
+                  <div className="text-xs text-neutral-muted whitespace-nowrap">
                     {new Date(a.createdAt).toLocaleDateString("pt-BR")}
-                  </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -339,17 +336,17 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       {activeTab === "tasks" && (
         <SectionContainer title="Tarefas Pendentes">
           {lead.tasks.length === 0 ? (
-            <p className="text-sm text-neutral-muted">Nenhuma tarefa pendente</p>
+            <div className="text-sm text-neutral-muted">Nenhuma tarefa pendente</div>
           ) : (
             <div className="space-y-2">
               {lead.tasks.map((t) => (
                 <div key={t.id} className="flex items-center gap-3 rounded-lg border border-neutral-border p-3">
                   <Clock size={16} className="text-neutral-muted" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-neutral-dark">{t.title}</p>
-                    <p className="text-xs text-neutral-muted">
+                    <div className="text-sm font-medium text-neutral-dark">{t.title}</div>
+                    <div className="text-xs text-neutral-muted">
                       {new Date(t.dueAt).toLocaleDateString("pt-BR")} às {new Date(t.dueAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                    </p>
+                    </div>
                   </div>
                   <Badge variant="warning" size="sm">{t.type}</Badge>
                 </div>
@@ -367,9 +364,9 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string
     <div className="rounded-lg bg-gray-ghost p-3">
       <div className="flex items-center gap-1.5 text-neutral-muted mb-1">
         {icon}
-        <span className="text-xs">{label}</span>
+        <div className="text-xs">{label}</div>
       </div>
-      <p className="text-sm font-medium text-neutral-dark">{value || "—"}</p>
+      <div className="text-sm font-medium text-neutral-dark">{value || "—"}</div>
     </div>
   );
 }

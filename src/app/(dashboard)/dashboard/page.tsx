@@ -66,9 +66,9 @@ const columns: Column<DashboardData["recentLeads"][0]>[] = [
     render: (value) => {
       const score = value as number;
       return (
-        <span className={`font-semibold ${getScoreTextClass(score)}`}>
+        <div className={`font-semibold ${getScoreTextClass(score)}`}>
           {score}/100
-        </span>
+        </div>
       );
     },
   },
@@ -124,7 +124,6 @@ export default function DashboardPage() {
           icon={<CheckSquare className="h-5 w-5" />}
         />
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <SectionContainer
           title="Leads Recentes"
@@ -141,7 +140,6 @@ export default function DashboardPage() {
             />
           )}
         </SectionContainer>
-
         <SectionContainer title="Atividade Recente">
           {data?.recentActivities?.length ? (
             <div className="space-y-3">
@@ -149,19 +147,19 @@ export default function DashboardPage() {
                 <div key={activity.id} className="flex gap-3 text-sm">
                   <div className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
                   <div>
-                    <p className="font-medium text-neutral-dark">{activity.title}</p>
+                    <div className="font-medium text-neutral-dark">{activity.title}</div>
                     {activity.description && (
-                      <p className="text-neutral-muted text-xs mt-0.5">{activity.description}</p>
+                      <div className="text-neutral-muted text-xs mt-0.5">{activity.description}</div>
                     )}
                     {activity.lead && (
-                      <p className="text-neutral-muted text-xs mt-0.5">{activity.lead.name}</p>
+                      <div className="text-neutral-muted text-xs mt-0.5">{activity.lead.name}</div>
                     )}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-neutral-muted">Nenhuma atividade recente</p>
+            <div className="text-sm text-neutral-muted">Nenhuma atividade recente</div>
           )}
         </SectionContainer>
       </div>

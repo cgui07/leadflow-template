@@ -39,7 +39,6 @@ export function ConversationHeader({
       )}
     >
       <div className="flex items-center gap-3 min-w-0">
-        {/* Avatar */}
         <div className="relative flex-shrink-0">
           {avatar ? (
             <img
@@ -53,7 +52,7 @@ export function ConversationHeader({
             </div>
           )}
           {status && (
-            <span
+            <div
               className={cn(
                 "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white",
                 statusColors[status]
@@ -61,19 +60,15 @@ export function ConversationHeader({
             />
           )}
         </div>
-
-        {/* Info */}
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-slate-900 truncate">
+          <div className="text-sm font-semibold text-slate-900 truncate">
             {name}
-          </p>
-          <p className="text-xs text-slate-500">
+          </div>
+          <div className="text-xs text-slate-500">
             {subtitle ?? (status ? statusLabels[status] : "")}
-          </p>
+          </div>
         </div>
       </div>
-
-      {/* Actions */}
       <div className="flex items-center gap-1">
         {actions ?? (
           <>

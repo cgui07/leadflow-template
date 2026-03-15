@@ -24,8 +24,8 @@ export function KpiCard({ label, value, icon, trend, className }: KpiCardProps) 
     >
       <div className="flex items-start justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="text-2xl font-bold text-slate-900">{value}</p>
+          <div className="text-sm font-medium text-slate-500">{label}</div>
+          <div className="text-2xl font-bold text-slate-900">{value}</div>
         </div>
         {icon && (
           <div className="p-2.5 bg-blue-50 text-blue-600 rounded-lg">
@@ -40,7 +40,7 @@ export function KpiCard({ label, value, icon, trend, className }: KpiCardProps) 
           ) : (
             <TrendingDown className="h-4 w-4 text-red-500" />
           )}
-          <span
+          <div
             className={cn(
               "text-sm font-medium",
               isPositive ? "text-emerald-600" : "text-red-600"
@@ -48,9 +48,9 @@ export function KpiCard({ label, value, icon, trend, className }: KpiCardProps) 
           >
             {isPositive ? "+" : ""}
             {trend.value}%
-          </span>
+          </div>
           {trend.label && (
-            <span className="text-sm text-slate-400">{trend.label}</span>
+            <div className="text-sm text-slate-400">{trend.label}</div>
           )}
         </div>
       )}

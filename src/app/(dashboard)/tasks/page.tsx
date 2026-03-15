@@ -98,12 +98,11 @@ export default function TasksPage() {
     >
       {overdue.length > 0 && tab === "pending" && (
         <div className="rounded-lg bg-red-pale border border-red-blush p-3">
-          <p className="text-sm font-medium text-danger">
+          <div className="text-sm font-medium text-danger">
             {overdue.length} tarefa(s) atrasada(s)
-          </p>
+          </div>
         </div>
       )}
-
       <Tabs
         tabs={[
           { id: "pending", label: "Pendentes" },
@@ -113,7 +112,6 @@ export default function TasksPage() {
         activeTab={tab}
         onTabChange={setTab}
       />
-
       <SectionContainer>
         {!tasks?.length ? (
           <EmptyState
@@ -139,17 +137,17 @@ export default function TasksPage() {
                     <CheckCircle size={20} className="text-success" />
                   )}
                   <div className="flex-1">
-                    <p className={`text-sm font-medium ${task.status === "completed" ? "text-neutral-muted line-through" : "text-neutral-dark"}`}>
+                    <div className={`text-sm font-medium ${task.status === "completed" ? "text-neutral-muted line-through" : "text-neutral-dark"}`}>
                       {task.title}
-                    </p>
+                    </div>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant={isOverdue ? "error" : "default"} size="sm">
                         {typeLabels[task.type] || task.type}
                       </Badge>
-                      <span className={`text-xs flex items-center gap-1 ${isOverdue ? "text-danger" : "text-neutral-muted"}`}>
+                      <div className={`text-xs flex items-center gap-1 ${isOverdue ? "text-danger" : "text-neutral-muted"}`}>
                         <Clock size={10} />
                         {new Date(task.dueAt).toLocaleDateString("pt-BR")}
-                      </span>
+                      </div>
                       {task.lead && (
                         <Link href={`/leads/${task.lead.id}`} className="text-xs text-primary hover:underline">
                           {task.lead.name}
@@ -170,7 +168,6 @@ export default function TasksPage() {
           </div>
         )}
       </SectionContainer>
-
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Nova Tarefa" size="md">
         <form onSubmit={handleCreate} className="space-y-4">
           <TextField

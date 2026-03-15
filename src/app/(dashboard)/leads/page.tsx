@@ -116,9 +116,9 @@ export default function LeadsPage() {
         const score = value as number;
         const color = getScoreBadgeClass(score);
         return (
-          <span className={`px-2 py-1 rounded-full text-xs font-bold ${color}`}>
+          <div className={`px-2 py-1 rounded-full text-xs font-bold ${color}`}>
             {score}
-          </span>
+          </div>
         );
       },
     },
@@ -141,12 +141,12 @@ export default function LeadsPage() {
       label: "",
       render: (_, row) =>
         row.conversation?.unreadCount ? (
-          <span className="flex items-center gap-1 text-primary">
+          <div className="flex items-center gap-1 text-primary">
             <MessageSquare size={14} />
-            <span className="text-xs font-bold">
+            <div className="text-xs font-bold">
               {row.conversation.unreadCount}
-            </span>
-          </span>
+            </div>
+          </div>
         ) : null,
     },
   ];
@@ -218,9 +218,9 @@ export default function LeadsPage() {
             className="w-full"
             trigger={
               <Button variant="outline" className="w-full flex items-center justify-between">
-                <span>
+                <div>
                   {tabs.find((t) => t.id === status)?.label || "Filtrar"}
-                </span>
+                </div>
                 <ChevronDown className="h-4 w-4 text-neutral-muted shrink-0" />
               </Button>
             }
@@ -234,7 +234,6 @@ export default function LeadsPage() {
           />
         </div>
       </div>
-
       <SectionContainer noPadding>
         {loading ? (
           <LoadingState variant="table" />
@@ -243,9 +242,9 @@ export default function LeadsPage() {
             <DataTable columns={columns} data={data.leads} rowKey="id" />
             {data.pages > 1 && (
               <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-border">
-                <p className="text-sm text-neutral-muted">
+                <div className="text-sm text-neutral-muted">
                   Página {data.page} de {data.pages}
-                </p>
+                </div>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -278,7 +277,6 @@ export default function LeadsPage() {
           />
         )}
       </SectionContainer>
-
       <Modal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}

@@ -29,8 +29,8 @@ export function NoteCard({
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <StickyNote className="h-4 w-4 text-amber-600 flex-shrink-0" />
-          <span className="text-xs font-medium text-amber-700">{author}</span>
-          <span className="text-xs text-amber-500">{timestamp}</span>
+          <div className="text-xs font-medium text-amber-700">{author}</div>
+          <div className="text-xs text-amber-500">{timestamp}</div>
         </div>
         {(onEdit || onDelete) && (
           <div className="flex items-center gap-1">
@@ -53,9 +53,9 @@ export function NoteCard({
           </div>
         )}
       </div>
-      <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+      <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
         {content}
-      </p>
+      </div>
     </div>
   );
 }

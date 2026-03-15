@@ -11,12 +11,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 const INBOUND_MESSAGE_EVENTS = new Set(["messages.upsert", "MESSAGES_UPSERT"]);
 
-// Evolution API sends webhooks as POST
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Validate webhook token if the instance has one configured
     const instanceName = body.instance || body.instanceName;
     if (instanceName) {
       const token = req.headers.get("x-webhook-token") || req.nextUrl.searchParams.get("token");
@@ -29,13 +27,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Evolution API webhook format
     const event = body.event;
     const data = body.data;
     const key = data?.key;
     rememberMapping(data);
 
-    // Only process incoming messages
     if (!INBOUND_MESSAGE_EVENTS.has(event)) {
       return NextResponse.json({ ok: true });
     }
@@ -56,12 +52,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Ignore outgoing messages (fromMe = true)
     if (key?.fromMe) {
       return NextResponse.json({ ok: true });
     }
 
-    // Instance name = whatsappPhoneId in our settings (already extracted above)
     if (!instanceName) {
       return NextResponse.json({ ok: true });
     }
@@ -78,7 +72,6 @@ export async function POST(req: NextRequest) {
 
     const userId = settings.userId;
 
-    // Extract message content from Evolution API format
     const messageType = data.messageType || "conversation";
     let textContent = "";
 
@@ -103,7 +96,6 @@ export async function POST(req: NextRequest) {
       textContent = "[Localização recebida]";
     }
 
-    // Skip completely unrecognized message types
     if (!textContent) {
       return NextResponse.json({ ok: true });
     }

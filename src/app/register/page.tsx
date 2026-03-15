@@ -73,22 +73,19 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Painel esquerdo decorativo */}
       <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-secondary via-primary to-blue-navy items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-10">
           <div className="absolute top-32 right-16 w-80 h-80 rounded-full bg-white blur-3xl" />
           <div className="absolute bottom-16 left-20 w-64 h-64 rounded-full bg-accent blur-3xl" />
         </div>
-
         <div className="relative z-10 max-w-lg text-white">
-          <h2 className="text-4xl font-bold leading-tight tracking-tight">
+          <div className="text-4xl font-bold leading-tight tracking-tight">
             Comece a converter mais leads hoje.
-          </h2>
-          <p className="mt-6 text-lg leading-relaxed text-blue-ice/80">
+          </div>
+          <div className="mt-6 text-lg leading-relaxed text-blue-ice/80">
             Crie sua conta em segundos e tenha acesso a um CRM inteligente
             feito para corretores que querem resultados.
-          </p>
-
+          </div>
           <div className="mt-12 space-y-4">
             <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/20">
@@ -97,8 +94,8 @@ export default function RegisterPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-semibold">Resposta automatica via WhatsApp</p>
-                <p className="text-sm text-blue-ice/60">Nunca deixe um lead sem resposta</p>
+                <div className="font-semibold">Resposta automatica via WhatsApp</div>
+                <div className="text-sm text-blue-ice/60">Nunca deixe um lead sem resposta</div>
               </div>
             </div>
             <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4">
@@ -108,8 +105,8 @@ export default function RegisterPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-semibold">Qualificacao com IA</p>
-                <p className="text-sm text-blue-ice/60">Saiba quem esta pronto para comprar</p>
+                <div className="font-semibold">Qualificacao com IA</div>
+                <div className="text-sm text-blue-ice/60">Saiba quem esta pronto para comprar</div>
               </div>
             </div>
             <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4">
@@ -119,29 +116,26 @@ export default function RegisterPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-semibold">Follow-ups programados</p>
-                <p className="text-sm text-blue-ice/60">Recupere leads frios automaticamente</p>
+                <div className="font-semibold">Follow-ups programados</div>
+                <div className="text-sm text-blue-ice/60">Recupere leads frios automaticamente</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Painel direito - formulario */}
       <div className="flex w-full lg:w-1/2 items-center justify-center bg-white px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-1">
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">LF</span>
+                <div className="text-white font-bold text-sm">LF</div>
               </div>
-              <h1 className="text-xl font-bold text-gray-iron">LeadFlow</h1>
+              <div className="text-xl font-bold text-gray-iron">LeadFlow</div>
             </div>
-            <p className="mt-3 text-sm text-gray-smoke">
+            <div className="mt-3 text-sm text-gray-smoke">
               Crie sua conta e comece a organizar seus leads
-            </p>
+            </div>
           </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="flex items-center gap-2 rounded-lg bg-red-pale border border-red-blush p-3 text-sm text-danger">
@@ -151,7 +145,6 @@ export default function RegisterPage() {
                 {error}
               </div>
             )}
-
             <div className="grid grid-cols-2 gap-3">
               <TextField
                 label="Nome"
@@ -169,7 +162,6 @@ export default function RegisterPage() {
                 placeholder="(11) 99999-9999"
               />
             </div>
-
             <TextField
               label="Email"
               type="email"
@@ -178,7 +170,6 @@ export default function RegisterPage() {
               placeholder="seu@email.com"
               required
             />
-
             <div>
               <TextField
                 label="Senha"
@@ -193,7 +184,6 @@ export default function RegisterPage() {
                 <PasswordStrengthMeter password={form.password} />
               </div>
             </div>
-
             <TextField
               label="Confirmar senha"
               type="password"
@@ -204,18 +194,15 @@ export default function RegisterPage() {
               error={!passwordsMatch ? "As senhas precisam ser iguais." : undefined}
               required
             />
-
             <Button type="submit" loading={loading} fullWidth size="lg" disabled={!passwordsMatch}>
               {loading ? "Criando conta..." : "Criar conta gratis"}
             </Button>
           </form>
-
           <div className="mt-8 flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-ash" />
-            <span className="text-xs text-gray-smoke">ou</span>
+            <div className="text-xs text-gray-smoke">ou</div>
             <div className="h-px flex-1 bg-gray-ash" />
           </div>
-
           <a
             href="/api/auth/google"
             className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-ash bg-white px-4 py-3 text-sm font-medium text-gray-iron shadow-sm transition-colors hover:bg-slate-50"
@@ -240,13 +227,12 @@ export default function RegisterPage() {
             </svg>
             Criar conta com Google
           </a>
-
-          <p className="mt-6 text-center text-sm text-gray-smoke">
+          <div className="mt-6 text-center text-sm text-gray-smoke">
             Ja tem uma conta?{" "}
             <Link href="/login" className="font-semibold text-primary hover:text-blue-royal transition-colors">
               Fazer login
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>
