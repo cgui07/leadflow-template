@@ -9,6 +9,10 @@ import { getScoreTextClass } from "@/lib/ui-colors";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import {
+  ACTION_TYPE_LABELS,
+  type LeadActionType,
+} from "@/lib/lead-action-config";
+import {
   AlertTriangle,
   Bot,
   CheckCircle,
@@ -26,6 +30,21 @@ import {
   ATTENTION_QUEUE_INITIAL_VISIBLE,
   ATTENTION_QUEUE_NO_REPLY_THRESHOLD_HOURS,
 } from "@/lib/attention-queue";
+
+function getOverdueActionLabel(item: AttentionQueueItem) {
+  if (item.overdueActionTitle) {
+    return `Acao: ${item.overdueActionTitle}`;
+  }
+
+  if (
+    item.overdueActionType &&
+    item.overdueActionType in ACTION_TYPE_LABELS
+  ) {
+    return `${ACTION_TYPE_LABELS[item.overdueActionType as LeadActionType]} vencida`;
+  }
+
+  return "Acao vencida";
+}
 
 const reasonConfig: Record<
   AttentionQueueReason,
@@ -57,6 +76,11 @@ const reasonConfig: Record<
     variant: "info",
     icon: <Clock size={10} />,
   },
+  overdue_action: {
+    getLabel: getOverdueActionLabel,
+    variant: "error",
+    icon: <AlertTriangle size={10} />,
+  },
 };
 
 function formatTimeAgo(dateStr: string | null) {
@@ -77,6 +101,13 @@ function formatTimeAgo(dateStr: string | null) {
 function getRelevantStatusText(item: AttentionQueueItem) {
   if (item.reasons.includes("overdue_task") && item.overdueTaskDueAt) {
     return `Tarefa vencida ${formatTimeAgo(item.overdueTaskDueAt)}`;
+  }
+
+  if (
+    item.reasons.includes("overdue_action") &&
+    item.overdueActionScheduledAt
+  ) {
+    return `Acao vencida ${formatTimeAgo(item.overdueActionScheduledAt)}`;
   }
 
   if (item.lastRelevantAt) {
@@ -145,6 +176,11 @@ function QueueItem({ item }: { item: AttentionQueueItem }) {
         {item.overdueTaskTitle && (
           <div className="mt-1 text-xs text-red-dark">
             Tarefa: {item.overdueTaskTitle}
+          </div>
+        )}
+        {item.overdueActionTitle && (
+          <div className="mt-1 text-xs text-red-dark">
+            Acao: {item.overdueActionTitle}
           </div>
         )}
       </div>

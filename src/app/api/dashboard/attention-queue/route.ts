@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { HOT_LEAD_MIN_SCORE } from "@/lib/lead-scoring";
 import { json, requireAuth, handleError } from "@/lib/api";
+import { OPEN_ACTION_STATUSES } from "@/lib/lead-action-config";
 import {
   AttentionQueueItem,
   ATTENTION_QUEUE_NO_REPLY_THRESHOLD_HOURS,
@@ -23,6 +24,14 @@ export async function GET() {
         OR: [
           { score: { gte: HOT_LEAD_MIN_SCORE } },
           { tasks: { some: { status: "pending", dueAt: { lte: now } } } },
+          {
+            leadActions: {
+              some: {
+                status: { in: OPEN_ACTION_STATUSES },
+                scheduledAt: { lte: now },
+              },
+            },
+          },
           { conversation: { isNot: null } },
         ],
       },
@@ -40,6 +49,15 @@ export async function GET() {
           orderBy: { dueAt: "asc" },
           take: 1,
           select: { id: true, title: true, dueAt: true },
+        },
+        leadActions: {
+          where: {
+            status: { in: OPEN_ACTION_STATUSES },
+            scheduledAt: { lte: now },
+          },
+          orderBy: { scheduledAt: "asc" },
+          take: 1,
+          select: { id: true, title: true, type: true, scheduledAt: true },
         },
       },
     });
@@ -120,6 +138,11 @@ export async function GET() {
         reasons.push("overdue_task");
       }
 
+      const overdueAction = lead.leadActions[0] ?? null;
+      if (overdueAction) {
+        reasons.push("overdue_action");
+      }
+
       if (reasons.length === 0) continue;
 
       const priorityRank = getAttentionQueuePriorityRank({
@@ -127,10 +150,12 @@ export async function GET() {
         isHot,
         hasNoReply,
         hasOverdueTask: Boolean(overdueTask),
+        hasOverdueAction: Boolean(overdueAction),
       });
 
       const lastRelevantAt =
         overdueTask?.dueAt ??
+        overdueAction?.scheduledAt ??
         latestInboundAt ??
         conv?.lastMessageAt ??
         null;
@@ -148,6 +173,10 @@ export async function GET() {
         overdueTaskId: overdueTask?.id ?? null,
         overdueTaskTitle: overdueTask?.title ?? null,
         overdueTaskDueAt: overdueTask?.dueAt?.toISOString() ?? null,
+        overdueActionId: overdueAction?.id ?? null,
+        overdueActionTitle: overdueAction?.title ?? null,
+        overdueActionScheduledAt: overdueAction?.scheduledAt?.toISOString() ?? null,
+        overdueActionType: overdueAction?.type ?? null,
         priorityRank,
       });
     }

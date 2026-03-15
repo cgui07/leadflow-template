@@ -8,19 +8,20 @@ datasource db {
 }
 
 model User {
-  id                     String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                     String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                   String
-  email                  String        @unique
-  passwordHash           String?       @map("password_hash")
+  email                  String         @unique
+  passwordHash           String?        @map("password_hash")
   phone                  String?
-  avatarUrl              String?       @map("avatar_url")
-  role                   String        @default("agent")
-  createdAt              DateTime      @default(now()) @map("created_at")
-  updatedAt              DateTime      @updatedAt @map("updated_at")
-  passwordResetTokenHash String?       @unique @map("password_reset_token_hash")
-  passwordResetExpiresAt DateTime?     @map("password_reset_expires_at") @db.Timestamptz(6)
-  googleId               String?       @unique @map("google_id")
+  avatarUrl              String?        @map("avatar_url")
+  role                   String         @default("agent")
+  createdAt              DateTime       @default(now()) @map("created_at")
+  updatedAt              DateTime       @updatedAt @map("updated_at")
+  passwordResetTokenHash String?        @unique @map("password_reset_token_hash")
+  passwordResetExpiresAt DateTime?      @map("password_reset_expires_at") @db.Timestamptz(6)
+  googleId               String?        @unique @map("google_id")
   activities             Activity[]
+  leadActions            LeadAction[]
   leads                  Lead[]
   tasks                  Task[]
   settings               UserSettings?
@@ -74,6 +75,7 @@ model Lead {
   updatedAt       DateTime       @updatedAt @map("updated_at")
   activities      Activity[]
   conversation    Conversation?
+  leadActions     LeadAction[]
   pipelineStage   PipelineStage? @relation(fields: [pipelineStageId], references: [id])
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   tasks           Task[]
@@ -164,4 +166,26 @@ model Task {
   @@index([userId, status, dueAt])
   @@index([leadId])
   @@map("tasks")
+}
+
+model LeadAction {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  leadId      String    @map("lead_id") @db.Uuid
+  type        String    @db.VarChar
+  status      String    @default("pending") @db.VarChar
+  title       String    @db.VarChar
+  notes       String?
+  origin      String    @default("manual") @db.VarChar
+  scheduledAt DateTime? @map("scheduled_at") @db.Timestamptz(6)
+  reminderAt  DateTime? @map("reminder_at") @db.Timestamptz(6)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([leadId, type, status], map: "idx_lead_actions_lead_type_status")
+  @@index([userId, status, scheduledAt], map: "idx_lead_actions_user_status_scheduled")
+  @@map("lead_actions")
 }

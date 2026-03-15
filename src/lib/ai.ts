@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import { checkHotLeadAlert } from "./alerts";
+import { upsertLeadActionFromAI } from "./lead-actions";
 import {
   calculateLeadScore,
   getLeadStatusFromScore,
@@ -267,6 +268,21 @@ export async function qualifyLead(leadId: string, config: AIConfig) {
       },
     },
   });
+
+  // Create structured actions from AI signals (no duplicates)
+  const actionPromises: Promise<unknown>[] = [];
+  if (normalizedProfile.requestedVisit) {
+    actionPromises.push(upsertLeadActionFromAI(lead.userId, lead.id, "visit"));
+  }
+  if (normalizedProfile.requestedProposal) {
+    actionPromises.push(upsertLeadActionFromAI(lead.userId, lead.id, "proposal"));
+  }
+  if (normalizedProfile.requestedFinancing) {
+    actionPromises.push(upsertLeadActionFromAI(lead.userId, lead.id, "financing"));
+  }
+  if (actionPromises.length > 0) {
+    await Promise.all(actionPromises);
+  }
 
   return updated;
 }

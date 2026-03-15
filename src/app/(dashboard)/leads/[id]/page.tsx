@@ -10,6 +10,7 @@ import { useEffect, useState, use } from "react";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { SelectField, TextField } from "@/components/forms";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { LeadActionsSection } from "./components/LeadActionsSection";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import {
   getPipelineColorSoftClass,
@@ -66,6 +67,19 @@ interface LeadDetail {
     type: string;
     status: string;
     dueAt: string;
+  }>;
+  leadActions: Array<{
+    id: string;
+    type: string;
+    status: string;
+    title: string;
+    notes?: string | null;
+    origin: string;
+    scheduledAt?: string | null;
+    reminderAt?: string | null;
+    completedAt?: string | null;
+    createdAt: string;
+    updatedAt: string;
   }>;
 }
 
@@ -205,6 +219,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       <Tabs
         tabs={[
           { id: "profile", label: "Perfil" },
+          { id: "actions", label: "Acoes", count: lead.leadActions.filter((a) => !["completed", "cancelled"].includes(a.status)).length },
           { id: "messages", label: "Mensagens", count: messages.length },
           { id: "activities", label: "Atividades", count: lead.activities.length },
           { id: "tasks", label: "Tarefas", count: lead.tasks.length },
@@ -272,6 +287,14 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           </SectionContainer>
         </div>
+      )}
+
+      {activeTab === "actions" && (
+        <LeadActionsSection
+          leadId={lead.id}
+          actions={lead.leadActions}
+          onRefetch={refetch}
+        />
       )}
 
       {activeTab === "messages" && (
