@@ -10,6 +10,7 @@ import { MessageInput } from "@/components/domain/chat/MessageInput";
 import { ConversationHeader } from "./components/ConversationHeader";
 import { ConversationSidebar } from "./components/ConversationSidebar";
 import { ConversationMessages } from "./components/ConversationMessages";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ConversationSummaryPanel } from "./components/ConversationSummaryPanel";
 import type {
   ConversationItem,
@@ -18,6 +19,9 @@ import type {
 } from "./types";
 
 export default function ConversationsPage() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -39,10 +43,40 @@ export default function ConversationsPage() {
   const { data: messages, refetch: refetchMessages } = useFetch<MessageItem[]>(
     selected ? `/api/conversations/${selected}/messages` : null,
   );
+  const selectedConversationIdFromUrl = searchParams.get("conversationId");
 
   const selectedConversation = conversations?.find(
     (conversation) => conversation.id === selected,
   );
+
+  useEffect(() => {
+    if (!selectedConversationIdFromUrl) {
+      if (selected === null) {
+        return;
+      }
+
+      resetSummaryState();
+      setConversationError(null);
+      setSelected(null);
+      return;
+    }
+
+    if (!conversations?.length) {
+      return;
+    }
+
+    const hasConversationInList = conversations.some((conversation) => {
+      return conversation.id === selectedConversationIdFromUrl;
+    });
+
+    if (!hasConversationInList || selected === selectedConversationIdFromUrl) {
+      return;
+    }
+
+    resetSummaryState();
+    setConversationError(null);
+    setSelected(selectedConversationIdFromUrl);
+  }, [conversations, selected, selectedConversationIdFromUrl]);
 
   useEffect(() => {
     return () => {
@@ -68,16 +102,31 @@ export default function ConversationsPage() {
     return fallback;
   }
 
+  function syncConversationQuery(conversationId: string | null) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (conversationId) {
+      params.set("conversationId", conversationId);
+    } else {
+      params.delete("conversationId");
+    }
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
+
   function handleSelectConversation(conversationId: string) {
     resetSummaryState();
     setConversationError(null);
     setSelected(conversationId);
+    syncConversationQuery(conversationId);
   }
 
   function handleBack() {
     resetSummaryState();
     setConversationError(null);
     setSelected(null);
+    syncConversationQuery(null);
   }
 
   async function handleSendMessage(content: string) {

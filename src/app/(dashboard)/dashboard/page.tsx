@@ -10,6 +10,7 @@ import { getScoreTextClass } from "@/lib/ui-colors";
 import { DataTable } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingState } from "@/components/ui/LoadingState";
+import { AttentionQueue } from "./components/AttentionQueue";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Users, MessageSquare, CheckSquare, Plus, Flame } from "lucide-react";
@@ -124,6 +125,9 @@ export default function DashboardPage() {
           icon={<CheckSquare className="h-5 w-5" />}
         />
       </div>
+
+      <AttentionQueue />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <SectionContainer
           title="Leads Recentes"

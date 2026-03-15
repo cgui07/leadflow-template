@@ -1,0 +1,250 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import { useFetch } from "@/lib/hooks";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { getScoreTextClass } from "@/lib/ui-colors";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { SectionContainer } from "@/components/layout/SectionContainer";
+import {
+  AlertTriangle,
+  Bot,
+  CheckCircle,
+  ChevronDown,
+  Clock,
+  ExternalLink,
+  Flame,
+  Mail,
+  MessageSquare,
+  User,
+} from "lucide-react";
+import {
+  AttentionQueueItem,
+  AttentionQueueReason,
+  ATTENTION_QUEUE_INITIAL_VISIBLE,
+  ATTENTION_QUEUE_NO_REPLY_THRESHOLD_HOURS,
+} from "@/lib/attention-queue";
+
+const reasonConfig: Record<
+  AttentionQueueReason,
+  {
+    getLabel: (item: AttentionQueueItem) => string;
+    variant: "error" | "warning" | "info" | "purple";
+    icon: React.ReactNode;
+  }
+> = {
+  overdue_task: {
+    getLabel: () => "Tarefa vencida",
+    variant: "error",
+    icon: <AlertTriangle size={10} />,
+  },
+  unread: {
+    getLabel: (item) => {
+      return item.unreadCount > 1 ? `${item.unreadCount} nao lidas` : "Nao lida";
+    },
+    variant: "warning",
+    icon: <Mail size={10} />,
+  },
+  hot: {
+    getLabel: () => "Quente",
+    variant: "error",
+    icon: <Flame size={10} />,
+  },
+  no_reply: {
+    getLabel: () => `Sem resposta ${ATTENTION_QUEUE_NO_REPLY_THRESHOLD_HOURS}h`,
+    variant: "info",
+    icon: <Clock size={10} />,
+  },
+};
+
+function formatTimeAgo(dateStr: string | null) {
+  if (!dateStr) return "";
+
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const minutes = Math.floor(diff / 60000);
+
+  if (minutes < 60) return `${minutes}min atras`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h atras`;
+
+  const days = Math.floor(hours / 24);
+  return `${days}d atras`;
+}
+
+function getRelevantStatusText(item: AttentionQueueItem) {
+  if (item.reasons.includes("overdue_task") && item.overdueTaskDueAt) {
+    return `Tarefa vencida ${formatTimeAgo(item.overdueTaskDueAt)}`;
+  }
+
+  if (item.lastRelevantAt) {
+    return `Cliente aguardando ${formatTimeAgo(item.lastRelevantAt)}`;
+  }
+
+  return "";
+}
+
+function QueueItem({ item }: { item: AttentionQueueItem }) {
+  const relevantStatus = getRelevantStatusText(item);
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-neutral-border bg-neutral-surface px-3 py-2.5 sm:px-4 sm:py-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-border text-xs font-bold text-neutral-dark sm:h-10 sm:w-10 sm:text-sm">
+        {item.leadName.charAt(0).toUpperCase()}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="truncate text-sm font-semibold text-neutral-ink">
+            {item.leadName}
+          </span>
+          <span
+            className={`hidden text-xs font-semibold sm:inline ${getScoreTextClass(item.leadScore)}`}
+          >
+            {item.leadScore}/100
+          </span>
+          {item.conversationStatus && (
+            <div className="hidden items-center gap-0.5 text-[10px] text-neutral-muted sm:inline-flex">
+              {item.conversationStatus === "bot" ? (
+                <Bot size={10} />
+              ) : (
+                <User size={10} />
+              )}
+              {item.conversationStatus === "bot" ? "Bot" : "Manual"}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-0.5 flex items-center gap-1.5 text-xs text-neutral-muted">
+          <span className="truncate">{item.leadPhone}</span>
+          {relevantStatus && (
+            <>
+              <span className="text-neutral-line">|</span>
+              <span className="shrink-0">{relevantStatus}</span>
+            </>
+          )}
+        </div>
+
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {item.reasons.map((reason) => {
+            const config = reasonConfig[reason];
+
+            return (
+              <Badge key={reason} variant={config.variant} size="sm">
+                <span className="flex items-center gap-1">
+                  {config.icon}
+                  {config.getLabel(item)}
+                </span>
+              </Badge>
+            );
+          })}
+        </div>
+
+        {item.overdueTaskTitle && (
+          <div className="mt-1 text-xs text-red-dark">
+            Tarefa: {item.overdueTaskTitle}
+          </div>
+        )}
+      </div>
+
+      <div className="flex shrink-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
+        {item.conversationId && (
+          <Link href={`/conversations?conversationId=${item.conversationId}`}>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<MessageSquare size={13} />}
+            >
+              <span className="hidden sm:inline">Abrir conversa</span>
+            </Button>
+          </Link>
+        )}
+        <Link href={`/leads/${item.leadId}`}>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<ExternalLink size={13} />}
+          >
+            <span className="hidden sm:inline">Ver lead</span>
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export function AttentionQueue() {
+  const { data: items, loading } = useFetch<AttentionQueueItem[]>(
+    "/api/dashboard/attention-queue",
+  );
+  const [expanded, setExpanded] = useState(false);
+
+  if (loading) {
+    return (
+      <SectionContainer
+        title="Quem preciso responder agora"
+        description="Fila operacional priorizada para voce agir sem se perder"
+        icon={<AlertTriangle className="h-4 w-4 text-orange-amber" />}
+      >
+        <div className="space-y-3">
+          {[1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className="h-20 animate-pulse rounded-lg bg-neutral-pale"
+            />
+          ))}
+        </div>
+      </SectionContainer>
+    );
+  }
+
+  const total = items?.length ?? 0;
+  const visibleItems = expanded
+    ? items
+    : items?.slice(0, ATTENTION_QUEUE_INITIAL_VISIBLE);
+
+  return (
+    <SectionContainer
+      title="Quem preciso responder agora"
+      description="Fila operacional priorizada para voce agir sem se perder"
+      icon={<AlertTriangle className="h-4 w-4 text-orange-amber" />}
+      actions={
+        total > 0 ? (
+          <Badge variant="warning" size="sm">
+            {total} {total === 1 ? "pendencia" : "pendencias"}
+          </Badge>
+        ) : undefined
+      }
+    >
+      {!total ? (
+        <EmptyState
+          icon={<CheckCircle className="h-10 w-10 text-green-emerald" />}
+          title="Tudo em dia"
+          description="Nenhum lead precisa de atencao imediata agora."
+        />
+      ) : (
+        <div className="space-y-2">
+          {visibleItems?.map((item) => (
+            <QueueItem key={item.leadId} item={item} />
+          ))}
+
+          {total > ATTENTION_QUEUE_INITIAL_VISIBLE && !expanded && (
+            <div className="pt-1 text-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<ChevronDown size={14} />}
+                onClick={() => setExpanded(true)}
+              >
+                Ver mais {total - ATTENTION_QUEUE_INITIAL_VISIBLE}{" "}
+                {total - ATTENTION_QUEUE_INITIAL_VISIBLE === 1 ? "item" : "itens"}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </SectionContainer>
+  );
+}
