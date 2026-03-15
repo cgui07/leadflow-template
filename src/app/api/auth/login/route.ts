@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return error("Email e senha sao obrigatorios");
+      return error("Email e senha são obrigatórios");
     }
 
     const normalizedEmail = normalizeEmail(email);

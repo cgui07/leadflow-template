@@ -35,6 +35,13 @@ const navItems: NavItem[] = [
     mobileVisible: true,
   },
   {
+    label: "Conversas",
+    href: "/conversations",
+    icon: <MessageSquare size={20} />,
+    iconMobile: <MessageSquare size={22} />,
+    mobileVisible: true,
+  },
+  {
     label: "Leads",
     href: "/leads",
     icon: <Users size={20} />,
@@ -53,13 +60,6 @@ const navItems: NavItem[] = [
     href: "/tasks",
     icon: <CheckSquare size={20} />,
     iconMobile: <CheckSquare size={22} />,
-    mobileVisible: true,
-  },
-  {
-    label: "Conversas",
-    href: "/conversations",
-    icon: <MessageSquare size={20} />,
-    iconMobile: <MessageSquare size={22} />,
     mobileVisible: true,
   },
   {

@@ -33,7 +33,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
           Redefinir minha senha
         </a>
         <div style="font-size: 13px; line-height: 1.6; color: ${emailColors.muted}; margin: 24px 0 0;">
-          Este link expira em 1 hora. Se voce nao solicitou essa alteracao, ignore este email.
+          Este link expira em 1 hora. Se você não solicitou essa alteração, ignore este e-mail.
         </div>
       </div>
     `,
@@ -41,6 +41,6 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
 
   if (error) {
     console.error("[email] Failed to send password reset email:", error);
-    throw new Error("Falha ao enviar email de redefinicao");
+    throw new Error("Falha ao enviar e-mail de redefinição");
   }
 }

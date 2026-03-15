@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { PipelineStage } from "@/types";
+import { getPipelineColorDotClass } from "@/lib/ui-colors";
 
 interface PipelineStageCardProps {
   stage: PipelineStage;
@@ -28,8 +29,10 @@ export function PipelineStageCard({
       <div className="px-4 py-3 border-b border-neutral-border">
         <div className="flex items-center gap-2">
           <div
-            className="h-2.5 w-2.5 rounded-full shrink-0"
-            style={{ backgroundColor: stage.color }}
+            className={cn(
+              "h-2.5 w-2.5 rounded-full shrink-0",
+              getPipelineColorDotClass(stage.color)
+            )}
           />
           <div className="text-sm font-semibold text-neutral-ink truncate">
             {stage.name}

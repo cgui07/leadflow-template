@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const token = req.nextUrl.searchParams.get("token")?.trim();
 
     if (!token) {
-      return error("Token obrigatorio");
+      return error("Token obrigatório");
     }
 
     const user = await prisma.user.findUnique({
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       !!user?.passwordResetExpiresAt && user.passwordResetExpiresAt.getTime() > Date.now();
 
     if (!isValid) {
-      return error("Token invalido ou expirado", 400);
+      return error("Token inválido ou expirado", 400);
     }
 
     return json({ valid: true });
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const { token, password, confirmPassword } = await req.json();
 
     if (!token || !password || !confirmPassword) {
-      return error("Token, senha e confirmacao sao obrigatorios");
+      return error("Token, senha e confirmação são obrigatórios");
     }
 
     if (password.length < MIN_PASSWORD_LENGTH) {
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (password !== confirmPassword) {
-      return error("As senhas nao coincidem");
+      return error("As senhas não coincidem");
     }
 
     const user = await prisma.user.findUnique({
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user || !user.passwordResetExpiresAt || user.passwordResetExpiresAt.getTime() <= Date.now()) {
-      return error("Token invalido ou expirado", 400);
+      return error("Token inválido ou expirado", 400);
     }
 
     const passwordHash = await hashPassword(password);

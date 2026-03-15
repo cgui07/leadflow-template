@@ -44,7 +44,7 @@ export default function RegisterPage() {
     }
 
     if (form.password !== form.confirmPassword) {
-      setError("As senhas nao coincidem");
+      setError("As senhas não coincidem");
       return;
     }
 
@@ -65,7 +65,7 @@ export default function RegisterPage() {
 
       router.push("/dashboard");
     } catch {
-      setError("Erro de conexao");
+      setError("Erro de conexão");
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ export default function RegisterPage() {
                 </svg>
               </div>
               <div>
-                <div className="font-semibold">Resposta automatica via WhatsApp</div>
+                <div className="font-semibold">Resposta automática via WhatsApp</div>
                 <div className="text-sm text-blue-ice/60">Nunca deixe um lead sem resposta</div>
               </div>
             </div>
@@ -105,8 +105,8 @@ export default function RegisterPage() {
                 </svg>
               </div>
               <div>
-                <div className="font-semibold">Qualificacao com IA</div>
-                <div className="text-sm text-blue-ice/60">Saiba quem esta pronto para comprar</div>
+                <div className="font-semibold">Qualificação com IA</div>
+                <div className="text-sm text-blue-ice/60">Saiba quem está pronto para comprar</div>
               </div>
             </div>
             <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4">
@@ -176,7 +176,7 @@ export default function RegisterPage() {
                 type="password"
                 value={form.password}
                 onChange={(e) => update("password", e.target.value)}
-                placeholder={`Minimo ${MIN_PASSWORD_LENGTH} caracteres`}
+                placeholder={`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`}
                 minLength={MIN_PASSWORD_LENGTH}
                 required
               />
@@ -195,7 +195,7 @@ export default function RegisterPage() {
               required
             />
             <Button type="submit" loading={loading} fullWidth size="lg" disabled={!passwordsMatch}>
-              {loading ? "Criando conta..." : "Criar conta gratis"}
+              {loading ? "Criando conta..." : "Criar conta grátis"}
             </Button>
           </form>
           <div className="mt-8 flex items-center gap-3">
@@ -228,7 +228,7 @@ export default function RegisterPage() {
             Criar conta com Google
           </a>
           <div className="mt-6 text-center text-sm text-gray-smoke">
-            Ja tem uma conta?{" "}
+            Já tem uma conta?{" "}
             <Link href="/login" className="font-semibold text-primary hover:text-blue-royal transition-colors">
               Fazer login
             </Link>

@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
 
   if (!clientId) {
     return NextResponse.json(
-      { error: "Google OAuth nao configurado" },
+      { error: "Google OAuth não configurado" },
       { status: 500 },
     );
   }

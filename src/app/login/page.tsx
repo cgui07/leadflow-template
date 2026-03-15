@@ -44,7 +44,7 @@ function LoginForm() {
 
       router.push(redirect);
     } catch {
-      setError("Erro de conexao");
+      setError("Erro de conexão");
     } finally {
       setLoading(false);
     }
@@ -63,7 +63,7 @@ function LoginForm() {
           </div>
           <div className="mt-6 text-lg leading-relaxed text-blue-ice/80">
             O LeadFlow organiza seus leads do WhatsApp, qualifica automaticamente
-            com IA e garante que voce nunca perca uma oportunidade.
+            com IA e garante que você nunca perca uma oportunidade.
           </div>
           <div className="mt-12 grid grid-cols-3 gap-6">
             <div className="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 text-center">
@@ -163,12 +163,12 @@ function LoginForm() {
             Continuar com Google
           </a>
           <div className="mt-6 text-center text-sm text-gray-smoke">
-            Ainda nao tem conta?{" "}
+            Ainda não tem conta?{" "}
             <Link
               href="/register"
               className="font-semibold text-primary hover:text-blue-royal transition-colors"
             >
-              Criar conta gratis
+              Criar conta grátis
             </Link>
           </div>
         </div>

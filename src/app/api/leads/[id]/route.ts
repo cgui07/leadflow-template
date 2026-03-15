@@ -16,6 +16,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         },
         activities: { orderBy: { createdAt: "desc" }, take: 20 },
         tasks: { orderBy: { dueAt: "asc" }, where: { status: "pending" } },
+        leadActions: { orderBy: [{ status: "asc" }, { createdAt: "desc" }] },
       },
     });
 

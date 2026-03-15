@@ -32,7 +32,7 @@ export default function PipelinePage() {
       refetch();
     } catch (err) {
       console.error(err);
-      alert("Nao foi possivel mover o lead. Tente novamente.");
+      alert("Não foi possível mover o lead. Tente novamente.");
     } finally {
       setMovingLeadId(null);
     }
