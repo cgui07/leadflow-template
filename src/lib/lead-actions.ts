@@ -46,7 +46,7 @@ export async function upsertLeadActionFromAI(
       leadId,
       type: "lead_action_created",
       title: `${ACTION_TYPE_LABELS[type]} detectada pela IA`,
-      description: `Acao criada automaticamente a partir de sinal detectado na conversa.`,
+      description: "Ação criada automaticamente a partir de sinal detectado na conversa.",
     },
   });
 

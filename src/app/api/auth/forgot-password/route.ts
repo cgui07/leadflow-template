@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json();
 
     if (!email) {
-      return error("Email obrigatorio");
+      return error("Email obrigatório");
     }
 
     const normalizedEmail = normalizeEmail(email);
@@ -54,6 +54,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error(err);
-    return error("Erro ao solicitar redefinicao de senha", 500);
+    return error("Erro ao solicitar redefinição de senha", 500);
   }
 }

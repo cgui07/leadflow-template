@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const { name, email, password, confirmPassword, phone } = await req.json();
 
     if (!name || !email || !password || !confirmPassword) {
-      return error("Nome, email, senha e confirmacao sao obrigatorios");
+      return error("Nome, email, senha e confirmação são obrigatórios");
     }
 
     if (password.length < MIN_PASSWORD_LENGTH) {
@@ -18,14 +18,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (password !== confirmPassword) {
-      return error("As senhas nao coincidem");
+      return error("As senhas não coincidem");
     }
 
     const normalizedEmail = normalizeEmail(email);
     const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 
     if (existing) {
-      return error("Email ja cadastrado");
+      return error("Email já cadastrado");
     }
 
     const passwordHash = await hashPassword(password);
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       { name: "Qualificado", color: DEFAULT_PIPELINE_STAGE_COLORS[2], order: 2 },
       { name: "Visita agendada", color: DEFAULT_PIPELINE_STAGE_COLORS[3], order: 3 },
       { name: "Proposta", color: DEFAULT_PIPELINE_STAGE_COLORS[4], order: 4 },
-      { name: "Negociacao", color: DEFAULT_PIPELINE_STAGE_COLORS[5], order: 5 },
+      { name: "Negociação", color: DEFAULT_PIPELINE_STAGE_COLORS[5], order: 5 },
       { name: "Fechado", color: DEFAULT_PIPELINE_STAGE_COLORS[6], order: 6 },
       { name: "Perdido", color: DEFAULT_PIPELINE_STAGE_COLORS[7], order: 7 },
     ];

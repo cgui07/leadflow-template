@@ -47,7 +47,13 @@ interface DashboardData {
   }>;
 }
 
-const statusMap: Record<string, { label: string; variant: "info" | "default" | "purple" | "warning" | "success" | "error" }> = {
+const statusMap: Record<
+  string,
+  {
+    label: string;
+    variant: "info" | "default" | "purple" | "warning" | "success" | "error";
+  }
+> = {
   new: { label: "Novo", variant: "info" },
   contacted: { label: "Contatado", variant: "default" },
   qualifying: { label: "Qualificando", variant: "purple" },
@@ -78,7 +84,11 @@ const columns: Column<DashboardData["recentLeads"][0]>[] = [
     label: "Status",
     render: (value) => {
       const config = statusMap[value as string];
-      return config ? <Badge variant={config.variant} size="sm" dot>{config.label}</Badge> : null;
+      return config ? (
+        <Badge variant={config.variant} size="sm" dot>
+          {config.label}
+        </Badge>
+      ) : null;
     },
   },
   { key: "source", label: "Fonte" },
@@ -101,37 +111,47 @@ export default function DashboardPage() {
         </Link>
       }
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           label="Total de Leads"
           value={String(kpis?.totalLeads || 0)}
           icon={<Users className="h-5 w-5" />}
+          iconVariant="blue"
           trend={{ value: kpis?.newLeads || 0, label: "novos" }}
         />
         <KpiCard
           label="Leads Quentes"
           value={String(kpis?.hotLeads || 0)}
           icon={<Flame className="h-5 w-5" />}
+          iconVariant="orange"
           trend={{ value: kpis?.qualifiedLeads || 0, label: "qualificados" }}
         />
         <KpiCard
           label="Conversas não lidas"
           value={String(kpis?.unreadConversations || 0)}
           icon={<MessageSquare className="h-5 w-5" />}
+          iconVariant="purple"
         />
         <KpiCard
           label="Tarefas Pendentes"
           value={String(kpis?.pendingTasks || 0)}
           icon={<CheckSquare className="h-5 w-5" />}
+          iconVariant="teal"
         />
       </div>
 
       <AttentionQueue />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <SectionContainer
           title="Leads Recentes"
-          actions={<Link href="/leads"><Button variant="ghost" size="sm">Ver todos</Button></Link>}
+          actions={
+            <Link href="/leads">
+              <Button variant="ghost" size="sm">
+                Ver todos
+              </Button>
+            </Link>
+          }
           noPadding
           className="lg:col-span-2"
         >
@@ -144,26 +164,35 @@ export default function DashboardPage() {
             />
           )}
         </SectionContainer>
+
         <SectionContainer title="Atividade Recente">
           {data?.recentActivities?.length ? (
             <div className="space-y-3">
               {data.recentActivities.map((activity) => (
                 <div key={activity.id} className="flex gap-3 text-sm">
-                  <div className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
                   <div>
-                    <div className="font-medium text-neutral-dark">{activity.title}</div>
+                    <div className="font-medium text-neutral-dark">
+                      {activity.title}
+                    </div>
                     {activity.description && (
-                      <div className="text-neutral-muted text-xs mt-0.5">{activity.description}</div>
+                      <div className="mt-0.5 text-xs text-neutral-muted">
+                        {activity.description}
+                      </div>
                     )}
                     {activity.lead && (
-                      <div className="text-neutral-muted text-xs mt-0.5">{activity.lead.name}</div>
+                      <div className="mt-0.5 text-xs text-neutral-muted">
+                        {activity.lead.name}
+                      </div>
                     )}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-sm text-neutral-muted">Nenhuma atividade recente</div>
+            <div className="text-sm text-neutral-muted">
+              Nenhuma atividade recente
+            </div>
           )}
         </SectionContainer>
       </div>

@@ -15,11 +15,11 @@ export async function PATCH(
     const action = await prisma.leadAction.findFirst({
       where: { id: actionId, leadId: id, userId: user.id },
     });
-    if (!action) return error("Acao nao encontrada", 404);
+    if (!action) return error("Ação não encontrada", 404);
 
     if (data.status && !LEAD_ACTION_STATUSES.includes(data.status)) {
       return error(
-        `Status invalido. Use: ${LEAD_ACTION_STATUSES.join(", ")}`,
+        `Status inválido. Use: ${LEAD_ACTION_STATUSES.join(", ")}`,
         400,
       );
     }
@@ -61,7 +61,7 @@ export async function DELETE(
     const action = await prisma.leadAction.findFirst({
       where: { id: actionId, leadId: id, userId: user.id },
     });
-    if (!action) return error("Acao nao encontrada", 404);
+    if (!action) return error("Ação não encontrada", 404);
 
     await prisma.leadAction.delete({ where: { id: actionId } });
 

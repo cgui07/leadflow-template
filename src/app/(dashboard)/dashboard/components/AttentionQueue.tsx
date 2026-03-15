@@ -33,7 +33,7 @@ import {
 
 function getOverdueActionLabel(item: AttentionQueueItem) {
   if (item.overdueActionTitle) {
-    return `Acao: ${item.overdueActionTitle}`;
+    return `Ação: ${item.overdueActionTitle}`;
   }
 
   if (
@@ -43,7 +43,7 @@ function getOverdueActionLabel(item: AttentionQueueItem) {
     return `${ACTION_TYPE_LABELS[item.overdueActionType as LeadActionType]} vencida`;
   }
 
-  return "Acao vencida";
+  return "Ação vencida";
 }
 
 const reasonConfig: Record<
@@ -61,7 +61,7 @@ const reasonConfig: Record<
   },
   unread: {
     getLabel: (item) => {
-      return item.unreadCount > 1 ? `${item.unreadCount} nao lidas` : "Nao lida";
+      return item.unreadCount > 1 ? `${item.unreadCount} não lidas` : "Não lida";
     },
     variant: "warning",
     icon: <Mail size={10} />,
@@ -89,13 +89,13 @@ function formatTimeAgo(dateStr: string | null) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const minutes = Math.floor(diff / 60000);
 
-  if (minutes < 60) return `${minutes}min atras`;
+  if (minutes < 60) return `${minutes}min atrás`;
 
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h atras`;
+  if (hours < 24) return `${hours}h atrás`;
 
   const days = Math.floor(hours / 24);
-  return `${days}d atras`;
+  return `${days}d atrás`;
 }
 
 function getRelevantStatusText(item: AttentionQueueItem) {
@@ -107,7 +107,7 @@ function getRelevantStatusText(item: AttentionQueueItem) {
     item.reasons.includes("overdue_action") &&
     item.overdueActionScheduledAt
   ) {
-    return `Acao vencida ${formatTimeAgo(item.overdueActionScheduledAt)}`;
+    return `Ação vencida ${formatTimeAgo(item.overdueActionScheduledAt)}`;
   }
 
   if (item.lastRelevantAt) {
@@ -180,7 +180,7 @@ function QueueItem({ item }: { item: AttentionQueueItem }) {
         )}
         {item.overdueActionTitle && (
           <div className="mt-1 text-xs text-red-dark">
-            Acao: {item.overdueActionTitle}
+            Ação: {item.overdueActionTitle}
           </div>
         )}
       </div>
@@ -221,7 +221,7 @@ export function AttentionQueue() {
     return (
       <SectionContainer
         title="Quem preciso responder agora"
-        description="Fila operacional priorizada para voce agir sem se perder"
+        description="Fila operacional priorizada para você agir sem se perder"
         icon={<AlertTriangle className="h-4 w-4 text-orange-amber" />}
       >
         <div className="space-y-3">
@@ -244,12 +244,12 @@ export function AttentionQueue() {
   return (
     <SectionContainer
       title="Quem preciso responder agora"
-      description="Fila operacional priorizada para voce agir sem se perder"
+      description="Fila operacional priorizada para você agir sem se perder"
       icon={<AlertTriangle className="h-4 w-4 text-orange-amber" />}
       actions={
         total > 0 ? (
           <Badge variant="warning" size="sm">
-            {total} {total === 1 ? "pendencia" : "pendencias"}
+            {total} {total === 1 ? "pendência" : "pendências"}
           </Badge>
         ) : undefined
       }
@@ -258,7 +258,7 @@ export function AttentionQueue() {
         <EmptyState
           icon={<CheckCircle className="h-10 w-10 text-green-emerald" />}
           title="Tudo em dia"
-          description="Nenhum lead precisa de atencao imediata agora."
+          description="Nenhum lead precisa de atenção imediata agora."
         />
       ) : (
         <div className="space-y-2">

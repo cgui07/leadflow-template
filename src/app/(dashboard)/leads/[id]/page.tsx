@@ -17,8 +17,16 @@ import {
   getScoreTextClass,
 } from "@/lib/ui-colors";
 import {
-  ArrowLeft, Phone, Mail, MapPin, Home, Calendar,
-  DollarSign, Target, Clock, Send,
+  ArrowLeft,
+  Phone,
+  Mail,
+  MapPin,
+  Home,
+  Calendar,
+  DollarSign,
+  Target,
+  Clock,
+  Send,
 } from "lucide-react";
 
 interface LeadDetail {
@@ -105,7 +113,11 @@ const statusColors: Record<string, string> = {
   lost: "bg-red-pale text-danger",
 };
 
-export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function LeadDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const router = useRouter();
   const { data: lead, loading, refetch } = useFetch<LeadDetail>(`/api/leads/${id}`);
@@ -120,7 +132,13 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   }, [lead?.phone]);
 
   if (loading) return <LoadingState variant="skeleton" />;
-  if (!lead) return <div className="p-6 text-center text-neutral-muted">Lead não encontrado</div>;
+  if (!lead) {
+    return (
+      <div className="p-6 text-center text-neutral-muted">
+        Lead não encontrado
+      </div>
+    );
+  }
 
   async function updateStatus(status: string) {
     await fetch(`/api/leads/${id}`, {
@@ -134,6 +152,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
     if (!message.trim() || !lead?.conversation?.id) return;
+
     setSending(true);
     try {
       await fetch(`/api/conversations/${lead.conversation.id}/messages`, {
@@ -150,6 +169,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
   async function savePhone() {
     if (!lead) return;
+
     const nextPhone = phoneInput.trim();
     if (!nextPhone || nextPhone === lead.phone) return;
 
@@ -182,44 +202,79 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             fullWidth={false}
             fieldSize="sm"
           />
-          <Button variant="danger" onClick={async () => {
-            if (confirm("Tem certeza que deseja excluir este lead?")) {
-              await fetch(`/api/leads/${id}`, { method: "DELETE" });
-              router.push("/leads");
-            }
-          }}>Excluir</Button>
+          <Button
+            variant="danger"
+            onClick={async () => {
+              if (confirm("Tem certeza que deseja excluir este lead?")) {
+                await fetch(`/api/leads/${id}`, { method: "DELETE" });
+                router.push("/leads");
+              }
+            }}
+          >
+            Excluir
+          </Button>
         </div>
       }
     >
       <div className="flex items-start gap-4">
         <Link href="/leads">
-          <Button variant="ghost" size="sm" icon={<ArrowLeft className="h-4 w-4" />}>Voltar</Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<ArrowLeft className="h-4 w-4" />}
+          >
+            Voltar
+          </Button>
         </Link>
+
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white text-lg font-bold">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
               {lead.name.charAt(0).toUpperCase()}
             </div>
             <div>
               <div className="text-xl font-bold text-neutral-ink">{lead.name}</div>
-              <div className="flex items-center gap-3 text-sm text-neutral-muted mt-0.5">
-                <div className="flex items-center gap-1"><Phone size={12} />{lead.phone}</div>
-                {lead.email && <div className="flex items-center gap-1"><Mail size={12} />{lead.email}</div>}
+              <div className="mt-0.5 flex items-center gap-3 text-sm text-neutral-muted">
+                <div className="flex items-center gap-1">
+                  <Phone size={12} />
+                  {lead.phone}
+                </div>
+                {lead.email && (
+                  <div className="flex items-center gap-1">
+                    <Mail size={12} />
+                    {lead.email}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
+
         <div className="text-right">
-          <div className={`text-3xl font-bold ${scoreColor}`}>{lead.score}<div className="inline text-sm font-normal text-neutral-muted">/100</div></div>
-          <div className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[lead.status] || ""}`}>
-            {statusOptions.find((s) => s.value === lead.status)?.label}
+          <div className={`text-3xl font-bold ${scoreColor}`}>
+            {lead.score}
+            <div className="inline text-sm font-normal text-neutral-muted">
+              /100
+            </div>
+          </div>
+          <div
+            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[lead.status] || ""} mt-1`}
+          >
+            {statusOptions.find((status) => status.value === lead.status)?.label}
           </div>
         </div>
       </div>
+
       <Tabs
         tabs={[
           { id: "profile", label: "Perfil" },
-          { id: "actions", label: "Acoes", count: lead.leadActions.filter((a) => !["completed", "cancelled"].includes(a.status)).length },
+          {
+            id: "actions",
+            label: "Ações",
+            count: lead.leadActions.filter((action) => {
+              return !["completed", "cancelled"].includes(action.status);
+            }).length,
+          },
           { id: "messages", label: "Mensagens", count: messages.length },
           { id: "activities", label: "Atividades", count: lead.activities.length },
           { id: "tasks", label: "Tarefas", count: lead.tasks.length },
@@ -227,30 +282,47 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
+
       {activeTab === "profile" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <SectionContainer title="Perfil do Lead (IA)">
             <div className="grid grid-cols-2 gap-4">
               <InfoItem icon={<MapPin size={16} />} label="Região" value={lead.region} />
               <InfoItem icon={<Home size={16} />} label="Tipo" value={lead.propertyType} />
-              <InfoItem icon={<DollarSign size={16} />} label="Faixa de valor"
-                value={lead.priceMax ? `R$ ${Number(lead.priceMin || 0).toLocaleString("pt-BR")} - R$ ${Number(lead.priceMax).toLocaleString("pt-BR")}` : undefined}
+              <InfoItem
+                icon={<DollarSign size={16} />}
+                label="Faixa de valor"
+                value={
+                  lead.priceMax
+                    ? `R$ ${Number(lead.priceMin || 0).toLocaleString("pt-BR")} - R$ ${Number(lead.priceMax).toLocaleString("pt-BR")}`
+                    : undefined
+                }
               />
               <InfoItem icon={<Target size={16} />} label="Finalidade" value={lead.purpose} />
               <InfoItem icon={<Calendar size={16} />} label="Prazo" value={lead.timeline} />
-              <InfoItem icon={<Home size={16} />} label="Quartos" value={lead.bedrooms ? `${lead.bedrooms} quartos` : undefined} />
+              <InfoItem
+                icon={<Home size={16} />}
+                label="Quartos"
+                value={lead.bedrooms ? `${lead.bedrooms} quartos` : undefined}
+              />
             </div>
+
             {lead.notes && (
               <div className="mt-4 rounded-lg bg-gray-ghost p-3">
-                <div className="text-xs font-medium text-neutral-muted mb-1">Observações da IA</div>
+                <div className="mb-1 text-xs font-medium text-neutral-muted">
+                  Observações da IA
+                </div>
                 <div className="text-sm text-neutral-dark">{lead.notes}</div>
               </div>
             )}
           </SectionContainer>
+
           <SectionContainer title="Informações">
             <div className="space-y-3 text-sm">
               <div className="rounded-xl border border-warning/30 bg-warning/5 p-3">
-                <div className="text-xs font-semibold uppercase tracking-wide text-warning">WhatsApp</div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-warning">
+                  WhatsApp
+                </div>
                 <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
                   <TextField
                     label={needsManualPhone ? "Telefone real do contato" : "Telefone do contato"}
@@ -259,21 +331,52 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                     onChange={(e) => setPhoneInput(e.target.value)}
                     placeholder="Ex: 5511999999999"
                   />
-                  <Button onClick={savePhone} loading={savingPhone} disabled={!phoneInput.trim() || phoneInput.trim() === lead.phone}>
+                  <Button
+                    onClick={savePhone}
+                    loading={savingPhone}
+                    disabled={!phoneInput.trim() || phoneInput.trim() === lead.phone}
+                  >
                     Salvar
                   </Button>
                 </div>
                 <div className="mt-2 text-xs text-neutral-muted">
                   {needsManualPhone
-                    ? "Este contato entrou como @lid na Evolution 1.8. Informe o numero real do WhatsApp para liberar respostas."
-                    : "Voce pode salvar so os digitos ou usar o formato 5511999999999@s.whatsapp.net."}
+                    ? "Este contato entrou como @lid na Evolution 1.8. Informe o número real do WhatsApp para liberar respostas."
+                    : "Você pode salvar só os dígitos ou usar o formato 5511999999999@s.whatsapp.net."}
                 </div>
               </div>
-              <div className="flex justify-between"><div className="text-neutral-muted">Fonte</div><div className="font-medium">{lead.source}</div></div>
-              <div className="flex justify-between"><div className="text-neutral-muted">Criado em</div><div className="font-medium">{new Date(lead.createdAt).toLocaleDateString("pt-BR")}</div></div>
-              <div className="flex justify-between"><div className="text-neutral-muted">Último contato</div><div className="font-medium">{lead.lastContactAt ? new Date(lead.lastContactAt).toLocaleDateString("pt-BR") : "—"}</div></div>
-              <div className="flex justify-between"><div className="text-neutral-muted">Próximo follow-up</div><div className="font-medium">{lead.nextFollowUpAt ? new Date(lead.nextFollowUpAt).toLocaleString("pt-BR") : "—"}</div></div>
-              <div className="flex justify-between"><div className="text-neutral-muted">Follow-ups enviados</div><div className="font-medium">{lead.followUpCount}</div></div>
+
+              <div className="flex justify-between">
+                <div className="text-neutral-muted">Fonte</div>
+                <div className="font-medium">{lead.source}</div>
+              </div>
+              <div className="flex justify-between">
+                <div className="text-neutral-muted">Criado em</div>
+                <div className="font-medium">
+                  {new Date(lead.createdAt).toLocaleDateString("pt-BR")}
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="text-neutral-muted">Último contato</div>
+                <div className="font-medium">
+                  {lead.lastContactAt
+                    ? new Date(lead.lastContactAt).toLocaleDateString("pt-BR")
+                    : "-"}
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="text-neutral-muted">Próximo follow-up</div>
+                <div className="font-medium">
+                  {lead.nextFollowUpAt
+                    ? new Date(lead.nextFollowUpAt).toLocaleString("pt-BR")
+                    : "-"}
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="text-neutral-muted">Follow-ups enviados</div>
+                <div className="font-medium">{lead.followUpCount}</div>
+              </div>
+
               {lead.pipelineStage && (
                 <div className="flex justify-between">
                   <div className="text-neutral-muted">Estágio</div>
@@ -299,36 +402,57 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
       {activeTab === "messages" && (
         <SectionContainer title="Conversa">
-          <div className="h-96 overflow-y-auto space-y-3 mb-4">
+          <div className="mb-4 h-96 space-y-3 overflow-y-auto">
             {messages.length === 0 ? (
-              <div className="text-center text-sm text-neutral-muted py-12">Nenhuma mensagem ainda</div>
+              <div className="py-12 text-center text-sm text-neutral-muted">
+                Nenhuma mensagem ainda
+              </div>
             ) : (
               messages.map((msg) => (
-                <div key={msg.id} className={`flex ${msg.direction === "outbound" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
-                    msg.direction === "outbound"
-                      ? "bg-primary text-white"
-                      : "bg-gray-ghost text-neutral-ink"
-                  }`}>
-                    <div className="text-[10px] font-semibold opacity-70 mb-0.5">
-                      {msg.sender === "bot" ? "Bot" : msg.sender === "agent" ? "Você" : "Cliente"}
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.direction === "outbound" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
+                      msg.direction === "outbound"
+                        ? "bg-primary text-white"
+                        : "bg-gray-ghost text-neutral-ink"
+                    }`}
+                  >
+                    <div className="mb-0.5 text-[10px] font-semibold opacity-70">
+                      {msg.sender === "bot"
+                        ? "Bot"
+                        : msg.sender === "agent"
+                          ? "Você"
+                          : "Cliente"}
                     </div>
                     <div>{msg.content}</div>
-                    <div className="text-[10px] opacity-50 mt-1">
-                      {new Date(msg.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                    <div className="mt-1 text-[10px] opacity-50">
+                      {new Date(msg.createdAt).toLocaleTimeString("pt-BR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </div>
                   </div>
                 </div>
               ))
             )}
           </div>
+
           <form onSubmit={sendMessage} className="flex gap-2">
             <TextField
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Digite uma mensagem..."
             />
-            <Button type="submit" loading={sending} icon={<Send className="h-4 w-4" />}>Enviar</Button>
+            <Button
+              type="submit"
+              loading={sending}
+              icon={<Send className="h-4 w-4" />}
+            >
+              Enviar
+            </Button>
           </form>
         </SectionContainer>
       )}
@@ -336,18 +460,29 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       {activeTab === "activities" && (
         <SectionContainer title="Histórico de Atividades">
           {lead.activities.length === 0 ? (
-            <div className="text-sm text-neutral-muted">Nenhuma atividade registrada</div>
+            <div className="text-sm text-neutral-muted">
+              Nenhuma atividade registrada
+            </div>
           ) : (
             <div className="space-y-3">
-              {lead.activities.map((a) => (
-                <div key={a.id} className="flex gap-3 text-sm border-b border-gray-ghost pb-3">
-                  <div className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
+              {lead.activities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex gap-3 border-b border-gray-ghost pb-3 text-sm"
+                >
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
                   <div className="flex-1">
-                    <div className="font-medium text-neutral-dark">{a.title}</div>
-                    {a.description && <div className="text-neutral-muted text-xs mt-0.5">{a.description}</div>}
+                    <div className="font-medium text-neutral-dark">
+                      {activity.title}
+                    </div>
+                    {activity.description && (
+                      <div className="mt-0.5 text-xs text-neutral-muted">
+                        {activity.description}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-xs text-neutral-muted whitespace-nowrap">
-                    {new Date(a.createdAt).toLocaleDateString("pt-BR")}
+                  <div className="whitespace-nowrap text-xs text-neutral-muted">
+                    {new Date(activity.createdAt).toLocaleDateString("pt-BR")}
                   </div>
                 </div>
               ))}
@@ -359,19 +494,32 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       {activeTab === "tasks" && (
         <SectionContainer title="Tarefas Pendentes">
           {lead.tasks.length === 0 ? (
-            <div className="text-sm text-neutral-muted">Nenhuma tarefa pendente</div>
+            <div className="text-sm text-neutral-muted">
+              Nenhuma tarefa pendente
+            </div>
           ) : (
             <div className="space-y-2">
-              {lead.tasks.map((t) => (
-                <div key={t.id} className="flex items-center gap-3 rounded-lg border border-neutral-border p-3">
+              {lead.tasks.map((task) => (
+                <div
+                  key={task.id}
+                  className="flex items-center gap-3 rounded-lg border border-neutral-border p-3"
+                >
                   <Clock size={16} className="text-neutral-muted" />
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-neutral-dark">{t.title}</div>
+                    <div className="text-sm font-medium text-neutral-dark">
+                      {task.title}
+                    </div>
                     <div className="text-xs text-neutral-muted">
-                      {new Date(t.dueAt).toLocaleDateString("pt-BR")} às {new Date(t.dueAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                      {new Date(task.dueAt).toLocaleDateString("pt-BR")} às{" "}
+                      {new Date(task.dueAt).toLocaleTimeString("pt-BR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </div>
                   </div>
-                  <Badge variant="warning" size="sm">{t.type}</Badge>
+                  <Badge variant="warning" size="sm">
+                    {task.type}
+                  </Badge>
                 </div>
               ))}
             </div>
@@ -382,14 +530,22 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   );
 }
 
-function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string | null }) {
+function InfoItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value?: string | null;
+}) {
   return (
     <div className="rounded-lg bg-gray-ghost p-3">
-      <div className="flex items-center gap-1.5 text-neutral-muted mb-1">
+      <div className="mb-1 flex items-center gap-1.5 text-neutral-muted">
         {icon}
         <div className="text-xs">{label}</div>
       </div>
-      <div className="text-sm font-medium text-neutral-dark">{value || "—"}</div>
+      <div className="text-sm font-medium text-neutral-dark">{value || "-"}</div>
     </div>
   );
 }

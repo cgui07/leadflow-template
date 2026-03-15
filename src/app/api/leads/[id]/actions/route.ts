@@ -20,7 +20,7 @@ export async function GET(
     const lead = await prisma.lead.findFirst({
       where: { id, userId: user.id },
     });
-    if (!lead) return error("Lead nao encontrado", 404);
+    if (!lead) return error("Lead não encontrado", 404);
 
     const actions = await prisma.leadAction.findMany({
       where: { leadId: id },
@@ -45,18 +45,18 @@ export async function POST(
     const lead = await prisma.lead.findFirst({
       where: { id, userId: user.id },
     });
-    if (!lead) return error("Lead nao encontrado", 404);
+    if (!lead) return error("Lead não encontrado", 404);
 
     if (!data.type || !LEAD_ACTION_TYPES.includes(data.type)) {
       return error(
-        `Tipo invalido. Use: ${LEAD_ACTION_TYPES.join(", ")}`,
+        `Tipo inválido. Use: ${LEAD_ACTION_TYPES.join(", ")}`,
         400,
       );
     }
 
     if (data.status && !LEAD_ACTION_STATUSES.includes(data.status)) {
       return error(
-        `Status invalido. Use: ${LEAD_ACTION_STATUSES.join(", ")}`,
+        `Status inválido. Use: ${LEAD_ACTION_STATUSES.join(", ")}`,
         400,
       );
     }
@@ -72,7 +72,7 @@ export async function POST(
 
     if (existing) {
       return error(
-        `Ja existe uma acao aberta do tipo "${ACTION_TYPE_LABELS[data.type as LeadActionType]}" para este lead.`,
+        `Já existe uma ação aberta do tipo "${ACTION_TYPE_LABELS[data.type as LeadActionType]}" para este lead.`,
         409,
       );
     }

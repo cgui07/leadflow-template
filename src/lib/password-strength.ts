@@ -23,14 +23,14 @@ function getHint(checks: PasswordChecks) {
   if (!checks.length) missing.push(`use pelo menos ${MIN_PASSWORD_LENGTH} caracteres`);
   if (!checks.upper) missing.push("adicione letra maiuscula");
   if (!checks.lower) missing.push("adicione letra minuscula");
-  if (!checks.number) missing.push("adicione numero");
+  if (!checks.number) missing.push("adicione número");
   if (!checks.symbol) missing.push("adicione simbolo");
 
   if (missing.length === 0) return "Senha bem equilibrada";
   if (missing.length === 1) return `Dica: ${missing[0]}`;
   if (missing.length === 2) return `Dica: ${missing[0]} e ${missing[1]}`;
 
-  return "Misture letras, numeros e simbolos";
+  return "Misture letras, números e símbolos";
 }
 
 export function getPasswordStrength(password: string): PasswordStrengthResult {

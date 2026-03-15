@@ -170,21 +170,21 @@ function ActionCard({
 
       if (!response.ok) {
         throw new Error(
-          await getResponseError(response, "Nao foi possivel atualizar a acao."),
+          await getResponseError(response, "Não foi possível atualizar a ação."),
         );
       }
 
       onError("");
       onRefetch();
     } catch (error) {
-      onError(getErrorMessage(error, "Nao foi possivel atualizar a acao."));
+      onError(getErrorMessage(error, "Não foi possível atualizar a ação."));
     } finally {
       setLoading(false);
     }
   }
 
   async function handleDelete() {
-    if (!confirm("Excluir esta acao?")) return;
+    if (!confirm("Excluir esta ação?")) return;
 
     setLoading(true);
 
@@ -195,14 +195,14 @@ function ActionCard({
 
       if (!response.ok) {
         throw new Error(
-          await getResponseError(response, "Nao foi possivel excluir a acao."),
+          await getResponseError(response, "Não foi possível excluir a ação."),
         );
       }
 
       onError("");
       onRefetch();
     } catch (error) {
-      onError(getErrorMessage(error, "Nao foi possivel excluir a acao."));
+      onError(getErrorMessage(error, "Não foi possível excluir a ação."));
     } finally {
       setLoading(false);
     }
@@ -425,8 +425,8 @@ export function LeadActionsSection({
           await getResponseError(
             response,
             editingId
-              ? "Nao foi possivel salvar a acao."
-              : "Nao foi possivel criar a acao.",
+              ? "Não foi possível salvar a ação."
+              : "Não foi possível criar a ação.",
           ),
         );
       }
@@ -439,8 +439,8 @@ export function LeadActionsSection({
         getErrorMessage(
           error,
           editingId
-            ? "Nao foi possivel salvar a acao."
-            : "Nao foi possivel criar a acao.",
+            ? "Não foi possível salvar a ação."
+            : "Não foi possível criar a ação.",
         ),
       );
     } finally {
@@ -451,8 +451,8 @@ export function LeadActionsSection({
   return (
     <>
       <SectionContainer
-        title="Acoes do Lead"
-        description="Visitas, propostas e simulacoes"
+        title="Ações do Lead"
+        description="Visitas, propostas e simulações"
         icon={<CalendarCheck className="h-4 w-4 text-primary" />}
         actions={
           <Button
@@ -461,7 +461,7 @@ export function LeadActionsSection({
             icon={<Plus size={14} />}
             onClick={openCreate}
           >
-            Nova acao
+            Nova ação
           </Button>
         }
       >
@@ -470,8 +470,8 @@ export function LeadActionsSection({
 
           {actions.length === 0 ? (
             <EmptyState
-              title="Nenhuma acao registrada"
-              description="Acoes de visita, proposta e simulacao aparecem aqui quando detectadas pela IA ou criadas manualmente."
+              title="Nenhuma ação registrada"
+              description="Ações de visita, proposta e simulação aparecem aqui quando detectadas pela IA ou criadas manualmente."
             />
           ) : (
             <div className="space-y-2">
@@ -489,7 +489,7 @@ export function LeadActionsSection({
               {closedActions.length > 0 && openActions.length > 0 && (
                 <div className="mt-3 border-t border-neutral-line pt-2">
                   <div className="mb-2 text-xs text-neutral-muted">
-                    Concluidas / Canceladas
+                    Concluídas / Canceladas
                   </div>
                 </div>
               )}
@@ -512,7 +512,7 @@ export function LeadActionsSection({
       <Modal
         open={showModal}
         onClose={closeModal}
-        title={editingId ? "Editar acao" : "Nova acao"}
+        title={editingId ? "Editar ação" : "Nova ação"}
         size="md"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -533,7 +533,7 @@ export function LeadActionsSection({
           />
 
           <TextField
-            label="Titulo"
+            label="Título"
             type="text"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -555,7 +555,7 @@ export function LeadActionsSection({
           />
 
           <TextareaField
-            label="Observacoes"
+            label="Observações"
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             rows={3}

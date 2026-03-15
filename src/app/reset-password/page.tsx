@@ -36,7 +36,7 @@ function ResetPasswordForm() {
     async function validateToken() {
       if (!token) {
         setStatus("invalid");
-        setError("Link de redefinicao invalido.");
+        setError("Link de redefinição inválido.");
         return;
       }
 
@@ -47,7 +47,7 @@ function ResetPasswordForm() {
           const data = await res.json();
           if (!cancelled) {
             setStatus("invalid");
-            setError(data.error || "Esse link nao e mais valido.");
+            setError(data.error || "Esse link não é mais válido.");
           }
           return;
         }
@@ -59,7 +59,7 @@ function ResetPasswordForm() {
       } catch {
         if (!cancelled) {
           setStatus("invalid");
-          setError("Nao foi possivel validar o link.");
+          setError("Não foi possível validar o link.");
         }
       }
     }
@@ -81,7 +81,7 @@ function ResetPasswordForm() {
     }
 
     if (password !== confirmPassword) {
-      setError("As senhas nao coincidem");
+      setError("As senhas não coincidem");
       return;
     }
 
@@ -97,13 +97,13 @@ function ResetPasswordForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Nao foi possivel redefinir a senha");
+        setError(data.error || "Não foi possível redefinir a senha");
         return;
       }
 
       router.push("/dashboard");
     } catch {
-      setError("Erro de conexao");
+      setError("Erro de conexão");
     } finally {
       setLoading(false);
     }
@@ -167,7 +167,7 @@ function ResetPasswordForm() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder={`Minimo ${MIN_PASSWORD_LENGTH} caracteres`}
+                    placeholder={`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`}
                     minLength={MIN_PASSWORD_LENGTH}
                     required
                   />

@@ -15,13 +15,13 @@ const summaryFields: Array<{
   key: keyof ConversationSummary;
 }> = [
   { label: "Interesse", key: "interesse" },
-  { label: "Regiao", key: "regiao" },
-  { label: "Tipo de imovel", key: "tipoImovel" },
+  { label: "Região", key: "regiao" },
+  { label: "Tipo de imóvel", key: "tipoImovel" },
   { label: "Faixa de valor", key: "faixaValor" },
   { label: "Prazo de compra", key: "prazoCompra" },
-  { label: "Objecoes/Duvidas", key: "objecoes" },
-  { label: "Ultima intencao", key: "ultimaIntencao" },
-  { label: "Proximo passo", key: "proximoPasso" },
+  { label: "Objeções/Dúvidas", key: "objecoes" },
+  { label: "Última intenção", key: "ultimaIntencao" },
+  { label: "Próximo passo", key: "proximoPasso" },
 ];
 
 export function ConversationSummaryPanel({
@@ -60,7 +60,7 @@ export function ConversationSummaryPanel({
       {!loading && error && (
         <div className="rounded-xl border border-red-blush bg-white p-3">
           <div className="text-sm font-semibold text-red-dark">
-            Nao foi possivel gerar o resumo.
+            Não foi possível gerar o resumo.
           </div>
           <div className="mt-1 text-xs text-neutral-steel">{error}</div>
           <div className="mt-3">

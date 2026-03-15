@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
         { name: "Qualificado", color: DEFAULT_PIPELINE_STAGE_COLORS[2], order: 2 },
         { name: "Visita agendada", color: DEFAULT_PIPELINE_STAGE_COLORS[3], order: 3 },
         { name: "Proposta", color: DEFAULT_PIPELINE_STAGE_COLORS[4], order: 4 },
-        { name: "Negociacao", color: DEFAULT_PIPELINE_STAGE_COLORS[5], order: 5 },
+        { name: "Negociação", color: DEFAULT_PIPELINE_STAGE_COLORS[5], order: 5 },
         { name: "Fechado", color: DEFAULT_PIPELINE_STAGE_COLORS[6], order: 6 },
         { name: "Perdido", color: DEFAULT_PIPELINE_STAGE_COLORS[7], order: 7 },
       ];

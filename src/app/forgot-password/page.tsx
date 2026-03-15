@@ -30,14 +30,14 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Nao foi possivel enviar o link");
+        setError(data.error || "Não foi possível enviar o link");
         return;
       }
 
       setMessage(data.message || "Se o email existir, enviamos um link para redefinir a senha.");
       setPreviewUrl(data.previewUrl || "");
     } catch {
-      setError("Erro de conexao");
+      setError("Erro de conexão");
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
                   className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-blue-royal transition-colors"
                 >
                   <Mail className="h-4 w-4" />
-                  Abrir link de redefinicao
+                  Abrir link de redefinição
                 </a>
               )}
             </div>
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
                 required
               />
               <Button type="submit" loading={loading} fullWidth size="lg">
-                {loading ? "Enviando..." : "Enviar link de recuperacao"}
+                {loading ? "Enviando..." : "Enviar link de recuperação"}
               </Button>
             </form>
           )}

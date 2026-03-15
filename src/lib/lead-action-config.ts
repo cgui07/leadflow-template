@@ -24,7 +24,7 @@ export const OPEN_ACTION_STATUSES: LeadActionStatus[] = [
 export const ACTION_TYPE_LABELS: Record<LeadActionType, string> = {
   visit: "Visita",
   proposal: "Proposta",
-  financing: "Simulacao/Financiamento",
+  financing: "Simulação/Financiamento",
 };
 
 export const ACTION_STATUS_LABELS: Record<LeadActionStatus, string> = {
@@ -32,7 +32,7 @@ export const ACTION_STATUS_LABELS: Record<LeadActionStatus, string> = {
   awaiting_schedule: "Aguardando agendamento",
   scheduled: "Agendado",
   done: "Realizado",
-  completed: "Concluido",
+  completed: "Concluído",
   cancelled: "Cancelado",
 };
 
@@ -51,5 +51,5 @@ export const ACTION_STATUS_BADGE_VARIANT: Record<
 export const ACTION_TYPE_DEFAULT_TITLES: Record<LeadActionType, string> = {
   visit: "Visita solicitada pelo lead",
   proposal: "Proposta solicitada pelo lead",
-  financing: "Simulacao/financiamento solicitado pelo lead",
+  financing: "Simulação/financiamento solicitada pelo lead",
 };
