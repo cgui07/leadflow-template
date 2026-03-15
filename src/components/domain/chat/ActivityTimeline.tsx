@@ -1,14 +1,14 @@
 import { cn } from "@/lib/utils";
+import type { Activity, ActivityType } from "@/types";
 import {
-  Phone,
-  Mail,
-  StickyNote,
+  ArrowRightLeft,
   CalendarCheck,
   CheckSquare,
-  ArrowRightLeft,
+  Mail,
   MessageSquare,
+  Phone,
+  StickyNote,
 } from "lucide-react";
-import type { Activity, ActivityType } from "@/types";
 
 interface ActivityTimelineProps {
   activities: Activity[];
@@ -80,9 +80,9 @@ export function ActivityTimeline({
             <div className="flex flex-col items-center">
               <div
                 className={cn(
-                  "flex items-center justify-center h-7 w-7 rounded-full flex-shrink-0",
+                  "flex items-center justify-center h-7 w-7 rounded-full shrink-0",
                   config.bg,
-                  config.color
+                  config.color,
                 )}
               >
                 {config.icon}

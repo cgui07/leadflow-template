@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { MoreVertical, Phone } from "lucide-react";
+import Image from "next/image";
 
 interface ConversationHeaderProps {
   name: string;
@@ -41,9 +42,12 @@ export function ConversationHeader({
       <div className="flex items-center gap-3 min-w-0">
         <div className="relative shrink-0">
           {avatar ? (
-            <img
+            <Image
               src={avatar}
               alt={name}
+              width={40}
+              height={40}
+              unoptimized
               className="h-10 w-10 rounded-full object-cover"
             />
           ) : (

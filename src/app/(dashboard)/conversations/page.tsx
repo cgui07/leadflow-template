@@ -12,15 +12,12 @@ import {
   ArrowLeft,
   Bot,
   FileText,
-  Image as ImageIcon,
   MessageSquare,
-  Paperclip,
   Search,
   Send,
   User,
-  Video,
-  X,
 } from "lucide-react";
+import Image from "next/image";
 import { useRef, useState } from "react";
 
 interface ConversationItem {
@@ -297,15 +294,21 @@ export default function ConversationsPage() {
                 </div>
                 {msg.type === "image" && msg.metadata?.mediaUrl ? (
                   <div className="mb-1">
-                    <img
+                    <Image
                       src={msg.metadata.mediaUrl}
                       alt={msg.metadata.caption || "Imagem"}
-                      className="max-w-full rounded-lg max-h-60 object-cover cursor-pointer"
-                      onClick={() => window.open(msg.metadata!.mediaUrl!, "_blank")}
+                      width={msg.metadata.width ?? 320}
+                      height={msg.metadata.height ?? 320}
+                      unoptimized
+                      className="h-auto max-w-full rounded-lg max-h-60 object-cover cursor-pointer"
+                      onClick={() =>
+                        window.open(msg.metadata!.mediaUrl!, "_blank")
+                      }
                     />
-                    {msg.metadata.caption && msg.metadata.caption !== msg.content && (
-                      <div className="mt-1">{msg.metadata.caption}</div>
-                    )}
+                    {msg.metadata.caption &&
+                      msg.metadata.caption !== msg.content && (
+                        <div className="mt-1">{msg.metadata.caption}</div>
+                      )}
                   </div>
                 ) : msg.type === "video" && msg.metadata?.mediaUrl ? (
                   <div className="mb-1">
@@ -314,13 +317,18 @@ export default function ConversationsPage() {
                       controls
                       className="max-w-full rounded-lg max-h-60"
                     />
-                    {msg.metadata.caption && msg.metadata.caption !== msg.content && (
-                      <div className="mt-1">{msg.metadata.caption}</div>
-                    )}
+                    {msg.metadata.caption &&
+                      msg.metadata.caption !== msg.content && (
+                        <div className="mt-1">{msg.metadata.caption}</div>
+                      )}
                   </div>
                 ) : msg.type === "audio" && msg.metadata?.mediaUrl ? (
                   <div className="mb-1">
-                    <audio src={msg.metadata.mediaUrl} controls className="max-w-full" />
+                    <audio
+                      src={msg.metadata.mediaUrl}
+                      controls
+                      className="max-w-full"
+                    />
                   </div>
                 ) : msg.type === "document" && msg.metadata?.mediaUrl ? (
                   <a
@@ -330,12 +338,16 @@ export default function ConversationsPage() {
                     className="flex items-center gap-2 py-1 underline"
                   >
                     <FileText className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{msg.metadata.fileName || "Documento"}</span>
+                    <span className="truncate">
+                      {msg.metadata.fileName || "Documento"}
+                    </span>
                   </a>
                 ) : (
                   <div>{msg.content}</div>
                 )}
-                {msg.type !== "text" && !msg.metadata?.mediaUrl && <div>{msg.content}</div>}
+                {msg.type !== "text" && !msg.metadata?.mediaUrl && (
+                  <div>{msg.content}</div>
+                )}
                 <div className="text-[10px] opacity-50 mt-1">
                   {new Date(msg.createdAt).toLocaleTimeString("pt-BR", {
                     hour: "2-digit",
