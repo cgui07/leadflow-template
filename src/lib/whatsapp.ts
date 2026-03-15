@@ -1,4 +1,6 @@
 import { prisma } from "./db";
+import { getDefaultPipelineStageId } from "./pipeline";
+import type { Prisma } from "@/generated/prisma/client";
 
 interface WhatsAppConfig {
   phoneId: string;
@@ -102,6 +104,10 @@ function parseJsonResponse(raw: string) {
   } catch {
     return { raw };
   }
+}
+
+function toInputJsonValue(value: Record<string, unknown> | undefined) {
+  return value as Prisma.InputJsonValue | undefined;
 }
 
 function getMappingCandidates(event: LidMappingEvent) {
@@ -322,6 +328,8 @@ export async function processIncomingMessage(userId: string, message: {
   }
 
   if (!lead) {
+    const defaultPipelineStageId = await getDefaultPipelineStageId(userId);
+
     lead = await prisma.lead.create({
       data: {
         userId,
@@ -329,6 +337,7 @@ export async function processIncomingMessage(userId: string, message: {
         phone,
         source: "whatsapp",
         status: "new",
+        pipelineStageId: defaultPipelineStageId,
         conversation: { create: { whatsappChatId: remoteJid } },
       },
       include: { conversation: true },
@@ -391,7 +400,7 @@ export async function processIncomingMessage(userId: string, message: {
       type: message.type === "conversation" || message.type === "extendedTextMessage" ? "text" : message.type,
       status: "delivered",
       whatsappMsgId: message.id,
-      metadata: message.metadata || undefined,
+      metadata: toInputJsonValue(message.metadata),
     },
   });
 
@@ -477,7 +486,15 @@ export async function sendAndSaveMessage(
       type: media?.type || "text",
       status: "sent",
       whatsappMsgId: waMessageId,
-      metadata: media ? { mediaUrl: media.url, mimetype: media.mimetype, fileName: media.fileName } : undefined,
+      metadata: toInputJsonValue(
+        media
+          ? {
+              mediaUrl: media.url,
+              mimetype: media.mimetype,
+              fileName: media.fileName,
+            }
+          : undefined,
+      ),
     },
   });
 
