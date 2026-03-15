@@ -163,6 +163,54 @@ export async function extractLeadProfile(
   }
 }
 
+function getSummaryPrompt() {
+  return `Voce e um assistente que gera resumos operacionais de conversas imobiliarias para corretores.
+
+Analise a conversa abaixo e gere um resumo curto e objetivo. Retorne APENAS o JSON, sem markdown ou explicacoes.
+
+Formato esperado:
+{
+  "interesse": "descricao curta do interesse do lead",
+  "regiao": "regiao desejada ou Nao informada",
+  "tipoImovel": "tipo de imovel ou Nao informado",
+  "faixaValor": "faixa de valor ou Nao informada",
+  "prazoCompra": "prazo de compra ou Nao informado",
+  "objecoes": "principais objecoes ou duvidas, ou Nenhuma identificada",
+  "ultimaIntencao": "ultima intencao percebida do lead",
+  "proximoPasso": "proximo passo sugerido para o corretor"
+}
+
+Regras:
+- Seja direto e operacional
+- Cada campo deve ter no maximo 1-2 frases curtas
+- Se a informacao nao apareceu na conversa, escreva "Nao informado(a)"
+- O proximo passo deve ser uma acao concreta para o corretor`;
+}
+
+export async function generateConversationSummary(
+  config: AIConfig,
+  conversationMessages: Array<{ direction: string; content: string; sender: string }>,
+) {
+  const conversationText = conversationMessages
+    .map((msg) => {
+      const role = msg.direction === "inbound" ? "Cliente" : msg.sender === "bot" ? "Bot" : "Corretor";
+      return `${role}: ${msg.content}`;
+    })
+    .join("\n");
+
+  const result = await callAI(config, getSummaryPrompt(), [
+    { role: "user", content: conversationText },
+  ]);
+
+  try {
+    const cleaned = result.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+    return JSON.parse(cleaned);
+  } catch {
+    console.error("Failed to parse AI summary:", result);
+    return null;
+  }
+}
+
 export async function qualifyLead(leadId: string, config: AIConfig) {
   const lead = await prisma.lead.findUnique({
     where: { id: leadId },

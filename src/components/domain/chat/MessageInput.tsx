@@ -6,10 +6,11 @@ import { Send, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 interface MessageInputProps {
-  onSend?: (message: string) => void;
+  onSend?: (message: string) => void | Promise<void>;
   onAttach?: () => void;
   placeholder?: string;
   disabled?: boolean;
+  sending?: boolean;
   className?: string;
 }
 
@@ -18,15 +19,24 @@ export function MessageInput({
   onAttach,
   placeholder = "Digite uma mensagem...",
   disabled,
+  sending,
   className,
 }: MessageInputProps) {
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSend() {
+  async function handleSend() {
     const trimmed = message.trim();
-    if (trimmed) {
-      onSend?.(trimmed);
+    if (!trimmed || disabled || sending || submitting) return;
+
+    try {
+      setSubmitting(true);
+      await onSend?.(trimmed);
       setMessage("");
+    } catch {
+      // The parent handles the visible error state. We keep the draft intact here.
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -41,7 +51,7 @@ export function MessageInput({
     <div
       className={cn(
         "flex items-end gap-2 px-4 py-3 border-t border-neutral-border",
-        className
+        className,
       )}
     >
       {onAttach && (
@@ -49,7 +59,7 @@ export function MessageInput({
           variant="ghost"
           size="sm"
           onClick={onAttach}
-          disabled={disabled}
+          disabled={disabled || sending || submitting}
           icon={<Paperclip className="h-5 w-5" />}
         />
       )}
@@ -58,19 +68,20 @@ export function MessageInput({
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        disabled={disabled}
+        disabled={disabled || sending || submitting}
         rows={1}
         className={cn(
           "flex-1 resize-none rounded-lg border border-neutral-border px-3 py-2 text-sm",
           "placeholder:text-neutral-muted",
           "focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent",
           "disabled:bg-neutral-surface disabled:cursor-not-allowed",
-          "max-h-32"
+          "max-h-32",
         )}
       />
       <Button
         onClick={handleSend}
-        disabled={disabled || !message.trim()}
+        loading={sending || submitting}
+        disabled={disabled || sending || submitting || !message.trim()}
         icon={<Send className="h-5 w-5" />}
       />
     </div>
