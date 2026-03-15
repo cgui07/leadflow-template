@@ -1,13 +1,13 @@
 import { prisma } from "@/lib/db";
+import { scheduleFollowUp } from "@/lib/followup";
+import { NextRequest, NextResponse } from "next/server";
+import { generateAutoReply, qualifyLead } from "@/lib/ai";
 import {
   processIncomingMessage,
   rememberMapping,
   resolveSendTarget,
   sendAndSaveMessage,
 } from "@/lib/whatsapp";
-import { generateAutoReply, qualifyLead } from "@/lib/ai";
-import { scheduleFollowUp } from "@/lib/followup";
-import { NextRequest, NextResponse } from "next/server";
 
 const INBOUND_MESSAGE_EVENTS = new Set(["messages.upsert", "MESSAGES_UPSERT"]);
 

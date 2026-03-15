@@ -1,8 +1,8 @@
-import { ActionMenu } from "@/components/ui/ActionMenu";
-import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/Badge";
 import type { Lead, LeadStatus } from "@/types";
 import { Building2, Mail, Phone } from "lucide-react";
+import { ActionMenu } from "@/components/ui/ActionMenu";
 
 interface LeadCardProps {
   lead: Lead;

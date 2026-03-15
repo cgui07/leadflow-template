@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { normalizeEmail, signToken, setAuthCookie } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
 import { DEFAULT_PIPELINE_STAGE_COLORS } from "@/lib/ui-colors";
+import { normalizeEmail, signToken, setAuthCookie } from "@/lib/auth";
 
 interface GoogleTokenResponse {
   access_token: string;

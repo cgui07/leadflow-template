@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
-import { json, requireAuth, handleError } from "@/lib/api";
-import { normalizePipelineColor } from "@/lib/ui-colors";
 import { NextRequest } from "next/server";
+import { normalizePipelineColor } from "@/lib/ui-colors";
+import { json, requireAuth, handleError } from "@/lib/api";
 
 export async function GET() {
   try {

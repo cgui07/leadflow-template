@@ -1,13 +1,15 @@
 "use client";
 
-import { TextField } from "@/components/forms";
-import { PageContainer } from "@/components/layout/PageContainer";
+import Image from "next/image";
+import { useFetch } from "@/lib/hooks";
+import { useRef, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
+import { TextField } from "@/components/forms";
 import { Button } from "@/components/ui/Button";
+import { getScoreBadgeClass } from "@/lib/ui-colors";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingState } from "@/components/ui/LoadingState";
-import { useFetch } from "@/lib/hooks";
-import { getScoreBadgeClass } from "@/lib/ui-colors";
+import { PageContainer } from "@/components/layout/PageContainer";
 import {
   ArrowLeft,
   Bot,
@@ -17,8 +19,6 @@ import {
   Send,
   User,
 } from "lucide-react";
-import Image from "next/image";
-import { useRef, useState } from "react";
 
 interface ConversationItem {
   id: string;

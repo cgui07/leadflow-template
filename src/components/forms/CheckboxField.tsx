@@ -1,8 +1,8 @@
 "use client";
 
-import { forwardRef, useId } from "react";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
+import { forwardRef, useId } from "react";
 import { Button } from "@/components/ui/Button";
 
 type CheckboxVariant = "checkbox" | "switch";

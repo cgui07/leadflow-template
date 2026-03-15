@@ -1,12 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { TextField } from "@/components/forms";
-import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
 import { Button } from "@/components/ui/Button";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
+import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
 
 interface RegisterForm {
   name: string;

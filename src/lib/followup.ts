@@ -1,6 +1,6 @@
 import { prisma } from "./db";
-import { sendAndSaveMessage } from "./whatsapp";
 import { generateAutoReply } from "./ai";
+import { sendAndSaveMessage } from "./whatsapp";
 
 const FOLLOW_UP_TEMPLATES = [
   "Olá! Tudo bem? Estou passando para saber se ainda tem interesse em encontrar o imóvel ideal. Posso ajudar com alguma informação?",

@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useRef, useEffect } from "react";
 
 interface MessageListProps {
   children: React.ReactNode;

@@ -1,7 +1,7 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { MessageDirection, MessageStatus } from "@/types";
 import { AlertCircle, Check, CheckCheck, Clock } from "lucide-react";
-import Image from "next/image";
 
 interface MessageBubbleProps {
   content: string;

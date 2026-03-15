@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
-import { normalizeEmail, verifyPassword, signToken, setAuthCookie } from "@/lib/auth";
 import { json, error } from "@/lib/api";
 import { NextRequest } from "next/server";
+import { normalizeEmail, verifyPassword, signToken, setAuthCookie } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {

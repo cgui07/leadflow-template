@@ -1,13 +1,13 @@
 "use client";
 
-import { PageContainer } from "@/components/layout/PageContainer";
-import { LoadingState } from "@/components/ui/LoadingState";
+import Link from "next/link";
 import { useFetch } from "@/lib/hooks";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { PageContainer } from "@/components/layout/PageContainer";
 import {
   getPipelineColorDotClass,
   getScoreBadgeClass,
 } from "@/lib/ui-colors";
-import Link from "next/link";
 
 interface PipelineStage {
   id: string;

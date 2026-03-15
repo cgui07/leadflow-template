@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import Link from "next/link";
+import { useFetch } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
-import { PageContainer } from "@/components/layout/PageContainer";
-import { SectionContainer } from "@/components/layout/SectionContainer";
+import { Tabs } from "@/components/ui/Tabs";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Tabs } from "@/components/ui/Tabs";
+import { useEffect, useState, use } from "react";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { SelectField, TextField } from "@/components/forms";
-import { useFetch } from "@/lib/hooks";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { SectionContainer } from "@/components/layout/SectionContainer";
 import {
   getPipelineColorSoftClass,
   getScoreTextClass,
@@ -18,7 +19,6 @@ import {
   ArrowLeft, Phone, Mail, MapPin, Home, Calendar,
   DollarSign, Target, Clock, Send,
 } from "lucide-react";
-import Link from "next/link";
 
 interface LeadDetail {
   id: string;

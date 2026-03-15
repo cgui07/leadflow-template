@@ -1,8 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Modal } from "@/components/ui/Modal";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 import {
   CheckSquare,
   ChevronLeft,
@@ -13,9 +16,6 @@ import {
   Settings,
   Users,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
 
 interface NavItem {
   label: string;

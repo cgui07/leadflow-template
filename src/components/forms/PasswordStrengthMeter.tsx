@@ -1,7 +1,7 @@
 "use client";
 
-import { getPasswordStrength } from "@/lib/password-strength";
 import { cn } from "@/lib/utils";
+import { getPasswordStrength } from "@/lib/password-strength";
 
 interface PasswordStrengthMeterProps {
   password: string;

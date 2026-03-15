@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import type { Column } from "@/types";
 import { EmptyState } from "./EmptyState";
 import { LoadingState } from "./LoadingState";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 interface DataTableProps<T> {
   columns: Column<T>[];

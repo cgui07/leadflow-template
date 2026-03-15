@@ -1,10 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { Suspense, useState } from "react";
 import { TextField } from "@/components/forms";
 import { Button } from "@/components/ui/Button";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
 
 export default function LoginPage() {
   return (

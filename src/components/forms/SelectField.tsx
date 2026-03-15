@@ -1,11 +1,11 @@
 "use client";
 
-import { forwardRef, useState, useRef, useEffect, useId } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronDown, X, Check, Loader2 } from "lucide-react";
+import type { SelectOption } from "@/types";
 import { FieldWrapper } from "./FieldWrapper";
 import { Button } from "@/components/ui/Button";
-import type { SelectOption } from "@/types";
+import { ChevronDown, X, Check, Loader2 } from "lucide-react";
+import { forwardRef, useState, useRef, useEffect, useId } from "react";
 
 type SelectFieldSize = "sm" | "md" | "lg";
 

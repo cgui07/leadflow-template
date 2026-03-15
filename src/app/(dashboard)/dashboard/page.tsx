@@ -1,18 +1,18 @@
 "use client";
 
-import { PageContainer } from "@/components/layout/PageContainer";
-import { SectionContainer } from "@/components/layout/SectionContainer";
-import { KpiCard } from "@/components/ui/KpiCard";
+import Link from "next/link";
+import type { Column } from "@/types";
+import { useFetch } from "@/lib/hooks";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { DataTable } from "@/components/ui/DataTable";
-import { LoadingState } from "@/components/ui/LoadingState";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { useFetch } from "@/lib/hooks";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { getScoreTextClass } from "@/lib/ui-colors";
+import { DataTable } from "@/components/ui/DataTable";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Users, MessageSquare, CheckSquare, Plus, Flame } from "lucide-react";
-import type { Column } from "@/types";
-import Link from "next/link";
 
 interface DashboardData {
   kpis: {

@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
-import { MoreVertical, Phone } from "lucide-react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
+import { MoreVertical, Phone } from "lucide-react";
 
 interface ConversationHeaderProps {
   name: string;

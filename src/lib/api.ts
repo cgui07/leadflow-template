@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { getCurrentUser } from "./auth";
+import { NextResponse } from "next/server";
 
 export function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status });

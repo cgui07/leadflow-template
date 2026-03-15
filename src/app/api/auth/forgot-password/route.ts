@@ -1,8 +1,8 @@
-import { NextRequest } from "next/server";
-import { json, error } from "@/lib/api";
-import { createPasswordResetToken, normalizeEmail } from "@/lib/auth";
-import { sendPasswordResetEmail } from "@/lib/email";
 import { prisma } from "@/lib/db";
+import { json, error } from "@/lib/api";
+import { NextRequest } from "next/server";
+import { sendPasswordResetEmail } from "@/lib/email";
+import { createPasswordResetToken, normalizeEmail } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {

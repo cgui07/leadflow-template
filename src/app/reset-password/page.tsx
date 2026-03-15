@@ -1,13 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { TextField } from "@/components/forms";
-import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
 import { Button } from "@/components/ui/Button";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
 import { ShieldCheck, ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
+import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
 
 export default function ResetPasswordPage() {
   return (
