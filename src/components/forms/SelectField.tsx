@@ -148,7 +148,7 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
               onClick={() => !disabled && !loading && setOpen(!open)}
               className={cn(
                 "flex items-center justify-between w-full rounded-lg border bg-white transition-colors text-left gap-2",
-                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
                 "disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed",
                 error ? "border-red-300" : "border-slate-300",
                 sizeStyles[fieldSize],
@@ -190,7 +190,7 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Buscar..."
-                    className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary"
                     autoFocus
                   />
                 </div>
@@ -214,7 +214,7 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
                       className={cn(
                         "flex items-center justify-between w-full px-3 py-2 text-sm transition-colors",
                         isSelected
-                          ? "bg-blue-50 text-blue-700"
+                          ? "bg-blue-pale text-primary"
                           : "text-slate-700 hover:bg-slate-50",
                         opt.disabled && "opacity-50 cursor-not-allowed"
                       )}

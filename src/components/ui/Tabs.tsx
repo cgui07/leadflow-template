@@ -4,7 +4,8 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface Tab {
-  key: string;
+  key?: string;
+  id?: string;
   label: string;
   icon?: React.ReactNode;
   count?: number;
@@ -14,6 +15,7 @@ interface TabsProps {
   tabs: Tab[];
   activeTab?: string;
   onChange?: (key: string) => void;
+  onTabChange?: (key: string) => void;
   children?: (activeKey: string) => React.ReactNode;
   className?: string;
 }
@@ -22,15 +24,18 @@ export function Tabs({
   tabs,
   activeTab,
   onChange,
+  onTabChange,
   children,
   className,
 }: TabsProps) {
-  const [internalActive, setInternalActive] = useState(tabs[0]?.key ?? "");
+  const getKey = (tab: Tab) => tab.key ?? tab.id ?? tab.label;
+  const [internalActive, setInternalActive] = useState(getKey(tabs[0]) ?? "");
   const active = activeTab ?? internalActive;
 
   function handleChange(key: string) {
     setInternalActive(key);
     onChange?.(key);
+    onTabChange?.(key);
   }
 
   return (
@@ -38,11 +43,11 @@ export function Tabs({
       <div className="flex border-b border-slate-200">
         {tabs.map((tab) => (
           <button
-            key={tab.key}
-            onClick={() => handleChange(tab.key)}
+            key={getKey(tab)}
+            onClick={() => handleChange(getKey(tab))}
             className={cn(
               "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px",
-              active === tab.key
+              active === getKey(tab)
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
             )}
@@ -53,7 +58,7 @@ export function Tabs({
               <span
                 className={cn(
                   "px-1.5 py-0.5 text-xs rounded-full",
-                  active === tab.key
+                  active === getKey(tab)
                     ? "bg-blue-100 text-blue-600"
                     : "bg-slate-100 text-slate-500"
                 )}

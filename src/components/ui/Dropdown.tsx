@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
 
 interface DropdownItem {
   label: string;
@@ -42,7 +42,8 @@ export function Dropdown({
     }
     if (open) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [open]);
 
@@ -53,15 +54,13 @@ export function Dropdown({
       {open && (
         <div
           className={cn(
-            "absolute z-50 mt-1 min-w-[180px] bg-white rounded-lg border border-slate-200 shadow-lg py-1",
-            align === "right" ? "right-0" : "left-0"
+            "absolute z-50 mt-1 min-w-45 bg-white rounded-lg border border-slate-200 shadow-lg py-1",
+            align === "right" ? "right-0" : "left-0",
           )}
         >
           {items.map((item, i) => {
             if (item.divider) {
-              return (
-                <div key={i} className="my-1 border-t border-slate-100" />
-              );
+              return <div key={i} className="my-1 border-t border-slate-100" />;
             }
 
             return (
@@ -77,11 +76,11 @@ export function Dropdown({
                   item.danger
                     ? "text-red-600 hover:bg-red-50"
                     : "text-slate-700 hover:bg-slate-50",
-                  item.disabled && "opacity-50 cursor-not-allowed"
+                  item.disabled && "opacity-50 cursor-not-allowed",
                 )}
               >
                 {item.icon && (
-                  <span className="flex-shrink-0 w-4 h-4">{item.icon}</span>
+                  <span className="shrink-0 w-4 h-4">{item.icon}</span>
                 )}
                 {item.label}
               </button>

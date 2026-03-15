@@ -55,9 +55,9 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
             onClick={handleToggle}
             className={cn(
               "relative inline-flex h-5 w-9 flex-shrink-0 rounded-full transition-colors",
-              "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+              "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
               "disabled:opacity-50 disabled:cursor-not-allowed",
-              checked ? "bg-blue-600" : "bg-slate-300"
+              checked ? "bg-primary" : "bg-slate-300"
             )}
           >
             <span
@@ -100,10 +100,10 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
           onClick={handleToggle}
           className={cn(
             "flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border transition-colors mt-0.5",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             checked
-              ? "bg-blue-600 border-blue-600 text-white"
+              ? "bg-primary border-primary text-white"
               : "border-slate-300 bg-white"
           )}
         >
