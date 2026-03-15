@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
-import { StickyNote, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
+import { Pencil, StickyNote, Trash2 } from "lucide-react";
 
 interface NoteCardProps {
   content: string;
@@ -23,12 +23,12 @@ export function NoteCard({
     <div
       className={cn(
         "bg-yellow-pale border border-yellow-butter rounded-lg p-4 space-y-2",
-        className
+        className,
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <StickyNote className="h-4 w-4 text-yellow-gold flex-shrink-0" />
+          <StickyNote className="h-4 w-4 text-yellow-gold shrink-0" />
           <div className="text-xs font-medium text-yellow-dark">{author}</div>
           <div className="text-xs text-orange-amber">{timestamp}</div>
         </div>

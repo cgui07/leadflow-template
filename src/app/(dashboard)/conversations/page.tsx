@@ -11,12 +11,17 @@ import { getScoreBadgeClass } from "@/lib/ui-colors";
 import {
   ArrowLeft,
   Bot,
+  FileText,
+  Image as ImageIcon,
   MessageSquare,
+  Paperclip,
   Search,
   Send,
   User,
+  Video,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface ConversationItem {
   id: string;
@@ -48,6 +53,16 @@ interface MessageItem {
   type: string;
   status: string;
   createdAt: string;
+  metadata?: {
+    mediaUrl?: string;
+    mimetype?: string;
+    fileName?: string;
+    fileSize?: number;
+    caption?: string;
+    seconds?: number;
+    width?: number;
+    height?: number;
+  };
 }
 
 export default function ConversationsPage() {
@@ -55,6 +70,9 @@ export default function ConversationsPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const queryParams = search ? `?search=${encodeURIComponent(search)}` : "";
   const {
@@ -68,16 +86,53 @@ export default function ConversationsPage() {
 
   const selectedConv = conversations?.find((c) => c.id === selected);
 
+  function getMediaType(file: File): string {
+    if (file.type.startsWith("image/")) return "image";
+    if (file.type.startsWith("video/")) return "video";
+    if (file.type.startsWith("audio/")) return "audio";
+    return "document";
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMediaFile(file);
+    if (file.type.startsWith("image/")) {
+      const url = URL.createObjectURL(file);
+      setMediaPreview(url);
+    } else {
+      setMediaPreview(null);
+    }
+  }
+
+  function clearMedia() {
+    setMediaFile(null);
+    setMediaPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!message.trim() || !selected) return;
+    if ((!message.trim() && !mediaFile) || !selected) return;
     setSending(true);
     try {
-      await fetch(`/api/conversations/${selected}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: message }),
-      });
+      if (mediaFile) {
+        const formData = new FormData();
+        formData.append("file", mediaFile);
+        formData.append("mediaType", getMediaType(mediaFile));
+        if (message.trim()) formData.append("caption", message.trim());
+        await fetch(`/api/conversations/${selected}/media`, {
+          method: "POST",
+          body: formData,
+        });
+        clearMedia();
+      } else {
+        await fetch(`/api/conversations/${selected}/messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: message }),
+        });
+      }
       setMessage("");
       refetchMessages();
       refetch();
@@ -240,7 +295,47 @@ export default function ConversationsPage() {
                       ? "Você"
                       : "Cliente"}
                 </div>
-                <div>{msg.content}</div>
+                {msg.type === "image" && msg.metadata?.mediaUrl ? (
+                  <div className="mb-1">
+                    <img
+                      src={msg.metadata.mediaUrl}
+                      alt={msg.metadata.caption || "Imagem"}
+                      className="max-w-full rounded-lg max-h-60 object-cover cursor-pointer"
+                      onClick={() => window.open(msg.metadata!.mediaUrl!, "_blank")}
+                    />
+                    {msg.metadata.caption && msg.metadata.caption !== msg.content && (
+                      <div className="mt-1">{msg.metadata.caption}</div>
+                    )}
+                  </div>
+                ) : msg.type === "video" && msg.metadata?.mediaUrl ? (
+                  <div className="mb-1">
+                    <video
+                      src={msg.metadata.mediaUrl}
+                      controls
+                      className="max-w-full rounded-lg max-h-60"
+                    />
+                    {msg.metadata.caption && msg.metadata.caption !== msg.content && (
+                      <div className="mt-1">{msg.metadata.caption}</div>
+                    )}
+                  </div>
+                ) : msg.type === "audio" && msg.metadata?.mediaUrl ? (
+                  <div className="mb-1">
+                    <audio src={msg.metadata.mediaUrl} controls className="max-w-full" />
+                  </div>
+                ) : msg.type === "document" && msg.metadata?.mediaUrl ? (
+                  <a
+                    href={msg.metadata.mediaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 py-1 underline"
+                  >
+                    <FileText className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{msg.metadata.fileName || "Documento"}</span>
+                  </a>
+                ) : (
+                  <div>{msg.content}</div>
+                )}
+                {msg.type !== "text" && !msg.metadata?.mediaUrl && <div>{msg.content}</div>}
                 <div className="text-[10px] opacity-50 mt-1">
                   {new Date(msg.createdAt).toLocaleTimeString("pt-BR", {
                     hour: "2-digit",

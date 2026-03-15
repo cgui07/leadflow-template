@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import { Check, CheckCheck, Clock, AlertCircle } from "lucide-react";
 import type { MessageDirection, MessageStatus } from "@/types";
+import { AlertCircle, Check, CheckCheck, Clock } from "lucide-react";
 
 interface MessageBubbleProps {
   content: string;
@@ -36,11 +36,11 @@ export function MessageBubble({
       className={cn(
         "flex gap-2 max-w-[75%]",
         isSent ? "ml-auto flex-row-reverse" : "mr-auto",
-        className
+        className,
       )}
     >
       {!isSent && (
-        <div className="flex-shrink-0 mt-auto">
+        <div className="shrink-0 mt-auto">
           {senderAvatar ? (
             <img
               src={senderAvatar}
@@ -65,7 +65,7 @@ export function MessageBubble({
             "px-3 py-2 rounded-2xl text-sm leading-relaxed",
             isSent
               ? "bg-blue-royal text-white rounded-br-md"
-              : "bg-neutral-pale text-neutral-ink rounded-bl-md"
+              : "bg-neutral-pale text-neutral-ink rounded-bl-md",
           )}
         >
           {content}
@@ -73,7 +73,7 @@ export function MessageBubble({
         <div
           className={cn(
             "flex items-center gap-1 mt-1 px-1",
-            isSent ? "justify-end" : "justify-start"
+            isSent ? "justify-end" : "justify-start",
           )}
         >
           <div className="text-[11px] text-neutral-muted">{timestamp}</div>

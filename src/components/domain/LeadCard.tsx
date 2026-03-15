@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/Badge";
 import { ActionMenu } from "@/components/ui/ActionMenu";
-import { Mail, Phone, Building2 } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { cn } from "@/lib/utils";
 import type { Lead, LeadStatus } from "@/types";
+import { Building2, Mail, Phone } from "lucide-react";
 
 interface LeadCardProps {
   lead: Lead;
@@ -12,7 +12,13 @@ interface LeadCardProps {
   className?: string;
 }
 
-const statusConfig: Record<LeadStatus, { label: string; variant: "default" | "success" | "warning" | "error" | "info" | "purple" }> = {
+const statusConfig: Record<
+  LeadStatus,
+  {
+    label: string;
+    variant: "default" | "success" | "warning" | "error" | "info" | "purple";
+  }
+> = {
   new: { label: "Novo", variant: "info" },
   contacted: { label: "Contatado", variant: "default" },
   qualified: { label: "Qualificado", variant: "purple" },
@@ -41,7 +47,9 @@ export function LeadCard({
 
   const menuItems = [
     ...(onEdit ? [{ label: "Editar", onClick: onEdit }] : []),
-    ...(onDelete ? [{ label: "Excluir", onClick: onDelete, danger: true }] : []),
+    ...(onDelete
+      ? [{ label: "Excluir", onClick: onDelete, danger: true }]
+      : []),
   ];
 
   return (
@@ -51,7 +59,7 @@ export function LeadCard({
         "bg-white rounded-lg border border-neutral-border p-3 space-y-2.5",
         "hover:border-neutral-line hover:shadow-sm transition-all",
         onClick && "cursor-pointer",
-        className
+        className,
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -71,13 +79,13 @@ export function LeadCard({
       <div className="space-y-1">
         {lead.email && (
           <div className="flex items-center gap-1.5 text-xs text-neutral truncate">
-            <Mail className="h-3 w-3 flex-shrink-0" />
+            <Mail className="h-3 w-3 shrink-0" />
             {lead.email}
           </div>
         )}
         {lead.phone && (
           <div className="flex items-center gap-1.5 text-xs text-neutral">
-            <Phone className="h-3 w-3 flex-shrink-0" />
+            <Phone className="h-3 w-3 shrink-0" />
             {lead.phone}
           </div>
         )}

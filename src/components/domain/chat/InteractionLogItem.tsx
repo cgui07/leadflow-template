@@ -1,11 +1,10 @@
 import { cn } from "@/lib/utils";
 import {
-  Phone,
-  PhoneIncoming,
-  PhoneOutgoing,
-  PhoneMissed,
   Mail,
   MessageSquare,
+  PhoneIncoming,
+  PhoneMissed,
+  PhoneOutgoing,
   Video,
 } from "lucide-react";
 
@@ -76,14 +75,14 @@ export function InteractionLogItem({
     <div
       className={cn(
         "flex items-start gap-3 py-3 border-b border-neutral-pale last:border-0",
-        className
+        className,
       )}
     >
       <div
         className={cn(
-          "flex items-center justify-center h-8 w-8 rounded-lg flex-shrink-0",
+          "flex items-center justify-center h-8 w-8 rounded-lg shrink-0",
           config.bg,
-          config.color
+          config.color,
         )}
       >
         {config.icon}
@@ -96,7 +95,7 @@ export function InteractionLogItem({
           </div>
         )}
       </div>
-      <div className="text-right flex-shrink-0">
+      <div className="text-right shrink-0">
         <div className="text-xs text-neutral-muted">{timestamp}</div>
         {duration && (
           <div className="text-xs text-neutral-muted mt-0.5">{duration}</div>

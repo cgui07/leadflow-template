@@ -17,12 +17,12 @@ export function ChatContainer({
     <div
       className={cn(
         "flex flex-col h-full bg-white rounded-xl border border-neutral-border overflow-hidden",
-        className
+        className,
       )}
     >
       {header}
       <div className="flex-1 overflow-y-auto">{messages}</div>
-      <div className="flex-shrink-0">{input}</div>
+      <div className="shrink-0">{input}</div>
     </div>
   );
 }

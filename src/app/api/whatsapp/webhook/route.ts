@@ -74,26 +74,68 @@ export async function POST(req: NextRequest) {
 
     const messageType = data.messageType || "conversation";
     let textContent = "";
+    let mediaType: string | undefined;
+    let mediaMetadata: Record<string, unknown> | undefined;
 
     if (data.message?.conversation) {
       textContent = data.message.conversation;
     } else if (data.message?.extendedTextMessage?.text) {
       textContent = data.message.extendedTextMessage.text;
     } else if (data.message?.audioMessage) {
+      mediaType = "audio";
       textContent = "[Áudio recebido]";
+      mediaMetadata = {
+        mediaUrl: data.message.audioMessage.url,
+        mimetype: data.message.audioMessage.mimetype,
+        seconds: data.message.audioMessage.seconds,
+        fileLength: data.message.audioMessage.fileLength,
+      };
     } else if (data.message?.imageMessage) {
+      mediaType = "image";
       textContent = data.message.imageMessage.caption || "[Imagem recebida]";
+      mediaMetadata = {
+        mediaUrl: data.message.imageMessage.url,
+        mimetype: data.message.imageMessage.mimetype,
+        caption: data.message.imageMessage.caption,
+        width: data.message.imageMessage.width,
+        height: data.message.imageMessage.height,
+      };
     } else if (data.message?.videoMessage) {
+      mediaType = "video";
       textContent = data.message.videoMessage.caption || "[Vídeo recebido]";
+      mediaMetadata = {
+        mediaUrl: data.message.videoMessage.url,
+        mimetype: data.message.videoMessage.mimetype,
+        caption: data.message.videoMessage.caption,
+        seconds: data.message.videoMessage.seconds,
+      };
     } else if (data.message?.documentMessage) {
+      mediaType = "document";
       const fileName = data.message.documentMessage.fileName || "documento";
-      textContent = `[Documento recebido: ${fileName}]`;
+      textContent = `[Documento: ${fileName}]`;
+      mediaMetadata = {
+        mediaUrl: data.message.documentMessage.url,
+        mimetype: data.message.documentMessage.mimetype,
+        fileName: data.message.documentMessage.fileName,
+        fileLength: data.message.documentMessage.fileLength,
+      };
     } else if (data.message?.stickerMessage) {
+      mediaType = "sticker";
       textContent = "[Sticker recebido]";
+      mediaMetadata = {
+        mediaUrl: data.message.stickerMessage.url,
+        mimetype: data.message.stickerMessage.mimetype,
+      };
     } else if (data.message?.contactMessage) {
       textContent = "[Contato recebido]";
     } else if (data.message?.locationMessage) {
       textContent = "[Localização recebida]";
+      mediaMetadata = {
+        latitude: data.message.locationMessage.degreesLatitude,
+        longitude: data.message.locationMessage.degreesLongitude,
+        name: data.message.locationMessage.name,
+        address: data.message.locationMessage.address,
+      };
     }
 
     if (!textContent) {
@@ -106,9 +148,10 @@ export async function POST(req: NextRequest) {
       from: remoteJid,
       id: key.id,
       text: textContent,
-      type: messageType,
+      type: mediaType || messageType,
       timestamp: String(data.messageTimestamp || Date.now()),
       pushName: data.pushName,
+      metadata: mediaMetadata,
     });
 
     const conv = result.conversation;

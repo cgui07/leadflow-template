@@ -38,7 +38,7 @@ export interface PipelineStage {
   totalValue: number;
 }
 
-export type MessageType = "text" | "image" | "file" | "audio";
+export type MessageType = "text" | "image" | "video" | "audio" | "document" | "sticker";
 export type MessageDirection = "sent" | "received";
 export type MessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
 

@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
-import { Phone, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
+import { MoreVertical, Phone } from "lucide-react";
 
 interface ConversationHeaderProps {
   name: string;
@@ -34,12 +34,12 @@ export function ConversationHeader({
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-4 py-3 border-b border-neutral-border flex-shrink-0",
-        className
+        "flex items-center justify-between px-4 py-3 border-b border-neutral-border shrink-0",
+        className,
       )}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className="relative flex-shrink-0">
+        <div className="relative shrink-0">
           {avatar ? (
             <img
               src={avatar}
@@ -55,7 +55,7 @@ export function ConversationHeader({
             <div
               className={cn(
                 "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white",
-                statusColors[status]
+                statusColors[status],
               )}
             />
           )}
@@ -72,8 +72,16 @@ export function ConversationHeader({
       <div className="flex items-center gap-1">
         {actions ?? (
           <>
-            <Button variant="ghost" size="sm" icon={<Phone className="h-4 w-4" />} />
-            <Button variant="ghost" size="sm" icon={<MoreVertical className="h-4 w-4" />} />
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Phone className="h-4 w-4" />}
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<MoreVertical className="h-4 w-4" />}
+            />
           </>
         )}
       </div>
