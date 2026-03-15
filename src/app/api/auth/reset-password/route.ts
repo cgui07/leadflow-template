@@ -1,13 +1,13 @@
-import { NextRequest } from "next/server";
+import { prisma } from "@/lib/db";
 import { json, error } from "@/lib/api";
+import { NextRequest } from "next/server";
+import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
 import {
   hashPassword,
   hashPasswordResetToken,
   setAuthCookie,
   signToken,
 } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
 
 export async function GET(req: NextRequest) {
   try {

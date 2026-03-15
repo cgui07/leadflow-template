@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
-import { json, error, requireAuth, handleError } from "@/lib/api";
 import { NextRequest } from "next/server";
 import { resolveSendTarget } from "@/lib/whatsapp";
+import { json, error, requireAuth, handleError } from "@/lib/api";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

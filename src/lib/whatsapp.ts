@@ -1,8 +1,10 @@
 import { prisma } from "./db";
+import { getDefaultPipelineStageId } from "./pipeline";
+import type { Prisma } from "@/generated/prisma/client";
 
 interface WhatsAppConfig {
-  phoneId: string; // Evolution API instance name
-  token: string;   // Evolution API key
+  phoneId: string;
+  token: string;
 }
 
 const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://localhost:8080";
@@ -102,6 +104,10 @@ function parseJsonResponse(raw: string) {
   } catch {
     return { raw };
   }
+}
+
+function toInputJsonValue(value: Record<string, unknown> | undefined) {
+  return value as Prisma.InputJsonValue | undefined;
 }
 
 function getMappingCandidates(event: LidMappingEvent) {
@@ -225,6 +231,60 @@ export async function sendWhatsAppMessage(config: WhatsAppConfig, to: string, te
   return data;
 }
 
+export async function sendWhatsAppMedia(
+  config: WhatsAppConfig,
+  to: string,
+  mediaType: "image" | "video" | "audio" | "document",
+  mediaUrl: string,
+  options?: { caption?: string; fileName?: string; mimetype?: string }
+) {
+  const resolvedTo = resolveReplyJid(to);
+  if (!resolvedTo) {
+    throw new Error(`Cannot resolve WhatsApp recipient JID: ${to}`);
+  }
+
+  const evolutionNumber = toEvolutionNumber(resolvedTo);
+  if (!evolutionNumber) {
+    throw new Error(`Cannot convert WhatsApp recipient into Evolution number: ${resolvedTo}`);
+  }
+
+  const url = `${EVOLUTION_API_URL}/message/sendMedia/${config.phoneId}`;
+  console.log("[whatsapp] Sending media", JSON.stringify({ to, resolvedTo, mediaType }));
+
+  const body: Record<string, unknown> = {
+    number: evolutionNumber,
+    mediatype: mediaType,
+    media: mediaUrl,
+  };
+
+  if (options?.caption) body.caption = options.caption;
+  if (options?.fileName) body.fileName = options.fileName;
+  if (options?.mimetype) body.mimetype = options.mimetype;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      apikey: config.token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  const raw = await res.text();
+  const data = parseJsonResponse(raw);
+
+  if (!res.ok) {
+    console.error("WhatsApp media send error:", data);
+    const message =
+      typeof data === "object" && data && "message" in data && typeof data.message === "string"
+        ? data.message
+        : "Failed to send WhatsApp media";
+    throw new Error(message);
+  }
+
+  return data;
+}
+
 export async function markAsRead(config: WhatsAppConfig, messageId: string) {
   const url = `${EVOLUTION_API_URL}/chat/markMessageAsRead/${config.phoneId}`;
 
@@ -247,15 +307,14 @@ export async function processIncomingMessage(userId: string, message: {
   type: string;
   timestamp: string;
   pushName?: string;
+  metadata?: Record<string, unknown>;
 }) {
-  // "from" can be "5521...@s.whatsapp.net" or a LID like "123456@lid"
   const remoteJid = message.from;
   const resolvedReplyJid = resolveReplyJid(remoteJid);
   const phone = resolvedReplyJid ? getPhoneIdentity(resolvedReplyJid) : remoteJid;
   const contactName = message.pushName || phone;
   const content = message.text || "";
 
-  // Try to find lead by whatsappChatId (remoteJid) first, then by phone
   let lead = await prisma.lead.findFirst({
     where: { userId, conversation: { whatsappChatId: remoteJid } },
     include: { conversation: true },
@@ -269,6 +328,8 @@ export async function processIncomingMessage(userId: string, message: {
   }
 
   if (!lead) {
+    const defaultPipelineStageId = await getDefaultPipelineStageId(userId);
+
     lead = await prisma.lead.create({
       data: {
         userId,
@@ -276,6 +337,7 @@ export async function processIncomingMessage(userId: string, message: {
         phone,
         source: "whatsapp",
         status: "new",
+        pipelineStageId: defaultPipelineStageId,
         conversation: { create: { whatsappChatId: remoteJid } },
       },
       include: { conversation: true },
@@ -320,6 +382,15 @@ export async function processIncomingMessage(userId: string, message: {
     }
   }
 
+  if (message.id) {
+    const existing = await prisma.message.findFirst({
+      where: { conversationId: conversation.id, whatsappMsgId: message.id },
+    });
+    if (existing) {
+      return { lead, conversation, message: existing };
+    }
+  }
+
   const savedMessage = await prisma.message.create({
     data: {
       conversationId: conversation.id,
@@ -329,6 +400,7 @@ export async function processIncomingMessage(userId: string, message: {
       type: message.type === "conversation" || message.type === "extendedTextMessage" ? "text" : message.type,
       status: "delivered",
       whatsappMsgId: message.id,
+      metadata: toInputJsonValue(message.metadata),
     },
   });
 
@@ -343,7 +415,10 @@ export async function processIncomingMessage(userId: string, message: {
 
   await prisma.lead.update({
     where: { id: lead.id },
-    data: { lastContactAt: new Date() },
+    data: {
+      lastContactAt: new Date(),
+      followUpCount: 0,
+    },
   });
 
   return { lead, conversation, message: savedMessage };
@@ -354,7 +429,14 @@ export async function sendAndSaveMessage(
   conversationId: string,
   recipient: string,
   content: string,
-  sender: "bot" | "agent"
+  sender: "bot" | "agent",
+  media?: {
+    type: "image" | "video" | "audio" | "document";
+    url: string;
+    caption?: string;
+    fileName?: string;
+    mimetype?: string;
+  }
 ) {
   let replyJid = resolveReplyJid(recipient);
 
@@ -383,7 +465,16 @@ export async function sendAndSaveMessage(
     return null;
   }
 
-  const waResponse = await sendWhatsAppMessage(config, replyJid, content);
+  let waResponse;
+  if (media) {
+    waResponse = await sendWhatsAppMedia(config, replyJid, media.type, media.url, {
+      caption: media.caption || content,
+      fileName: media.fileName,
+      mimetype: media.mimetype,
+    });
+  } else {
+    waResponse = await sendWhatsAppMessage(config, replyJid, content);
+  }
   const waMessageId = waResponse.key?.id ?? waResponse.messages?.[0]?.id;
 
   const message = await prisma.message.create({
@@ -391,10 +482,19 @@ export async function sendAndSaveMessage(
       conversationId,
       direction: "outbound",
       sender,
-      content,
-      type: "text",
+      content: media?.caption || content,
+      type: media?.type || "text",
       status: "sent",
       whatsappMsgId: waMessageId,
+      metadata: toInputJsonValue(
+        media
+          ? {
+              mediaUrl: media.url,
+              mimetype: media.mimetype,
+              fileName: media.fileName,
+            }
+          : undefined,
+      ),
     },
   });
 

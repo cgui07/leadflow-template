@@ -1,5 +1,162 @@
 import type { Config } from "tailwindcss";
 
+export const appColors = {
+  primary:   "#3366ff",
+  secondary: "#7c3aed",
+  accent:    "#f97316",
+  success:   "#22c55e",
+  warning:   "#eab308",
+  danger:    "#ef4444",
+  info:      "#38bdf8",
+
+  blue: {
+    DEFAULT:  "#3b82f6",
+    sky:      "#38bdf8",
+    royal:    "#2563eb",
+    navy:     "#1e3a8a",
+    ice:      "#bfdbfe",
+    pale:     "#eff6ff",
+    midnight: "#172554",
+  },
+
+  indigo: {
+    DEFAULT: "#6366f1",
+    deep:    "#4f46e5",
+    pale:    "#eef2ff",
+  },
+
+  purple: {
+    DEFAULT:  "#7c3aed",
+    amethyst: "#8b5cf6",
+    violet:   "#6d28d9",
+    lavender: "#a78bfa",
+    lilac:    "#ddd6fe",
+    plum:     "#4c1d95",
+    pale:     "#f5f3ff",
+    grape:    "#5b21b6",
+  },
+
+  pink: {
+    DEFAULT:  "#ec4899",
+    hot:      "#db2777",
+    blush:    "#f9a8d4",
+    rose:     "#fce7f3",
+    magenta:  "#be185d",
+    pale:     "#fdf2f8",
+    fuchsia:  "#c026d3",
+  },
+
+  red: {
+    DEFAULT:  "#ef4444",
+    crimson:  "#dc2626",
+    coral:    "#f87171",
+    blush:    "#fecaca",
+    pale:     "#fef2f2",
+    dark:     "#991b1b",
+    darker:   "#450a0a",
+  },
+
+  orange: {
+    DEFAULT: "#f97316",
+    amber:   "#f59e0b",
+    peach:   "#fdba74",
+    light:   "#fed7aa",
+    pale:    "#fff7ed",
+    dark:    "#c2570a",
+    burn:    "#7c2d12",
+  },
+
+  yellow: {
+    DEFAULT: "#eab308",
+    gold:    "#ca8a04",
+    lemon:   "#fde047",
+    butter:  "#fef08a",
+    pale:    "#fefce8",
+    dark:    "#a16207",
+    mustard: "#713f12",
+  },
+
+  green: {
+    DEFAULT: "#22c55e",
+    emerald: "#10b981",
+    lime:    "#84cc16",
+    mint:    "#86efac",
+    sage:    "#bbf7d0",
+    pale:    "#f0fdf4",
+    dark:    "#15803d",
+    forest:  "#14532d",
+  },
+
+  teal: {
+    DEFAULT: "#14b8a6",
+    cyan:    "#06b6d4",
+    aqua:    "#67e8f9",
+    mist:    "#ccfbf1",
+    pale:    "#f0fdfa",
+    dark:    "#0f766e",
+    deep:    "#134e4a",
+  },
+
+  gray: {
+    DEFAULT:  "#6b7280",
+    smoke:    "#9ca3af",
+    silver:   "#d1d5db",
+    ash:      "#e5e7eb",
+    ghost:    "#f3f4f6",
+    pale:     "#f9fafb",
+    charcoal: "#374151",
+    iron:     "#1f2937",
+    jet:      "#111827",
+  },
+
+  neutral: {
+    DEFAULT: "#64748b",
+    muted:   "#94a3b8",
+    border:  "#e2e8f0",
+    line:    "#cbd5e1",
+    surface: "#f8fafc",
+    pale:    "#f1f5f9",
+    steel:   "#475569",
+    dark:    "#334155",
+    deep:    "#1e293b",
+    ink:     "#0f172a",
+  },
+
+  black: {
+    DEFAULT: "#000000",
+    rich:    "#0a0a0a",
+    soft:    "#171717",
+    fade:    "#1a1a1a",
+  },
+
+  white: {
+    DEFAULT: "#ffffff",
+    off:     "#fafafa",
+    cream:   "#f5f5f5",
+    warm:    "#fffbf0",
+  },
+
+  google: {
+    blue:   "#4285f4",
+    green:  "#34a853",
+    yellow: "#fbbc05",
+    red:    "#ea4335",
+  },
+} as const;
+
+export const appBoxShadows = {
+  soft:           "0 2px 15px -3px rgba(0,0,0,.07), 0 10px 20px -2px rgba(0,0,0,.04)",
+  card:           "0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06)",
+  "primary-glow": "0 0 20px rgba(51,102,255,.35)",
+  hero:           "0 32px 90px rgba(41,37,36,0.22)",
+  "hero-soft":    "0 24px 70px rgba(41,37,36,0.18)",
+} as const;
+
+export const appBackgroundImages = {
+  "landing-hero":
+    "radial-gradient(circle at top left, rgba(15,118,110,0.18), transparent 34%), radial-gradient(circle at top right, rgba(202,138,4,0.18), transparent 28%), linear-gradient(180deg, #fffbf0 0%, #ffffff 46%, #f5f5f5 100%)",
+} as const;
+
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,135 +167,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary:    "#3366ff",
-        secondary:  "#7c3aed",
-        accent:     "#f97316",
-        success:    "#22c55e",
-        warning:    "#eab308",
-        danger:     "#ef4444",
-        info:       "#38bdf8",
-
         background: "var(--background)",
         foreground: "var(--foreground)",
-
-        blue: {
-          DEFAULT:  "#3b82f6",
-          sky:      "#38bdf8",
-          royal:    "#2563eb",
-          navy:     "#1e3a8a",
-          ice:      "#bfdbfe",
-          pale:     "#eff6ff",
-          midnight: "#172554",
-        },
-
-        purple: {
-          DEFAULT:  "#7c3aed",
-          violet:   "#6d28d9",
-          lavender: "#a78bfa",
-          lilac:    "#ddd6fe",
-          plum:     "#4c1d95",
-          pale:     "#f5f3ff",
-          grape:    "#5b21b6",
-        },
-
-        pink: {
-          DEFAULT:  "#ec4899",
-          hot:      "#db2777",
-          blush:    "#f9a8d4",
-          rose:     "#fce7f3",
-          magenta:  "#be185d",
-          pale:     "#fdf2f8",
-          fuchsia:  "#c026d3",
-        },
-
-        red: {
-          DEFAULT:  "#ef4444",
-          crimson:  "#dc2626",
-          coral:    "#f87171",
-          blush:    "#fecaca",
-          pale:     "#fef2f2",
-          dark:     "#991b1b",
-          darker:   "#450a0a",
-        },
-
-        orange: {
-          DEFAULT:  "#f97316",
-          amber:    "#f59e0b",
-          peach:    "#fdba74",
-          light:    "#fed7aa",
-          pale:     "#fff7ed",
-          dark:     "#c2570a",
-          burn:     "#7c2d12",
-        },
-
-        yellow: {
-          DEFAULT:  "#eab308",
-          gold:     "#ca8a04",
-          lemon:    "#fde047",
-          butter:   "#fef08a",
-          pale:     "#fefce8",
-          dark:     "#a16207",
-          mustard:  "#713f12",
-        },
-
-        green: {
-          DEFAULT:  "#22c55e",
-          emerald:  "#10b981",
-          lime:     "#84cc16",
-          mint:     "#86efac",
-          sage:     "#bbf7d0",
-          pale:     "#f0fdf4",
-          dark:     "#15803d",
-          forest:   "#14532d",
-        },
-
-        teal: {
-          DEFAULT:  "#14b8a6",
-          cyan:     "#06b6d4",
-          aqua:     "#67e8f9",
-          mist:     "#ccfbf1",
-          pale:     "#f0fdfa",
-          dark:     "#0f766e",
-          deep:     "#134e4a",
-        },
-
-        gray: {
-          DEFAULT:  "#6b7280",
-          smoke:    "#9ca3af",
-          silver:   "#d1d5db",
-          ash:      "#e5e7eb",
-          ghost:    "#f3f4f6",
-          pale:     "#f9fafb",
-          charcoal: "#374151",
-          iron:     "#1f2937",
-          jet:      "#111827",
-        },
-
-        neutral: {
-          DEFAULT:  "#64748b",
-          muted:    "#94a3b8",
-          border:   "#e2e8f0",
-          line:     "#cbd5e1",
-          surface:  "#f8fafc",
-          pale:     "#f1f5f9",
-          dark:     "#334155",
-          deep:     "#1e293b",
-          ink:      "#0f172a",
-        },
-
-        black: {
-          DEFAULT:  "#000000",
-          rich:     "#0a0a0a",
-          soft:     "#171717",
-          fade:     "#1a1a1a",
-        },
-
-        white: {
-          DEFAULT:  "#ffffff",
-          off:      "#fafafa",
-          cream:    "#f5f5f5",
-          warm:     "#fffbf0",
-        },
+        ...appColors,
       },
 
       fontFamily: {
@@ -164,9 +195,11 @@ const config: Config = {
       },
 
       boxShadow: {
-        soft:          "0 2px 15px -3px rgba(0,0,0,.07), 0 10px 20px -2px rgba(0,0,0,.04)",
-        card:          "0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06)",
-        "primary-glow": "0 0 20px rgba(51,102,255,.35)",
+        ...appBoxShadows,
+      },
+
+      backgroundImage: {
+        ...appBackgroundImages,
       },
 
       keyframes: {

@@ -1,7 +1,7 @@
 "use client";
 
-import { forwardRef, useId } from "react";
 import { cn } from "@/lib/utils";
+import { forwardRef, useId } from "react";
 import { FieldWrapper } from "./FieldWrapper";
 
 interface TextareaFieldProps
@@ -57,18 +57,18 @@ export const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>
           rows={4}
           className={cn(
             "w-full rounded-lg border bg-white px-3 py-2 text-sm transition-colors resize-y",
-            "placeholder:text-slate-400",
+            "placeholder:text-neutral-muted",
             "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
-            "disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed",
-            error ? "border-red-300 focus:ring-danger" : "border-slate-300",
+            "disabled:bg-neutral-surface disabled:text-neutral-muted disabled:cursor-not-allowed",
+            error ? "border-red-blush focus:ring-danger" : "border-neutral-line",
             className
           )}
           {...props}
         />
         {showCount && maxLength && (
-          <p className="text-xs text-slate-400 text-right">
+          <div className="text-xs text-neutral-muted text-right">
             {charCount}/{maxLength}
-          </p>
+          </div>
         )}
       </FieldWrapper>
     );

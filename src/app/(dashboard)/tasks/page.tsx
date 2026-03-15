@@ -1,18 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { PageContainer } from "@/components/layout/PageContainer";
-import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Button } from "@/components/ui/Button";
+import { useFetch } from "@/lib/hooks";
+import { Tabs } from "@/components/ui/Tabs";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
-import { Tabs } from "@/components/ui/Tabs";
-import { LoadingState } from "@/components/ui/LoadingState";
+import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { TextField, SelectField, DateField, TextareaField } from "@/components/forms";
-import { useFetch } from "@/lib/hooks";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { Plus, CheckCircle, Clock, Trash2 } from "lucide-react";
-import Link from "next/link";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { SectionContainer } from "@/components/layout/SectionContainer";
+import { TextField, SelectField, DateField, TextareaField } from "@/components/forms";
 
 interface TaskItem {
   id: string;
@@ -98,12 +98,11 @@ export default function TasksPage() {
     >
       {overdue.length > 0 && tab === "pending" && (
         <div className="rounded-lg bg-red-pale border border-red-blush p-3">
-          <p className="text-sm font-medium text-danger">
+          <div className="text-sm font-medium text-danger">
             {overdue.length} tarefa(s) atrasada(s)
-          </p>
+          </div>
         </div>
       )}
-
       <Tabs
         tabs={[
           { id: "pending", label: "Pendentes" },
@@ -113,7 +112,6 @@ export default function TasksPage() {
         activeTab={tab}
         onTabChange={setTab}
       />
-
       <SectionContainer>
         {!tasks?.length ? (
           <EmptyState
@@ -127,25 +125,29 @@ export default function TasksPage() {
               return (
                 <div key={task.id} className={`flex items-center gap-3 rounded-lg border p-3 ${isOverdue ? "border-red-blush bg-red-pale" : "border-neutral-border"}`}>
                   {task.status === "pending" && (
-                    <button onClick={() => completeTask(task.id)} className="text-neutral-muted hover:text-success transition">
-                      <CheckCircle size={20} />
-                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => completeTask(task.id)}
+                      icon={<CheckCircle size={20} />}
+                      className="h-auto p-0"
+                    />
                   )}
                   {task.status === "completed" && (
                     <CheckCircle size={20} className="text-success" />
                   )}
                   <div className="flex-1">
-                    <p className={`text-sm font-medium ${task.status === "completed" ? "text-neutral-muted line-through" : "text-neutral-dark"}`}>
+                    <div className={`text-sm font-medium ${task.status === "completed" ? "text-neutral-muted line-through" : "text-neutral-dark"}`}>
                       {task.title}
-                    </p>
+                    </div>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant={isOverdue ? "error" : "default"} size="sm">
                         {typeLabels[task.type] || task.type}
                       </Badge>
-                      <span className={`text-xs flex items-center gap-1 ${isOverdue ? "text-danger" : "text-neutral-muted"}`}>
+                      <div className={`text-xs flex items-center gap-1 ${isOverdue ? "text-danger" : "text-neutral-muted"}`}>
                         <Clock size={10} />
                         {new Date(task.dueAt).toLocaleDateString("pt-BR")}
-                      </span>
+                      </div>
                       {task.lead && (
                         <Link href={`/leads/${task.lead.id}`} className="text-xs text-primary hover:underline">
                           {task.lead.name}
@@ -153,16 +155,19 @@ export default function TasksPage() {
                       )}
                     </div>
                   </div>
-                  <button onClick={() => deleteTask(task.id)} className="text-neutral-line hover:text-danger transition">
-                    <Trash2 size={16} />
-                  </button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteTask(task.id)}
+                    icon={<Trash2 size={16} />}
+                    className="h-auto p-0 text-neutral-line hover:text-danger"
+                  />
                 </div>
               );
             })}
           </div>
         )}
       </SectionContainer>
-
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Nova Tarefa" size="md">
         <form onSubmit={handleCreate} className="space-y-4">
           <TextField

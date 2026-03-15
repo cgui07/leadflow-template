@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/db";
-import { hashPassword, normalizeEmail, signToken, setAuthCookie } from "@/lib/auth";
 import { json, error } from "@/lib/api";
+import { NextRequest } from "next/server";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
 import { DEFAULT_PIPELINE_STAGE_COLORS } from "@/lib/ui-colors";
-import { NextRequest } from "next/server";
+import { hashPassword, normalizeEmail, signToken, setAuthCookie } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {

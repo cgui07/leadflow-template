@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { normalizeEmail, signToken, setAuthCookie } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
 import { DEFAULT_PIPELINE_STAGE_COLORS } from "@/lib/ui-colors";
+import { normalizeEmail, signToken, setAuthCookie } from "@/lib/auth";
 
 interface GoogleTokenResponse {
   access_token: string;
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // 1. Exchange code for tokens
+
     const callbackUrl = new URL(
       "/api/auth/google/callback",
       req.nextUrl.origin,
@@ -53,7 +53,6 @@ export async function GET(req: NextRequest) {
 
     const tokens: GoogleTokenResponse = await tokenRes.json();
 
-    // 2. Get user info from Google
     const userInfoRes = await fetch(
       "https://www.googleapis.com/oauth2/v3/userinfo",
       { headers: { Authorization: `Bearer ${tokens.access_token}` } },
@@ -72,7 +71,6 @@ export async function GET(req: NextRequest) {
 
     const normalizedEmail = normalizeEmail(googleUser.email);
 
-    // 3. Find or create user
     let user = await prisma.user.findFirst({
       where: {
         OR: [{ googleId: googleUser.sub }, { email: normalizedEmail }],
@@ -80,7 +78,6 @@ export async function GET(req: NextRequest) {
     });
 
     if (user) {
-      // Link Google account if not yet linked
       if (!user.googleId) {
         await prisma.user.update({
           where: { id: user.id },
@@ -91,7 +88,6 @@ export async function GET(req: NextRequest) {
         });
       }
     } else {
-      // Create new user
       user = await prisma.user.create({
         data: {
           name: googleUser.name || googleUser.email.split("@")[0],
@@ -102,7 +98,6 @@ export async function GET(req: NextRequest) {
         },
       });
 
-      // Create default pipeline stages
       const stages = [
         { name: "Novo", color: DEFAULT_PIPELINE_STAGE_COLORS[0], order: 0 },
         { name: "Contato feito", color: DEFAULT_PIPELINE_STAGE_COLORS[1], order: 1 },
@@ -119,7 +114,6 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // 4. Sign JWT and set cookie
     const token = signToken(user.id);
     await setAuthCookie(token);
 

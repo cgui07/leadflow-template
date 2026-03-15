@@ -26,18 +26,18 @@ export function FieldWrapper({
       {label && (
         <label
           htmlFor={htmlFor}
-          className="block text-sm font-medium text-slate-700"
+          className="block text-sm font-medium text-neutral-dark"
         >
           {label}
-          {required && <span className="text-red-500 ml-0.5">*</span>}
+          {required && <div className="inline text-danger ml-0.5">*</div>}
         </label>
       )}
       {description && (
-        <p className="text-xs text-slate-500">{description}</p>
+        <div className="text-xs text-neutral">{description}</div>
       )}
       {children}
-      {error && <p className="text-xs text-red-500">{error}</p>}
-      {!error && hint && <p className="text-xs text-slate-400">{hint}</p>}
+      {error && <div className="text-xs text-danger">{error}</div>}
+      {!error && hint && <div className="text-xs text-neutral-muted">{hint}</div>}
     </div>
   );
 }

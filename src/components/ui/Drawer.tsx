@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
+import { useEffect } from "react";
+import { Button } from "./Button";
 
 type DrawerSide = "right" | "left";
 type DrawerSize = "sm" | "md" | "lg" | "xl";
@@ -60,13 +61,10 @@ export function Drawer({
 
   return (
     <div className="fixed inset-0 z-50 flex">
-      {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/50 transition-opacity"
         onClick={onClose}
       />
-
-      {/* Panel */}
       <div
         className={cn(
           "relative ml-auto flex h-full w-full flex-col bg-white shadow-xl",
@@ -75,34 +73,29 @@ export function Drawer({
           className
         )}
       >
-        {/* Header */}
         {(title || description) && (
-          <div className="flex items-start justify-between px-6 py-4 border-b border-slate-200">
+          <div className="flex items-start justify-between px-6 py-4 border-b border-neutral-border">
             <div>
               {title && (
-                <h2 className="text-lg font-semibold text-slate-900">
+                <div className="text-lg font-semibold text-neutral-ink">
                   {title}
-                </h2>
+                </div>
               )}
               {description && (
-                <p className="mt-1 text-sm text-slate-500">{description}</p>
+                <div className="mt-1 text-sm text-neutral">{description}</div>
               )}
             </div>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={onClose}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+              icon={<X className="h-5 w-5" />}
+            />
           </div>
         )}
-
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-6">{children}</div>
-
-        {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-200">
+          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-neutral-border">
             {footer}
           </div>
         )}

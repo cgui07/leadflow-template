@@ -18,17 +18,17 @@ export function KpiCard({ label, value, icon, trend, className }: KpiCardProps) 
   return (
     <div
       className={cn(
-        "bg-white rounded-xl border border-slate-200 p-6",
+        "bg-white rounded-xl border border-neutral-border p-6",
         className
       )}
     >
       <div className="flex items-start justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="text-2xl font-bold text-slate-900">{value}</p>
+          <div className="text-sm font-medium text-neutral">{label}</div>
+          <div className="text-2xl font-bold text-neutral-ink">{value}</div>
         </div>
         {icon && (
-          <div className="p-2.5 bg-blue-50 text-blue-600 rounded-lg">
+          <div className="p-2.5 bg-blue-pale text-blue-royal rounded-lg">
             {icon}
           </div>
         )}
@@ -36,21 +36,21 @@ export function KpiCard({ label, value, icon, trend, className }: KpiCardProps) 
       {trend && (
         <div className="mt-3 flex items-center gap-1.5">
           {isPositive ? (
-            <TrendingUp className="h-4 w-4 text-emerald-500" />
+            <TrendingUp className="h-4 w-4 text-green-emerald" />
           ) : (
-            <TrendingDown className="h-4 w-4 text-red-500" />
+            <TrendingDown className="h-4 w-4 text-danger" />
           )}
-          <span
+          <div
             className={cn(
               "text-sm font-medium",
-              isPositive ? "text-emerald-600" : "text-red-600"
+              isPositive ? "text-green-dark" : "text-red-crimson"
             )}
           >
             {isPositive ? "+" : ""}
             {trend.value}%
-          </span>
+          </div>
           {trend.label && (
-            <span className="text-sm text-slate-400">{trend.label}</span>
+            <div className="text-sm text-neutral-muted">{trend.label}</div>
           )}
         </div>
       )}

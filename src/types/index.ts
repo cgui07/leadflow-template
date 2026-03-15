@@ -1,5 +1,3 @@
-// === Lead ===
-
 export type LeadStatus =
   | "new"
   | "contacted"
@@ -31,8 +29,6 @@ export interface Lead {
   updatedAt: Date;
 }
 
-// === Pipeline ===
-
 export interface PipelineStage {
   id: string;
   name: string;
@@ -42,9 +38,7 @@ export interface PipelineStage {
   totalValue: number;
 }
 
-// === Messages / Chat ===
-
-export type MessageType = "text" | "image" | "file" | "audio";
+export type MessageType = "text" | "image" | "video" | "audio" | "document" | "sticker";
 export type MessageDirection = "sent" | "received";
 export type MessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
 
@@ -77,8 +71,6 @@ export interface Conversation {
   updatedAt: Date;
 }
 
-// === Activity ===
-
 export type ActivityType =
   | "call"
   | "email"
@@ -101,8 +93,6 @@ export interface Activity {
   metadata?: Record<string, unknown>;
 }
 
-// === Table ===
-
 export interface Column<T> {
   key: keyof T | string;
   label: string;
@@ -110,8 +100,6 @@ export interface Column<T> {
   render?: (value: unknown, row: T) => React.ReactNode;
   className?: string;
 }
-
-// === Select Options ===
 
 export interface SelectOption {
   label: string;

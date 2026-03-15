@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useRef, useEffect } from "react";
 
 interface MessageListProps {
   children: React.ReactNode;
@@ -30,7 +30,6 @@ export function MessageList({
   );
 }
 
-// Date separator for grouping messages
 interface DateSeparatorProps {
   date: string;
 }
@@ -38,11 +37,11 @@ interface DateSeparatorProps {
 export function DateSeparator({ date }: DateSeparatorProps) {
   return (
     <div className="flex items-center gap-3 py-2">
-      <div className="flex-1 h-px bg-slate-200" />
-      <span className="text-xs font-medium text-slate-400 whitespace-nowrap">
+      <div className="flex-1 h-px bg-neutral-border" />
+      <div className="text-xs font-medium text-neutral-muted whitespace-nowrap">
         {date}
-      </span>
-      <div className="flex-1 h-px bg-slate-200" />
+      </div>
+      <div className="flex-1 h-px bg-neutral-border" />
     </div>
   );
 }

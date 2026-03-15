@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { HOT_LEAD_MIN_SCORE } from "@/lib/lead-scoring";
 import { json, requireAuth, handleError } from "@/lib/api";
 
 export async function GET() {
@@ -14,13 +15,14 @@ export async function GET() {
       recentLeads,
       recentActivities,
       pendingTasks,
+      overdueTasks,
       conversationsWithUnread,
     ] = await Promise.all([
       prisma.lead.count({ where: { userId: user.id } }),
       prisma.lead.count({ where: { userId: user.id, status: "new" } }),
       prisma.lead.count({ where: { userId: user.id, status: "qualified" } }),
       prisma.lead.count({ where: { userId: user.id, status: "won" } }),
-      prisma.lead.count({ where: { userId: user.id, score: { gte: 70 } } }),
+      prisma.lead.count({ where: { userId: user.id, score: { gte: HOT_LEAD_MIN_SCORE } } }),
       prisma.lead.findMany({
         where: { userId: user.id },
         orderBy: { createdAt: "desc" },
@@ -56,6 +58,7 @@ export async function GET() {
         wonLeads,
         hotLeads,
         pendingTasks,
+        overdueTasks,
         unreadConversations: conversationsWithUnread,
         pipelineValue: pipelineValue._sum.value || 0,
       },

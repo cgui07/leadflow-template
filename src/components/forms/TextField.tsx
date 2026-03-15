@@ -1,8 +1,8 @@
 "use client";
 
-import { forwardRef, useId } from "react";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { forwardRef, useId } from "react";
 import { FieldWrapper } from "./FieldWrapper";
 
 type TextFieldSize = "sm" | "md" | "lg";
@@ -65,13 +65,11 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
         className={fullWidth ? "w-full" : undefined}
       >
         <div className="relative">
-          {/* Left icon / prefix */}
           {hasPrefix && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center text-slate-400 pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center text-neutral-muted pointer-events-none">
               {icon ?? prefix}
             </div>
           )}
-
           <input
             ref={ref}
             id={fieldId}
@@ -79,12 +77,12 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
             required={required}
             className={cn(
               "w-full rounded-lg border bg-white transition-colors",
-              "placeholder:text-slate-400",
+              "placeholder:text-neutral-muted",
               "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
-              "disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed",
+              "disabled:bg-neutral-surface disabled:text-neutral-muted disabled:cursor-not-allowed",
               error
-                ? "border-red-300 focus:ring-danger"
-                : "border-slate-300",
+                ? "border-red-blush focus:ring-danger"
+                : "border-neutral-line",
               sizeStyles[fieldSize],
               hasPrefix && "pl-9",
               hasSuffix && "pr-9",
@@ -92,10 +90,8 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
             )}
             {...props}
           />
-
-          {/* Right suffix / loading */}
           {hasSuffix && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-slate-400">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-neutral-muted">
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (

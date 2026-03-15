@@ -1,5 +1,5 @@
-import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 const PUBLIC_PATHS = new Set([
   "/",
@@ -16,7 +16,7 @@ const PUBLIC_PREFIXES = [
   "/api/cron",
 ];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (PUBLIC_PATHS.has(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {

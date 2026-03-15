@@ -1,7 +1,7 @@
 "use client";
 
-import { forwardRef, useId } from "react";
 import { cn } from "@/lib/utils";
+import { forwardRef, useId } from "react";
 import { FieldWrapper } from "./FieldWrapper";
 
 type DateFieldType = "date" | "datetime-local" | "time" | "month";
@@ -64,8 +64,8 @@ export const DateField = forwardRef<HTMLInputElement, DateFieldProps>(
           className={cn(
             "w-full rounded-lg border bg-white transition-colors",
             "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
-            "disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed",
-            error ? "border-red-300 focus:ring-danger" : "border-slate-300",
+            "disabled:bg-neutral-surface disabled:text-neutral-muted disabled:cursor-not-allowed",
+            error ? "border-red-blush focus:ring-danger" : "border-neutral-line",
             sizeStyles[fieldSize],
             className
           )}

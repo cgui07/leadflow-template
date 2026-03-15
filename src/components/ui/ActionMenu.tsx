@@ -1,7 +1,8 @@
 "use client";
 
-import { MoreVertical } from "lucide-react";
+import { Button } from "./Button";
 import { Dropdown } from "./Dropdown";
+import { MoreVertical } from "lucide-react";
 
 interface ActionMenuItem {
   label: string;
@@ -21,9 +22,7 @@ export function ActionMenu({ items, className }: ActionMenuProps) {
     <Dropdown
       className={className}
       trigger={
-        <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-          <MoreVertical className="h-4 w-4" />
-        </button>
+        <Button variant="ghost" size="sm" icon={<MoreVertical className="h-4 w-4" />} />
       }
       items={items}
     />

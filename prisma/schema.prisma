@@ -12,7 +12,6 @@ model User {
   name                   String
   email                  String        @unique
   passwordHash           String?       @map("password_hash")
-  googleId               String?       @unique @map("google_id")
   phone                  String?
   avatarUrl              String?       @map("avatar_url")
   role                   String        @default("agent")
@@ -20,6 +19,7 @@ model User {
   updatedAt              DateTime      @updatedAt @map("updated_at")
   passwordResetTokenHash String?       @unique @map("password_reset_token_hash")
   passwordResetExpiresAt DateTime?     @map("password_reset_expires_at") @db.Timestamptz(6)
+  googleId               String?       @unique @map("google_id")
   activities             Activity[]
   leads                  Lead[]
   tasks                  Task[]
@@ -112,6 +112,7 @@ model Message {
   createdAt      DateTime     @default(now()) @map("created_at")
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
+  @@unique([conversationId, whatsappMsgId])
   @@index([conversationId, createdAt])
   @@map("messages")
 }
@@ -120,7 +121,7 @@ model PipelineStage {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
   name      String
-  color     String   @default("#3b82f6")
+  color     String   @default("blue")
   order     Int      @default(0)
   createdAt DateTime @default(now()) @map("created_at")
   leads     Lead[]

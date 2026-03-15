@@ -1,5 +1,5 @@
-import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
+import { forwardRef } from "react";
 import { Loader2 } from "lucide-react";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
@@ -15,11 +15,15 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-white hover:bg-blue-royal focus:ring-primary shadow-sm",
-  secondary: "bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-500",
-  outline: "border border-neutral-border text-slate-700 hover:bg-slate-50 focus:ring-primary",
-  ghost: "text-slate-600 hover:bg-slate-100 focus:ring-slate-500",
-  danger: "bg-danger text-white hover:bg-red-crimson focus:ring-danger shadow-sm",
+  primary:
+    "bg-primary text-white hover:bg-blue-royal focus-visible:ring-primary shadow-sm",
+  secondary:
+    "bg-neutral-pale text-neutral-dark hover:bg-neutral-border focus-visible:ring-neutral",
+  outline:
+    "border border-neutral-border text-neutral-dark hover:bg-neutral-surface focus-visible:ring-primary",
+  ghost: "text-neutral-steel hover:bg-neutral-pale focus-visible:ring-neutral",
+  danger:
+    "bg-danger text-white hover:bg-red-crimson focus-visible:ring-danger shadow-sm",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -42,20 +46,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <button
         ref={ref}
         disabled={disabled || loading}
         className={cn(
-          "inline-flex items-center justify-center rounded-lg font-medium transition-colors",
-          "focus:outline-none focus:ring-2 focus:ring-offset-2",
+          "inline-flex items-center justify-center rounded-lg font-medium transition-colors cursor-pointer",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           variantStyles[variant],
           sizeStyles[size],
           fullWidth && "w-full",
-          className
+          className,
         )}
         {...props}
       >
@@ -64,7 +68,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!loading && iconRight}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

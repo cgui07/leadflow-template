@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { PageContainer } from "@/components/layout/PageContainer";
-import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Button } from "@/components/ui/Button";
-import { TextField, SelectField, TextareaField, CheckboxField } from "@/components/forms";
 import { useFetch } from "@/lib/hooks";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/Button";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { Save, MessageSquare, Bot, Bell } from "lucide-react";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { SectionContainer } from "@/components/layout/SectionContainer";
+import { TextField, SelectField, TextareaField, CheckboxField } from "@/components/forms";
 
 interface Settings {
   whatsappPhoneId: string | null;
@@ -102,16 +102,15 @@ export default function SettingsPage() {
                 onChange={(e) => update("whatsappWebhookToken", e.target.value)}
                 placeholder="Token de seguranca para o webhook"
               />
-              <p className="mt-1 text-xs text-neutral-muted">
+              <div className="mt-1 text-xs text-neutral-muted">
                 URL do webhook: <code className="bg-gray-ghost px-1 rounded">{typeof window !== "undefined" ? window.location.origin : ""}/api/whatsapp/webhook</code>
-              </p>
-              <p className="mt-1 text-xs text-neutral-muted">
+              </div>
+              <div className="mt-1 text-xs text-neutral-muted">
                 Configure esta URL na Evolution API em Webhook {"->"} URL e habilite pelo menos o evento MESSAGES_UPSERT
-              </p>
+              </div>
             </div>
           </div>
         </SectionContainer>
-
         <SectionContainer title="Inteligência Artificial" icon={<Bot className="h-5 w-5 text-secondary" />}>
           <div className="space-y-4">
             <SelectField
@@ -142,7 +141,6 @@ export default function SettingsPage() {
             />
           </div>
         </SectionContainer>
-
         <SectionContainer title="Mensagem de Saudação">
           <TextareaField
             label="Mensagem padrão para novos contatos (quando IA não está configurada)"
@@ -152,7 +150,6 @@ export default function SettingsPage() {
             placeholder="Olá! Obrigado pelo contato. Em breve um corretor especializado vai te atender..."
           />
         </SectionContainer>
-
         <SectionContainer title="Follow-up Automático" icon={<Bell className="h-5 w-5 text-accent" />}>
           <div className="space-y-4">
             <CheckboxField

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
-import { json, requireAuth, handleError } from "@/lib/api";
 import { NextRequest } from "next/server";
+import { json, requireAuth, handleError } from "@/lib/api";
+import { getDefaultPipelineStageId } from "@/lib/pipeline";
 
 export async function GET(req: NextRequest) {
   try {
@@ -49,6 +50,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth();
     const data = await req.json();
+    const defaultPipelineStageId = await getDefaultPipelineStageId(user.id);
 
     const lead = await prisma.lead.create({
       data: {
@@ -63,6 +65,7 @@ export async function POST(req: NextRequest) {
         propertyType: data.propertyType,
         purpose: data.purpose,
         notes: data.notes,
+        pipelineStageId: defaultPipelineStageId,
         conversation: { create: {} },
       },
     });

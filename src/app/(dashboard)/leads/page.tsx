@@ -1,22 +1,22 @@
 "use client";
 
+import Link from "next/link";
+import { useState } from "react";
+import type { Column } from "@/types";
+import { useFetch } from "@/lib/hooks";
+import { Tabs } from "@/components/ui/Tabs";
+import { Badge } from "@/components/ui/Badge";
+import { Modal } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
+import { Dropdown } from "@/components/ui/Dropdown";
+import { getScoreBadgeClass } from "@/lib/ui-colors";
+import { DataTable } from "@/components/ui/DataTable";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { TextField, TextareaField } from "@/components/forms";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { DataTable } from "@/components/ui/DataTable";
-import { Dropdown } from "@/components/ui/Dropdown";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { LoadingState } from "@/components/ui/LoadingState";
-import { Modal } from "@/components/ui/Modal";
-import { Tabs } from "@/components/ui/Tabs";
-import { useFetch } from "@/lib/hooks";
-import { getScoreBadgeClass } from "@/lib/ui-colors";
-import type { Column } from "@/types";
 import { ChevronDown, MessageSquare, Plus, Search } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
 
 interface LeadRow {
   id: string;
@@ -116,9 +116,9 @@ export default function LeadsPage() {
         const score = value as number;
         const color = getScoreBadgeClass(score);
         return (
-          <span className={`px-2 py-1 rounded-full text-xs font-bold ${color}`}>
+          <div className={`px-2 py-1 rounded-full text-xs font-bold ${color}`}>
             {score}
-          </span>
+          </div>
         );
       },
     },
@@ -141,12 +141,12 @@ export default function LeadsPage() {
       label: "",
       render: (_, row) =>
         row.conversation?.unreadCount ? (
-          <span className="flex items-center gap-1 text-primary">
+          <div className="flex items-center gap-1 text-primary">
             <MessageSquare size={14} />
-            <span className="text-xs font-bold">
+            <div className="text-xs font-bold">
               {row.conversation.unreadCount}
-            </span>
-          </span>
+            </div>
+          </div>
         ) : null,
     },
   ];
@@ -215,12 +215,12 @@ export default function LeadsPage() {
         <div className="md:hidden w-full">
           <Dropdown
             align="left"
-            className="w-full block"
+            className="w-full"
             trigger={
-              <Button className="w-full flex items-center justify-between bg-white border border-neutral-border rounded-lg px-3 py-2 text-sm font-medium text-neutral-ink cursor-pointer transition hover:border-neutral-muted focus:outline-none focus:ring-2 focus:ring-primary/50">
-                <span>
+              <Button variant="outline" className="w-full flex items-center justify-between">
+                <div>
                   {tabs.find((t) => t.id === status)?.label || "Filtrar"}
-                </span>
+                </div>
                 <ChevronDown className="h-4 w-4 text-neutral-muted shrink-0" />
               </Button>
             }
@@ -234,7 +234,6 @@ export default function LeadsPage() {
           />
         </div>
       </div>
-
       <SectionContainer noPadding>
         {loading ? (
           <LoadingState variant="table" />
@@ -243,9 +242,9 @@ export default function LeadsPage() {
             <DataTable columns={columns} data={data.leads} rowKey="id" />
             {data.pages > 1 && (
               <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-border">
-                <p className="text-sm text-neutral-muted">
+                <div className="text-sm text-neutral-muted">
                   Página {data.page} de {data.pages}
-                </p>
+                </div>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -278,7 +277,6 @@ export default function LeadsPage() {
           />
         )}
       </SectionContainer>
-
       <Modal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}

@@ -14,7 +14,7 @@ function Skeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "animate-pulse rounded-lg bg-slate-200",
+        "animate-pulse rounded-lg bg-neutral-border",
         className
       )}
     />
@@ -69,8 +69,8 @@ export function LoadingState({
         className
       )}
     >
-      <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
-      {label && <p className="text-sm text-slate-500">{label}</p>}
+      <Loader2 className="h-6 w-6 text-blue-royal animate-spin" />
+      {label && <div className="text-sm text-neutral">{label}</div>}
     </div>
   );
 }

@@ -1,8 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Modal } from "@/components/ui/Modal";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 import {
   CheckSquare,
   ChevronLeft,
@@ -13,9 +16,6 @@ import {
   Settings,
   Users,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
 
 interface NavItem {
   label: string;
@@ -107,30 +107,29 @@ export function Sidebar({
 
   return (
     <>
-      {/* ── Desktop Sidebar ── */}
       <aside
         className={cn(
-          "hidden h-screen shrink-0 flex-col bg-slate-900 text-white transition-all duration-300 md:flex",
+          "hidden h-screen shrink-0 flex-col bg-neutral-ink text-white transition-all duration-300 md:flex",
           collapsed ? "w-17" : "w-64"
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
-          {!collapsed && <span className="text-lg font-bold tracking-tight">LeadFlow</span>}
-          <button
-            type="button"
+        <div className="flex h-16 items-center justify-between border-b border-neutral-deep px-4">
+          {!collapsed && <div className="text-lg font-bold tracking-tight">LeadFlow</div>}
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setCollapsed(!collapsed)}
-            className="rounded-lg p-1.5 transition-colors hover:bg-slate-800"
-          >
-            <ChevronLeft
-              className={cn(
-                "h-5 w-5 transition-transform duration-300",
-                collapsed && "rotate-180"
-              )}
-            />
-          </button>
+            icon={
+              <ChevronLeft
+                className={cn(
+                  "h-5 w-5 transition-transform duration-300",
+                  collapsed && "rotate-180"
+                )}
+              />
+            }
+          />
         </div>
-
-        <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
+        <div className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
           {navItems.map((item) => {
             const isActive =
               item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -142,52 +141,49 @@ export function Sidebar({
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white",
+                    ? "bg-blue-royal text-white"
+                    : "text-neutral-line hover:bg-neutral-deep hover:text-white",
                   collapsed && "justify-center px-2"
                 )}
                 title={collapsed ? item.label : undefined}
               >
-                <span className="shrink-0">{item.icon}</span>
+                <div className="shrink-0">{item.icon}</div>
                 {!collapsed && (
                   <>
-                    <span className="flex-1 text-left">{item.label}</span>
+                    <div className="flex-1 text-left">{item.label}</div>
                     {item.badge !== undefined && item.badge > 0 && (
-                      <span className="min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                      <div className="min-w-5 rounded-full bg-danger px-1.5 py-0.5 text-center text-xs font-bold text-white">
                         {item.badge}
-                      </span>
+                      </div>
                     )}
                   </>
                 )}
               </Link>
             );
           })}
-        </nav>
-
-        <div className="border-t border-slate-800 p-3">
-          <button
-            type="button"
+        </div>
+        <div className="border-t border-neutral-deep p-3">
+          <Button
+            variant="ghost"
             onClick={() => setShowAccountModal(true)}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-slate-800",
+              "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left justify-start",
               collapsed && "justify-center px-1"
             )}
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-royal text-sm font-bold">
               {userName.charAt(0).toUpperCase()}
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{userName}</p>
-                <p className="truncate text-xs text-slate-400">{userEmail}</p>
+                <div className="truncate text-sm font-medium">{userName}</div>
+                <div className="truncate text-xs text-neutral-muted">{userEmail}</div>
               </div>
             )}
-          </button>
+          </Button>
         </div>
       </aside>
-
-      {/* ── Mobile Bottom Tab Bar ── */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-lg md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-border bg-white/95 backdrop-blur-lg md:hidden">
         <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
           {mobileItems.map((item) => {
             const isActive =
@@ -200,39 +196,33 @@ export function Sidebar({
                 className={cn(
                   "flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-colors",
                   isActive
-                    ? "text-blue-600"
-                    : "text-slate-400 active:text-slate-600"
+                    ? "text-blue-royal"
+                    : "text-neutral-muted active:text-neutral-steel"
                 )}
               >
-                <span className="shrink-0">{item.iconMobile}</span>
-                <span className={cn(
+                <div className="shrink-0">{item.iconMobile}</div>
+                <div className={cn(
                   "text-[10px] font-medium leading-tight",
                   isActive && "font-semibold"
                 )}>
                   {item.label}
-                </span>
+                </div>
               </Link>
             );
           })}
-
-          {/* Avatar / Account */}
-          <button
-            type="button"
+          <Button
+            variant="ghost"
             onClick={() => setShowAccountModal(true)}
-            className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-slate-400 active:text-slate-600"
+            className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5"
           >
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-royal text-[10px] font-bold text-white">
               {userName.charAt(0).toUpperCase()}
             </div>
-            <span className="text-[10px] font-medium leading-tight">Conta</span>
-          </button>
+            <div className="text-[10px] font-medium leading-tight">Conta</div>
+          </Button>
         </div>
-
-        {/* Safe area for phones with home indicator */}
         <div className="h-[env(safe-area-inset-bottom)]" />
-      </nav>
-
-      {/* ── Account Modal ── */}
+      </div>
       <Modal
         open={showAccountModal}
         onClose={() => {
@@ -243,25 +233,23 @@ export function Sidebar({
         size="sm"
       >
         <div className="space-y-5">
-          <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 text-base font-bold text-white">
+          <div className="flex items-center gap-3 rounded-xl bg-neutral-surface p-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-royal text-base font-bold text-white">
               {userName.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-900">{userName}</p>
-              <p className="truncate text-sm text-slate-500">{userEmail}</p>
+              <div className="truncate text-sm font-semibold text-neutral-ink">{userName}</div>
+              <div className="truncate text-sm text-neutral">{userEmail}</div>
             </div>
           </div>
-
           <Link
             href="/settings"
             onClick={() => setShowAccountModal(false)}
-            className="flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="flex w-full items-center gap-3 rounded-xl border border-neutral-border px-4 py-3 text-sm font-medium text-neutral-dark transition-colors hover:bg-neutral-surface"
           >
             <Settings size={18} />
             Configurações
           </Link>
-
           <Button
             variant="danger"
             fullWidth

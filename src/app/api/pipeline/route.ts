@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/db";
-import { json, requireAuth, handleError } from "@/lib/api";
-import { normalizePipelineColor } from "@/lib/ui-colors";
 import { NextRequest } from "next/server";
+import { normalizePipelineColor } from "@/lib/ui-colors";
+import { json, requireAuth, handleError } from "@/lib/api";
+import { assignDefaultPipelineStageToUnassignedLeads } from "@/lib/pipeline";
 
 export async function GET() {
   try {
     const user = await requireAuth();
+    await assignDefaultPipelineStageToUnassignedLeads(user.id);
 
     const stages = await prisma.pipelineStage.findMany({
       where: { userId: user.id },

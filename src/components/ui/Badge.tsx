@@ -12,21 +12,21 @@ interface BadgeProps {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  default: "bg-slate-100 text-slate-700",
-  success: "bg-emerald-50 text-emerald-700",
-  warning: "bg-amber-50 text-amber-700",
-  error: "bg-red-50 text-red-700",
-  info: "bg-blue-50 text-blue-700",
-  purple: "bg-purple-50 text-purple-700",
+  default: "bg-neutral-pale text-neutral-dark",
+  success: "bg-green-pale text-green-forest",
+  warning: "bg-yellow-pale text-yellow-dark",
+  error: "bg-red-pale text-red-dark",
+  info: "bg-blue-pale text-blue-navy",
+  purple: "bg-purple-pale text-purple-grape",
 };
 
 const dotColors: Record<BadgeVariant, string> = {
-  default: "bg-slate-400",
-  success: "bg-emerald-500",
-  warning: "bg-amber-500",
-  error: "bg-red-500",
-  info: "bg-blue-500",
-  purple: "bg-purple-500",
+  default: "bg-neutral-muted",
+  success: "bg-green-emerald",
+  warning: "bg-orange-amber",
+  error: "bg-danger",
+  info: "bg-blue",
+  purple: "bg-purple",
 };
 
 const sizeStyles: Record<BadgeSize, string> = {
@@ -42,7 +42,7 @@ export function Badge({
   className,
 }: BadgeProps) {
   return (
-    <span
+    <div
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap",
         variantStyles[variant],
@@ -51,9 +51,9 @@ export function Badge({
       )}
     >
       {dot && (
-        <span className={cn("h-1.5 w-1.5 rounded-full", dotColors[variant])} />
+        <div className={cn("h-1.5 w-1.5 rounded-full", dotColors[variant])} />
       )}
       {children}
-    </span>
+    </div>
   );
 }

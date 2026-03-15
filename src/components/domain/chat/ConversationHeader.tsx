@@ -1,5 +1,7 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Phone, MoreVertical } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { MoreVertical, Phone } from "lucide-react";
 
 interface ConversationHeaderProps {
   name: string;
@@ -11,9 +13,9 @@ interface ConversationHeaderProps {
 }
 
 const statusColors: Record<string, string> = {
-  online: "bg-emerald-500",
-  offline: "bg-slate-300",
-  away: "bg-amber-500",
+  online: "bg-green-emerald",
+  offline: "bg-neutral-line",
+  away: "bg-orange-amber",
 };
 
 const statusLabels: Record<string, string> = {
@@ -33,55 +35,57 @@ export function ConversationHeader({
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-4 py-3 border-b border-slate-200 flex-shrink-0",
-        className
+        "flex items-center justify-between px-4 py-3 border-b border-neutral-border shrink-0",
+        className,
       )}
     >
       <div className="flex items-center gap-3 min-w-0">
-        {/* Avatar */}
-        <div className="relative flex-shrink-0">
+        <div className="relative shrink-0">
           {avatar ? (
-            <img
+            <Image
               src={avatar}
               alt={name}
+              width={40}
+              height={40}
+              unoptimized
               className="h-10 w-10 rounded-full object-cover"
             />
           ) : (
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
+            <div className="h-10 w-10 rounded-full bg-blue-ice flex items-center justify-center text-sm font-bold text-blue-royal">
               {name.charAt(0).toUpperCase()}
             </div>
           )}
           {status && (
-            <span
+            <div
               className={cn(
                 "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white",
-                statusColors[status]
+                statusColors[status],
               )}
             />
           )}
         </div>
-
-        {/* Info */}
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-slate-900 truncate">
+          <div className="text-sm font-semibold text-neutral-ink truncate">
             {name}
-          </p>
-          <p className="text-xs text-slate-500">
+          </div>
+          <div className="text-xs text-neutral">
             {subtitle ?? (status ? statusLabels[status] : "")}
-          </p>
+          </div>
         </div>
       </div>
-
-      {/* Actions */}
       <div className="flex items-center gap-1">
         {actions ?? (
           <>
-            <button className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-              <Phone className="h-4 w-4" />
-            </button>
-            <button className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-              <MoreVertical className="h-4 w-4" />
-            </button>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Phone className="h-4 w-4" />}
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<MoreVertical className="h-4 w-4" />}
+            />
           </>
         )}
       </div>

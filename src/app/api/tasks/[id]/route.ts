@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
-import { json, error, requireAuth, handleError } from "@/lib/api";
 import { NextRequest } from "next/server";
+import { json, error, requireAuth, handleError } from "@/lib/api";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Button } from "./Button";
 import { useEffect, useRef, useState } from "react";
 
 interface DropdownItem {
@@ -49,41 +50,41 @@ export function Dropdown({
 
   return (
     <div className={cn("relative inline-block", className)} ref={ref}>
-      <div onClick={() => setOpen(!open)}>{trigger}</div>
-
+      <div onClick={() => setOpen(!open)}>
+        {trigger}
+      </div>
       {open && (
         <div
           className={cn(
-            "absolute z-50 mt-1 min-w-45 bg-white rounded-lg border border-slate-200 shadow-lg py-1",
+            "absolute z-50 mt-1 min-w-45 bg-white rounded-lg border border-neutral-border shadow-lg py-1",
             align === "right" ? "right-0" : "left-0",
           )}
         >
           {items.map((item, i) => {
             if (item.divider) {
-              return <div key={i} className="my-1 border-t border-slate-100" />;
+              return <div key={i} className="my-1 border-t border-neutral-pale" />;
             }
 
             return (
-              <button
+              <Button
                 key={i}
+                type="button"
+                variant="ghost"
                 disabled={item.disabled}
                 onClick={() => {
                   item.onClick();
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex items-center gap-2 w-full px-3 py-2 text-sm text-left transition-colors",
+                  "w-full justify-start px-3 py-2 text-sm font-normal h-auto",
                   item.danger
-                    ? "text-red-600 hover:bg-red-50"
-                    : "text-slate-700 hover:bg-slate-50",
-                  item.disabled && "opacity-50 cursor-not-allowed",
+                    ? "text-red-crimson hover:bg-red-pale"
+                    : "text-neutral-dark hover:bg-neutral-surface"
                 )}
+                icon={item.icon ? <div className="shrink-0 w-4 h-4">{item.icon}</div> : undefined}
               >
-                {item.icon && (
-                  <span className="shrink-0 w-4 h-4">{item.icon}</span>
-                )}
                 {item.label}
-              </button>
+              </Button>
             );
           })}
         </div>

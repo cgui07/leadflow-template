@@ -1,6 +1,6 @@
-import { processFollowUps } from "@/lib/followup";
 import { json, error } from "@/lib/api";
 import { NextRequest } from "next/server";
+import { processFollowUps } from "@/lib/followup";
 
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("authorization");

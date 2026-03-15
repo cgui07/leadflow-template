@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import { StickyNote, Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Pencil, StickyNote, Trash2 } from "lucide-react";
 
 interface NoteCardProps {
   content: string;
@@ -21,40 +22,40 @@ export function NoteCard({
   return (
     <div
       className={cn(
-        "bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-2",
-        className
+        "bg-yellow-pale border border-yellow-butter rounded-lg p-4 space-y-2",
+        className,
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <StickyNote className="h-4 w-4 text-amber-600 flex-shrink-0" />
-          <span className="text-xs font-medium text-amber-700">{author}</span>
-          <span className="text-xs text-amber-500">{timestamp}</span>
+          <StickyNote className="h-4 w-4 text-yellow-gold shrink-0" />
+          <div className="text-xs font-medium text-yellow-dark">{author}</div>
+          <div className="text-xs text-orange-amber">{timestamp}</div>
         </div>
         {(onEdit || onDelete) && (
           <div className="flex items-center gap-1">
             {onEdit && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={onEdit}
-                className="p-1 rounded text-amber-400 hover:text-amber-600 transition-colors"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
+                icon={<Pencil className="h-3.5 w-3.5" />}
+              />
             )}
             {onDelete && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={onDelete}
-                className="p-1 rounded text-amber-400 hover:text-red-500 transition-colors"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+                icon={<Trash2 className="h-3.5 w-3.5" />}
+              />
             )}
           </div>
         )}
       </div>
-      <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+      <div className="text-sm text-neutral-dark leading-relaxed whitespace-pre-wrap">
         {content}
-      </p>
+      </div>
     </div>
   );
 }
