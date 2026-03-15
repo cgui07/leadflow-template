@@ -1,4 +1,5 @@
 import { appColors } from "../../tailwind.config";
+import { HOT_LEAD_MIN_SCORE, WARM_LEAD_MIN_SCORE } from "./lead-scoring";
 
 export type PipelineColorToken =
   | "blue"
@@ -95,11 +96,11 @@ export function getPipelineColorSoftClass(color?: string | null) {
 }
 
 export function getScoreTextClass(score: number) {
-  if (score >= 70) {
+  if (score >= HOT_LEAD_MIN_SCORE) {
     return "text-green-dark";
   }
 
-  if (score >= 40) {
+  if (score >= WARM_LEAD_MIN_SCORE) {
     return "text-yellow-gold";
   }
 
@@ -107,11 +108,11 @@ export function getScoreTextClass(score: number) {
 }
 
 export function getScoreBadgeClass(score: number) {
-  if (score >= 70) {
+  if (score >= HOT_LEAD_MIN_SCORE) {
     return "bg-green-pale text-green-forest";
   }
 
-  if (score >= 40) {
+  if (score >= WARM_LEAD_MIN_SCORE) {
     return "bg-yellow-pale text-yellow-dark";
   }
 

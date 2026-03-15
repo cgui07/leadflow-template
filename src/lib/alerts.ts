@@ -1,8 +1,9 @@
 import { prisma } from "./db";
+import { HOT_LEAD_MIN_SCORE, WARM_LEAD_MIN_SCORE } from "./lead-scoring";
 
 export async function checkHotLeadAlert(leadId: string, previousScore: number, newScore: number) {
 
-  if (previousScore < 70 && newScore >= 70) {
+  if (previousScore < HOT_LEAD_MIN_SCORE && newScore >= HOT_LEAD_MIN_SCORE) {
     const lead = await prisma.lead.findUnique({
       where: { id: leadId },
       select: { userId: true, name: true, phone: true, score: true },
@@ -41,7 +42,7 @@ export async function processEscalations() {
   const staleQualified = await prisma.lead.findMany({
     where: {
       status: { in: ["qualifying", "qualified"] },
-      score: { gte: 40 },
+      score: { gte: WARM_LEAD_MIN_SCORE },
       lastContactAt: { lte: twoDaysAgo },
       tasks: { none: { type: "call", status: "pending", createdAt: { gte: twoDaysAgo } } },
     },
