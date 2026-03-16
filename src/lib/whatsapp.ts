@@ -1,4 +1,5 @@
 import { prisma } from "./db";
+import { getEvolutionApiKey } from "./evolution";
 import { getDefaultPipelineStageId } from "./pipeline";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -8,6 +9,10 @@ interface WhatsAppConfig {
 }
 
 const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://localhost:8080";
+
+export function getWhatsAppConfig(instanceName: string): WhatsAppConfig {
+  return { phoneId: instanceName, token: getEvolutionApiKey() };
+}
 const LID_SUFFIX = "@lid";
 const PHONE_NUMBER_JID_SUFFIX = "@s.whatsapp.net";
 const lidToPnCache = new Map<string, string>();

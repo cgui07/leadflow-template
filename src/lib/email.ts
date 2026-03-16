@@ -3,20 +3,30 @@ import { appColors } from "../../tailwind.config";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL = process.env.EMAIL_FROM || "LeadFlow <noreply@leadflow.com>";
+const DEVELOPMENT_FROM_EMAIL =
+  process.env.EMAIL_FROM_DEV || "LeadFlow <onboarding@resend.dev>";
+const PRODUCTION_FROM_EMAIL =
+  process.env.EMAIL_FROM || "LeadFlow <noreply@leadflow.com>";
+
 const emailColors = {
-  heading:    appColors.neutral.deep,
-  body:       appColors.neutral.DEFAULT,
-  buttonBg:   appColors.neutral.ink,
+  heading: appColors.neutral.deep,
+  body: appColors.neutral.DEFAULT,
+  buttonBg: appColors.neutral.ink,
   buttonText: appColors.white.DEFAULT,
-  muted:      appColors.neutral.muted,
+  muted: appColors.neutral.muted,
 } as const;
+
+function getFromEmail() {
+  return process.env.NODE_ENV === "production"
+    ? PRODUCTION_FROM_EMAIL
+    : DEVELOPMENT_FROM_EMAIL;
+}
 
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   const { error } = await resend.emails.send({
-    from: FROM_EMAIL,
+    from: getFromEmail(),
     to,
-    subject: "Redefinir sua senha — LeadFlow",
+    subject: "Redefinir sua senha - LeadFlow",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 24px;">
         <div style="font-size: 20px; font-weight: 600; color: ${emailColors.heading}; margin: 0 0 16px;">
@@ -33,7 +43,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
           Redefinir minha senha
         </a>
         <div style="font-size: 13px; line-height: 1.6; color: ${emailColors.muted}; margin: 24px 0 0;">
-          Este link expira em 1 hora. Se você não solicitou essa alteração, ignore este e-mail.
+          Este link expira em 1 hora. Se voce nao solicitou essa alteracao, ignore este e-mail.
         </div>
       </div>
     `,
@@ -41,6 +51,6 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
 
   if (error) {
     console.error("[email] Failed to send password reset email:", error);
-    throw new Error("Falha ao enviar e-mail de redefinição");
+    throw new Error("Falha ao enviar e-mail de redefinicao");
   }
 }

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
 import { json, error, requireAuth, handleError } from "@/lib/api";
-import { resolveSendTarget, sendWhatsAppMedia } from "@/lib/whatsapp";
+import { getWhatsAppConfig, resolveSendTarget, sendWhatsAppMedia } from "@/lib/whatsapp";
 
 const ALLOWED_TYPES = new Set(["image", "video", "audio", "document"]);
 const MAX_FILE_SIZE = 16 * 1024 * 1024; // 16MB
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const settings = conv.lead.user.settings;
-    if (!settings?.whatsappPhoneId || !settings?.whatsappToken) {
+    if (!settings?.whatsappPhoneId) {
       return error("WhatsApp não configurado", 400);
     }
 
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const dataUrl = `data:${file.type};base64,${base64}`;
 
     const waResponse = await sendWhatsAppMedia(
-      { phoneId: settings.whatsappPhoneId, token: settings.whatsappToken },
+      getWhatsAppConfig(settings.whatsappPhoneId),
       replyJid,
       mediaType as "image" | "video" | "audio" | "document",
       dataUrl,

@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/db";
 import { scheduleFollowUp } from "@/lib/followup";
+import { mapEvolutionState } from "@/lib/evolution";
 import { NextRequest, NextResponse } from "next/server";
 import { generateAutoReply, qualifyLead } from "@/lib/ai";
 import {
+  getWhatsAppConfig,
   processIncomingMessage,
   rememberMapping,
   resolveSendTarget,
@@ -16,21 +18,38 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const instanceName = body.instance || body.instanceName;
-    if (instanceName) {
-      const token = req.headers.get("x-webhook-token") || req.nextUrl.searchParams.get("token");
-      const settings = await prisma.userSettings.findFirst({
-        where: { whatsappPhoneId: instanceName },
-        select: { whatsappWebhookToken: true },
-      });
-      if (settings?.whatsappWebhookToken && settings.whatsappWebhookToken !== token) {
-        return NextResponse.json({ error: "Invalid webhook token" }, { status: 401 });
-      }
+    const token = req.headers.get("x-webhook-token") || req.nextUrl.searchParams.get("token");
+
+    if (!instanceName) {
+      return NextResponse.json({ ok: true });
+    }
+
+    const settings = await prisma.userSettings.findFirst({
+      where: { whatsappPhoneId: instanceName },
+      include: { user: true },
+    });
+
+    if (!settings) {
+      console.error("No user found for instance:", instanceName);
+      return NextResponse.json({ ok: true });
+    }
+
+    if (settings.whatsappWebhookToken && settings.whatsappWebhookToken !== token) {
+      return NextResponse.json({ error: "Invalid webhook token" }, { status: 401 });
     }
 
     const event = body.event;
     const data = body.data;
     const key = data?.key;
     rememberMapping(data);
+
+    if (event === "CONNECTION_UPDATE") {
+      const state = data?.state || data?.instance?.state;
+      return NextResponse.json({
+        ok: true,
+        status: mapEvolutionState(state),
+      });
+    }
 
     if (!INBOUND_MESSAGE_EVENTS.has(event)) {
       return NextResponse.json({ ok: true });
@@ -53,20 +72,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (key?.fromMe) {
-      return NextResponse.json({ ok: true });
-    }
-
-    if (!instanceName) {
-      return NextResponse.json({ ok: true });
-    }
-
-    const settings = await prisma.userSettings.findFirst({
-      where: { whatsappPhoneId: instanceName },
-      include: { user: true },
-    });
-
-    if (!settings) {
-      console.error("No user found for instance:", instanceName);
       return NextResponse.json({ ok: true });
     }
 
@@ -198,7 +203,7 @@ export async function POST(req: NextRequest) {
           } else {
             console.log("[webhook] Sending reply to", replyJid);
             await sendAndSaveMessage(
-              { phoneId: settings.whatsappPhoneId!, token: settings.whatsappToken! },
+              getWhatsAppConfig(settings.whatsappPhoneId!),
               conv.id,
               replyJid,
               reply,
@@ -224,7 +229,7 @@ export async function POST(req: NextRequest) {
           console.warn("[webhook] Skipping greeting because LID JID could not be resolved:", remoteJid);
         } else {
           await sendAndSaveMessage(
-            { phoneId: settings.whatsappPhoneId!, token: settings.whatsappToken! },
+            getWhatsAppConfig(settings.whatsappPhoneId!),
             conv.id,
             replyJid,
             settings.greetingMessage,

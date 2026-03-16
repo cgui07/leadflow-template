@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TextField } from "@/components/forms";
 import { Button } from "@/components/ui/Button";
+import { PasswordField, TextField } from "@/components/forms";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
 import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
 
@@ -28,7 +28,8 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const passwordsMatch = !form.confirmPassword || form.password === form.confirmPassword;
+  const passwordsMatch =
+    !form.confirmPassword || form.password === form.confirmPassword;
 
   function update(field: keyof RegisterForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -73,10 +74,10 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen">
-      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-secondary via-primary to-blue-navy items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10">
-          <div className="absolute top-32 right-16 w-80 h-80 rounded-full bg-white blur-3xl" />
-          <div className="absolute bottom-16 left-20 w-64 h-64 rounded-full bg-accent blur-3xl" />
+      <div className="relative hidden items-center justify-center overflow-hidden bg-linear-to-br from-secondary via-primary to-blue-navy p-12 lg:flex lg:w-1/2">
+        <div className="absolute left-0 top-0 h-full w-full opacity-10">
+          <div className="absolute right-16 top-32 h-80 w-80 rounded-full bg-white blur-3xl" />
+          <div className="absolute bottom-16 left-20 h-64 w-64 rounded-full bg-accent blur-3xl" />
         </div>
         <div className="relative z-10 max-w-lg text-white">
           <div className="text-4xl font-bold leading-tight tracking-tight">
@@ -87,48 +88,72 @@ export default function RegisterPage() {
             feito para corretores que querem resultados.
           </div>
           <div className="mt-12 space-y-4">
-            <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4">
+            <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/20">
-                <svg className="h-5 w-5 text-green-mint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <svg
+                  className="h-5 w-5 text-green-mint"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div>
                 <div className="font-semibold">Resposta automática via WhatsApp</div>
-                <div className="text-sm text-blue-ice/60">Nunca deixe um lead sem resposta</div>
+                <div className="text-sm text-blue-ice/60">
+                  Nunca deixe um lead sem resposta
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4">
+            <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/20">
-                <svg className="h-5 w-5 text-green-mint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <svg
+                  className="h-5 w-5 text-green-mint"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div>
                 <div className="font-semibold">Qualificação com IA</div>
-                <div className="text-sm text-blue-ice/60">Saiba quem está pronto para comprar</div>
+                <div className="text-sm text-blue-ice/60">
+                  Saiba quem está pronto para comprar
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4">
+            <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/20">
-                <svg className="h-5 w-5 text-green-mint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <svg
+                  className="h-5 w-5 text-green-mint"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div>
                 <div className="font-semibold">Follow-ups programados</div>
-                <div className="text-sm text-blue-ice/60">Recupere leads frios automaticamente</div>
+                <div className="text-sm text-blue-ice/60">
+                  Recupere leads frios automaticamente
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div className="flex w-full lg:w-1/2 items-center justify-center bg-white px-6 py-12">
+      <div className="flex w-full items-center justify-center bg-white px-6 py-12 lg:w-1/2">
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <div className="text-white font-bold text-sm">LF</div>
+            <div className="mb-1 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <div className="text-sm font-bold text-white">LF</div>
               </div>
               <div className="text-xl font-bold text-gray-iron">LeadFlow</div>
             </div>
@@ -138,9 +163,19 @@ export default function RegisterPage() {
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="flex items-center gap-2 rounded-lg bg-red-pale border border-red-blush p-3 text-sm text-danger">
-                <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              <div className="flex items-center gap-2 rounded-lg border border-red-blush bg-red-pale p-3 text-sm text-danger">
+                <svg
+                  className="h-4 w-4 shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                  />
                 </svg>
                 {error}
               </div>
@@ -171,30 +206,36 @@ export default function RegisterPage() {
               required
             />
             <div>
-              <TextField
+              <PasswordField
                 label="Senha"
-                type="password"
                 value={form.password}
                 onChange={(e) => update("password", e.target.value)}
                 placeholder={`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`}
                 minLength={MIN_PASSWORD_LENGTH}
+                autoComplete="new-password"
                 required
               />
               <div className="mt-2">
                 <PasswordStrengthMeter password={form.password} />
               </div>
             </div>
-            <TextField
+            <PasswordField
               label="Confirmar senha"
-              type="password"
               value={form.confirmPassword}
               onChange={(e) => update("confirmPassword", e.target.value)}
               placeholder="Repita sua senha"
               minLength={MIN_PASSWORD_LENGTH}
+              autoComplete="new-password"
               error={!passwordsMatch ? "As senhas precisam ser iguais." : undefined}
               required
             />
-            <Button type="submit" loading={loading} fullWidth size="lg" disabled={!passwordsMatch}>
+            <Button
+              type="submit"
+              loading={loading}
+              fullWidth
+              size="lg"
+              disabled={!passwordsMatch}
+            >
               {loading ? "Criando conta..." : "Criar conta grátis"}
             </Button>
           </form>
@@ -229,7 +270,10 @@ export default function RegisterPage() {
           </a>
           <div className="mt-6 text-center text-sm text-gray-smoke">
             Já tem uma conta?{" "}
-            <Link href="/login" className="font-semibold text-primary hover:text-blue-royal transition-colors">
+            <Link
+              href="/login"
+              className="font-semibold text-primary transition-colors hover:text-blue-royal"
+            >
               Fazer login
             </Link>
           </div>

@@ -1,14 +1,13 @@
 import { json, error } from "@/lib/api";
 import { NextRequest } from "next/server";
-import { processFollowUps } from "@/lib/followup";
+import { requireCronAuth } from "@/lib/cron";
 import { processEscalations } from "@/lib/alerts";
+import { processFollowUps } from "@/lib/followup";
 
 export async function POST(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return error("Unauthorized", 401);
+  const authError = requireCronAuth(req);
+  if (authError) {
+    return authError;
   }
 
   try {
