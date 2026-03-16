@@ -17,11 +17,20 @@ import type {
   ConversationSummary,
   MessageItem,
 } from "./types";
+import {
+  useBrandText,
+  useFeatureFlag,
+} from "@/components/providers/BrandingProvider";
 
 export default function ConversationsPage() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const subtitle = useBrandText(
+    "conversationsSubtitle",
+    "Gerencie suas conversas do WhatsApp",
+  );
+  const showSummary = useFeatureFlag("conversationSummary");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -44,16 +53,13 @@ export default function ConversationsPage() {
     selected ? `/api/conversations/${selected}/messages` : null,
   );
   const selectedConversationIdFromUrl = searchParams.get("conversationId");
-
-  const selectedConversation = conversations?.find(
-    (conversation) => conversation.id === selected,
-  );
+  const selectedConversation = conversations?.find((conversation) => {
+    return conversation.id === selected;
+  });
 
   useEffect(() => {
     if (!selectedConversationIdFromUrl) {
-      if (selected === null) {
-        return;
-      }
+      if (selected === null) return;
 
       resetSummaryState();
       setConversationError(null);
@@ -61,9 +67,7 @@ export default function ConversationsPage() {
       return;
     }
 
-    if (!conversations?.length) {
-      return;
-    }
+    if (!conversations?.length) return;
 
     const hasConversationInList = conversations.some((conversation) => {
       return conversation.id === selectedConversationIdFromUrl;
@@ -83,6 +87,11 @@ export default function ConversationsPage() {
       summaryAbortRef.current?.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (showSummary) return;
+    resetSummaryState();
+  }, [showSummary]);
 
   function resetSummaryState() {
     summaryAbortRef.current?.abort();
@@ -144,7 +153,10 @@ export default function ConversationsPage() {
 
       if (!response.ok) {
         throw new Error(
-          await readErrorMessage(response, "Não foi possível enviar a mensagem."),
+          await readErrorMessage(
+            response,
+            "Não foi possível enviar a mensagem.",
+          ),
         );
       }
 
@@ -192,7 +204,7 @@ export default function ConversationsPage() {
   }
 
   async function handleGenerateSummary() {
-    if (!selected) return;
+    if (!selected || !showSummary) return;
 
     summaryAbortRef.current?.abort();
 
@@ -267,6 +279,7 @@ export default function ConversationsPage() {
         conversation={selectedConversation}
         switching={switching}
         summaryLoading={summaryLoading}
+        showSummary={showSummary}
         onBack={handleBack}
         onToggleMode={() =>
           toggleBotMode(selectedConversation.id, selectedConversation.status)
@@ -274,7 +287,7 @@ export default function ConversationsPage() {
         onGenerateSummary={handleGenerateSummary}
       />
 
-      {summaryVisible && (
+      {showSummary && summaryVisible && (
         <ConversationSummaryPanel
           summary={summary}
           loading={summaryLoading}
@@ -312,7 +325,7 @@ export default function ConversationsPage() {
   return (
     <PageContainer
       title="Conversas"
-      subtitle="Gerencie suas conversas do WhatsApp"
+      subtitle={subtitle}
     >
       <div className="hidden h-[calc(100vh-13rem)] overflow-hidden rounded-xl border border-neutral-border bg-white md:flex">
         <div className="w-80 shrink-0 border-r border-neutral-border">

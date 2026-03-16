@@ -3,7 +3,6 @@
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { forwardRef, useId } from "react";
-import { Button } from "@/components/ui/Button";
 
 type CheckboxVariant = "checkbox" | "switch";
 
@@ -45,8 +44,8 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
 
     if (variant === "switch") {
       return (
-        <div className={cn("flex items-start gap-3", className)}>
-          <Button
+        <div className={cn("flex items-start gap-3.5", className)}>
+          <button
             ref={ref}
             type="button"
             role="switch"
@@ -54,34 +53,41 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
             aria-checked={checked}
             disabled={disabled}
             onClick={handleToggle}
-            variant="ghost"
             className={cn(
-              "relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors p-0",
+              "relative mt-0.5 inline-flex h-7 w-12 shrink-0 rounded-full border transition-all duration-200 ease-out",
               "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
-              checked ? "bg-primary" : "bg-neutral-line"
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              checked
+                ? "border-blue-royal bg-primary"
+                : "border-neutral-line bg-neutral-surface",
             )}
           >
             <div
               className={cn(
-                "inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform mt-0.5",
-                checked ? "translate-x-[18px]" : "translate-x-0.5"
+                "absolute left-0.5 top-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm transition-transform duration-200 ease-out",
+                checked ? "translate-x-5 text-primary" : "translate-x-0 text-neutral-muted",
               )}
-            />
-          </Button>
+            >
+              {checked ? (
+                <Check className="h-3.5 w-3.5" strokeWidth={3} />
+              ) : (
+                <div className="h-2 w-2 rounded-full bg-neutral-line" />
+              )}
+            </div>
+          </button>
           {(label || description) && (
-            <div>
+            <div className="space-y-0.5">
               {label && (
                 <label
                   htmlFor={fieldId}
-                  className="text-sm font-medium text-neutral-dark cursor-pointer"
+                  className="cursor-pointer text-sm font-medium leading-5 text-neutral-dark"
                   onClick={handleToggle}
                 >
                   {label}
                 </label>
               )}
               {description && (
-                <div className="text-xs text-neutral mt-0.5">{description}</div>
+                <div className="text-xs leading-5 text-neutral">{description}</div>
               )}
               {error && <div className="text-xs text-danger mt-1">{error}</div>}
             </div>
@@ -92,7 +98,7 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
 
     return (
       <div className={cn("flex items-start gap-3", className)}>
-        <Button
+        <button
           ref={ref}
           type="button"
           role="checkbox"
@@ -100,17 +106,17 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
           aria-checked={checked}
           disabled={disabled}
           onClick={handleToggle}
-          variant="ghost"
           className={cn(
-            "flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors mt-0.5 p-0",
+            "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
             "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "disabled:cursor-not-allowed disabled:opacity-50",
             checked
-              ? "bg-primary border-primary text-white"
-              : "border-neutral-line bg-white"
+              ? "border-primary bg-primary text-white shadow-sm"
+              : "border-neutral-line bg-white text-transparent",
           )}
-          icon={checked ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : undefined}
-        />
+        >
+          {checked ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
+        </button>
         {(label || description) && (
           <div>
             {label && (

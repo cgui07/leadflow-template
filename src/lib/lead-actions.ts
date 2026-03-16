@@ -6,11 +6,6 @@ import {
   type LeadActionType,
 } from "./lead-action-config";
 
-/**
- * Upserts a lead action from AI signals.
- * If an open action of the same type already exists for the lead, it reuses it.
- * Otherwise, creates a new one.
- */
 export async function upsertLeadActionFromAI(
   userId: string,
   leadId: string,
@@ -46,7 +41,8 @@ export async function upsertLeadActionFromAI(
       leadId,
       type: "lead_action_created",
       title: `${ACTION_TYPE_LABELS[type]} detectada pela IA`,
-      description: "Ação criada automaticamente a partir de sinal detectado na conversa.",
+      description:
+        "Ação criada automaticamente a partir de sinal detectado na conversa.",
     },
   });
 

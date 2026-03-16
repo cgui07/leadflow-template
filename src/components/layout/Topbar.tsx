@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Bell, Search } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Search } from "lucide-react";
+import { NotificationBell } from "./NotificationBell";
 
 interface TopbarProps {
   title?: string;
@@ -32,14 +32,7 @@ export function Topbar({ title, actions, className }: TopbarProps) {
             className="pl-9 pr-4 py-2 w-64 text-sm bg-neutral-surface border border-neutral-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent placeholder:text-neutral-muted"
           />
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<Bell className="h-5 w-5" />}
-          className="relative"
-        >
-          <div className="absolute top-1.5 right-1.5 h-2 w-2 bg-danger rounded-full" />
-        </Button>
+        <NotificationBell />
         {actions}
       </div>
     </div>

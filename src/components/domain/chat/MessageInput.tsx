@@ -33,9 +33,7 @@ export function MessageInput({
       setSubmitting(true);
       await onSend?.(trimmed);
       setMessage("");
-    } catch {
-      // The parent handles the visible error state. We keep the draft intact here.
-    } finally {
+    } catch {} finally {
       setSubmitting(false);
     }
   }

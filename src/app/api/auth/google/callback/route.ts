@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { DEFAULT_PIPELINE_STAGE_COLORS } from "@/lib/ui-colors";
 import { normalizeEmail, signToken, setAuthCookie } from "@/lib/auth";
 
 interface GoogleTokenResponse {
@@ -28,11 +27,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-
-    const callbackUrl = new URL(
-      "/api/auth/google/callback",
-      req.nextUrl.origin,
-    );
+    const callbackUrl = new URL("/api/auth/google/callback", req.nextUrl.origin);
 
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -52,7 +47,6 @@ export async function GET(req: NextRequest) {
     }
 
     const tokens: GoogleTokenResponse = await tokenRes.json();
-
     const userInfoRes = await fetch(
       "https://www.googleapis.com/oauth2/v3/userinfo",
       { headers: { Authorization: `Bearer ${tokens.access_token}` } },
@@ -70,47 +64,38 @@ export async function GET(req: NextRequest) {
     }
 
     const normalizedEmail = normalizeEmail(googleUser.email);
-
-    let user = await prisma.user.findFirst({
+    const user = await prisma.user.findFirst({
       where: {
         OR: [{ googleId: googleUser.sub }, { email: normalizedEmail }],
       },
+      select: {
+        id: true,
+        googleId: true,
+        avatarUrl: true,
+        status: true,
+        tenant: {
+          select: {
+            status: true,
+          },
+        },
+      },
     });
 
-    if (user) {
-      if (!user.googleId) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            googleId: googleUser.sub,
-            avatarUrl: user.avatarUrl || googleUser.picture || null,
-          },
-        });
-      }
-    } else {
-      user = await prisma.user.create({
+    if (!user) {
+      return redirectToLogin(req, "no_account");
+    }
+
+    if (user.status !== "active" || user.tenant?.status === "inactive") {
+      return redirectToLogin(req, "account_suspended");
+    }
+
+    if (!user.googleId) {
+      await prisma.user.update({
+        where: { id: user.id },
         data: {
-          name: googleUser.name || googleUser.email.split("@")[0],
-          email: normalizedEmail,
           googleId: googleUser.sub,
-          avatarUrl: googleUser.picture || null,
-          settings: { create: {} },
+          avatarUrl: user.avatarUrl || googleUser.picture || null,
         },
-      });
-
-      const stages = [
-        { name: "Novo", color: DEFAULT_PIPELINE_STAGE_COLORS[0], order: 0 },
-        { name: "Contato feito", color: DEFAULT_PIPELINE_STAGE_COLORS[1], order: 1 },
-        { name: "Qualificado", color: DEFAULT_PIPELINE_STAGE_COLORS[2], order: 2 },
-        { name: "Visita agendada", color: DEFAULT_PIPELINE_STAGE_COLORS[3], order: 3 },
-        { name: "Proposta", color: DEFAULT_PIPELINE_STAGE_COLORS[4], order: 4 },
-        { name: "Negociação", color: DEFAULT_PIPELINE_STAGE_COLORS[5], order: 5 },
-        { name: "Fechado", color: DEFAULT_PIPELINE_STAGE_COLORS[6], order: 6 },
-        { name: "Perdido", color: DEFAULT_PIPELINE_STAGE_COLORS[7], order: 7 },
-      ];
-
-      await prisma.pipelineStage.createMany({
-        data: stages.map((stage) => ({ ...stage, userId: user!.id })),
       });
     }
 

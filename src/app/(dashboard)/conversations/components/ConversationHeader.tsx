@@ -8,6 +8,7 @@ interface ConversationHeaderProps {
   conversation: ConversationItem;
   switching: boolean;
   summaryLoading: boolean;
+  showSummary: boolean;
   onBack: () => void;
   onToggleMode: () => void;
   onGenerateSummary: () => void;
@@ -17,6 +18,7 @@ export function ConversationHeader({
   conversation,
   switching,
   summaryLoading,
+  showSummary,
   onBack,
   onToggleMode,
   onGenerateSummary,
@@ -82,15 +84,17 @@ export function ConversationHeader({
           </Button>
         )}
 
-        <Button
-          variant="secondary"
-          size="sm"
-          icon={<Sparkles size={14} />}
-          onClick={onGenerateSummary}
-          loading={summaryLoading}
-        >
-          <span className="hidden sm:inline">Gerar resumo</span>
-        </Button>
+        {showSummary && (
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Sparkles size={14} />}
+            onClick={onGenerateSummary}
+            loading={summaryLoading}
+          >
+            <span className="hidden sm:inline">Gerar resumo</span>
+          </Button>
+        )}
       </div>
     </div>
   );
