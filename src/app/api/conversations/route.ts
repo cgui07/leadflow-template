@@ -25,8 +25,27 @@ export async function GET(req: NextRequest) {
       where,
       orderBy: { lastMessageAt: "desc" },
       include: {
-        lead: { select: { id: true, name: true, phone: true, avatarUrl: true, score: true, status: true } },
-        messages: { orderBy: { createdAt: "desc" }, take: 1 },
+        lead: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            avatarUrl: true,
+            score: true,
+            status: true,
+          },
+        },
+        messages: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          select: {
+            id: true,
+            content: true,
+            direction: true,
+            sender: true,
+            createdAt: true,
+          },
+        },
       },
     });
 

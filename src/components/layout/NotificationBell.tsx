@@ -11,6 +11,11 @@ import {
   type LeadActionType,
 } from "@/lib/lead-action-config";
 import {
+  ATTENTION_QUEUE_NO_REPLY_THRESHOLD_HOURS,
+  type AttentionQueueItem,
+  type AttentionQueueReason,
+} from "@/lib/attention-queue";
+import {
   AlertTriangle,
   Bell,
   Bot,
@@ -21,11 +26,6 @@ import {
   MessageSquare,
   User,
 } from "lucide-react";
-import {
-  ATTENTION_QUEUE_NO_REPLY_THRESHOLD_HOURS,
-  type AttentionQueueItem,
-  type AttentionQueueReason,
-} from "@/lib/attention-queue";
 
 const MAX_VISIBLE_NOTIFICATIONS = 5;
 

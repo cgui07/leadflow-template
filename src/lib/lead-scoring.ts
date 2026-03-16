@@ -1,3 +1,5 @@
+import type { LeadStatus } from "@/lib/lead-status";
+
 export const WARM_LEAD_MIN_SCORE = 45;
 export const HOT_LEAD_MIN_SCORE = 75;
 
@@ -308,7 +310,7 @@ export function getLeadTemperatureLabel(score: number) {
   return "frio";
 }
 
-export function getLeadStatusFromScore(score: number) {
+export function getLeadStatusFromScore(score: number): LeadStatus {
   if (score >= HOT_LEAD_MIN_SCORE) {
     return "qualified";
   }

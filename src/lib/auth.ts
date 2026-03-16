@@ -5,9 +5,23 @@ import { prisma } from "./db";
 import { cookies } from "next/headers";
 import { ensureLegacyTenantAccess } from "./tenant";
 
-const JWT_SECRET = process.env.JWT_SECRET || "leadflow-dev-secret-change-in-production";
 const TOKEN_NAME = "leadflow_token";
 const PASSWORD_RESET_TOKEN_TTL_MS = 1000 * 60 * 60;
+const DEV_JWT_SECRET = "leadflow-dev-secret-change-in-production";
+
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET?.trim();
+
+  if (secret) {
+    return secret;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET must be configured in production");
+  }
+
+  return DEV_JWT_SECRET;
+}
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, 12);
@@ -36,12 +50,12 @@ export function createPasswordResetToken() {
 }
 
 export function signToken(userId: string) {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ userId }, getJwtSecret(), { expiresIn: "7d" });
 }
 
 export function verifyToken(token: string): { userId: string } | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as { userId: string };
+    return jwt.verify(token, getJwtSecret()) as { userId: string };
   } catch {
     return null;
   }

@@ -18,6 +18,11 @@ import {
   useBrandText,
   useFeatureFlag,
 } from "@/components/providers/BrandingProvider";
+import {
+  LEAD_STATUS_BADGE_VARIANTS,
+  LEAD_STATUS_LABELS,
+  isLeadStatus,
+} from "@/lib/lead-status";
 
 interface DashboardData {
   kpis: {
@@ -51,23 +56,6 @@ interface DashboardData {
   }>;
 }
 
-const statusMap: Record<
-  string,
-  {
-    label: string;
-    variant: "info" | "default" | "purple" | "warning" | "success" | "error";
-  }
-> = {
-  new: { label: "Novo", variant: "info" },
-  contacted: { label: "Contatado", variant: "default" },
-  qualifying: { label: "Qualificando", variant: "purple" },
-  qualified: { label: "Qualificado", variant: "success" },
-  proposal: { label: "Proposta", variant: "warning" },
-  negotiation: { label: "Negociação", variant: "warning" },
-  won: { label: "Ganho", variant: "success" },
-  lost: { label: "Perdido", variant: "error" },
-};
-
 const columns: Column<DashboardData["recentLeads"][0]>[] = [
   { key: "name", label: "Nome", sortable: true },
   { key: "phone", label: "Telefone" },
@@ -87,11 +75,12 @@ const columns: Column<DashboardData["recentLeads"][0]>[] = [
     key: "status",
     label: "Status",
     render: (value) => {
-      const config = statusMap[value as string];
+      const status =
+        typeof value === "string" && isLeadStatus(value) ? value : null;
 
-      return config ? (
-        <Badge variant={config.variant} size="sm" dot>
-          {config.label}
+      return status ? (
+        <Badge variant={LEAD_STATUS_BADGE_VARIANTS[status]} size="sm" dot>
+          {LEAD_STATUS_LABELS[status]}
         </Badge>
       ) : null;
     },
@@ -104,7 +93,7 @@ export default function DashboardPage() {
   const title = useBrandText("dashboardTitle", "Dashboard");
   const subtitle = useBrandText(
     "dashboardSubtitle",
-    "Visão geral dos seus leads e atendimentos",
+    "Visao geral dos seus leads e atendimentos",
   );
   const showAttentionQueue = useFeatureFlag("attentionQueue");
 
@@ -138,7 +127,7 @@ export default function DashboardPage() {
           trend={{ value: kpis?.qualifiedLeads || 0, label: "qualificados" }}
         />
         <KpiCard
-          label="Conversas não lidas"
+          label="Conversas nao lidas"
           value={String(kpis?.unreadConversations || 0)}
           icon={<MessageSquare className="h-5 w-5" />}
           iconVariant="purple"
@@ -171,7 +160,7 @@ export default function DashboardPage() {
           ) : (
             <EmptyState
               title="Nenhum lead ainda"
-              description="Seus leads aparecerão aqui quando começarem a chegar via WhatsApp ou quando você criar manualmente."
+              description="Seus leads aparecerao aqui quando comecarem a chegar via WhatsApp ou quando voce criar manualmente."
             />
           )}
         </SectionContainer>

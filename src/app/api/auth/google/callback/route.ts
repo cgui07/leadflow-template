@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/db";
+import { sanitizeAppRedirect } from "@/lib/redirect";
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeEmail, signToken, setAuthCookie } from "@/lib/auth";
+
+const GOOGLE_OAUTH_STATE_COOKIE = "leadflow_google_oauth_state";
+const GOOGLE_OAUTH_REDIRECT_COOKIE = "leadflow_google_oauth_redirect";
 
 interface GoogleTokenResponse {
   access_token: string;
@@ -17,13 +21,17 @@ interface GoogleUserInfo {
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
-  const state = req.nextUrl.searchParams.get("state") || "/dashboard";
+  const state = req.nextUrl.searchParams.get("state");
   const errorParam = req.nextUrl.searchParams.get("error");
+  const expectedState = req.cookies.get(GOOGLE_OAUTH_STATE_COOKIE)?.value;
+  const redirectPath = sanitizeAppRedirect(
+    req.cookies.get(GOOGLE_OAUTH_REDIRECT_COOKIE)?.value,
+  );
 
-  if (errorParam || !code) {
+  if (errorParam || !code || !state || !expectedState || state !== expectedState) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
     loginUrl.searchParams.set("error", "google_auth_failed");
-    return NextResponse.redirect(loginUrl);
+    return clearOAuthCookies(NextResponse.redirect(loginUrl));
   }
 
   try {
@@ -102,7 +110,9 @@ export async function GET(req: NextRequest) {
     const token = signToken(user.id);
     await setAuthCookie(token);
 
-    return NextResponse.redirect(new URL(state, req.nextUrl.origin));
+    return clearOAuthCookies(
+      NextResponse.redirect(new URL(redirectPath, req.nextUrl.origin)),
+    );
   } catch (err) {
     console.error("[google-auth] Callback error:", err);
     return redirectToLogin(req, "google_internal_error");
@@ -112,5 +122,11 @@ export async function GET(req: NextRequest) {
 function redirectToLogin(req: NextRequest, error: string) {
   const loginUrl = new URL("/login", req.nextUrl.origin);
   loginUrl.searchParams.set("error", error);
-  return NextResponse.redirect(loginUrl);
+  return clearOAuthCookies(NextResponse.redirect(loginUrl));
+}
+
+function clearOAuthCookies(response: NextResponse) {
+  response.cookies.delete(GOOGLE_OAUTH_STATE_COOKIE);
+  response.cookies.delete(GOOGLE_OAUTH_REDIRECT_COOKIE);
+  return response;
 }

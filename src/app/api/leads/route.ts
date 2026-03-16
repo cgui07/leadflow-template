@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
-import { json, requireAuth, handleError } from "@/lib/api";
 import { getDefaultPipelineStageId } from "@/lib/pipeline";
+import { error, json, requireAuth, handleError } from "@/lib/api";
 
 export async function GET(req: NextRequest) {
   try {
@@ -51,20 +51,41 @@ export async function POST(req: NextRequest) {
     const user = await requireAuth();
     const data = await req.json();
     const defaultPipelineStageId = await getDefaultPipelineStageId(user.id);
+    const name = typeof data.name === "string" ? data.name.trim() : "";
+    const phone = typeof data.phone === "string" ? data.phone.trim() : "";
+
+    if (!name || !phone) {
+      return error("Nome e telefone sao obrigatorios", 400);
+    }
 
     const lead = await prisma.lead.create({
       data: {
         userId: user.id,
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
+        name,
+        phone,
+        email:
+          typeof data.email === "string" && data.email.trim()
+            ? data.email.trim()
+            : null,
         source: data.source || "manual",
         status: "new",
         value: data.value,
-        region: data.region,
-        propertyType: data.propertyType,
-        purpose: data.purpose,
-        notes: data.notes,
+        region:
+          typeof data.region === "string" && data.region.trim()
+            ? data.region.trim()
+            : null,
+        propertyType:
+          typeof data.propertyType === "string" && data.propertyType.trim()
+            ? data.propertyType.trim()
+            : null,
+        purpose:
+          typeof data.purpose === "string" && data.purpose.trim()
+            ? data.purpose.trim()
+            : null,
+        notes:
+          typeof data.notes === "string" && data.notes.trim()
+            ? data.notes.trim()
+            : null,
         pipelineStageId: defaultPipelineStageId,
         conversation: { create: {} },
       },

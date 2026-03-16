@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
 const priorityLeads = [
@@ -52,6 +53,25 @@ const systemHighlights = [
   "Classificação de interesse para destacar quem merece atendimento imediato.",
   "Follow-ups programados para leads frios ou que deixaram de responder.",
   "Interface simples para corretores autônomos que não querem aprender um CRM pesado.",
+];
+
+const heroHighlights = [
+  {
+    label: "Resposta inicial",
+    value: "instantânea",
+  },
+  {
+    label: "Qualificação",
+    value: "automática",
+  },
+  {
+    label: "Operação",
+    value: "simples",
+  },
+  {
+    label: "Priorização",
+    value: "inteligente",
+  },
 ];
 
 const conversationFlow = [
@@ -160,28 +180,43 @@ export function LandingPage() {
                 Entender o fluxo
               </a>
             </div>
-            <div className="mt-10 grid grid-cols-3 gap-2 sm:mt-12 sm:gap-4">
-              <div className="rounded-2xl border border-neutral-border bg-white/90 px-3 py-3 shadow-sm backdrop-blur sm:rounded-3xl sm:px-6 sm:py-5">
+            <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] gap-3 sm:mt-12 sm:gap-4">
+              {heroHighlights.map((highlight) => (
+                <Card
+                  key={highlight.label}
+                  className="min-h-[7.5rem] rounded-2xl border-neutral-border bg-white/90 shadow-sm backdrop-blur sm:min-h-[8.5rem] sm:rounded-3xl"
+                >
+                  <div className="text-[10px] text-neutral-muted sm:text-sm">
+                    {highlight.label}
+                  </div>
+                  <div className="font-display mt-1.5 text-lg leading-tight font-semibold text-neutral-ink sm:mt-3 sm:text-2xl lg:text-[2rem]">
+                    {highlight.value}
+                  </div>
+                </Card>
+              ))}
+            </div>
+            <div className="hidden">
+              <div className="min-w-0 rounded-2xl border border-neutral-border bg-white/90 px-3 py-3 shadow-sm backdrop-blur sm:rounded-3xl sm:px-6 sm:py-5">
                 <div className="text-[10px] text-neutral-muted sm:text-sm">
                   Resposta inicial
                 </div>
-                <div className="font-display mt-1.5 text-base font-semibold text-neutral-ink sm:mt-3 sm:text-3xl">
+                <div className="font-display mt-1.5 min-w-0 text-lg leading-tight font-semibold text-neutral-ink sm:mt-3 sm:text-xl lg:text-2xl xl:text-3xl">
                   instantânea
                 </div>
               </div>
-              <div className="rounded-2xl border border-neutral-border bg-white/90 px-3 py-3 shadow-sm backdrop-blur sm:rounded-3xl sm:px-6 sm:py-5">
+              <div className="min-w-0 rounded-2xl border border-neutral-border bg-white/90 px-3 py-3 shadow-sm backdrop-blur sm:rounded-3xl sm:px-6 sm:py-5">
                 <div className="text-[10px] text-neutral-muted sm:text-sm">
                   Qualificação
                 </div>
-                <div className="font-display mt-1.5 text-base font-semibold text-neutral-ink sm:mt-3 sm:text-3xl">
+                <div className="font-display mt-1.5 min-w-0 text-lg leading-tight font-semibold text-neutral-ink sm:mt-3 sm:text-xl lg:text-2xl xl:text-3xl">
                   automática
                 </div>
               </div>
-              <div className="rounded-2xl border border-neutral-border bg-white/90 px-3 py-3 shadow-sm backdrop-blur sm:rounded-3xl sm:px-6 sm:py-5">
+              <div className="min-w-0 rounded-2xl border border-neutral-border bg-white/90 px-3 py-3 shadow-sm backdrop-blur sm:rounded-3xl sm:px-6 sm:py-5">
                 <div className="text-[10px] text-neutral-muted sm:text-sm">
                   Operação
                 </div>
-                <div className="font-display mt-1.5 text-base font-semibold text-neutral-ink sm:mt-3 sm:text-3xl">
+                <div className="font-display mt-1.5 min-w-0 text-lg leading-tight font-semibold text-neutral-ink sm:mt-3 sm:text-xl lg:text-2xl xl:text-3xl">
                   simples
                 </div>
               </div>
@@ -196,8 +231,8 @@ export function LandingPage() {
                 <div className="text-[10px] uppercase tracking-[0.24em] text-neutral-muted sm:text-xs">
                   Leads ativos
                 </div>
-                <div className="mt-2 flex items-center gap-2 sm:gap-3">
-                  <div className="text-xl font-semibold sm:text-2xl">
+                <div className="mt-2 flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
+                  <div className="text-xl font-semibold sm:shrink-0 sm:whitespace-nowrap sm:text-2xl">
                     18 contatos
                   </div>
                   <div className="shrink-0 whitespace-nowrap rounded-full bg-green-emerald/18 px-2 py-0.5 text-[10px] font-medium text-green-sage sm:px-3 sm:py-1 sm:text-xs">

@@ -9,7 +9,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const url = req.nextUrl;
     const cursor = url.searchParams.get("cursor");
-    const limit = parseInt(url.searchParams.get("limit") || "50");
+    const rawLimit = parseInt(url.searchParams.get("limit") || "50", 10);
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(Math.max(rawLimit, 1), 100)
+      : 50;
 
     const conv = await prisma.conversation.findFirst({
       where: { id, lead: { userId: user.id } },
@@ -40,7 +43,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   try {
     const user = await requireAuth();
     const { id } = await params;
-    const { content } = await req.json();
+    const body = await req.json();
+    const content =
+      typeof body.content === "string" ? body.content.trim() : "";
+
+    if (!content) {
+      return error("Mensagem obrigatoria", 400);
+    }
 
     const conv = await prisma.conversation.findFirst({
       where: { id, lead: { userId: user.id } },

@@ -1,12 +1,25 @@
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
 import { json, error, requireAuth, handleError } from "@/lib/api";
-import { getWhatsAppConfig, resolveSendTarget, sendWhatsAppMedia } from "@/lib/whatsapp";
+import {
+  getWhatsAppConfig,
+  resolveSendTarget,
+  sendWhatsAppMedia,
+} from "@/lib/whatsapp";
 
 const ALLOWED_TYPES = new Set(["image", "video", "audio", "document"]);
 const MAX_FILE_SIZE = 16 * 1024 * 1024; // 16MB
+const MEDIA_PLACEHOLDER_LABELS = {
+  image: "Imagem enviada",
+  video: "Video enviado",
+  audio: "Audio enviado",
+  document: "Documento enviado",
+} as const;
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await requireAuth();
     const { id } = await params;
@@ -16,19 +29,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const mediaType = formData.get("mediaType") as string | null;
     const caption = formData.get("caption") as string | null;
 
-    if (!file) return error("Arquivo não enviado", 400);
+    if (!file) return error("Arquivo nao enviado", 400);
     if (!mediaType || !ALLOWED_TYPES.has(mediaType)) {
-      return error("Tipo de mídia inválido. Use: image, video, audio, document", 400);
+      return error(
+        "Tipo de midia invalido. Use: image, video, audio, document",
+        400,
+      );
     }
     if (file.size > MAX_FILE_SIZE) {
-      return error("Arquivo muito grande. Máximo: 16MB", 400);
+      return error("Arquivo muito grande. Maximo: 16MB", 400);
     }
 
     const conv = await prisma.conversation.findFirst({
       where: { id, lead: { userId: user.id } },
       include: { lead: { include: { user: { include: { settings: true } } } } },
     });
-    if (!conv) return error("Conversa não encontrada", 404);
+    if (!conv) return error("Conversa nao encontrada", 404);
 
     if (conv.status === "bot") {
       await prisma.conversation.update({
@@ -39,12 +55,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const settings = conv.lead.user.settings;
     if (!settings?.whatsappPhoneId) {
-      return error("WhatsApp não configurado", 400);
+      return error("WhatsApp nao configurado", 400);
     }
 
     const replyJid = resolveSendTarget(conv.whatsappChatId, conv.lead.phone);
     if (!replyJid) {
-      return error("Não foi possível resolver o destinatário", 400);
+      return error("Nao foi possivel resolver o destinatario", 400);
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -56,7 +72,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       replyJid,
       mediaType as "image" | "video" | "audio" | "document",
       dataUrl,
-      { caption: caption || undefined, fileName: file.name, mimetype: file.type }
+      {
+        caption: caption || undefined,
+        fileName: file.name,
+        mimetype: file.type,
+      },
     );
 
     const waMessageId = waResponse.key?.id ?? waResponse.messages?.[0]?.id;
@@ -66,15 +86,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         conversationId: id,
         direction: "outbound",
         sender: "agent",
-        content: caption || `[${mediaType === "image" ? "Imagem" : mediaType === "video" ? "Vídeo" : mediaType === "audio" ? "Áudio" : "Documento"} enviado]`,
+        content:
+          caption ||
+          `[${MEDIA_PLACEHOLDER_LABELS[mediaType as keyof typeof MEDIA_PLACEHOLDER_LABELS]}]`,
         type: mediaType,
         status: "sent",
         whatsappMsgId: waMessageId,
         metadata: {
-          mediaUrl: dataUrl,
           mimetype: file.type,
           fileName: file.name,
           fileSize: file.size,
+          caption: caption || null,
         },
       },
     });

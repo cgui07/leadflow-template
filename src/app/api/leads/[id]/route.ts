@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
+import { isLeadStatus } from "@/lib/lead-status";
 import { json, error, requireAuth, handleError } from "@/lib/api";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await requireAuth();
     const { id } = await params;
@@ -20,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       },
     });
 
-    if (!lead) return error("Lead não encontrado", 404);
+    if (!lead) return error("Lead nao encontrado", 404);
 
     return json(lead);
   } catch (err) {
@@ -28,14 +32,44 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await requireAuth();
     const { id } = await params;
     const data = await req.json();
 
-    const existing = await prisma.lead.findFirst({ where: { id, userId: user.id } });
-    if (!existing) return error("Lead não encontrado", 404);
+    const existing = await prisma.lead.findFirst({
+      where: { id, userId: user.id },
+    });
+    if (!existing) return error("Lead nao encontrado", 404);
+
+    if (
+      data.status &&
+      (typeof data.status !== "string" || !isLeadStatus(data.status))
+    ) {
+      return error("Status de lead invalido", 400);
+    }
+
+    if (data.pipelineStageId !== undefined && data.pipelineStageId !== null) {
+      if (
+        typeof data.pipelineStageId !== "string" ||
+        !data.pipelineStageId.trim()
+      ) {
+        return error("Estagio invalido", 400);
+      }
+
+      const stage = await prisma.pipelineStage.findFirst({
+        where: { id: data.pipelineStageId, userId: user.id },
+        select: { id: true },
+      });
+
+      if (!stage) {
+        return error("Estagio nao encontrado", 404);
+      }
+    }
 
     if (data.status && data.status !== existing.status) {
       await prisma.activity.create({
@@ -52,20 +86,50 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const lead = await prisma.lead.update({
       where: { id },
       data: {
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
+        ...(typeof data.name === "string" && { name: data.name.trim() }),
+        ...(typeof data.phone === "string" && { phone: data.phone.trim() }),
+        ...(data.email !== undefined && {
+          email:
+            typeof data.email === "string" && data.email.trim()
+              ? data.email.trim()
+              : null,
+        }),
         status: data.status,
         score: data.score,
         value: data.value,
-        region: data.region,
+        ...(data.region !== undefined && {
+          region:
+            typeof data.region === "string" && data.region.trim()
+              ? data.region.trim()
+              : null,
+        }),
         priceMin: data.priceMin,
         priceMax: data.priceMax,
-        propertyType: data.propertyType,
-        purpose: data.purpose,
-        timeline: data.timeline,
+        ...(data.propertyType !== undefined && {
+          propertyType:
+            typeof data.propertyType === "string" && data.propertyType.trim()
+              ? data.propertyType.trim()
+              : null,
+        }),
+        ...(data.purpose !== undefined && {
+          purpose:
+            typeof data.purpose === "string" && data.purpose.trim()
+              ? data.purpose.trim()
+              : null,
+        }),
+        ...(data.timeline !== undefined && {
+          timeline:
+            typeof data.timeline === "string" && data.timeline.trim()
+              ? data.timeline.trim()
+              : null,
+        }),
         bedrooms: data.bedrooms,
-        notes: data.notes,
+        ...(data.notes !== undefined && {
+          notes:
+            typeof data.notes === "string" && data.notes.trim()
+              ? data.notes.trim()
+              : null,
+        }),
         pipelineStageId: data.pipelineStageId,
       },
     });
@@ -76,13 +140,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await requireAuth();
     const { id } = await params;
 
-    const existing = await prisma.lead.findFirst({ where: { id, userId: user.id } });
-    if (!existing) return error("Lead não encontrado", 404);
+    const existing = await prisma.lead.findFirst({
+      where: { id, userId: user.id },
+    });
+    if (!existing) return error("Lead nao encontrado", 404);
 
     await prisma.lead.delete({ where: { id } });
 

@@ -1,11 +1,4 @@
-export type LeadStatus =
-  | "new"
-  | "contacted"
-  | "qualified"
-  | "proposal"
-  | "negotiation"
-  | "won"
-  | "lost";
+import type { LeadStatus } from "@/lib/lead-status";
 
 export type LeadSource =
   | "website"
@@ -18,9 +11,9 @@ export type LeadSource =
 export interface Lead {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone?: string;
-  company?: string;
+  region?: string;
   status: LeadStatus;
   source: LeadSource;
   value?: number;
