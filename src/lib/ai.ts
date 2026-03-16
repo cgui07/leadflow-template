@@ -1,6 +1,7 @@
 import { prisma } from "./db";
 import { checkHotLeadAlert } from "./alerts";
 import { upsertLeadActionFromAI } from "./lead-actions";
+import { DEFAULT_AI_MODEL_BY_PROVIDER, isSupportedAIProvider } from "./ai-models";
 import {
   calculateLeadScore,
   getLeadStatusFromScore,
@@ -19,23 +20,40 @@ function getQualificationPrompt(agentName: string) {
 
 1. Receber o cliente de forma educada e profissional
 2. Fazer perguntas curtas e objetivas para qualificar o interesse
-3. Coletar: região desejada, tipo de imóvel, faixa de valor, prazo de compra, finalidade (morar/investir)
-4. Identificar o nível de interesse do cliente (frio, morno, quente)
+3. Coletar: região desejada, tipo de imóvel, faixa de valor, prazo de compra e finalidade (morar ou investir)
+4. Identificar o nível de interesse do cliente
 5. Quando o lead estiver qualificado, informar que o corretor entrará em contato
 
 Regras:
-- Mensagens CURTAS (máximo 2 frases por mensagem)
+- Mensagens curtas, com no máximo 2 frases
 - Tom profissional, mas amigável
-- NÃO invente informações sobre imóveis disponíveis
-- NÃO mencione preços específicos de imóveis
-- Faça UMA pergunta por vez
+- Não invente informações sobre imóveis disponíveis
+- Não mencione preços específicos de imóveis
+- Faça uma pergunta por vez
 - Se o cliente perguntar sobre um imóvel específico, diga que o corretor vai entrar em contato com opções
 
-Responda APENAS com a mensagem para o cliente, sem explicações adicionais.`;
+Responda apenas com a mensagem para o cliente, sem explicações adicionais.`;
+}
+
+function getFollowUpPrompt(agentName: string) {
+  return `Você é um assistente de atendimento imobiliário que trabalha para o corretor ${agentName}.
+
+Sua tarefa é retomar uma conversa parada com naturalidade e foco comercial.
+
+Regras:
+- Escreva uma mensagem curta, humana e objetiva
+- Não faça parecer cobrança
+- Não repita uma saudação robótica
+- Não invente imóveis, preços ou condições
+- Retome com base no contexto da conversa, quando houver
+- Convide o lead a responder com um próximo passo simples
+- Máximo de 2 frases curtas
+
+Responda apenas com a mensagem para o cliente, sem explicações adicionais.`;
 }
 
 function getExtractionPrompt() {
-  return `Analise a conversa abaixo e extraia as informações do lead em formato JSON. Retorne APENAS o JSON, sem markdown ou explicações.
+  return `Analise a conversa abaixo e extraia as informações do lead em formato JSON. Retorne apenas o JSON, sem markdown ou explicações.
 
 Formato esperado:
 {
@@ -73,12 +91,39 @@ Regras importantes:
 - Não retorne score; o score será calculado pelo sistema com base nessas respostas`;
 }
 
+function getSummaryPrompt() {
+  return `Você é um assistente que gera resumos operacionais de conversas imobiliárias para corretores.
+
+Analise a conversa abaixo e gere um resumo curto e objetivo. Retorne apenas o JSON, sem markdown ou explicações.
+
+Formato esperado:
+{
+  "interesse": "descrição curta do interesse do lead",
+  "regiao": "região desejada ou Não informada",
+  "tipoImovel": "tipo de imóvel ou Não informado",
+  "faixaValor": "faixa de valor ou Não informada",
+  "prazoCompra": "prazo de compra ou Não informado",
+  "objecoes": "principais objeções ou dúvidas, ou Nenhuma identificada",
+  "ultimaIntencao": "última intenção percebida do lead",
+  "proximoPasso": "próximo passo sugerido para o corretor"
+}
+
+Regras:
+- Seja direto e operacional
+- Cada campo deve ter no máximo 1 ou 2 frases curtas
+- Se a informação não apareceu na conversa, escreva "Não informado(a)"
+- O próximo passo deve ser uma ação concreta para o corretor`;
+}
+
 async function callAI(
   config: AIConfig,
   systemPrompt: string,
   messages: Array<{ role: string; content: string }>,
 ) {
-  if (config.provider === "anthropic") {
+  const provider = isSupportedAIProvider(config.provider) ? config.provider : "openai";
+  const model = config.model || DEFAULT_AI_MODEL_BY_PROVIDER[provider];
+
+  if (provider === "anthropic") {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -87,7 +132,7 @@ async function callAI(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: config.model || "claude-sonnet-4-20250514",
+        model,
         max_tokens: 300,
         system: systemPrompt,
         messages: messages.map((message) => ({
@@ -107,7 +152,7 @@ async function callAI(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: config.model || "gpt-4o-mini",
+      model,
       max_tokens: 300,
       messages: [{ role: "system", content: systemPrompt }, ...messages],
     }),
@@ -131,14 +176,29 @@ export async function generateAutoReply(
     sender: string;
   }>,
 ) {
-  const systemPrompt = getQualificationPrompt(agentName);
-
   const messages = conversationMessages.map((message) => ({
     role: message.direction === "inbound" ? "user" : "assistant",
     content: message.content,
   }));
 
-  return callAI(config, systemPrompt, messages);
+  return callAI(config, getQualificationPrompt(agentName), messages);
+}
+
+export async function generateFollowUpMessage(
+  config: AIConfig,
+  agentName: string,
+  conversationMessages: Array<{
+    direction: string;
+    content: string;
+    sender: string;
+  }>,
+) {
+  const messages = conversationMessages.map((message) => ({
+    role: message.direction === "inbound" ? "user" : "assistant",
+    content: message.content,
+  }));
+
+  return callAI(config, getFollowUpPrompt(agentName), messages);
 }
 
 export async function extractLeadProfile(
@@ -151,9 +211,7 @@ export async function extractLeadProfile(
     })
     .join("\n");
 
-  const result = await callAI(config, getExtractionPrompt(), [
-    { role: "user", content: conversationText },
-  ]);
+  const result = await callAI(config, getExtractionPrompt(), [{ role: "user", content: conversationText }]);
 
   try {
     const cleaned = result.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
@@ -164,44 +222,19 @@ export async function extractLeadProfile(
   }
 }
 
-function getSummaryPrompt() {
-  return `Você é um assistente que gera resumos operacionais de conversas imobiliárias para corretores.
-
-Analise a conversa abaixo e gere um resumo curto e objetivo. Retorne APENAS o JSON, sem markdown ou explicações.
-
-Formato esperado:
-{
-  "interesse": "descrição curta do interesse do lead",
-  "regiao": "região desejada ou Não informada",
-  "tipoImovel": "tipo de imóvel ou Não informado",
-  "faixaValor": "faixa de valor ou Não informada",
-  "prazoCompra": "prazo de compra ou Não informado",
-  "objecoes": "principais objeções ou dúvidas, ou Nenhuma identificada",
-  "ultimaIntencao": "última intenção percebida do lead",
-  "proximoPasso": "próximo passo sugerido para o corretor"
-}
-
-Regras:
-- Seja direto e operacional
-- Cada campo deve ter no máximo 1-2 frases curtas
-- Se a informação não apareceu na conversa, escreva "Não informado(a)"
-- O próximo passo deve ser uma ação concreta para o corretor`;
-}
-
 export async function generateConversationSummary(
   config: AIConfig,
   conversationMessages: Array<{ direction: string; content: string; sender: string }>,
 ) {
   const conversationText = conversationMessages
-    .map((msg) => {
-      const role = msg.direction === "inbound" ? "Cliente" : msg.sender === "bot" ? "Bot" : "Corretor";
-      return `${role}: ${msg.content}`;
+    .map((message) => {
+      const role =
+        message.direction === "inbound" ? "Cliente" : message.sender === "bot" ? "Bot" : "Corretor";
+      return `${role}: ${message.content}`;
     })
     .join("\n");
 
-  const result = await callAI(config, getSummaryPrompt(), [
-    { role: "user", content: conversationText },
-  ]);
+  const result = await callAI(config, getSummaryPrompt(), [{ role: "user", content: conversationText }]);
 
   try {
     const cleaned = result.replace(/```json?\n?/g, "").replace(/```/g, "").trim();

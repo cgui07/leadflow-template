@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
-import { resolveSendTarget } from "@/lib/whatsapp";
 import { json, error, requireAuth, handleError } from "@/lib/api";
+import { getWhatsAppConfig, resolveSendTarget } from "@/lib/whatsapp";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     const settings = conv.lead.user.settings;
-    if (settings?.whatsappPhoneId && settings?.whatsappToken) {
+    if (settings?.whatsappPhoneId) {
       try {
         const { sendWhatsAppMessage } = await import("@/lib/whatsapp");
         const replyJid = resolveSendTarget(conv.whatsappChatId, conv.lead.phone);
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         }
 
         const wa = await sendWhatsAppMessage(
-          { phoneId: settings.whatsappPhoneId, token: settings.whatsappToken },
+          getWhatsAppConfig(settings.whatsappPhoneId),
           replyJid,
           content
         );

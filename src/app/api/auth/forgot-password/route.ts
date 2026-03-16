@@ -21,7 +21,13 @@ export async function POST(req: NextRequest) {
     let previewUrl: string | undefined;
 
     if (user) {
+      if (process.env.NODE_ENV === "production" && !process.env.RESEND_API_KEY) {
+        return error("O envio de e-mail não está configurado.", 500);
+      }
+
       const { token, tokenHash, expiresAt } = createPasswordResetToken();
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
+      const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
       await prisma.user.update({
         where: { id: user.id },
@@ -31,14 +37,22 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
-      const resetUrl = `${appUrl}/reset-password?token=${token}`;
-
       if (process.env.RESEND_API_KEY) {
         try {
           await sendPasswordResetEmail(user.email, resetUrl);
         } catch (emailErr) {
-          console.error("[auth] Email send failed, continuing:", emailErr);
+          console.error("[auth] Password reset email failed:", emailErr);
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              passwordResetTokenHash: null,
+              passwordResetExpiresAt: null,
+            },
+          });
+          return error(
+            "Não foi possível enviar o e-mail de redefinição agora. Tente novamente em instantes.",
+            502,
+          );
         }
       }
 

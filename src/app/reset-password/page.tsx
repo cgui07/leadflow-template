@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { TextField } from "@/components/forms";
 import { Button } from "@/components/ui/Button";
+import { PasswordField } from "@/components/forms";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
@@ -24,7 +24,9 @@ function ResetPasswordForm() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [status, setStatus] = useState<"checking" | "ready" | "invalid">("checking");
+  const [status, setStatus] = useState<"checking" | "ready" | "invalid">(
+    "checking",
+  );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -41,7 +43,9 @@ function ResetPasswordForm() {
       }
 
       try {
-        const res = await fetch(`/api/auth/reset-password?token=${encodeURIComponent(token)}`);
+        const res = await fetch(
+          `/api/auth/reset-password?token=${encodeURIComponent(token)}`,
+        );
 
         if (!res.ok) {
           const data = await res.json();
@@ -114,16 +118,16 @@ function ResetPasswordForm() {
       <div className="w-full max-w-md">
         <Link
           href="/login"
-          className="mb-8 inline-flex items-center gap-1.5 text-sm text-gray-smoke hover:text-gray-charcoal transition-colors"
+          className="mb-8 inline-flex items-center gap-1.5 text-sm text-gray-smoke transition-colors hover:text-gray-charcoal"
         >
           <ArrowLeft className="h-4 w-4" />
           Voltar para login
         </Link>
         <div className="rounded-2xl border border-gray-ash bg-white p-8 shadow-sm">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-6">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
             <ShieldCheck className="h-7 w-7 text-primary" />
           </div>
-          <div className="text-center mb-6">
+          <div className="mb-6 text-center">
             <div className="text-xl font-bold text-gray-iron">Redefinir senha</div>
             <div className="mt-2 text-sm text-gray-smoke">
               Crie uma nova senha segura para sua conta.
@@ -137,11 +141,11 @@ function ResetPasswordForm() {
           )}
 
           {status === "invalid" && (
-            <div className="text-center py-4">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-danger/10 mb-4">
+            <div className="py-4 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-danger/10">
                 <AlertTriangle className="h-7 w-7 text-danger" />
               </div>
-              <div className="text-sm text-gray-charcoal mb-4">{error}</div>
+              <div className="mb-4 text-sm text-gray-charcoal">{error}</div>
               <Link href="/forgot-password">
                 <Button variant="outline" fullWidth>
                   Solicitar novo link
@@ -153,35 +157,45 @@ function ResetPasswordForm() {
           {status === "ready" && (
             <>
               {error && (
-                <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-pale border border-red-blush p-3 text-sm text-danger">
-                  <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-blush bg-red-pale p-3 text-sm text-danger">
+                  <svg
+                    className="h-4 w-4 shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                    />
                   </svg>
                   {error}
                 </div>
               )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <TextField
+                  <PasswordField
                     label="Nova senha"
-                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`}
                     minLength={MIN_PASSWORD_LENGTH}
+                    autoComplete="new-password"
                     required
                   />
                   <div className="mt-2">
                     <PasswordStrengthMeter password={password} />
                   </div>
                 </div>
-                <TextField
+                <PasswordField
                   label="Confirmar nova senha"
-                  type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repita a nova senha"
                   minLength={MIN_PASSWORD_LENGTH}
+                  autoComplete="new-password"
                   required
                   error={!passwordsMatch ? "As senhas precisam ser iguais." : undefined}
                 />

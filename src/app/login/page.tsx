@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { Suspense, useState } from "react";
-import { TextField } from "@/components/forms";
 import { Button } from "@/components/ui/Button";
 import { useRouter, useSearchParams } from "next/navigation";
+import { PasswordField, TextField } from "@/components/forms";
 
 export default function LoginPage() {
   return (
@@ -52,10 +52,10 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen">
-      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-blue-navy via-primary to-secondary items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10">
-          <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-white blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-info blur-3xl" />
+      <div className="relative hidden items-center justify-center overflow-hidden bg-linear-to-br from-blue-navy via-primary to-secondary p-12 lg:flex lg:w-1/2">
+        <div className="absolute left-0 top-0 h-full w-full opacity-10">
+          <div className="absolute left-10 top-20 h-72 w-72 rounded-full bg-white blur-3xl" />
+          <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-info blur-3xl" />
         </div>
         <div className="relative z-10 max-w-lg text-white">
           <div className="text-4xl font-bold leading-tight tracking-tight">
@@ -66,27 +66,27 @@ function LoginForm() {
             com IA e garante que você nunca perca uma oportunidade.
           </div>
           <div className="mt-12 grid grid-cols-3 gap-6">
-            <div className="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 text-center">
+            <div className="rounded-2xl border border-white/10 bg-white/10 p-4 text-center backdrop-blur-sm">
               <div className="text-3xl font-bold">3x</div>
               <div className="mt-1 text-xs text-blue-ice/70">mais respostas</div>
             </div>
-            <div className="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 text-center">
+            <div className="rounded-2xl border border-white/10 bg-white/10 p-4 text-center backdrop-blur-sm">
               <div className="text-3xl font-bold">-70%</div>
               <div className="mt-1 text-xs text-blue-ice/70">tempo de triagem</div>
             </div>
-            <div className="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 text-center">
+            <div className="rounded-2xl border border-white/10 bg-white/10 p-4 text-center backdrop-blur-sm">
               <div className="text-3xl font-bold">24/7</div>
               <div className="mt-1 text-xs text-blue-ice/70">atendimento IA</div>
             </div>
           </div>
         </div>
       </div>
-      <div className="flex w-full lg:w-1/2 items-center justify-center bg-white px-6 py-12">
+      <div className="flex w-full items-center justify-center bg-white px-6 py-12 lg:w-1/2">
         <div className="w-full max-w-sm">
           <div className="mb-10">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <div className="text-white font-bold text-sm">LF</div>
+            <div className="mb-1 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <div className="text-sm font-bold text-white">LF</div>
               </div>
               <div className="text-xl font-bold text-gray-iron">LeadFlow</div>
             </div>
@@ -96,9 +96,19 @@ function LoginForm() {
           </div>
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="flex items-center gap-2 rounded-lg bg-red-pale border border-red-blush p-3 text-sm text-danger">
-                <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              <div className="flex items-center gap-2 rounded-lg border border-red-blush bg-red-pale p-3 text-sm text-danger">
+                <svg
+                  className="h-4 w-4 shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                  />
                 </svg>
                 {error}
               </div>
@@ -112,18 +122,18 @@ function LoginForm() {
               required
             />
             <div>
-              <TextField
+              <PasswordField
                 label="Senha"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                autoComplete="current-password"
                 required
               />
               <div className="mt-1.5 text-right">
                 <Link
                   href="/forgot-password"
-                  className="text-xs font-medium text-primary/70 hover:text-primary transition-colors"
+                  className="text-xs font-medium text-primary/70 transition-colors hover:text-primary"
                 >
                   Esqueceu a senha?
                 </Link>
@@ -166,7 +176,7 @@ function LoginForm() {
             Ainda não tem conta?{" "}
             <Link
               href="/register"
-              className="font-semibold text-primary hover:text-blue-royal transition-colors"
+              className="font-semibold text-primary transition-colors hover:text-blue-royal"
             >
               Criar conta grátis
             </Link>
