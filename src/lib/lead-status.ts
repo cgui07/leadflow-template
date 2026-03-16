@@ -37,7 +37,7 @@ export const LEAD_STATUS_BADGE_VARIANTS: Record<
 };
 
 export const LEAD_STATUS_SOFT_CLASSES: Record<LeadStatus, string> = {
-  new: "bg-info/10 text-info",
+  new: "bg-info-10 text-info",
   contacted: "bg-gray-ghost text-neutral-dark",
   qualifying: "bg-purple-pale text-secondary",
   qualified: "bg-green-pale text-success",

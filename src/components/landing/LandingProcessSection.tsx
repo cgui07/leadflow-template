@@ -32,6 +32,11 @@ export function LandingProcessSection({
       <div className="mt-8 sm:mt-10">
         <LandingFlowJourney
           content={{
+            customerPerspectiveDescription:
+              content.customerPerspectiveDescription,
+            customerPerspectiveEyebrow: content.customerPerspectiveEyebrow,
+            customerPerspectiveTitle: content.customerPerspectiveTitle,
+            journeyBadge: content.journeyBadge,
             journeyDescription: content.journeyDescription,
             journeyLabel: content.journeyLabel,
             journeyTitle: content.journeyTitle,
@@ -59,7 +64,7 @@ function LandingProcessStepCard({
 }: LandingProcessStepCardProps) {
   return (
     <Card
-      className="rounded-2xl border-neutral-border bg-white/90 shadow-soft backdrop-blur sm:rounded-[1.75rem]"
+      className="rounded-2xl border-neutral-border bg-white-90 shadow-soft backdrop-blur sm:rounded-[1.75rem]"
       noPadding
     >
       <CardContent className="p-5 sm:p-6">

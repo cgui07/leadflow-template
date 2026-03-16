@@ -34,7 +34,7 @@ function LandingHeroSignalCard({ signal }: LandingHeroSignalCardProps) {
 
   return (
     <Card
-      className="rounded-[1.5rem] border-white/70 bg-white/78 shadow-soft backdrop-blur"
+      className="rounded-[1.5rem] border-white-70 bg-white-78 shadow-soft backdrop-blur"
       noPadding
     >
       <CardContent className="p-4">

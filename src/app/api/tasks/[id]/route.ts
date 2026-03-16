@@ -1,67 +1,59 @@
-import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
-import { isTaskStatus } from "@/lib/task-config";
-import { json, error, requireAuth, handleError } from "@/lib/api";
+import { deleteTask, updateTask } from "@/features/tasks/server";
+import { error, handleError, json, requireAuth } from "@/lib/api";
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await requireAuth();
     const { id } = await params;
-    const data = await req.json();
-
-    const existing = await prisma.task.findFirst({ where: { id, userId: user.id } });
-    if (!existing) return error("Tarefa não encontrada", 404);
-
-    if (data.status && (typeof data.status !== "string" || !isTaskStatus(data.status))) {
-      return error("Status de tarefa inválido", 400);
-    }
-
-    if (
-      data.dueAt !== undefined &&
-      data.dueAt !== null &&
-      Number.isNaN(new Date(data.dueAt).getTime())
-    ) {
-      return error("Data de vencimento inválida", 400);
-    }
-
-    const task = await prisma.task.update({
-      where: { id },
-      data: {
-        ...(typeof data.title === "string" && { title: data.title.trim() }),
-        ...(data.description !== undefined && {
-          description:
-            typeof data.description === "string" && data.description.trim()
-              ? data.description.trim()
-              : null,
-        }),
-        status: data.status,
-        dueAt: data.dueAt ? new Date(data.dueAt) : undefined,
-        completedAt:
-          data.status === "completed"
-            ? new Date()
-            : data.status === "pending"
-              ? null
-              : undefined,
-      },
-    });
+    const task = await updateTask(
+      user.id,
+      id,
+      (await req.json()) as Record<string, unknown>,
+    );
 
     return json(task);
   } catch (err) {
+    if (err instanceof Error) {
+      if (err.message === "TASK_NOT_FOUND") {
+        return error("Tarefa nao encontrada", 404);
+      }
+
+      if (err.message === "TASK_STATUS_INVALID") {
+        return error("Status de tarefa invalido", 400);
+      }
+
+      if (err.message === "TASK_DUE_AT_INVALID") {
+        return error("Data de vencimento invalida", 400);
+      }
+    }
+
+    if (err instanceof SyntaxError) {
+      return error("Payload invalido");
+    }
+
     return handleError(err);
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await requireAuth();
     const { id } = await params;
+    await deleteTask(user.id, id);
 
-    const existing = await prisma.task.findFirst({ where: { id, userId: user.id } });
-    if (!existing) return error("Tarefa não encontrada", 404);
-
-    await prisma.task.delete({ where: { id } });
     return json({ ok: true });
   } catch (err) {
+    if (err instanceof Error && err.message === "TASK_NOT_FOUND") {
+      return error("Tarefa nao encontrada", 404);
+    }
+
     return handleError(err);
   }
 }

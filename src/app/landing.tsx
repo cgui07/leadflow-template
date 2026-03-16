@@ -22,7 +22,7 @@ export function LandingPage() {
           <LandingDashboardPreview content={landingContent.preview} />
         </div>
       </Container>
-      <Section className="border-y border-neutral-border bg-white/70 py-10 backdrop-blur sm:py-20">
+      <Section className="border-y border-neutral-border bg-white-70 py-10 backdrop-blur sm:py-20">
         <LandingProcessSection content={landingContent.process} />
       </Section>
       <Section>

@@ -1,13 +1,13 @@
 export interface LandingAction {
-  label: string;
-  href: string;
-  external?: boolean;
   description?: string;
+  external?: boolean;
+  href: string;
+  label: string;
 }
 
 export interface LandingBrand {
-  name: string;
   description: string;
+  name: string;
 }
 
 export interface LandingHighlight {
@@ -18,33 +18,33 @@ export interface LandingHighlight {
 export type LandingHeroSignalIcon = "lead" | "qualify" | "handoff";
 
 export interface LandingHeroSignal {
+  badge: string;
+  description: string;
+  icon: LandingHeroSignalIcon;
   label: string;
   title: string;
-  description: string;
-  badge: string;
-  icon: LandingHeroSignalIcon;
 }
 
 export interface LandingHeroContent {
-  eyebrow: string;
-  title: string;
   description: string;
+  eyebrow: string;
+  highlights: readonly LandingHighlight[];
   primaryAction: LandingAction;
   signals: readonly LandingHeroSignal[];
-  highlights: readonly LandingHighlight[];
+  title: string;
 }
 
 export interface LandingPriorityLead {
-  name: string;
-  stage: string;
   detail: string;
-  score: string;
   eta: string;
+  name: string;
+  score: string;
+  stage: string;
 }
 
 export interface LandingConversationEntry {
-  role: "Assistente" | "Cliente";
   message: string;
+  role: "Assistente" | "Cliente";
 }
 
 export interface LandingProfileField {
@@ -53,35 +53,35 @@ export interface LandingProfileField {
 }
 
 export interface LandingPreviewSummary {
+  badge: string;
   label: string;
   value: string;
-  badge: string;
 }
 
 export interface LandingConversationContent {
-  label: string;
   badge: string;
+  label: string;
   leadName: string;
   messages: readonly LandingConversationEntry[];
-  profileLabel: string;
   profileFields: readonly LandingProfileField[];
+  profileLabel: string;
 }
 
 export interface LandingSupportCard {
-  title: string;
   description: string;
+  title: string;
 }
 
 export interface LandingPreviewContent {
-  summary: LandingPreviewSummary;
-  priorityLeads: readonly LandingPriorityLead[];
   conversation: LandingConversationContent;
+  priorityLeads: readonly LandingPriorityLead[];
+  summary: LandingPreviewSummary;
   supportCards: readonly LandingSupportCard[];
 }
 
 export interface LandingProcessStep {
-  title: string;
   description: string;
+  title: string;
 }
 
 export type LandingProcessStageIcon =
@@ -92,29 +92,33 @@ export type LandingProcessStageIcon =
   | "handoff";
 
 export interface LandingProcessStage {
-  label: string;
-  title: string;
   description: string;
   icon: LandingProcessStageIcon;
+  label: string;
   metric: string;
+  title: string;
 }
 
 export interface LandingProcessOutcome {
+  description: string;
   label: string;
   value: string;
-  description: string;
 }
 
 export interface LandingProcessSectionContent {
-  eyebrow: string;
-  title: string;
+  customerPerspectiveDescription: string;
+  customerPerspectiveEyebrow: string;
+  customerPerspectiveTitle: string;
   description: string;
+  eyebrow: string;
+  journeyBadge: string;
+  journeyDescription: string;
   journeyLabel: string;
   journeyTitle: string;
-  journeyDescription: string;
-  stages: readonly LandingProcessStage[];
   outcomes: readonly LandingProcessOutcome[];
+  stages: readonly LandingProcessStage[];
   steps: readonly LandingProcessStep[];
+  title: string;
 }
 
 export interface LandingBenefit {
@@ -122,27 +126,27 @@ export interface LandingBenefit {
 }
 
 export interface LandingBenefitsSectionContent {
-  eyebrow: string;
-  title: string;
   description: string;
+  eyebrow: string;
   items: readonly LandingBenefit[];
+  title: string;
 }
 
 export interface LandingFooterContent {
-  label: string;
   action: LandingAction;
+  label: string;
 }
 
 export interface LandingContent {
+  benefits: LandingBenefitsSectionContent;
   brand: LandingBrand;
+  footer: LandingFooterContent;
   header: {
     contactAction: LandingAction;
   };
   hero: LandingHeroContent;
   preview: LandingPreviewContent;
   process: LandingProcessSectionContent;
-  benefits: LandingBenefitsSectionContent;
-  footer: LandingFooterContent;
 }
 
 const contactHref =
@@ -151,28 +155,26 @@ const contactHref =
 export const landingContent = {
   brand: {
     name: "LeadFlow",
-    description:
-      "Atendimento e qualificação de leads para corretores autônomos.",
+    description: "Atendimento e qualificacao de leads para corretores autonomos.",
   },
   header: {
     contactAction: {
-      label: "Pedir orçamento",
+      label: "Pedir orcamento",
       href: contactHref,
       external: true,
     },
   },
   hero: {
-    eyebrow:
-      "Responda em segundos. Organize sem esforço. Priorize com clareza.",
-    title: "Transforme o WhatsApp em um funil simples de vendas imobiliárias.",
+    eyebrow: "Responda em segundos. Organize sem esforco. Priorize com clareza.",
+    title: "Transforme o WhatsApp em um funil simples de vendas imobiliarias.",
     description:
-      "O LeadFlow atende o primeiro contato, coleta informações essenciais e entrega ao corretor apenas os leads com maior probabilidade de compra.",
+      "O LeadFlow atende o primeiro contato, coleta informacoes essenciais e entrega ao corretor apenas os leads com maior probabilidade de compra.",
     primaryAction: {
       label: "Entenda melhor com a nossa equipe",
       href: contactHref,
       external: true,
       description:
-        "Você será direcionado para conversar com a equipe e entender valores e formato de contratação.",
+        "Voce sera direcionado para conversar com a equipe e entender valores e formato de contratacao.",
     },
     signals: [
       {
@@ -184,10 +186,10 @@ export const landingContent = {
         icon: "lead",
       },
       {
-        label: "Qualificação",
-        title: "IA coleta região e faixa",
+        label: "Qualificacao",
+        title: "IA coleta regiao e faixa",
         description:
-          "As informações mais importantes entram no contexto logo no início.",
+          "As informacoes mais importantes entram no contexto logo no inicio.",
         badge: "dados certos",
         icon: "qualify",
       },
@@ -195,36 +197,18 @@ export const landingContent = {
         label: "Entrega",
         title: "Corretor assume com clareza",
         description:
-          "Histórico, prioridade e próximo passo chegam prontos para seguir.",
+          "Historico, prioridade e proximo passo chegam prontos para seguir.",
         badge: "mais foco",
         icon: "handoff",
       },
     ],
     highlights: [
-      {
-        label: "Resposta inicial",
-        value: "instantânea",
-      },
-      {
-        label: "Qualificação",
-        value: "automática",
-      },
-      {
-        label: "Operação",
-        value: "simples",
-      },
-      {
-        label: "Priorização",
-        value: "inteligente",
-      },
-      {
-        label: "Contexto",
-        value: "completo",
-      },
-      {
-        label: "Follow-up",
-        value: "ativo",
-      },
+      { label: "Resposta inicial", value: "instantanea" },
+      { label: "Qualificacao", value: "automatica" },
+      { label: "Operacao", value: "simples" },
+      { label: "Priorizacao", value: "inteligente" },
+      { label: "Contexto", value: "completo" },
+      { label: "Follow-up", value: "ativo" },
     ],
   },
   preview: {
@@ -237,29 +221,29 @@ export const landingContent = {
       {
         name: "Mariana Souza",
         stage: "Pronta para visita",
-        detail: "Busca apartamento de 2 quartos na Zona Sul até R$ 780 mil.",
+        detail: "Busca apartamento de 2 quartos na Zona Sul ate R$ 780 mil.",
         score: "92/100",
         eta: "Responder agora",
       },
       {
         name: "Paulo Henrique",
-        stage: "Em qualificação",
-        detail: "Quer casa em condomínio e pretende comprar em até 90 dias.",
+        stage: "Em qualificacao",
+        detail: "Quer casa em condominio e pretende comprar em ate 90 dias.",
         score: "81/100",
         eta: "Hoje, 14h",
       },
       {
         name: "Ana Beatriz",
         stage: "Follow-up automatico",
-        detail: "Parou de responder após pedir opções na Barra da Tijuca.",
+        detail: "Parou de responder apos pedir opcoes na Barra da Tijuca.",
         score: "63/100",
-        eta: "Amanhã, 10h",
+        eta: "Amanha, 10h",
       },
       {
         name: "Lucas Martins",
         stage: "Aguardando retorno",
         detail:
-          "Visitou duas opções em Botafogo e quer comparar financiamento antes de decidir.",
+          "Visitou duas opcoes em Botafogo e quer comparar financiamento antes de decidir.",
         score: "76/100",
         eta: "Hoje, 17h",
       },
@@ -267,9 +251,9 @@ export const landingContent = {
         name: "Juliana Costa",
         stage: "Interesse aquecido",
         detail:
-          "Pediu opções de cobertura na Tijuca e quer entender disponibilidade para visita nesta semana.",
+          "Pediu opcoes de cobertura na Tijuca e quer entender disponibilidade para visita nesta semana.",
         score: "84/100",
-        eta: "Amanhã, 9h",
+        eta: "Amanha, 9h",
       },
     ],
     conversation: {
@@ -280,7 +264,7 @@ export const landingContent = {
         {
           role: "Assistente",
           message:
-            "Olá, aqui é da equipe LeadFlow. Vi que você tem interesse em um imóvel. Posso te ajudar com algumas opções.",
+            "Ola, aqui e da equipe LeadFlow. Vi que voce tem interesse em um imovel. Posso te ajudar com algumas opcoes.",
         },
         {
           role: "Cliente",
@@ -289,43 +273,30 @@ export const landingContent = {
         {
           role: "Assistente",
           message:
-            "Perfeito. Você busca para morar ou investir? E qual faixa de valor faz mais sentido hoje?",
+            "Perfeito. Voce busca para morar ou investir? E qual faixa de valor faz mais sentido hoje?",
         },
         {
           role: "Cliente",
-          message:
-            "Para morar. Até R$ 650 mil e quero comprar ainda este semestre.",
+          message: "Para morar. Ate R$ 650 mil e quero comprar ainda este semestre.",
         },
       ],
       profileLabel: "Perfil gerado pela IA",
       profileFields: [
-        {
-          label: "Região",
-          value: "Zona Sul",
-        },
-        {
-          label: "Faixa",
-          value: "Até R$ 780 mil",
-        },
-        {
-          label: "Prazo",
-          value: "Até 60 dias",
-        },
-        {
-          label: "Próximo passo",
-          value: "Agendar visita",
-        },
+        { label: "Regiao", value: "Zona Sul" },
+        { label: "Faixa", value: "Ate R$ 780 mil" },
+        { label: "Prazo", value: "Ate 60 dias" },
+        { label: "Proximo passo", value: "Agendar visita" },
       ],
     },
     supportCards: [
       {
         title: "Follow-up",
-        description: "Mensagens programadas para não perder leads frios.",
+        description: "Mensagens programadas para nao perder leads frios.",
       },
       {
-        title: "Organização",
+        title: "Organizacao",
         description:
-          "Histórico centralizado para o corretor retomar a conversa com contexto.",
+          "Historico centralizado para o corretor retomar a conversa com contexto.",
       },
     ],
   },
@@ -333,17 +304,22 @@ export const landingContent = {
     eyebrow: "Como funciona",
     title: "Um fluxo direto para responder, qualificar e entregar contexto.",
     description:
-      "O sistema não substitui o corretor. Ele organiza a entrada, faz a triagem inicial e cria clareza sobre quem precisa de atenção imediata.",
+      "O sistema nao substitui o corretor. Ele organiza a entrada, faz a triagem inicial e cria clareza sobre quem precisa de atencao imediata.",
     journeyLabel: "Veja o fluxo acontecendo",
-    journeyTitle: "Do primeiro \"Oi\" ao lead pronto para atendimento.",
+    journeyTitle: 'Do primeiro "Oi" ao lead pronto para atendimento.',
     journeyDescription:
-      "O cliente percebe uma conversa fluida. O corretor recebe prioridade, contexto e próximo passo sem precisar montar nada manualmente.",
+      "O cliente percebe uma conversa fluida. O corretor recebe prioridade, contexto e proximo passo sem precisar montar nada manualmente.",
+    journeyBadge: "processo visivel e facil de entender",
+    customerPerspectiveEyebrow: "o que o cliente percebe",
+    customerPerspectiveTitle: "Atendimento rapido, natural e profissional.",
+    customerPerspectiveDescription:
+      "Em vez de esperar resposta ou preencher um processo pesado, o lead entra em uma conversa enxuta que ja move a oportunidade para o ponto certo.",
     stages: [
       {
         label: "Entrada",
         title: "Lead chega pelo WhatsApp",
         description:
-          "O contato entra a partir do anúncio ou indicação e cai no fluxo certo imediatamente.",
+          "O contato entra a partir do anuncio ou indicacao e cai no fluxo certo imediatamente.",
         icon: "lead",
         metric: "sem fila",
       },
@@ -356,10 +332,10 @@ export const landingContent = {
         metric: "em segundos",
       },
       {
-        label: "Qualificação",
+        label: "Qualificacao",
         title: "IA coleta o que importa",
         description:
-          "Região, faixa, prazo e intenção de compra entram no contexto sem conversa arrastada.",
+          "Regiao, faixa, prazo e intencao de compra entram no contexto sem conversa arrastada.",
         icon: "qualify",
         metric: "dados certos",
       },
@@ -367,7 +343,7 @@ export const landingContent = {
         label: "Prioridade",
         title: "Sistema ordena o atendimento",
         description:
-          "Quem está mais pronto para avançar sobe na frente com score e próximo passo definidos.",
+          "Quem esta mais pronto para avancar sobe na frente com score e proximo passo definidos.",
         icon: "prioritize",
         metric: "foco real",
       },
@@ -375,46 +351,46 @@ export const landingContent = {
         label: "Entrega",
         title: "Corretor assume com clareza",
         description:
-          "A passagem acontece com histórico, resumo e contexto suficiente para seguir vendendo.",
+          "A passagem acontece com historico, resumo e contexto suficiente para seguir vendendo.",
         icon: "handoff",
         metric: "handoff limpo",
       },
     ],
     outcomes: [
       {
-        label: "Cliente vê",
+        label: "Cliente ve",
         value: "Conversa natural",
         description:
-          "Uma troca objetiva, profissional e sem parecer formulário engessado.",
+          "Uma troca objetiva, profissional e sem parecer formulario engessado.",
       },
       {
         label: "IA entrega",
         value: "Contexto pronto",
         description:
-          "Região, faixa, prazo e interesse chegam organizados para a equipe.",
+          "Regiao, faixa, prazo e interesse chegam organizados para a equipe.",
       },
       {
         label: "Corretor ganha",
         value: "Prioridade clara",
         description:
-          "Fica evidente quem precisa de resposta imediata e qual deve ser o próximo movimento.",
+          "Fica evidente quem precisa de resposta imediata e qual deve ser o proximo movimento.",
       },
     ],
     steps: [
       {
         title: "Resposta imediata no WhatsApp",
         description:
-          "Todo novo contato recebe uma resposta profissional em segundos, mesmo quando o corretor está em visita ou dirigindo.",
+          "Todo novo contato recebe uma resposta profissional em segundos, mesmo quando o corretor esta em visita ou dirigindo.",
       },
       {
         title: "Conversa curta e objetiva",
         description:
-          "O assistente faz poucas perguntas, mas captura o que importa: região, faixa de valor, prazo e intenção de compra.",
+          "O assistente faz poucas perguntas, mas captura o que importa: regiao, faixa de valor, prazo e intencao de compra.",
       },
       {
         title: "Entrega do lead pronto",
         description:
-          "Quando o lead demonstra intenção real, o corretor assume a conversa com histórico, contexto e prioridade definidos.",
+          "Quando o lead demonstra intencao real, o corretor assume a conversa com historico, contexto e prioridade definidos.",
       },
     ],
   },
@@ -422,15 +398,15 @@ export const landingContent = {
     eyebrow: "O que o corretor ganha",
     title: "Menos perda de lead. Mais foco em quem realmente quer comprar.",
     description:
-      "O valor do produto está na capacidade de aumentar a taxa de resposta e reduzir o abandono causado por demora, desorganização e ausência de follow-up.",
+      "O valor do produto esta na capacidade de aumentar a taxa de resposta e reduzir o abandono causado por demora, desorganizacao e ausencia de follow-up.",
     items: [
       {
         description:
-          "Mini CRM com histórico completo de mensagens e ficha automática do lead.",
+          "Mini CRM com historico completo de mensagens e ficha automatica do lead.",
       },
       {
         description:
-          "Classificação de interesse para destacar quem merece atendimento imediato.",
+          "Classificacao de interesse para destacar quem merece atendimento imediato.",
       },
       {
         description:
@@ -438,7 +414,7 @@ export const landingContent = {
       },
       {
         description:
-          "Interface simples para corretores autônomos que não querem aprender um CRM pesado.",
+          "Interface simples para corretores autonomos que nao querem aprender um CRM pesado.",
       },
     ],
   },

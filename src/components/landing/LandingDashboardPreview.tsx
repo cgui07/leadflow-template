@@ -67,7 +67,7 @@ function LeadPriorityPanel({
   priorityLeads,
 }: LeadPriorityPanelProps) {
   return (
-    <div className="self-start rounded-xl bg-white/6 p-3 sm:rounded-3xl sm:p-4">
+    <div className="self-start rounded-xl bg-white-6 p-3 sm:rounded-3xl sm:p-4">
       <div className="text-[10px] uppercase tracking-[0.24em] text-neutral-muted sm:text-xs">
         {summary.label}
       </div>
@@ -76,7 +76,7 @@ function LeadPriorityPanel({
           {summary.value}
         </div>
         <Badge
-          className="shrink-0 whitespace-nowrap bg-green-emerald/18 px-3 py-1 text-[10px] font-medium text-green-sage sm:text-xs"
+          className="shrink-0 whitespace-nowrap bg-green-emerald-18 px-3 py-1 text-[10px] font-medium text-green-sage sm:text-xs"
           size="sm"
         >
           {summary.badge}
@@ -93,11 +93,11 @@ function LeadPriorityPanel({
 
 function PriorityLeadCard({ lead }: PriorityLeadCardProps) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-3 sm:rounded-[1.25rem] sm:p-4">
+    <div className="rounded-xl border border-white-10 bg-white-5 p-3 sm:rounded-[1.25rem] sm:p-4">
       <div className="flex items-center gap-2">
         <div className="text-sm font-semibold sm:text-base">{lead.name}</div>
         <Badge
-          className="shrink-0 whitespace-nowrap bg-orange-amber/15 px-3 py-1 text-[10px] font-semibold text-yellow-lemon sm:text-xs"
+          className="shrink-0 whitespace-nowrap bg-orange-amber-15 px-3 py-1 text-[10px] font-semibold text-yellow-lemon sm:text-xs"
           size="sm"
         >
           {lead.score}
@@ -191,7 +191,7 @@ function ProfileFieldCard({ field }: ProfileFieldCardProps) {
 
 function PreviewSupportCard({ card }: PreviewSupportCardProps) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/6 p-3 sm:rounded-3xl sm:p-4">
+    <div className="rounded-xl border border-white-10 bg-white-6 p-3 sm:rounded-3xl sm:p-4">
       <div className="text-[10px] uppercase tracking-[0.24em] text-neutral-muted sm:text-xs">
         {card.title}
       </div>

@@ -214,7 +214,7 @@ export function Sidebar({
         </div>
       </aside>
 
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-border bg-white/95 backdrop-blur-lg md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-border bg-white-95 backdrop-blur-lg md:hidden">
         <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
           {mobileItems.map((item) => {
             const isActive =

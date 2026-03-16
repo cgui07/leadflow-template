@@ -1,7 +1,6 @@
-import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
-import { generateConversationSummary } from "@/lib/ai";
-import { json, error, requireAuth, handleError } from "@/lib/api";
+import { error, handleError, json, requireAuth } from "@/lib/api";
+import { generateSummary } from "@/features/conversations/server";
 
 export async function POST(
   _req: NextRequest,
@@ -10,34 +9,28 @@ export async function POST(
   try {
     const user = await requireAuth();
     const { id } = await params;
-
-    const conv = await prisma.conversation.findFirst({
-      where: { id, lead: { userId: user.id } },
-      include: {
-        messages: { orderBy: { createdAt: "asc" }, take: 50 },
-        lead: { include: { user: { include: { settings: true } } } },
-      },
-    });
-
-    if (!conv) return error("Conversa não encontrada", 404);
-    if (!conv.messages.length) return error("Conversa sem mensagens", 400);
-
-    const settings = conv.lead.user.settings;
-    if (!settings?.aiProvider || !settings?.aiApiKey) {
-      return error("Configuração de IA não encontrada", 400);
-    }
-
-    const config = {
-      provider: settings.aiProvider,
-      apiKey: settings.aiApiKey,
-      model: settings.aiModel || "",
-    };
-
-    const summary = await generateConversationSummary(config, conv.messages);
-    if (!summary) return error("Não foi possível gerar o resumo", 500);
+    const summary = await generateSummary(user.id, id);
 
     return json(summary);
   } catch (err) {
+    if (err instanceof Error) {
+      if (err.message === "CONVERSATION_NOT_FOUND") {
+        return error("Conversa nao encontrada", 404);
+      }
+
+      if (err.message === "CONVERSATION_EMPTY") {
+        return error("Conversa sem mensagens", 400);
+      }
+
+      if (err.message === "CONVERSATION_AI_NOT_CONFIGURED") {
+        return error("Configuracao de IA nao encontrada", 400);
+      }
+
+      if (err.message === "CONVERSATION_SUMMARY_FAILED") {
+        return error("Nao foi possivel gerar o resumo", 500);
+      }
+    }
+
     return handleError(err);
   }
 }

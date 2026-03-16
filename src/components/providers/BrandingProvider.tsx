@@ -2,13 +2,13 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import {
-  DEFAULT_BRANDING,
-  TENANT_FEATURE_FLAGS,
-  TENANT_TEXT_FIELDS,
+  createDefaultBranding,
+  type TenantFeatureFlagKey,
   type TenantBranding,
+  type TenantTextKey,
 } from "@/lib/branding";
 
-const BrandingContext = createContext<TenantBranding>(DEFAULT_BRANDING);
+const BrandingContext = createContext<TenantBranding>(createDefaultBranding());
 
 export function BrandingProvider({
   branding,
@@ -30,18 +30,14 @@ export function useBranding(): TenantBranding {
   return useContext(BrandingContext);
 }
 
-export function useBrandText(key: string, fallback: string): string {
+export function useBrandText(key: TenantTextKey, fallback: string): string {
   const branding = useBranding();
-  const isKnownKey = TENANT_TEXT_FIELDS.some((field) => field.key === key);
-  if (!isKnownKey) return fallback;
 
-  return branding.customTexts[key as keyof TenantBranding["customTexts"]] || fallback;
+  return branding.customTexts[key] || fallback;
 }
 
-export function useFeatureFlag(flag: string): boolean {
+export function useFeatureFlag(flag: TenantFeatureFlagKey): boolean {
   const branding = useBranding();
-  const isKnownFlag = TENANT_FEATURE_FLAGS.some((field) => field.key === flag);
-  if (!isKnownFlag) return false;
 
-  return branding.featureFlags[flag as keyof TenantBranding["featureFlags"]] === true;
+  return branding.featureFlags[flag] === true;
 }

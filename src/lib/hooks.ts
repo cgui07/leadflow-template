@@ -1,22 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import {
-  DEFAULT_BRANDING,
-  type TenantBranding,
-} from "@/lib/branding";
-
-export const AUTH_REFRESH_EVENT = "leadflow:auth-refresh";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  avatarUrl?: string;
-  role: string;
-  tenantId?: string | null;
-}
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const NO_STORE_FETCH_OPTIONS = {
   cache: "no-store" as const,
@@ -31,84 +15,21 @@ function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
-export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [branding, setBranding] = useState<TenantBranding>(DEFAULT_BRANDING);
-  const [loading, setLoading] = useState(true);
-
-  const loadSession = useCallback(
-    async (showLoading = false, signal?: AbortSignal) => {
-      if (showLoading) {
-        setLoading(true);
-      }
-
-      try {
-        const response = await fetch("/api/auth/me", {
-          ...NO_STORE_FETCH_OPTIONS,
-          signal,
-        });
-
-        if (!response.ok) {
-          throw new Error("Nao foi possivel carregar a sessao");
-        }
-
-        const data = (await response.json()) as {
-          user?: User | null;
-          branding?: TenantBranding;
-        };
-
-        if (signal?.aborted) {
-          return;
-        }
-
-        setUser(data.user || null);
-        setBranding(data.branding || DEFAULT_BRANDING);
-      } catch (error) {
-        if (isAbortError(error)) {
-          return;
-        }
-
-        if (!signal?.aborted) {
-          setUser(null);
-          setBranding(DEFAULT_BRANDING);
-        }
-      } finally {
-        if (showLoading && !signal?.aborted) {
-          setLoading(false);
-        }
-      }
-    },
-    [],
-  );
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    void loadSession(true, controller.signal);
-
-    function handleRefresh() {
-      void loadSession(false);
-    }
-
-    window.addEventListener(AUTH_REFRESH_EVENT, handleRefresh);
-
-    return () => {
-      controller.abort();
-      window.removeEventListener(AUTH_REFRESH_EVENT, handleRefresh);
-    };
-  }, [loadSession]);
-
-  const logout = useCallback(async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/login";
-  }, []);
-
-  return { user, branding, loading, logout };
+interface UseFetchOptions<T> {
+  initialData?: T | null;
+  revalidateOnMount?: boolean;
 }
 
-export function useFetch<T>(url: string | null) {
-  const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(Boolean(url));
+export function useFetch<T>(
+  url: string | null,
+  options?: UseFetchOptions<T>,
+) {
+  const hasInitialData = options && "initialData" in options;
+  const initialData = options?.initialData ?? null;
+  const initialUrlRef = useRef(url);
+  const [data, setData] = useState<T | null>(hasInitialData ? initialData : null);
+  const revalidateOnMount = options?.revalidateOnMount ?? !hasInitialData;
+  const [loading, setLoading] = useState(Boolean(url) && (revalidateOnMount || !hasInitialData));
   const [error, setError] = useState<string | null>(null);
 
   const runFetch = useCallback(
@@ -172,6 +93,14 @@ export function useFetch<T>(url: string | null) {
       return;
     }
 
+    if (
+      url === initialUrlRef.current &&
+      hasInitialData &&
+      !revalidateOnMount
+    ) {
+      return;
+    }
+
     const controller = new AbortController();
 
     void runFetch(controller.signal);
@@ -179,7 +108,7 @@ export function useFetch<T>(url: string | null) {
     return () => {
       controller.abort();
     };
-  }, [runFetch, url]);
+  }, [hasInitialData, revalidateOnMount, runFetch, url]);
 
   const refetch = useCallback(() => {
     return runFetch();

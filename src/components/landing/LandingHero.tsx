@@ -21,7 +21,7 @@ export function LandingHero({ content }: LandingHeroProps) {
         <LandingHeroSignals signals={content.signals} />
       </div>
       <div className="flex justify-center sm:justify-start">
-        <div className="inline-flex rounded-full border border-teal-dark/15 bg-white/85 px-3 py-1.5 text-center text-xs font-medium text-teal-deep shadow-sm backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
+        <div className="inline-flex rounded-full border border-teal-dark-15 bg-white-85 px-3 py-1.5 text-center text-xs font-medium text-teal-deep shadow-sm backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
           {content.eyebrow}
         </div>
       </div>
@@ -52,7 +52,7 @@ export function LandingHero({ content }: LandingHeroProps) {
 function HeroHighlightCard({ highlight }: HeroHighlightCardProps) {
   return (
     <Card
-      className="rounded-2xl border-neutral-border bg-white/90 shadow-sm backdrop-blur sm:rounded-3xl"
+      className="rounded-2xl border-neutral-border bg-white-90 shadow-sm backdrop-blur sm:rounded-3xl"
       noPadding
     >
       <CardContent className="flex min-h-[5.5rem] flex-col items-center justify-between p-4 text-center sm:min-h-[6.5rem] sm:items-start sm:p-5 sm:text-left">

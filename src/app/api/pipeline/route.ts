@@ -1,27 +1,14 @@
-import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
-import { normalizePipelineColor } from "@/lib/ui-colors";
-import { json, requireAuth, handleError } from "@/lib/api";
-import { assignDefaultPipelineStageToUnassignedLeads } from "@/lib/pipeline";
+import { error, handleError, json, requireAuth } from "@/lib/api";
+import {
+  createPipelineStage,
+  listPipelineStages,
+} from "@/features/pipeline/server";
 
 export async function GET() {
   try {
     const user = await requireAuth();
-    await assignDefaultPipelineStageToUnassignedLeads(user.id);
-
-    const stages = await prisma.pipelineStage.findMany({
-      where: { userId: user.id },
-      orderBy: { order: "asc" },
-      include: {
-        leads: {
-          select: {
-            id: true, name: true, phone: true, score: true, value: true,
-            status: true, lastContactAt: true, createdAt: true,
-          },
-          orderBy: { score: "desc" },
-        },
-      },
-    });
+    const stages = await listPipelineStages(user.id);
 
     return json(stages);
   } catch (err) {
@@ -32,24 +19,21 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth();
-    const { name, color } = await req.json();
-
-    const maxOrder = await prisma.pipelineStage.findFirst({
-      where: { userId: user.id },
-      orderBy: { order: "desc" },
-    });
-
-    const stage = await prisma.pipelineStage.create({
-      data: {
-        userId: user.id,
-        name,
-        color: normalizePipelineColor(color),
-        order: (maxOrder?.order ?? -1) + 1,
-      },
-    });
+    const stage = await createPipelineStage(
+      user.id,
+      (await req.json()) as Record<string, unknown>,
+    );
 
     return json(stage, 201);
   } catch (err) {
+    if (err instanceof Error && err.message === "PIPELINE_STAGE_NAME_REQUIRED") {
+      return error("Nome do estagio e obrigatorio");
+    }
+
+    if (err instanceof SyntaxError) {
+      return error("Payload invalido");
+    }
+
     return handleError(err);
   }
 }

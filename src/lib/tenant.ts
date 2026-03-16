@@ -1,6 +1,10 @@
 import crypto from "node:crypto";
 import { prisma } from "./db";
-import { buildBranding, DEFAULT_BRANDING, type TenantBranding } from "./branding";
+import {
+  buildBranding,
+  createDefaultBranding,
+  type TenantBranding,
+} from "./branding";
 
 function buildTenantName(name: string | null | undefined, email: string): string {
   if (typeof name === "string" && name.trim()) {
@@ -85,7 +89,7 @@ export async function getTenantBranding(
   tenantId?: string | null,
 ): Promise<TenantBranding> {
   if (!tenantId) {
-    return { ...DEFAULT_BRANDING };
+    return createDefaultBranding();
   }
 
   const tenant = await prisma.tenant.findUnique({
@@ -102,7 +106,7 @@ export async function getTenantBranding(
   });
 
   if (!tenant || tenant.status !== "active") {
-    return { ...DEFAULT_BRANDING };
+    return createDefaultBranding();
   }
 
   return buildBranding(tenant);

@@ -1,54 +1,33 @@
-import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
-import { json, error, requireAuth, handleError } from "@/lib/api";
+import { error, handleError, json, requireAuth } from "@/lib/api";
 import {
-  buildBranding,
-  normalizeBrandColor,
-  sanitizeTenantCustomTexts,
-  sanitizeTenantFeatureFlags,
-  type BrandColorKey,
-} from "@/lib/branding";
+  TenantAccessError,
+  getTenantCustomization,
+  updateTenantCustomization,
+} from "@/features/settings/server";
 
-function isTenantAdmin(user: Awaited<ReturnType<typeof requireAuth>>) {
-  return user.role === "admin" && !!user.tenantId;
+function getTenantContext(user: Awaited<ReturnType<typeof requireAuth>>) {
+  return {
+    role: user.role,
+    tenantId: user.tenantId,
+  };
 }
 
 export async function GET() {
   try {
     const user = await requireAuth();
+    const tenant = await getTenantCustomization(getTenantContext(user));
 
-    if (!isTenantAdmin(user)) {
+    if (!tenant) {
+      return error("Tenant nao encontrado", 404);
+    }
+
+    return json({ tenant });
+  } catch (err) {
+    if (err instanceof TenantAccessError) {
       return error("Acesso negado", 403);
     }
 
-    const tenant = await prisma.tenant.findUnique({
-      where: { id: user.tenantId! },
-      select: {
-        id: true,
-        slug: true,
-        status: true,
-        name: true,
-        logoUrl: true,
-        colorPrimary: true,
-        colorSecondary: true,
-        customTexts: true,
-        featureFlags: true,
-      },
-    });
-
-    if (!tenant) {
-      return error("Tenant não encontrado", 404);
-    }
-
-    return json({
-      tenant: {
-        id: tenant.id,
-        slug: tenant.slug,
-        status: tenant.status,
-        ...buildBranding(tenant),
-      },
-    });
-  } catch (err) {
     return handleError(err);
   }
 }
@@ -56,67 +35,27 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   try {
     const user = await requireAuth();
+    const body = (await req.json()) as Record<string, unknown>;
+    const tenant = await updateTenantCustomization(getTenantContext(user), body);
 
-    if (!isTenantAdmin(user)) {
+    if (!tenant) {
+      return error("Tenant nao encontrado", 404);
+    }
+
+    return json({ tenant });
+  } catch (err) {
+    if (err instanceof TenantAccessError) {
       return error("Acesso negado", 403);
     }
 
-    const body = await req.json();
-    const name = typeof body.name === "string" ? body.name.trim() : "";
-
-    if (!name) {
-      return error("Nome da marca é obrigatório");
+    if (err instanceof Error && err.message === "TENANT_NAME_REQUIRED") {
+      return error("Nome da marca e obrigatorio");
     }
 
-    const customTexts = sanitizeTenantCustomTexts(body.customTexts);
-    const featureFlags = sanitizeTenantFeatureFlags(body.featureFlags);
-    const branding = buildBranding({
-      name,
-      logoUrl: typeof body.logoUrl === "string" ? body.logoUrl : null,
-      colorPrimary: normalizeBrandColor(
-        typeof body.colorPrimary === "string" ? body.colorPrimary : null,
-        "blue" satisfies BrandColorKey,
-      ),
-      colorSecondary: normalizeBrandColor(
-        typeof body.colorSecondary === "string" ? body.colorSecondary : null,
-        "purple" satisfies BrandColorKey,
-      ),
-      customTexts,
-      featureFlags,
-    });
+    if (err instanceof SyntaxError) {
+      return error("Payload invalido");
+    }
 
-    const tenant = await prisma.tenant.update({
-      where: { id: user.tenantId! },
-      data: {
-        name: branding.name,
-        logoUrl: branding.logoUrl,
-        colorPrimary: branding.colorPrimary,
-        colorSecondary: branding.colorSecondary,
-        customTexts: branding.customTexts,
-        featureFlags: branding.featureFlags,
-      },
-      select: {
-        id: true,
-        slug: true,
-        status: true,
-        name: true,
-        logoUrl: true,
-        colorPrimary: true,
-        colorSecondary: true,
-        customTexts: true,
-        featureFlags: true,
-      },
-    });
-
-    return json({
-      tenant: {
-        id: tenant.id,
-        slug: tenant.slug,
-        status: tenant.status,
-        ...buildBranding(tenant),
-      },
-    });
-  } catch (err) {
     return handleError(err);
   }
 }

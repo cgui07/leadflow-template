@@ -1,30 +1,18 @@
-import { prisma } from "@/lib/db";
-import { sanitizeAppRedirect } from "@/lib/redirect";
 import { NextRequest, NextResponse } from "next/server";
-import { normalizeEmail, signToken, setAuthCookie } from "@/lib/auth";
-
-const GOOGLE_OAUTH_STATE_COOKIE = "leadflow_google_oauth_state";
-const GOOGLE_OAUTH_REDIRECT_COOKIE = "leadflow_google_oauth_redirect";
-
-interface GoogleTokenResponse {
-  access_token: string;
-  id_token: string;
-  token_type: string;
-}
-
-interface GoogleUserInfo {
-  sub: string;
-  email: string;
-  name: string;
-  picture?: string;
-}
+import { getAuthRedirectPath } from "@/features/auth/utils";
+import {
+  authenticateWithGoogleAuthorizationCode,
+  GoogleAuthError,
+  GOOGLE_OAUTH_REDIRECT_COOKIE,
+  GOOGLE_OAUTH_STATE_COOKIE,
+} from "@/features/auth/oauth";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
   const state = req.nextUrl.searchParams.get("state");
   const errorParam = req.nextUrl.searchParams.get("error");
   const expectedState = req.cookies.get(GOOGLE_OAUTH_STATE_COOKIE)?.value;
-  const redirectPath = sanitizeAppRedirect(
+  const redirectPath = getAuthRedirectPath(
     req.cookies.get(GOOGLE_OAUTH_REDIRECT_COOKIE)?.value,
   );
 
@@ -35,93 +23,27 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const callbackUrl = new URL("/api/auth/google/callback", req.nextUrl.origin);
-
-    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        code,
-        client_id: process.env.GOOGLE_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-        redirect_uri: callbackUrl.toString(),
-        grant_type: "authorization_code",
-      }),
+    await authenticateWithGoogleAuthorizationCode({
+      code,
+      origin: req.nextUrl.origin,
     });
-
-    if (!tokenRes.ok) {
-      console.error("[google-auth] Token exchange failed:", await tokenRes.text());
-      return redirectToLogin(req, "google_token_failed");
-    }
-
-    const tokens: GoogleTokenResponse = await tokenRes.json();
-    const userInfoRes = await fetch(
-      "https://www.googleapis.com/oauth2/v3/userinfo",
-      { headers: { Authorization: `Bearer ${tokens.access_token}` } },
-    );
-
-    if (!userInfoRes.ok) {
-      console.error("[google-auth] User info fetch failed");
-      return redirectToLogin(req, "google_userinfo_failed");
-    }
-
-    const googleUser: GoogleUserInfo = await userInfoRes.json();
-
-    if (!googleUser.email) {
-      return redirectToLogin(req, "google_no_email");
-    }
-
-    const normalizedEmail = normalizeEmail(googleUser.email);
-    const user = await prisma.user.findFirst({
-      where: {
-        OR: [{ googleId: googleUser.sub }, { email: normalizedEmail }],
-      },
-      select: {
-        id: true,
-        googleId: true,
-        avatarUrl: true,
-        status: true,
-        tenant: {
-          select: {
-            status: true,
-          },
-        },
-      },
-    });
-
-    if (!user) {
-      return redirectToLogin(req, "no_account");
-    }
-
-    if (user.status !== "active" || user.tenant?.status === "inactive") {
-      return redirectToLogin(req, "account_suspended");
-    }
-
-    if (!user.googleId) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          googleId: googleUser.sub,
-          avatarUrl: user.avatarUrl || googleUser.picture || null,
-        },
-      });
-    }
-
-    const token = signToken(user.id);
-    await setAuthCookie(token);
 
     return clearOAuthCookies(
       NextResponse.redirect(new URL(redirectPath, req.nextUrl.origin)),
     );
   } catch (err) {
+    if (err instanceof GoogleAuthError) {
+      return redirectToLogin(req, err.redirectCode);
+    }
+
     console.error("[google-auth] Callback error:", err);
     return redirectToLogin(req, "google_internal_error");
   }
 }
 
-function redirectToLogin(req: NextRequest, error: string) {
+function redirectToLogin(req: NextRequest, errorCode: string) {
   const loginUrl = new URL("/login", req.nextUrl.origin);
-  loginUrl.searchParams.set("error", error);
+  loginUrl.searchParams.set("error", errorCode);
   return clearOAuthCookies(NextResponse.redirect(loginUrl));
 }
 

@@ -1,24 +1,5 @@
-export interface PipelineLead {
-  id: string;
-  name: string;
-  phone: string;
-  score: number;
-  value?: number;
-  status: string;
-  lastContactAt?: string;
-  createdAt: string;
-}
-
-export interface PipelineStage {
-  id: string;
-  name: string;
-  color: string;
-  order: number;
-  leads: PipelineLead[];
-}
-
-export interface SelectedLead {
-  id: string;
-  name: string;
-  stageId: string;
-}
+export type {
+  PipelineLead,
+  PipelineStage,
+  SelectedLead,
+} from "@/features/pipeline/contracts";

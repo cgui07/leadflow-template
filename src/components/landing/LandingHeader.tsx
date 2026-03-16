@@ -22,7 +22,7 @@ export function LandingHeader({
           </div>
         </div>
         <ButtonLink
-          className="h-11 rounded-full bg-[#25D366] px-4 text-xs text-white shadow-none hover:bg-[#1fbe5a] focus-visible:ring-[#25D366] sm:px-5"
+          className="h-11 rounded-full bg-whatsapp px-4 text-xs text-white shadow-none hover:bg-whatsapp-dark focus-visible:ring-whatsapp sm:px-5"
           icon={<WhatsAppIcon className="h-4 w-4 shrink-0" />}
           href={contactAction.href}
           rel={contactAction.external ? "noreferrer" : undefined}

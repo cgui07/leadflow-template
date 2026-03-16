@@ -212,9 +212,9 @@ function ActionCard({
     <div
       className={`rounded-lg border p-3 sm:p-4 ${
         overdue
-          ? "border-red-blush bg-red-pale/50"
+          ? "border-red-blush bg-red-pale-50"
           : finished
-            ? "border-neutral-line bg-neutral-surface/50"
+            ? "border-neutral-line bg-neutral-surface-50"
             : "border-neutral-border"
       }`}
     >
