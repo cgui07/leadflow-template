@@ -1,24 +1,19 @@
 import { prisma } from "@/lib/db";
 import { scheduleFollowUp } from "@/lib/followup";
 import { mapEvolutionState } from "@/lib/evolution";
-import { NextRequest, NextResponse } from "next/server";
-import { generateAutoReply, qualifyLead } from "@/lib/ai";
-import {
-  getWhatsAppConfig,
-  processIncomingMessage,
-  rememberMapping,
-  resolveSendTarget,
-  sendAndSaveMessage,
-} from "@/lib/whatsapp";
+import { processScheduledAutoReply } from "@/lib/auto-reply";
+import { after, NextRequest, NextResponse } from "next/server";
+import { processIncomingMessage, rememberMapping } from "@/lib/whatsapp";
 
 const INBOUND_MESSAGE_EVENTS = new Set(["messages.upsert", "MESSAGES_UPSERT"]);
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-
     const instanceName = body.instance || body.instanceName;
-    const token = req.headers.get("x-webhook-token") || req.nextUrl.searchParams.get("token");
+    const token =
+      req.headers.get("x-webhook-token") ||
+      req.nextUrl.searchParams.get("token");
 
     if (!instanceName) {
       return NextResponse.json({ ok: true });
@@ -34,8 +29,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    if (settings.whatsappWebhookToken && settings.whatsappWebhookToken !== token) {
-      return NextResponse.json({ error: "Invalid webhook token" }, { status: 401 });
+    if (
+      settings.whatsappWebhookToken &&
+      settings.whatsappWebhookToken !== token
+    ) {
+      return NextResponse.json(
+        { error: "Invalid webhook token" },
+        { status: 401 },
+      );
     }
 
     const event = body.event;
@@ -55,7 +56,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    console.log("[webhook] Full payload:", JSON.stringify(body).substring(0, 500));
+    console.log(
+      "[webhook] Full payload:",
+      JSON.stringify(body).substring(0, 500),
+    );
 
     if (key?.remoteJid?.endsWith("@lid")) {
       console.log(
@@ -67,7 +71,7 @@ export async function POST(req: NextRequest) {
           participantAlt: key.participantAlt ?? data.participantAlt ?? null,
           senderPn: key.senderPn ?? data.senderPn ?? null,
           participantPn: key.participantPn ?? data.participantPn ?? null,
-        })
+        }),
       );
     }
 
@@ -76,7 +80,6 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = settings.userId;
-
     const messageType = data.messageType || "conversation";
     let textContent = "";
     let mediaType: string | undefined;
@@ -148,7 +151,6 @@ export async function POST(req: NextRequest) {
     }
 
     const remoteJid = key.remoteJid || "";
-
     const result = await processIncomingMessage(userId, {
       from: remoteJid,
       id: key.id,
@@ -158,85 +160,42 @@ export async function POST(req: NextRequest) {
       pushName: data.pushName,
       metadata: mediaMetadata,
     });
-
     const conv = result.conversation;
-    console.log("[webhook] conv.status:", conv.status, "autoReply:", settings.autoReplyEnabled, "aiKey:", !!settings.aiApiKey);
-    if (settings.autoReplyEnabled && (conv.status === "bot" || conv.status === "active")) {
-      if (conv.status === "active") {
+    const wasActiveConversation = conv.status === "active";
+
+    console.log(
+      "[webhook] conv.status:",
+      conv.status,
+      "autoReply:",
+      settings.autoReplyEnabled,
+      "aiKey:",
+      !!settings.aiApiKey,
+      "delaySeconds:",
+      settings.auto_reply_delay_seconds,
+    );
+
+    if (settings.autoReplyEnabled && (conv.status === "bot" || wasActiveConversation)) {
+      if (wasActiveConversation) {
         await prisma.conversation.update({
           where: { id: conv.id },
           data: { status: "bot" },
         });
       }
 
-      if (settings.aiApiKey) {
-        const messages = await prisma.message.findMany({
-          where: { conversationId: conv.id },
-          orderBy: { createdAt: "asc" },
-          take: 20,
-        });
-
-        const aiConfig = {
-          provider: settings.aiProvider,
-          apiKey: settings.aiApiKey,
-          model: settings.aiModel,
-        };
-
-        console.log("[webhook] Calling AI with", messages.length, "messages, provider:", aiConfig.provider);
-        const reply = await generateAutoReply(
-          aiConfig,
-          settings.user.name,
-          messages.map((m) => ({ direction: m.direction, content: m.content, sender: m.sender }))
-        );
-        console.log("[webhook] AI reply:", reply ? reply.substring(0, 100) : "EMPTY");
-
-        if (reply) {
-          const replyJid = resolveSendTarget(
-            key.remoteJidAlt,
-            data.remoteJidAlt,
+      after(async () => {
+        try {
+          await processScheduledAutoReply({
+            conversationId: conv.id,
+            triggerMessageId: result.message.id,
+            delaySeconds: settings.auto_reply_delay_seconds,
             remoteJid,
-            result.conversation.whatsappChatId,
-            result.lead.phone
-          );
-          if (!replyJid) {
-            console.warn("[webhook] Skipping auto-reply because LID JID could not be resolved:", remoteJid);
-          } else {
-            console.log("[webhook] Sending reply to", replyJid);
-            await sendAndSaveMessage(
-              getWhatsAppConfig(settings.whatsappPhoneId!),
-              conv.id,
-              replyJid,
-              reply,
-              "bot"
-            );
-            console.log("[webhook] Reply sent successfully");
-          }
+            remoteJidAlt: key.remoteJidAlt || data.remoteJidAlt,
+            wasActiveConversation,
+          });
+        } catch (err) {
+          console.error("[webhook] Auto-reply error:", err);
         }
-
-        const messageCount = messages.length + 1;
-        if (messageCount >= 3 && messageCount % 2 === 1) {
-          await qualifyLead(result.lead.id, aiConfig);
-        }
-      } else if (settings.greetingMessage && conv.status === "active") {
-        const replyJid = resolveSendTarget(
-          key.remoteJidAlt,
-          data.remoteJidAlt,
-          remoteJid,
-          result.conversation.whatsappChatId,
-          result.lead.phone
-        );
-        if (!replyJid) {
-          console.warn("[webhook] Skipping greeting because LID JID could not be resolved:", remoteJid);
-        } else {
-          await sendAndSaveMessage(
-            getWhatsAppConfig(settings.whatsappPhoneId!),
-            conv.id,
-            replyJid,
-            settings.greetingMessage,
-            "bot"
-          );
-        }
-      }
+      });
 
       if (settings.followUpEnabled) {
         await scheduleFollowUp(result.lead.id, settings.followUpDelayHours);

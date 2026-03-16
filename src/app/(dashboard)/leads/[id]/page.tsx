@@ -12,6 +12,7 @@ import { SelectField, TextField } from "@/components/forms";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { LeadActionsSection } from "./components/LeadActionsSection";
 import { SectionContainer } from "@/components/layout/SectionContainer";
+import { useFeatureFlag } from "@/components/providers/BrandingProvider";
 import {
   getPipelineColorSoftClass,
   getScoreTextClass,
@@ -126,10 +127,17 @@ export default function LeadDetailPage({
   const [sending, setSending] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
   const [savingPhone, setSavingPhone] = useState(false);
+  const showLeadActions = useFeatureFlag("leadActions");
 
   useEffect(() => {
     setPhoneInput(lead?.phone || "");
   }, [lead?.phone]);
+
+  useEffect(() => {
+    if (!showLeadActions && activeTab === "actions") {
+      setActiveTab("profile");
+    }
+  }, [activeTab, showLeadActions]);
 
   if (loading) return <LoadingState variant="skeleton" />;
   if (!lead) {
@@ -189,6 +197,21 @@ export default function LeadDetailPage({
   const scoreColor = getScoreTextClass(lead.score);
   const messages = lead.conversation?.messages?.slice().reverse() || [];
   const needsManualPhone = lead.phone.endsWith("@lid");
+  const tabs = [
+    { id: "profile", label: "Perfil" },
+    showLeadActions
+      ? {
+          id: "actions",
+          label: "Ações",
+          count: lead.leadActions.filter((action) => {
+            return !["completed", "cancelled"].includes(action.status);
+          }).length,
+        }
+      : null,
+    { id: "messages", label: "Mensagens", count: messages.length },
+    { id: "activities", label: "Atividades", count: lead.activities.length },
+    { id: "tasks", label: "Tarefas", count: lead.tasks.length },
+  ].filter(Boolean) as Array<{ id: string; label: string; count?: number }>;
 
   return (
     <PageContainer
@@ -266,19 +289,7 @@ export default function LeadDetailPage({
       </div>
 
       <Tabs
-        tabs={[
-          { id: "profile", label: "Perfil" },
-          {
-            id: "actions",
-            label: "Ações",
-            count: lead.leadActions.filter((action) => {
-              return !["completed", "cancelled"].includes(action.status);
-            }).length,
-          },
-          { id: "messages", label: "Mensagens", count: messages.length },
-          { id: "activities", label: "Atividades", count: lead.activities.length },
-          { id: "tasks", label: "Tarefas", count: lead.tasks.length },
-        ]}
+        tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
@@ -392,7 +403,7 @@ export default function LeadDetailPage({
         </div>
       )}
 
-      {activeTab === "actions" && (
+      {showLeadActions && activeTab === "actions" && (
         <LeadActionsSection
           leadId={lead.id}
           actions={lead.leadActions}

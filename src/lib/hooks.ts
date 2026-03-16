@@ -1,6 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import {
+  DEFAULT_BRANDING,
+  type TenantBranding,
+} from "@/lib/branding";
+
+export const AUTH_REFRESH_EVENT = "leadflow:auth-refresh";
 
 interface User {
   id: string;
@@ -9,26 +15,57 @@ interface User {
   phone?: string;
   avatarUrl?: string;
   role: string;
+  tenantId?: string | null;
 }
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
+  const [branding, setBranding] = useState<TenantBranding>(DEFAULT_BRANDING);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadSession = useCallback(async (showLoading = false) => {
+    if (showLoading) {
+      setLoading(true);
+    }
+
     fetch("/api/auth/me")
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setUser(data?.user || null))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        setUser(data?.user || null);
+        setBranding(data?.branding || DEFAULT_BRANDING);
+      })
+      .catch(() => {
+        setUser(null);
+        setBranding(DEFAULT_BRANDING);
+      })
+      .finally(() => {
+        if (showLoading) {
+          setLoading(false);
+        }
+      });
   }, []);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      void loadSession(true);
+    });
+
+    function handleRefresh() {
+      void loadSession(false);
+    }
+
+    window.addEventListener(AUTH_REFRESH_EVENT, handleRefresh);
+    return () => {
+      window.removeEventListener(AUTH_REFRESH_EVENT, handleRefresh);
+    };
+  }, [loadSession]);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login";
   }, []);
 
-  return { user, loading, logout };
+  return { user, branding, loading, logout };
 }
 
 export function useFetch<T>(url: string | null) {

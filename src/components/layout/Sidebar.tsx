@@ -6,6 +6,12 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { useBranding } from "@/components/providers/BrandingProvider";
+import {
+  getBrandActiveNavClass,
+  getBrandChipClass,
+  getBrandTextClass,
+} from "@/lib/branding";
 import {
   CheckSquare,
   ChevronLeft,
@@ -82,6 +88,7 @@ export function Sidebar({
   userEmail = "user@email.com",
   onLogout,
 }: SidebarProps) {
+  const branding = useBranding();
   const [collapsed, setCollapsed] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -104,17 +111,33 @@ export function Sidebar({
   }
 
   const mobileItems = navItems.filter((item) => item.mobileVisible);
+  const userInitial = userName.charAt(0).toUpperCase();
+  const brandChipClass = getBrandChipClass(branding.colorPrimary);
+  const activeNavClass = getBrandActiveNavClass(branding.colorPrimary);
+  const activeTextClass = getBrandTextClass(branding.colorPrimary);
 
   return (
     <>
       <aside
         className={cn(
           "hidden h-screen shrink-0 flex-col bg-neutral-ink text-white transition-all duration-300 md:flex",
-          collapsed ? "w-17" : "w-64"
+          collapsed ? "w-17" : "w-64",
         )}
       >
         <div className="flex h-16 items-center justify-between border-b border-neutral-deep px-4">
-          {!collapsed && <div className="text-lg font-bold tracking-tight">LeadFlow</div>}
+          {!collapsed && (
+            <div className="flex items-center gap-2">
+              {branding.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={branding.logoUrl}
+                  alt={branding.name}
+                  className="h-6 w-6 rounded object-contain"
+                />
+              ) : null}
+              <div className="text-lg font-bold tracking-tight">{branding.name}</div>
+            </div>
+          )}
           <Button
             variant="ghost"
             size="sm"
@@ -123,12 +146,13 @@ export function Sidebar({
               <ChevronLeft
                 className={cn(
                   "h-5 w-5 transition-transform duration-300",
-                  collapsed && "rotate-180"
+                  collapsed && "rotate-180",
                 )}
               />
             }
           />
         </div>
+
         <div className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
           {navItems.map((item) => {
             const isActive =
@@ -141,9 +165,9 @@ export function Sidebar({
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-blue-royal text-white"
+                    ? activeNavClass
                     : "text-neutral-line hover:bg-neutral-deep hover:text-white",
-                  collapsed && "justify-center px-2"
+                  collapsed && "justify-center px-2",
                 )}
                 title={collapsed ? item.label : undefined}
               >
@@ -162,17 +186,23 @@ export function Sidebar({
             );
           })}
         </div>
+
         <div className="border-t border-neutral-deep p-3">
           <Button
             variant="ghost"
             onClick={() => setShowAccountModal(true)}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left justify-start",
-              collapsed && "justify-center px-1"
+              "flex w-full items-center justify-start gap-3 rounded-xl px-2 py-2 text-left",
+              collapsed && "justify-center px-1",
             )}
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-royal text-sm font-bold">
-              {userName.charAt(0).toUpperCase()}
+            <div
+              className={cn(
+                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white",
+                brandChipClass,
+              )}
+            >
+              {userInitial}
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1">
@@ -183,6 +213,7 @@ export function Sidebar({
           </Button>
         </div>
       </aside>
+
       <div className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-border bg-white/95 backdrop-blur-lg md:hidden">
         <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
           {mobileItems.map((item) => {
@@ -196,15 +227,17 @@ export function Sidebar({
                 className={cn(
                   "flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-colors",
                   isActive
-                    ? "text-blue-royal"
-                    : "text-neutral-muted active:text-neutral-steel"
+                    ? activeTextClass
+                    : "text-neutral-muted active:text-neutral-steel",
                 )}
               >
                 <div className="shrink-0">{item.iconMobile}</div>
-                <div className={cn(
-                  "text-[10px] font-medium leading-tight",
-                  isActive && "font-semibold"
-                )}>
+                <div
+                  className={cn(
+                    "text-[10px] font-medium leading-tight",
+                    isActive && "font-semibold",
+                  )}
+                >
                   {item.label}
                 </div>
               </Link>
@@ -215,14 +248,20 @@ export function Sidebar({
             onClick={() => setShowAccountModal(true)}
             className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5"
           >
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-royal text-[10px] font-bold text-white">
-              {userName.charAt(0).toUpperCase()}
+            <div
+              className={cn(
+                "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white",
+                brandChipClass,
+              )}
+            >
+              {userInitial}
             </div>
             <div className="text-[10px] font-medium leading-tight">Conta</div>
           </Button>
         </div>
         <div className="h-[env(safe-area-inset-bottom)]" />
       </div>
+
       <Modal
         open={showAccountModal}
         onClose={() => {
@@ -234,11 +273,18 @@ export function Sidebar({
       >
         <div className="space-y-5">
           <div className="flex items-center gap-3 rounded-xl bg-neutral-surface p-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-royal text-base font-bold text-white">
-              {userName.charAt(0).toUpperCase()}
+            <div
+              className={cn(
+                "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-bold text-white",
+                brandChipClass,
+              )}
+            >
+              {userInitial}
             </div>
             <div className="min-w-0">
-              <div className="truncate text-sm font-semibold text-neutral-ink">{userName}</div>
+              <div className="truncate text-sm font-semibold text-neutral-ink">
+                {userName}
+              </div>
               <div className="truncate text-sm text-neutral">{userEmail}</div>
             </div>
           </div>

@@ -1,7 +1,12 @@
 import { prisma } from "@/lib/db";
 import { json, error } from "@/lib/api";
 import { NextRequest } from "next/server";
-import { normalizeEmail, verifyPassword, signToken, setAuthCookie } from "@/lib/auth";
+import {
+  normalizeEmail,
+  verifyPassword,
+  signToken,
+  setAuthCookie,
+} from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,10 +17,28 @@ export async function POST(req: NextRequest) {
     }
 
     const normalizedEmail = normalizeEmail(email);
-    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        passwordHash: true,
+        status: true,
+        tenant: {
+          select: {
+            status: true,
+          },
+        },
+      },
+    });
 
     if (!user) {
-      return error("Credenciais invalidas", 401);
+      return error("Credenciais inválidas", 401);
+    }
+
+    if (user.status !== "active" || user.tenant?.status === "inactive") {
+      return error("Conta suspensa. Entre em contato com o administrador.", 403);
     }
 
     if (!user.passwordHash) {
@@ -28,7 +51,7 @@ export async function POST(req: NextRequest) {
     const valid = await verifyPassword(password, user.passwordHash);
 
     if (!valid) {
-      return error("Credenciais invalidas", 401);
+      return error("Credenciais inválidas", 401);
     }
 
     const token = signToken(user.id);

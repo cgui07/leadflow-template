@@ -18,10 +18,21 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
+  const authError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() => {
+    if (authError === "no_account") {
+      return "Conta não encontrada. O acesso é por convite.";
+    }
+
+    if (authError === "account_suspended") {
+      return "Conta suspensa. Entre em contato com o administrador.";
+    }
+
+    return "";
+  });
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -62,8 +73,8 @@ function LoginForm() {
             Transforme contatos em clientes reais.
           </div>
           <div className="mt-6 text-lg leading-relaxed text-blue-ice/80">
-            O LeadFlow organiza seus leads do WhatsApp, qualifica automaticamente
-            com IA e garante que você nunca perca uma oportunidade.
+            Organize seus leads, qualifique automaticamente com IA e garanta
+            que você nunca perca uma oportunidade.
           </div>
           <div className="mt-12 grid grid-cols-3 gap-6">
             <div className="rounded-2xl border border-white/10 bg-white/10 p-4 text-center backdrop-blur-sm">
@@ -81,6 +92,7 @@ function LoginForm() {
           </div>
         </div>
       </div>
+
       <div className="flex w-full items-center justify-center bg-white px-6 py-12 lg:w-1/2">
         <div className="w-full max-w-sm">
           <div className="mb-10">
@@ -91,9 +103,10 @@ function LoginForm() {
               <div className="text-xl font-bold text-gray-iron">LeadFlow</div>
             </div>
             <div className="mt-3 text-sm text-gray-smoke">
-              Entre na sua conta para gerenciar seus leads
+              Entre na sua conta para acessar a plataforma
             </div>
           </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="flex items-center gap-2 rounded-lg border border-red-blush bg-red-pale p-3 text-sm text-danger">
@@ -113,6 +126,7 @@ function LoginForm() {
                 {error}
               </div>
             )}
+
             <TextField
               label="Email"
               type="email"
@@ -121,6 +135,7 @@ function LoginForm() {
               placeholder="seu@email.com"
               required
             />
+
             <div>
               <PasswordField
                 label="Senha"
@@ -139,15 +154,18 @@ function LoginForm() {
                 </Link>
               </div>
             </div>
+
             <Button type="submit" loading={loading} fullWidth size="lg">
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
+
           <div className="mt-8 flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-ash" />
             <div className="text-xs text-gray-smoke">ou</div>
             <div className="h-px flex-1 bg-gray-ash" />
           </div>
+
           <a
             href={`/api/auth/google?redirect=${encodeURIComponent(redirect)}`}
             className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-ash bg-white px-4 py-3 text-sm font-medium text-gray-iron shadow-sm transition-colors hover:bg-neutral-surface"
@@ -172,14 +190,9 @@ function LoginForm() {
             </svg>
             Continuar com Google
           </a>
+
           <div className="mt-6 text-center text-sm text-gray-smoke">
-            Ainda não tem conta?{" "}
-            <Link
-              href="/register"
-              className="font-semibold text-primary transition-colors hover:text-blue-royal"
-            >
-              Criar conta grátis
-            </Link>
+            O acesso é controlado por convite.
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
 import { prisma } from "./db";
 import { cookies } from "next/headers";
+import { ensureLegacyTenantAccess } from "./tenant";
 
 const JWT_SECRET = process.env.JWT_SECRET || "leadflow-dev-secret-change-in-production";
 const TOKEN_NAME = "leadflow_token";
@@ -54,10 +55,52 @@ export async function getCurrentUser() {
   const payload = verifyToken(token);
   if (!payload) return null;
 
+  const sessionUser = await prisma.user.findUnique({
+    where: { id: payload.userId },
+    select: {
+      id: true,
+      status: true,
+      tenantId: true,
+    },
+  });
+
+  if (!sessionUser || sessionUser.status !== "active") {
+    return null;
+  }
+
+  if (!sessionUser.tenantId) {
+    await ensureLegacyTenantAccess(sessionUser.id);
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, name: true, email: true, phone: true, avatarUrl: true, role: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      avatarUrl: true,
+      role: true,
+      status: true,
+      tenantId: true,
+      tenant: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          logoUrl: true,
+          colorPrimary: true,
+          colorSecondary: true,
+          status: true,
+          featureFlags: true,
+          customTexts: true,
+        },
+      },
+    },
   });
+
+  if (!user) return null;
+  if (user.tenant && user.tenant.status !== "active") return null;
 
   return user;
 }

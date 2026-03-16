@@ -20,30 +20,35 @@ model User {
   passwordResetTokenHash String?       @unique @map("password_reset_token_hash")
   passwordResetExpiresAt DateTime?     @map("password_reset_expires_at") @db.Timestamptz(6)
   googleId               String?       @unique @map("google_id")
+  tenantId               String?       @map("tenant_id") @db.Uuid
+  status                 String        @default("active") @db.VarChar(20)
   activities             Activity[]
   leadActions            LeadAction[]
   leads                  Lead[]
   tasks                  Task[]
   settings               UserSettings?
+  tenant                 Tenant?       @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@index([tenantId], map: "idx_users_tenant_id")
   @@map("users")
 }
 
 model UserSettings {
-  id                   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId               String  @unique @map("user_id") @db.Uuid
-  whatsappPhoneId      String? @map("whatsapp_phone_id")
-  whatsappToken        String? @map("whatsapp_token")
-  whatsappWebhookToken String? @map("whatsapp_webhook_token")
-  aiProvider           String  @default("openai") @map("ai_provider")
-  aiApiKey             String? @map("ai_api_key")
-  aiModel              String  @default("gpt-4o-mini") @map("ai_model")
-  greetingMessage      String? @map("greeting_message")
-  autoReplyEnabled     Boolean @default(true) @map("auto_reply_enabled")
-  followUpEnabled      Boolean @default(true) @map("follow_up_enabled")
-  followUpDelayHours   Int     @default(24) @map("follow_up_delay_hours")
-  maxFollowUps         Int     @default(3) @map("max_follow_ups")
-  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                   String  @unique @map("user_id") @db.Uuid
+  whatsappPhoneId          String? @map("whatsapp_phone_id")
+  whatsappToken            String? @map("whatsapp_token")
+  whatsappWebhookToken     String? @map("whatsapp_webhook_token")
+  aiProvider               String  @default("openai") @map("ai_provider")
+  aiApiKey                 String? @map("ai_api_key")
+  aiModel                  String  @default("gpt-4o-mini") @map("ai_model")
+  greetingMessage          String? @map("greeting_message")
+  autoReplyEnabled         Boolean @default(true) @map("auto_reply_enabled")
+  followUpEnabled          Boolean @default(true) @map("follow_up_enabled")
+  followUpDelayHours       Int     @default(24) @map("follow_up_delay_hours")
+  maxFollowUps             Int     @default(3) @map("max_follow_ups")
+  auto_reply_delay_seconds Int     @default(0)
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
 }
@@ -188,4 +193,38 @@ model LeadAction {
   @@index([leadId, type, status], map: "idx_lead_actions_lead_type_status")
   @@index([userId, status, scheduledAt], map: "idx_lead_actions_user_status_scheduled")
   @@map("lead_actions")
+}
+
+model InviteToken {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  token      String   @unique @db.VarChar(64)
+  email      String?  @db.VarChar(255)
+  role       String   @default("agent") @db.VarChar(20)
+  maxUses    Int      @default(1) @map("max_uses")
+  usedCount  Int      @default(0) @map("used_count")
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at")
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([token], map: "idx_invite_tokens_token")
+  @@map("invite_tokens")
+}
+
+model Tenant {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug           String       @unique @db.VarChar(63)
+  name           String       @db.VarChar(120)
+  logoUrl        String?      @map("logo_url")
+  colorPrimary   String       @default("blue") @map("color_primary") @db.VarChar(7)
+  colorSecondary String       @default("purple") @map("color_secondary") @db.VarChar(7)
+  status         String       @default("active") @db.VarChar(20)
+  featureFlags   Json         @default("{}") @map("feature_flags")
+  customTexts    Json         @default("{}") @map("custom_texts")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @default(now()) @map("updated_at")
+  inviteTokens   InviteToken[]
+  users          User[]
+
+  @@map("tenants")
 }

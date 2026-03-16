@@ -14,6 +14,10 @@ import { AttentionQueue } from "./components/AttentionQueue";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Users, MessageSquare, CheckSquare, Plus, Flame } from "lucide-react";
+import {
+  useBrandText,
+  useFeatureFlag,
+} from "@/components/providers/BrandingProvider";
 
 interface DashboardData {
   kpis: {
@@ -84,6 +88,7 @@ const columns: Column<DashboardData["recentLeads"][0]>[] = [
     label: "Status",
     render: (value) => {
       const config = statusMap[value as string];
+
       return config ? (
         <Badge variant={config.variant} size="sm" dot>
           {config.label}
@@ -96,6 +101,12 @@ const columns: Column<DashboardData["recentLeads"][0]>[] = [
 
 export default function DashboardPage() {
   const { data, loading } = useFetch<DashboardData>("/api/dashboard");
+  const title = useBrandText("dashboardTitle", "Dashboard");
+  const subtitle = useBrandText(
+    "dashboardSubtitle",
+    "Visão geral dos seus leads e atendimentos",
+  );
+  const showAttentionQueue = useFeatureFlag("attentionQueue");
 
   if (loading) return <LoadingState variant="skeleton" />;
 
@@ -103,8 +114,8 @@ export default function DashboardPage() {
 
   return (
     <PageContainer
-      title="Dashboard"
-      subtitle="Visão geral dos seus leads e atendimentos"
+      title={title}
+      subtitle={subtitle}
       actions={
         <Link href="/leads">
           <Button icon={<Plus className="h-4 w-4" />}>Novo Lead</Button>
@@ -140,7 +151,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <AttentionQueue />
+      {showAttentionQueue && <AttentionQueue />}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <SectionContainer
