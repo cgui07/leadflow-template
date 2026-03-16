@@ -19,7 +19,7 @@ export async function GET() {
     const tenant = await getTenantCustomization(getTenantContext(user));
 
     if (!tenant) {
-      return error("Tenant nao encontrado", 404);
+      return error("Tenant não encontrado", 404);
     }
 
     return json({ tenant });
@@ -39,7 +39,7 @@ export async function PATCH(req: NextRequest) {
     const tenant = await updateTenantCustomization(getTenantContext(user), body);
 
     if (!tenant) {
-      return error("Tenant nao encontrado", 404);
+      return error("Tenant não encontrado", 404);
     }
 
     return json({ tenant });
@@ -53,7 +53,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (err instanceof SyntaxError) {
-      return error("Payload invalido");
+      return error("Payload inválido");
     }
 
     return handleError(err);

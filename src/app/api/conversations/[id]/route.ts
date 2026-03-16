@@ -16,16 +16,16 @@ export async function PATCH(
   } catch (err) {
     if (err instanceof Error) {
       if (err.message === "CONVERSATION_STATUS_INVALID") {
-        return error("Status invalido. Use 'bot' ou 'human'.", 400);
+        return error("Status inválido. Use 'bot' ou 'human'.", 400);
       }
 
       if (err.message === "CONVERSATION_NOT_FOUND") {
-        return error("Conversa nao encontrada", 404);
+        return error("Conversa não encontrada", 404);
       }
     }
 
     if (err instanceof SyntaxError) {
-      return error("Payload invalido");
+      return error("Payload inválido");
     }
 
     return handleError(err);

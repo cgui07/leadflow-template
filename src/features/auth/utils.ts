@@ -5,16 +5,16 @@ export type SearchParamValue = string | string[] | undefined;
 export function getLoginErrorMessage(code?: string | null): string {
   switch (code) {
     case "no_account":
-      return "Conta nao encontrada. O acesso e por convite.";
+      return "Conta não encontrada. O acesso e por convite.";
     case "account_suspended":
       return "Conta suspensa. Entre em contato com o administrador.";
     case "google_auth_failed":
-      return "Nao foi possivel concluir o login com Google.";
+      return "Não foi possível concluir o login com Google.";
     case "google_token_failed":
     case "google_userinfo_failed":
     case "google_no_email":
     case "google_internal_error":
-      return "Nao foi possivel concluir o login com Google. Tente novamente.";
+      return "Não foi possível concluir o login com Google. Tente novamente.";
     default:
       return "";
   }

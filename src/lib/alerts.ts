@@ -27,7 +27,7 @@ export async function checkHotLeadAlert(leadId: string, previousScore: number, n
         leadId,
         type: "status_change",
         title: `Lead quente detectado — score ${newScore}/100`,
-        description: `${lead.name} foi identificado como lead quente. Tarefa de contato criada automaticamente.`,
+        description: `${lead.name} foi identificado como lead quente. Tarefa de contato criada automáticamente.`,
         metadata: { previousScore, newScore, alert: "hot_lead" },
       },
     });
@@ -67,7 +67,7 @@ export async function processEscalations() {
         leadId: lead.id,
         type: "task",
         title: "Escalonamento: sem contato há 48h",
-        description: `Tarefa de retomada criada automaticamente para ${lead.name}`,
+        description: `Tarefa de retomada criada automáticamente para ${lead.name}`,
       },
     });
 
@@ -95,7 +95,7 @@ export async function processEscalations() {
         userId: lead.userId,
         leadId: lead.id,
         type: "status_change",
-        title: "Lead encerrado automaticamente",
+        title: "Lead encerrado automáticamente",
         description: `${lead.name} ficou sem contato por 7 dias e foi marcado como perdido.`,
         metadata: { rule: "auto_close_7d" },
       },
@@ -124,7 +124,7 @@ export async function processEscalations() {
         userId: lead.userId,
         leadId: lead.id,
         type: "status_change",
-        title: "Lead encerrado automaticamente",
+        title: "Lead encerrado automáticamente",
         description: `${lead.name} ficou sem avanço por 14 dias e foi marcado como perdido.`,
         metadata: { rule: "auto_close_14d" },
       },

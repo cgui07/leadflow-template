@@ -19,11 +19,11 @@ export async function PATCH(
   } catch (err) {
     if (err instanceof Error) {
       if (err.message === "TASK_NOT_FOUND") {
-        return error("Tarefa nao encontrada", 404);
+        return error("Tarefa não encontrada", 404);
       }
 
       if (err.message === "TASK_STATUS_INVALID") {
-        return error("Status de tarefa invalido", 400);
+        return error("Status de tarefa inválido", 400);
       }
 
       if (err.message === "TASK_DUE_AT_INVALID") {
@@ -32,7 +32,7 @@ export async function PATCH(
     }
 
     if (err instanceof SyntaxError) {
-      return error("Payload invalido");
+      return error("Payload inválido");
     }
 
     return handleError(err);
@@ -51,7 +51,7 @@ export async function DELETE(
     return json({ ok: true });
   } catch (err) {
     if (err instanceof Error && err.message === "TASK_NOT_FOUND") {
-      return error("Tarefa nao encontrada", 404);
+      return error("Tarefa não encontrada", 404);
     }
 
     return handleError(err);

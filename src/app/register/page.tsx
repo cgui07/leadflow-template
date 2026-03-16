@@ -87,7 +87,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
         <AuthHeroPanel
           className="bg-linear-to-br from-blue-navy via-primary to-secondary"
           title={`Bem-vindo ao ${invite.tenantName}.`}
-          description="Voce recebeu um convite para acessar a plataforma. Crie sua conta e comece a usar agora."
+          description="Você recebeu um convite para acessar a plataforma. Crie sua conta e comece a usar agora."
         >
           <div className="space-y-4">
             <div className="flex items-center gap-4 rounded-2xl border border-white-10 bg-white-10 p-4 backdrop-blur-sm">
@@ -108,7 +108,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
               <div>
                 <div className="font-semibold">Plataforma personalizada</div>
                 <div className="text-sm text-blue-ice-60">
-                  Configurada especialmente para sua operacao
+                  Configurada especialmente para sua operação
                 </div>
               </div>
             </div>

@@ -25,19 +25,19 @@ function getHint(checks: PasswordChecks) {
   }
 
   if (!checks.upper) {
-    missing.push("adicione letra maiuscula");
+    missing.push("adicione letra maiúscula");
   }
 
   if (!checks.lower) {
-    missing.push("adicione letra minuscula");
+    missing.push("adicione letra minúscula");
   }
 
   if (!checks.number) {
-    missing.push("adicione numero");
+    missing.push("adicione número");
   }
 
   if (!checks.symbol) {
-    missing.push("adicione simbolo");
+    missing.push("adicione símbolo");
   }
 
   if (missing.length === 0) {
@@ -52,7 +52,7 @@ function getHint(checks: PasswordChecks) {
     return `Dica: ${missing[0]} e ${missing[1]}`;
   }
 
-  return "Misture letras, numeros e simbolos";
+  return "Misture letras, números e símbolos";
 }
 
 export function getPasswordStrength(password: string): PasswordStrengthResult {
@@ -117,7 +117,7 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
   if (score === 3) {
     return {
       score,
-      label: "Media",
+      label: "Média",
       hint: getHint(checks),
       barClassName: "bg-orange-amber",
       textClassName: "text-yellow-gold",

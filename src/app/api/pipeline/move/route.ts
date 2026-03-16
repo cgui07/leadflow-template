@@ -18,16 +18,16 @@ export async function POST(req: NextRequest) {
       }
 
       if (err.message === "PIPELINE_LEAD_NOT_FOUND") {
-        return error("Lead nao encontrado", 404);
+        return error("Lead não encontrado", 404);
       }
 
       if (err.message === "PIPELINE_STAGE_NOT_FOUND") {
-        return error("Estagio nao encontrado", 404);
+        return error("Estágio não encontrado", 404);
       }
     }
 
     if (err instanceof SyntaxError) {
-      return error("Payload invalido");
+      return error("Payload inválido");
     }
 
     return handleError(err);

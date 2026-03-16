@@ -12,7 +12,7 @@ export async function GET(
     const lead = await getLeadDetail(user.id, id);
 
     if (!lead) {
-      return error("Lead nao encontrado", 404);
+      return error("Lead não encontrado", 404);
     }
 
     return json(lead);
@@ -38,24 +38,24 @@ export async function PATCH(
   } catch (err) {
     if (err instanceof Error) {
       if (err.message === "LEAD_NOT_FOUND") {
-        return error("Lead nao encontrado", 404);
+        return error("Lead não encontrado", 404);
       }
 
       if (err.message === "LEAD_STATUS_INVALID") {
-        return error("Status de lead invalido", 400);
+        return error("Status de lead inválido", 400);
       }
 
       if (err.message === "LEAD_STAGE_INVALID") {
-        return error("Estagio invalido", 400);
+        return error("Estágio inválido", 400);
       }
 
       if (err.message === "LEAD_STAGE_NOT_FOUND") {
-        return error("Estagio nao encontrado", 404);
+        return error("Estágio não encontrado", 404);
       }
     }
 
     if (err instanceof SyntaxError) {
-      return error("Payload invalido");
+      return error("Payload inválido");
     }
 
     return handleError(err);
@@ -74,7 +74,7 @@ export async function DELETE(
     return json({ ok: true });
   } catch (err) {
     if (err instanceof Error && err.message === "LEAD_NOT_FOUND") {
-      return error("Lead nao encontrado", 404);
+      return error("Lead não encontrado", 404);
     }
 
     return handleError(err);

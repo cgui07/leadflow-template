@@ -8,7 +8,7 @@ import { useState, type FormEvent } from "react";
 import { DEFAULT_BRANDING } from "@/lib/branding";
 import { getResponseErrorMessage } from "../utils";
 import { AuthBrandHeader } from "./AuthBrandHeader";
-import { PasswordField, TextField } from "@/components/forms";
+import { Form, PasswordField, TextField } from "@/components/forms";
 
 interface LoginFormProps {
   initialError: string;
@@ -59,7 +59,7 @@ export function LoginForm({ initialError, redirectPath }: LoginFormProps) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <Form onSubmit={handleSubmit} className="space-y-5">
         {error ? <AuthAlert>{error}</AuthAlert> : null}
 
         <TextField
@@ -93,7 +93,7 @@ export function LoginForm({ initialError, redirectPath }: LoginFormProps) {
         <Button type="submit" loading={loading} fullWidth size="lg">
           {loading ? "Entrando..." : "Entrar"}
         </Button>
-      </form>
+      </Form>
 
       <div className="mt-8 flex items-center gap-3">
         <div className="h-px flex-1 bg-gray-ash" />

@@ -183,7 +183,7 @@ export function ConversationsPageClient({
 
       if (!response.ok) {
         throw new Error(
-          await readErrorMessage(response, "Nao foi possivel enviar a mensagem."),
+          await readErrorMessage(response, "Não foi possível enviar a mensagem."),
         );
       }
 
@@ -192,7 +192,7 @@ export function ConversationsPageClient({
       setConversationError(
         error instanceof Error
           ? error.message
-          : "Nao foi possivel enviar a mensagem.",
+          : "Não foi possível enviar a mensagem.",
       );
       throw error;
     } finally {
@@ -217,7 +217,7 @@ export function ConversationsPageClient({
         setConversationError(
           await readErrorMessage(
             response,
-            "Nao foi possivel atualizar o modo da conversa.",
+            "Não foi possível atualizar o modo da conversa.",
           ),
         );
         return;
@@ -260,7 +260,7 @@ export function ConversationsPageClient({
         setSummaryError(
           await readErrorMessage(
             response,
-            "Nao foi possivel gerar o resumo desta conversa.",
+            "Não foi possível gerar o resumo desta conversa.",
           ),
         );
         return;
@@ -281,7 +281,7 @@ export function ConversationsPageClient({
       setSummaryError(
         error instanceof Error
           ? error.message
-          : "Nao foi possivel gerar o resumo desta conversa.",
+          : "Não foi possível gerar o resumo desta conversa.",
       );
     } finally {
       if (controller.signal.aborted || summaryRequestIdRef.current !== requestId) {

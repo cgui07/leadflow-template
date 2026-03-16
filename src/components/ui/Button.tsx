@@ -8,6 +8,7 @@ export type ButtonVariant =
   | "secondary"
   | "outline"
   | "ghost"
+  | "unstyled"
   | "danger";
 
 export type ButtonSize = "sm" | "md" | "lg";
@@ -29,6 +30,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   outline:
     "border border-neutral-border text-neutral-dark hover:bg-neutral-surface focus-visible:ring-primary",
   ghost: "text-neutral-steel hover:bg-neutral-pale focus-visible:ring-neutral",
+  unstyled: "",
   danger:
     "bg-danger text-white hover:bg-red-crimson focus-visible:ring-danger shadow-sm",
 };

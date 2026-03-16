@@ -13,7 +13,7 @@ export type TaskStatus = (typeof TASK_STATUSES)[number];
 
 export const TASK_TYPE_LABELS: Record<TaskType, string> = {
   follow_up: "Follow-up",
-  call: "Ligacao",
+  call: "Ligação",
   visit: "Visita",
   proposal: "Proposta",
   other: "Outro",

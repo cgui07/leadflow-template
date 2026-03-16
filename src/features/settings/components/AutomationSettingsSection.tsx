@@ -93,13 +93,13 @@ export function AutomationSettingsSection({
           </div>
         </SectionContainer>
 
-        <SectionContainer title="Mensagem de saudacao">
+        <SectionContainer title="Mensagem de saudação">
           <TextareaField
-            label="Mensagem padrao para novos contatos quando a IA nao estiver configurada"
+            label="Mensagem padrao para novos contatos quando a IA não estiver configurada"
             value={form.greetingMessage || ""}
             onChange={(event) => update("greetingMessage", event.target.value)}
             rows={4}
-            placeholder="Ola! Obrigado pelo contato. Em breve um corretor especializado vai te atender."
+            placeholder="Olá! Obrigado pelo contato. Em breve um corretor especializado vai te atender."
           />
         </SectionContainer>
 

@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest) {
     return json(settings);
   } catch (err) {
     if (err instanceof SyntaxError) {
-      return error("Payload invalido");
+      return error("Payload inválido");
     }
 
     return handleError(err);

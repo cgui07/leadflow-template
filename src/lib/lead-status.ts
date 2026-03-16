@@ -17,7 +17,7 @@ export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
   qualifying: "Qualificando",
   qualified: "Qualificado",
   proposal: "Proposta",
-  negotiation: "Negociacao",
+  negotiation: "Negociação",
   won: "Ganho",
   lost: "Perdido",
 };

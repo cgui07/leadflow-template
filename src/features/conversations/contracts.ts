@@ -50,5 +50,5 @@ export interface ConversationSummary {
   prazoCompra: string;
   objecoes: string;
   ultimaIntencao: string;
-  proximoPasso: string;
+  próximoPasso: string;
 }

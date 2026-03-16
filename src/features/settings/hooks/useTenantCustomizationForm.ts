@@ -105,13 +105,13 @@ export function useTenantCustomizationForm(
         setSaveError(
           payload && "error" in payload && payload.error
             ? payload.error
-            : "Nao foi possivel salvar a personalizacao.",
+            : "Não foi possível salvar a personalização.",
         );
         return;
       }
 
       if (!payload || !("tenant" in payload)) {
-        setSaveError("Nao foi possivel salvar a personalizacao.");
+        setSaveError("Não foi possível salvar a personalização.");
         return;
       }
 

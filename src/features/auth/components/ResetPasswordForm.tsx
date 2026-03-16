@@ -4,8 +4,8 @@ import { AuthAlert } from "./AuthAlert";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useState, type FormEvent } from "react";
-import { PasswordField } from "@/components/forms";
 import { getResponseErrorMessage } from "../utils";
+import { Form, PasswordField } from "@/components/forms";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
 import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
 
@@ -27,12 +27,14 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     setError("");
 
     if (password.length < MIN_PASSWORD_LENGTH) {
-      setError(`A senha deve ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`);
+      setError(
+        `A senha deve ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`,
+      );
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("As senhas nao coincidem.");
+      setError("As senhas não coincidem.");
       return;
     }
 
@@ -49,7 +51,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         setError(
           await getResponseErrorMessage(
             response,
-            "Nao foi possivel redefinir a senha.",
+            "Não foi possível redefinir a senha.",
           ),
         );
         return;
@@ -65,7 +67,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <Form onSubmit={handleSubmit} className="space-y-4">
       {error ? <AuthAlert>{error}</AuthAlert> : null}
 
       <div>
@@ -103,6 +105,6 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       >
         {loading ? "Salvando..." : "Redefinir senha"}
       </Button>
-    </form>
+    </Form>
   );
 }

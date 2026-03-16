@@ -68,8 +68,8 @@ export function useSettingsForm(initialSettings: UserSettings): UseSettingsFormR
 
   const modelHelpText =
     selectedProvider === "openai"
-      ? "Mostrando os modelos OpenAI suportados por esta integracao."
-      : "Mostrando os modelos Anthropic suportados por esta integracao.";
+      ? "Mostrando os modelos OpenAI suportados por esta integração."
+      : "Mostrando os modelos Anthropic suportados por esta integração.";
 
   function update<K extends keyof UserSettings>(key: K, value: UserSettings[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -106,13 +106,13 @@ export function useSettingsForm(initialSettings: UserSettings): UseSettingsFormR
         setSaveError(
           result && "error" in result && result.error
             ? result.error
-            : "Nao foi possivel salvar suas configuracoes.",
+            : "Não foi possível salvar suas configurações.",
         );
         return;
       }
 
       if (!isUserSettings(result)) {
-        setSaveError("Nao foi possivel salvar suas configuracoes.");
+        setSaveError("Não foi possível salvar suas configurações.");
         return;
       }
 

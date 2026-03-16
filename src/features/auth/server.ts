@@ -32,7 +32,11 @@ export class AuthFlowError extends Error {
   }
 }
 
-function mapUserSummary(user: { id: string; name: string; email: string }): AuthUserSummary {
+function mapUserSummary(user: {
+  id: string;
+  name: string;
+  email: string;
+}): AuthUserSummary {
   return {
     id: user.id,
     name: user.name,
@@ -58,12 +62,12 @@ export async function loginWithPassword(
   const email = assertRequiredString(
     input.email,
     "LOGIN_MISSING_CREDENTIALS",
-    "Email e senha sao obrigatorios",
+    "Email e senha são obrigatórios",
   );
   const password = assertRequiredString(
     input.password,
     "LOGIN_MISSING_CREDENTIALS",
-    "Email e senha sao obrigatorios",
+    "Email e senha são obrigatórios",
   );
   const normalizedEmail = normalizeEmail(email);
   const user = await prisma.user.findUnique({
@@ -86,7 +90,7 @@ export async function loginWithPassword(
     throw new AuthFlowError(
       "LOGIN_INVALID_CREDENTIALS",
       401,
-      "Credenciais invalidas",
+      "Credenciais inválidas",
     );
   }
 
@@ -111,7 +115,7 @@ export async function loginWithPassword(
     throw new AuthFlowError(
       "LOGIN_INVALID_CREDENTIALS",
       401,
-      "Credenciais invalidas",
+      "Credenciais inválidas",
     );
   }
 
@@ -127,7 +131,7 @@ export async function getInviteRegistrationInfo(
   const inviteToken = assertRequiredString(
     token,
     "INVITE_TOKEN_REQUIRED",
-    "Token de convite e obrigatorio",
+    "Token de convite e obrigatório",
   );
   const invite = await validateInviteToken(inviteToken);
 
@@ -135,7 +139,7 @@ export async function getInviteRegistrationInfo(
     throw new AuthFlowError(
       "INVITE_INVALID",
       403,
-      "Convite invalido, expirado ou ja utilizado",
+      "Convite inválido, expirado ou já utilizado",
     );
   }
 
@@ -160,29 +164,29 @@ export async function registerWithInvite(
     throw new AuthFlowError(
       "REGISTER_INVITE_INVALID",
       403,
-      "Convite invalido, expirado ou ja utilizado",
+      "Convite inválido, expirado ou já utilizado",
     );
   }
 
   const name = assertRequiredString(
     input.name,
     "REGISTER_REQUIRED_FIELDS",
-    "Nome, email, senha e confirmacao sao obrigatorios",
+    "Nome, email, senha e confirmação são obrigatórios",
   );
   const email = assertRequiredString(
     input.email,
     "REGISTER_REQUIRED_FIELDS",
-    "Nome, email, senha e confirmacao sao obrigatorios",
+    "Nome, email, senha e confirmação são obrigatórios",
   );
   const password = assertRequiredString(
     input.password,
     "REGISTER_REQUIRED_FIELDS",
-    "Nome, email, senha e confirmacao sao obrigatorios",
+    "Nome, email, senha e confirmação são obrigatórios",
   );
   const confirmPassword = assertRequiredString(
     input.confirmPassword,
     "REGISTER_REQUIRED_FIELDS",
-    "Nome, email, senha e confirmacao sao obrigatorios",
+    "Nome, email, senha e confirmação são obrigatórios",
   );
   const normalizedEmail = normalizeEmail(email);
 
@@ -206,7 +210,7 @@ export async function registerWithInvite(
     throw new AuthFlowError(
       "REGISTER_PASSWORD_MISMATCH",
       400,
-      "As senhas nao coincidem",
+      "As senhas não coincidem",
     );
   }
 
@@ -216,21 +220,25 @@ export async function registerWithInvite(
   });
 
   if (existing) {
-    throw new AuthFlowError(
-      "REGISTER_EMAIL_TAKEN",
-      409,
-      "Email ja cadastrado",
-    );
+    throw new AuthFlowError("REGISTER_EMAIL_TAKEN", 409, "Email já cadastrado");
   }
 
   const passwordHash = await hashPassword(password);
   const stages = [
     { name: "Novo", color: DEFAULT_PIPELINE_STAGE_COLORS[0], order: 0 },
-    { name: "Contato feito", color: DEFAULT_PIPELINE_STAGE_COLORS[1], order: 1 },
+    {
+      name: "Contato feito",
+      color: DEFAULT_PIPELINE_STAGE_COLORS[1],
+      order: 1,
+    },
     { name: "Qualificado", color: DEFAULT_PIPELINE_STAGE_COLORS[2], order: 2 },
-    { name: "Visita agendada", color: DEFAULT_PIPELINE_STAGE_COLORS[3], order: 3 },
+    {
+      name: "Visita agendada",
+      color: DEFAULT_PIPELINE_STAGE_COLORS[3],
+      order: 3,
+    },
     { name: "Proposta", color: DEFAULT_PIPELINE_STAGE_COLORS[4], order: 4 },
-    { name: "Negociacao", color: DEFAULT_PIPELINE_STAGE_COLORS[5], order: 5 },
+    { name: "Negociação", color: DEFAULT_PIPELINE_STAGE_COLORS[5], order: 5 },
     { name: "Fechado", color: DEFAULT_PIPELINE_STAGE_COLORS[6], order: 6 },
     { name: "Perdido", color: DEFAULT_PIPELINE_STAGE_COLORS[7], order: 7 },
   ];
@@ -251,7 +259,7 @@ export async function registerWithInvite(
       throw new AuthFlowError(
         "REGISTER_INVITE_INVALID",
         403,
-        "Convite invalido, expirado ou ja utilizado",
+        "Convite inválido, expirado ou já utilizado",
       );
     }
 
@@ -261,7 +269,10 @@ export async function registerWithInvite(
         name,
         email: normalizedEmail,
         passwordHash,
-        phone: typeof input.phone === "string" && input.phone.trim() ? input.phone.trim() : null,
+        phone:
+          typeof input.phone === "string" && input.phone.trim()
+            ? input.phone.trim()
+            : null,
         role: invite.role,
         settings: { create: {} },
       },
@@ -288,7 +299,7 @@ export async function requestPasswordReset(
     assertRequiredString(
       email,
       "PASSWORD_RESET_EMAIL_REQUIRED",
-      "Email obrigatorio",
+      "Email obrigatório",
     ),
   );
   const user = await prisma.user.findUnique({
@@ -303,7 +314,7 @@ export async function requestPasswordReset(
       throw new AuthFlowError(
         "PASSWORD_RESET_EMAIL_NOT_CONFIGURED",
         500,
-        "O envio de e-mail nao esta configurado.",
+        "O envio de e-mail não está configurado.",
       );
     }
 
@@ -334,7 +345,7 @@ export async function requestPasswordReset(
         throw new AuthFlowError(
           "PASSWORD_RESET_EMAIL_FAILED",
           502,
-          "Nao foi possivel enviar o e-mail de redefinicao agora. Tente novamente em instantes.",
+          "Não foi possível enviar o e-mail de redefinição agora. Tente novamente em instantes.",
         );
       }
     }
@@ -357,7 +368,7 @@ export async function assertValidPasswordResetToken(
   const rawToken = assertRequiredString(
     token,
     "PASSWORD_RESET_TOKEN_REQUIRED",
-    "Token obrigatorio",
+    "Token obrigatório",
   );
 
   const user = await prisma.user.findUnique({
@@ -373,7 +384,7 @@ export async function assertValidPasswordResetToken(
     throw new AuthFlowError(
       "PASSWORD_RESET_TOKEN_INVALID",
       400,
-      "Token invalido ou expirado",
+      "Token inválido ou expirado",
     );
   }
 }
@@ -384,17 +395,17 @@ export async function resetPasswordWithToken(
   const token = assertRequiredString(
     input.token,
     "PASSWORD_RESET_REQUIRED_FIELDS",
-    "Token, senha e confirmacao sao obrigatorios",
+    "Token, senha e confirmação são obrigatórios",
   );
   const password = assertRequiredString(
     input.password,
     "PASSWORD_RESET_REQUIRED_FIELDS",
-    "Token, senha e confirmacao sao obrigatorios",
+    "Token, senha e confirmação são obrigatórios",
   );
   const confirmPassword = assertRequiredString(
     input.confirmPassword,
     "PASSWORD_RESET_REQUIRED_FIELDS",
-    "Token, senha e confirmacao sao obrigatorios",
+    "Token, senha e confirmação são obrigatórios",
   );
 
   if (password.length < MIN_PASSWORD_LENGTH) {
@@ -409,7 +420,7 @@ export async function resetPasswordWithToken(
     throw new AuthFlowError(
       "PASSWORD_RESET_PASSWORD_MISMATCH",
       400,
-      "As senhas nao coincidem",
+      "As senhas não coincidem",
     );
   }
 
@@ -425,7 +436,7 @@ export async function resetPasswordWithToken(
     throw new AuthFlowError(
       "PASSWORD_RESET_TOKEN_INVALID",
       400,
-      "Token invalido ou expirado",
+      "Token inválido ou expirado",
     );
   }
 

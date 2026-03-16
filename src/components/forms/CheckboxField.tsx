@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { forwardRef, useId } from "react";
+import { Button } from "@/components/ui/Button";
 
 type CheckboxVariant = "checkbox" | "switch";
 
@@ -45,18 +46,19 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
     if (variant === "switch") {
       return (
         <div className={cn("flex items-start gap-3.5", className)}>
-          <button
+          <Button
             ref={ref}
             type="button"
+            variant="unstyled"
+            size="sm"
             role="switch"
             id={fieldId}
             aria-checked={checked}
             disabled={disabled}
             onClick={handleToggle}
             className={cn(
-              "relative mt-0.5 inline-flex h-7 w-12 shrink-0 rounded-full border transition-all duration-200 ease-out",
-              "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-              "disabled:cursor-not-allowed disabled:opacity-50",
+              "relative mt-0.5 h-7 w-12 shrink-0 rounded-full border px-0 transition-all duration-200 ease-out",
+              "focus-visible:ring-primary",
               checked
                 ? "border-blue-royal bg-primary"
                 : "border-neutral-line bg-neutral-surface",
@@ -74,7 +76,7 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
                 <div className="h-2 w-2 rounded-full bg-neutral-line" />
               )}
             </div>
-          </button>
+          </Button>
           {(label || description) && (
             <div className="space-y-0.5">
               {label && (
@@ -98,25 +100,26 @@ export const CheckboxField = forwardRef<HTMLButtonElement, CheckboxFieldProps>(
 
     return (
       <div className={cn("flex items-start gap-3", className)}>
-        <button
+        <Button
           ref={ref}
           type="button"
+          variant="unstyled"
+          size="sm"
           role="checkbox"
           id={fieldId}
           aria-checked={checked}
           disabled={disabled}
           onClick={handleToggle}
           className={cn(
-            "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
-            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-            "disabled:cursor-not-allowed disabled:opacity-50",
+            "mt-0.5 h-5 w-5 shrink-0 rounded-md border px-0 transition-colors",
+            "focus-visible:ring-primary",
             checked
               ? "border-primary bg-primary text-white shadow-sm"
               : "border-neutral-line bg-white text-transparent",
           )}
         >
           {checked ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
-        </button>
+        </Button>
         {(label || description) && (
           <div>
             {label && (

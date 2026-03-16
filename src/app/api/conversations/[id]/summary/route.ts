@@ -15,7 +15,7 @@ export async function POST(
   } catch (err) {
     if (err instanceof Error) {
       if (err.message === "CONVERSATION_NOT_FOUND") {
-        return error("Conversa nao encontrada", 404);
+        return error("Conversa não encontrada", 404);
       }
 
       if (err.message === "CONVERSATION_EMPTY") {
@@ -23,11 +23,11 @@ export async function POST(
       }
 
       if (err.message === "CONVERSATION_AI_NOT_CONFIGURED") {
-        return error("Configuracao de IA nao encontrada", 400);
+        return error("Configuração de IA não encontrada", 400);
       }
 
       if (err.message === "CONVERSATION_SUMMARY_FAILED") {
-        return error("Nao foi possivel gerar o resumo", 500);
+        return error("Não foi possível gerar o resumo", 500);
       }
     }
 

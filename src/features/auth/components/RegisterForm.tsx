@@ -8,8 +8,8 @@ import { useState, type FormEvent } from "react";
 import { getResponseErrorMessage } from "../utils";
 import { AuthBrandHeader } from "./AuthBrandHeader";
 import type { InviteRegistrationInfo } from "../contracts";
-import { PasswordField, TextField } from "@/components/forms";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
+import { Form, PasswordField, TextField } from "@/components/forms";
 import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
 
 interface RegisterFormProps {
@@ -55,7 +55,7 @@ export function RegisterForm({ invite, inviteToken }: RegisterFormProps) {
     }
 
     if (form.password !== form.confirmPassword) {
-      setError("As senhas nao coincidem.");
+      setError("As senhas não coincidem.");
       return;
     }
 
@@ -96,7 +96,7 @@ export function RegisterForm({ invite, inviteToken }: RegisterFormProps) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <Form onSubmit={handleSubmit} className="space-y-4">
         {error ? <AuthAlert>{error}</AuthAlert> : null}
 
         <div className="grid grid-cols-2 gap-3">
@@ -164,7 +164,7 @@ export function RegisterForm({ invite, inviteToken }: RegisterFormProps) {
         >
           {loading ? "Criando conta..." : "Criar conta"}
         </Button>
-      </form>
+      </Form>
 
       <div className="mt-6 text-center text-sm text-gray-smoke">
         Ja tem uma conta?{" "}

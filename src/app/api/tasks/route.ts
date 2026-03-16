@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     if (err instanceof Error) {
       if (err.message === "TASK_TITLE_REQUIRED") {
-        return error("Titulo obrigatorio");
+        return error("Título obrigatorio");
       }
 
       if (err.message === "TASK_DUE_AT_INVALID") {
@@ -36,16 +36,16 @@ export async function POST(req: NextRequest) {
       }
 
       if (err.message === "TASK_TYPE_INVALID") {
-        return error("Tipo de tarefa invalido", 400);
+        return error("Tipo de tarefa inválido", 400);
       }
 
       if (err.message === "TASK_LEAD_NOT_FOUND") {
-        return error("Lead nao encontrado", 404);
+        return error("Lead não encontrado", 404);
       }
     }
 
     if (err instanceof SyntaxError) {
-      return error("Payload invalido");
+      return error("Payload inválido");
     }
 
     return handleError(err);

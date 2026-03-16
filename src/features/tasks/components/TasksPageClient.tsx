@@ -12,11 +12,17 @@ import type { TaskItem, TaskListStatus } from "../contracts";
 import { CheckCircle, Clock, Plus, Trash2 } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { DateField, SelectField, TextField, TextareaField } from "@/components/forms";
+import {
+  DateField,
+  Form,
+  SelectField,
+  TextField,
+  TextareaField,
+} from "@/components/forms";
 
 const typeLabels: Record<string, string> = {
   follow_up: "Follow-up",
-  call: "Ligacao",
+  call: "Ligação",
   visit: "Visita",
   proposal: "Proposta",
   other: "Outro",
@@ -24,7 +30,7 @@ const typeLabels: Record<string, string> = {
 
 const typeOptions = [
   { value: "follow_up", label: "Follow-up" },
-  { value: "call", label: "Ligacao" },
+  { value: "call", label: "Ligação" },
   { value: "visit", label: "Visita" },
   { value: "proposal", label: "Proposta" },
   { value: "other", label: "Outro" },
@@ -49,13 +55,14 @@ export function TasksPageClient({
     description: "",
   });
   const [actionError, setActionError] = useState<string | null>(null);
-  const { data: tasks, error, refetch } = useFetch<TaskItem[]>(
-    `/api/tasks?status=${tab}`,
-    {
-      initialData: initialTasks,
-      revalidateOnMount: false,
-    },
-  );
+  const {
+    data: tasks,
+    error,
+    refetch,
+  } = useFetch<TaskItem[]>(`/api/tasks?status=${tab}`, {
+    initialData: initialTasks,
+    revalidateOnMount: false,
+  });
 
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
@@ -68,12 +75,12 @@ export function TasksPageClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const payload = (await response.json().catch(() => null)) as
-        | { error?: string }
-        | null;
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
 
       if (!response.ok) {
-        setActionError(payload?.error || "Nao foi possivel criar a tarefa.");
+        setActionError(payload?.error || "Não foi possível criar a tarefa.");
         return;
       }
 
@@ -93,12 +100,12 @@ export function TasksPageClient({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "completed" }),
     });
-    const payload = (await response.json().catch(() => null)) as
-      | { error?: string }
-      | null;
+    const payload = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
 
     if (!response.ok) {
-      setActionError(payload?.error || "Nao foi possivel atualizar a tarefa.");
+      setActionError(payload?.error || "Não foi possível atualizar a tarefa.");
       return;
     }
 
@@ -109,12 +116,12 @@ export function TasksPageClient({
     setActionError(null);
 
     const response = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
-    const payload = (await response.json().catch(() => null)) as
-      | { error?: string }
-      | null;
+    const payload = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
 
     if (!response.ok) {
-      setActionError(payload?.error || "Nao foi possivel remover a tarefa.");
+      setActionError(payload?.error || "Não foi possível remover a tarefa.");
       return;
     }
 
@@ -169,7 +176,7 @@ export function TasksPageClient({
             title="Nenhuma tarefa"
             description={
               tab === "pending"
-                ? "Todas as tarefas estao em dia!"
+                ? "Todas as tarefas estão em dia!"
                 : "Nenhuma tarefa encontrada."
             }
           />
@@ -211,7 +218,10 @@ export function TasksPageClient({
                       {task.title}
                     </div>
                     <div className="mt-1 flex items-center gap-2">
-                      <Badge variant={isOverdue ? "error" : "default"} size="sm">
+                      <Badge
+                        variant={isOverdue ? "error" : "default"}
+                        size="sm"
+                      >
                         {typeLabels[task.type] || task.type}
                       </Badge>
                       <div
@@ -253,12 +263,14 @@ export function TasksPageClient({
         title="Nova Tarefa"
         size="md"
       >
-        <form onSubmit={handleCreate} className="space-y-4">
+        <Form onSubmit={handleCreate} className="space-y-4">
           <TextField
-            label="Titulo"
+            label="Título"
             type="text"
             value={form.title}
-            onChange={(event) => setForm({ ...form, title: event.target.value })}
+            onChange={(event) =>
+              setForm({ ...form, title: event.target.value })
+            }
             required
           />
           <SelectField
@@ -271,7 +283,9 @@ export function TasksPageClient({
             label="Data/hora"
             fieldType="datetime-local"
             value={form.dueAt}
-            onChange={(event) => setForm({ ...form, dueAt: event.target.value })}
+            onChange={(event) =>
+              setForm({ ...form, dueAt: event.target.value })
+            }
             required
           />
           <TextareaField
@@ -294,7 +308,7 @@ export function TasksPageClient({
               Criar
             </Button>
           </div>
-        </form>
+        </Form>
       </Modal>
     </PageContainer>
   );

@@ -29,7 +29,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <AuthHeroPanel
           className="bg-linear-to-br from-blue-navy via-primary to-secondary"
           title="Transforme contatos em clientes reais."
-          description="Organize seus leads, qualifique automaticamente com IA e garanta que voce nunca perca uma oportunidade."
+          description="Organize seus leads, qualifique automaticamente com IA e garanta que você nunca perca uma oportunidade."
         >
           <div className="grid grid-cols-3 gap-6">
             <div className="rounded-2xl border border-white-10 bg-white-10 p-4 text-center backdrop-blur-sm">

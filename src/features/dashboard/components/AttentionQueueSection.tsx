@@ -36,17 +36,14 @@ interface AttentionQueueSectionProps {
 
 function getOverdueActionLabel(item: AttentionQueueItem) {
   if (item.overdueActionTitle) {
-    return `Acao: ${item.overdueActionTitle}`;
+    return `Ação: ${item.overdueActionTitle}`;
   }
 
-  if (
-    item.overdueActionType &&
-    item.overdueActionType in ACTION_TYPE_LABELS
-  ) {
+  if (item.overdueActionType && item.overdueActionType in ACTION_TYPE_LABELS) {
     return `${ACTION_TYPE_LABELS[item.overdueActionType as LeadActionType]} vencida`;
   }
 
-  return "Acao vencida";
+  return "Ação vencida";
 }
 
 const reasonConfig: Record<
@@ -64,7 +61,9 @@ const reasonConfig: Record<
   },
   unread: {
     getLabel: (item) => {
-      return item.unreadCount > 1 ? `${item.unreadCount} nao lidas` : "Nao lida";
+      return item.unreadCount > 1
+        ? `${item.unreadCount} não lidas`
+        : "Não lida";
     },
     icon: <Mail size={10} />,
     variant: "warning",
@@ -116,7 +115,7 @@ function getRelevantStatusText(item: AttentionQueueItem) {
     item.reasons.includes("overdue_action") &&
     item.overdueActionScheduledAt
   ) {
-    return `Acao vencida ${formatTimeAgo(item.overdueActionScheduledAt)}`;
+    return `Ação vencida ${formatTimeAgo(item.overdueActionScheduledAt)}`;
   }
 
   if (item.lastRelevantAt) {
@@ -189,7 +188,7 @@ function QueueItem({ item }: { item: AttentionQueueItem }) {
         )}
         {item.overdueActionTitle && (
           <div className="mt-1 text-xs text-red-dark">
-            Acao: {item.overdueActionTitle}
+            Ação: {item.overdueActionTitle}
           </div>
         )}
       </div>
@@ -207,11 +206,7 @@ function QueueItem({ item }: { item: AttentionQueueItem }) {
           </Link>
         )}
         <Link href={`/leads/${item.leadId}`}>
-          <Button
-            variant="ghost"
-            size="sm"
-            icon={<ExternalLink size={13} />}
-          >
+          <Button variant="ghost" size="sm" icon={<ExternalLink size={13} />}>
             <span className="hidden sm:inline">Ver lead</span>
           </Button>
         </Link>
@@ -220,9 +215,7 @@ function QueueItem({ item }: { item: AttentionQueueItem }) {
   );
 }
 
-export function AttentionQueueSection({
-  items,
-}: AttentionQueueSectionProps) {
+export function AttentionQueueSection({ items }: AttentionQueueSectionProps) {
   const [expanded, setExpanded] = useState(false);
   const total = items.length;
   const visibleItems = expanded
@@ -232,12 +225,12 @@ export function AttentionQueueSection({
   return (
     <SectionContainer
       title="Quem preciso responder agora"
-      description="Fila operacional priorizada para voce agir sem se perder"
+      description="Fila operacional priorizada para você agir sem se perder"
       icon={<AlertTriangle className="h-4 w-4 text-orange-amber" />}
       actions={
         total > 0 ? (
           <Badge variant="warning" size="sm">
-            {total} {total === 1 ? "pendencia" : "pendencias"}
+            {total} {total === 1 ? "pendência" : "pendências"}
           </Badge>
         ) : undefined
       }
@@ -246,7 +239,7 @@ export function AttentionQueueSection({
         <EmptyState
           icon={<CheckCircle className="h-10 w-10 text-green-emerald" />}
           title="Tudo em dia"
-          description="Nenhum lead precisa de atencao imediata agora."
+          description="Nenhum lead precisa de atenção imediata agora."
         />
       ) : (
         <div className="space-y-2">
@@ -263,7 +256,9 @@ export function AttentionQueueSection({
                 onClick={() => setExpanded(true)}
               >
                 Ver mais {total - ATTENTION_QUEUE_INITIAL_VISIBLE}{" "}
-                {total - ATTENTION_QUEUE_INITIAL_VISIBLE === 1 ? "item" : "itens"}
+                {total - ATTENTION_QUEUE_INITIAL_VISIBLE === 1
+                  ? "item"
+                  : "itens"}
               </Button>
             </div>
           )}

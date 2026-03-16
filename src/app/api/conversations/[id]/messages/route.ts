@@ -22,7 +22,7 @@ export async function GET(
     return json(messages);
   } catch (err) {
     if (err instanceof Error && err.message === "CONVERSATION_NOT_FOUND") {
-      return error("Conversa nao encontrada", 404);
+      return error("Conversa não encontrada", 404);
     }
 
     return handleError(err);
@@ -50,12 +50,12 @@ export async function POST(
       }
 
       if (err.message === "CONVERSATION_NOT_FOUND") {
-        return error("Conversa nao encontrada", 404);
+        return error("Conversa não encontrada", 404);
       }
     }
 
     if (err instanceof SyntaxError) {
-      return error("Payload invalido");
+      return error("Payload inválido");
     }
 
     return handleError(err);

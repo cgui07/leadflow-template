@@ -61,7 +61,7 @@ export default async function ResetPasswordPage({
 
   if (!token) {
     return (
-      <InvalidResetPasswordState message="Link de redefinicao invalido." />
+      <InvalidResetPasswordState message="Link de redefinição inválido." />
     );
   }
 

@@ -5,7 +5,7 @@ export async function GET() {
   const session = await getSession();
 
   if (!session) {
-    return error("Nao autorizado", 401);
+    return error("Não autorizado", 401);
   }
 
   return json({

@@ -38,7 +38,7 @@ export function PipelinePageClient({
         | null;
 
       if (!response.ok) {
-        setMoveError(payload?.error || "Nao foi possivel mover o lead.");
+        setMoveError(payload?.error || "Não foi possível mover o lead.");
         return;
       }
 

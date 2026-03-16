@@ -2,10 +2,10 @@
 
 import { Mail } from "lucide-react";
 import { AuthAlert } from "./AuthAlert";
-import { TextField } from "@/components/forms";
 import { Button } from "@/components/ui/Button";
 import { useState, type FormEvent } from "react";
 import { getResponseErrorMessage } from "../utils";
+import { Form, TextField } from "@/components/forms";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -32,7 +32,7 @@ export function ForgotPasswordForm() {
         setError(
           await getResponseErrorMessage(
             response,
-            "Nao foi possivel enviar o link.",
+            "Não foi possível enviar o link.",
           ),
         );
         return;
@@ -49,7 +49,7 @@ export function ForgotPasswordForm() {
       );
       setPreviewUrl(data.previewUrl || "");
     } catch {
-      setError("Erro de conexao.");
+      setError("Erro de conexão.");
     } finally {
       setLoading(false);
     }
@@ -68,12 +68,12 @@ export function ForgotPasswordForm() {
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-blue-royal"
             >
               <Mail className="h-4 w-4" />
-              Abrir link de redefinicao
+              Abrir link de redefinição
             </a>
           ) : null}
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <Form onSubmit={handleSubmit} className="space-y-5">
           <TextField
             label="Email"
             type="email"
@@ -84,9 +84,9 @@ export function ForgotPasswordForm() {
             required
           />
           <Button type="submit" loading={loading} fullWidth size="lg">
-            {loading ? "Enviando..." : "Enviar link de recuperacao"}
+            {loading ? "Enviando..." : "Enviar link de recuperação"}
           </Button>
-        </form>
+        </Form>
       )}
     </div>
   );

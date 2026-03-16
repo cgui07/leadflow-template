@@ -2,6 +2,7 @@
 
 import { TextField } from "./TextField";
 import { Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { useState, type ComponentPropsWithoutRef } from "react";
 
 type PasswordFieldProps = Omit<
@@ -21,19 +22,22 @@ export function PasswordField({
       autoComplete={autoComplete}
       type={visible ? "text" : "password"}
       suffix={
-        <button
+        <Button
           type="button"
+          variant="unstyled"
+          size="sm"
           aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
           aria-pressed={visible}
+          icon={
+            visible ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )
+          }
           onClick={() => setVisible((current) => !current)}
-          className="flex items-center justify-center rounded text-neutral-muted transition-colors hover:text-neutral-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        >
-          {visible ? (
-            <EyeOff className="h-4 w-4" />
-          ) : (
-            <Eye className="h-4 w-4" />
-          )}
-        </button>
+          className="h-auto w-auto px-0 text-neutral-muted transition-colors hover:text-neutral-dark focus-visible:ring-primary"
+        />
       }
     />
   );

@@ -50,7 +50,7 @@ export function TenantCustomizationSection({
             onClick={save}
             loading={saving}
           >
-            {saved ? "Personalizacao salva" : "Salvar"}
+            {saved ? "Personalização salva" : "Salvar"}
           </Button>
         }
       >
@@ -108,7 +108,7 @@ export function TenantCustomizationSection({
               />
               <InfoCard
                 icon={<Settings2 className="h-4 w-4 text-neutral-muted" />}
-                label="Aplicacao imediata"
+                label="Aplicação imediata"
                 value="Sidebar, titulos e modulos opcionais"
               />
             </div>
@@ -161,7 +161,7 @@ export function TenantCustomizationSection({
                 Recursos do tenant
               </div>
               <div className="mt-1 text-sm text-neutral">
-                Voce pode ligar ou desligar modulos sem alterar o resto da base.
+                Você pode ligar ou desligar modulos sem alterar o resto da base.
               </div>
             </div>
 
@@ -205,12 +205,15 @@ function ColorPicker({
           const selected = color === value;
 
           return (
-            <button
+            <Button
               key={color}
               type="button"
+              variant="unstyled"
+              size="md"
+              aria-pressed={selected}
               onClick={() => onChange(color)}
               className={cn(
-                "rounded-xl border px-3 py-2 text-left transition-colors",
+                "h-auto flex-col items-start rounded-xl border px-3 py-2 text-left transition-colors",
                 selected
                   ? "border-neutral-ink bg-neutral-surface"
                   : "border-neutral-border bg-white hover:bg-neutral-surface",
@@ -229,7 +232,7 @@ function ColorPicker({
               >
                 Tema
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>

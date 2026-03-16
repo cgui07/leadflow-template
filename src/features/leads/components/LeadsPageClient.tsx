@@ -13,8 +13,8 @@ import { getScoreBadgeClass } from "@/lib/ui-colors";
 import { DataTable } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { LeadRow, LeadsResponse } from "../contracts";
-import { TextField, TextareaField } from "@/components/forms";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { Form, TextField, TextareaField } from "@/components/forms";
 import { ChevronDown, MessageSquare, Plus, Search } from "lucide-react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 
@@ -30,7 +30,7 @@ const statusMap: Record<
   qualifying: { label: "Qualificando", variant: "purple" },
   qualified: { label: "Qualificado", variant: "success" },
   proposal: { label: "Proposta", variant: "warning" },
-  negotiation: { label: "Negociacao", variant: "warning" },
+  negotiation: { label: "Negociação", variant: "warning" },
   won: { label: "Ganho", variant: "success" },
   lost: { label: "Perdido", variant: "error" },
 };
@@ -87,7 +87,7 @@ const columns: Column<LeadRow>[] = [
       ) : null;
     },
   },
-  { key: "region", label: "Regiao", render: (value) => (value as string) || "-" },
+  { key: "region", label: "Região", render: (value) => (value as string) || "-" },
   { key: "source", label: "Fonte" },
   {
     key: "conversation",
@@ -156,7 +156,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
         | null;
 
       if (!response.ok) {
-        setActionError(payload?.error || "Nao foi possivel criar o lead.");
+        setActionError(payload?.error || "Não foi possível criar o lead.");
         return;
       }
 
@@ -276,7 +276,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
             description={
               deferredSearch
                 ? "Tente uma busca diferente."
-                : "Seus leads aparecerao aqui quando comecarem a chegar via WhatsApp."
+                : "Seus leads aparecerao aqui quando começarem a chegar via WhatsApp."
             }
           />
         )}
@@ -288,7 +288,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
         title="Novo Lead"
         size="md"
       >
-        <form onSubmit={handleCreate} className="space-y-4">
+        <Form onSubmit={handleCreate} className="space-y-4">
           <TextField
             label="Nome"
             type="text"
@@ -310,7 +310,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
             onChange={(event) => setForm({ ...form, email: event.target.value })}
           />
           <TextField
-            label="Regiao"
+            label="Região"
             type="text"
             value={form.region}
             onChange={(event) => setForm({ ...form, region: event.target.value })}
@@ -334,7 +334,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
               Criar Lead
             </Button>
           </div>
-        </form>
+        </Form>
       </Modal>
     </PageContainer>
   );

@@ -105,7 +105,7 @@ export function SettingsPageClient({
     >
       <div className="space-y-6">
         <SectionContainer
-          title="Areas de configuracao"
+          title="Áreas de configuração"
           description="Escolha se quer ajustar automacoes do workspace ou a identidade visual do cliente."
           noPadding
         >

@@ -5,9 +5,9 @@ import { useFetch } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { Tabs } from "@/components/ui/Tabs";
 import { Badge } from "@/components/ui/Badge";
-import { TextField } from "@/components/forms";
 import type { LeadDetail } from "../contracts";
 import { Button } from "@/components/ui/Button";
+import { Form, TextField } from "@/components/forms";
 import { useEffect, useState, type ReactNode } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
@@ -36,7 +36,7 @@ const statusOptions = [
   { value: "qualifying", label: "Qualificando" },
   { value: "qualified", label: "Qualificado" },
   { value: "proposal", label: "Proposta" },
-  { value: "negotiation", label: "Negociacao" },
+  { value: "negotiation", label: "Negociação" },
   { value: "won", label: "Ganho" },
   { value: "lost", label: "Perdido" },
 ];
@@ -89,7 +89,7 @@ export function LeadDetailPageClient({
 
   if (!lead) {
     return (
-      <div className="p-6 text-center text-neutral-muted">Lead nao encontrado</div>
+      <div className="p-6 text-center text-neutral-muted">Lead não encontrado</div>
     );
   }
 
@@ -106,7 +106,7 @@ export function LeadDetailPageClient({
       | null;
 
     if (!response.ok) {
-      setActionError(payload?.error || "Nao foi possivel atualizar o status.");
+      setActionError(payload?.error || "Não foi possível atualizar o status.");
       return;
     }
 
@@ -138,7 +138,7 @@ export function LeadDetailPageClient({
         | null;
 
       if (!response.ok) {
-        setActionError(payload?.error || "Nao foi possivel enviar a mensagem.");
+        setActionError(payload?.error || "Não foi possível enviar a mensagem.");
         return;
       }
 
@@ -170,7 +170,7 @@ export function LeadDetailPageClient({
         | null;
 
       if (!response.ok) {
-        setActionError(payload?.error || "Nao foi possivel salvar o telefone.");
+        setActionError(payload?.error || "Não foi possível salvar o telefone.");
         return;
       }
 
@@ -194,7 +194,7 @@ export function LeadDetailPageClient({
       | null;
 
     if (!response.ok) {
-      setActionError(payload?.error || "Nao foi possivel excluir o lead.");
+      setActionError(payload?.error || "Não foi possível excluir o lead.");
       return;
     }
 
@@ -303,7 +303,7 @@ export function LeadDetailPageClient({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <SectionContainer title="Perfil do Lead (IA)">
             <div className="grid grid-cols-2 gap-4">
-              <InfoItem icon={<MapPin size={16} />} label="Regiao" value={lead.region} />
+              <InfoItem icon={<MapPin size={16} />} label="Região" value={lead.region} />
               <InfoItem icon={<Home size={16} />} label="Tipo" value={lead.propertyType} />
               <InfoItem
                 icon={<DollarSign size={16} />}
@@ -357,8 +357,8 @@ export function LeadDetailPageClient({
                 </div>
                 <div className="mt-2 text-xs text-neutral-muted">
                   {needsManualPhone
-                    ? "Este contato entrou como @lid na Evolution 1.8. Informe o numero real do WhatsApp para liberar respostas."
-                    : "Voce pode salvar so os digitos ou usar o formato 5511999999999@s.whatsapp.net."}
+                    ? "Este contato entrou como @lid na Evolution 1.8. Informe o número real do WhatsApp para liberar respostas."
+                    : "Você pode salvar so os digitos ou usar o formato 5511999999999@s.whatsapp.net."}
                 </div>
               </div>
 
@@ -376,7 +376,7 @@ export function LeadDetailPageClient({
                 }
               />
               <InfoRow
-                label="Proximo follow-up"
+                label="Próximo follow-up"
                 value={
                   lead.nextFollowUpAt
                     ? new Date(lead.nextFollowUpAt).toLocaleString("pt-BR")
@@ -390,7 +390,7 @@ export function LeadDetailPageClient({
 
               {lead.pipelineStage ? (
                 <div className="flex justify-between">
-                  <div className="text-neutral-muted">Estagio</div>
+                  <div className="text-neutral-muted">Estágio</div>
                   <div
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getPipelineColorSoftClass(lead.pipelineStage.color)}`}
                   >
@@ -439,7 +439,7 @@ export function LeadDetailPageClient({
                       {msg.sender === "bot"
                         ? "Bot"
                         : msg.sender === "agent"
-                          ? "Voce"
+                          ? "Você"
                           : "Cliente"}
                     </div>
                     <div>{msg.content}</div>
@@ -455,7 +455,7 @@ export function LeadDetailPageClient({
             )}
           </div>
 
-          <form onSubmit={sendMessage} className="flex gap-2">
+          <Form onSubmit={sendMessage} className="flex gap-2">
             <TextField
               value={message}
               onChange={(event) => setMessage(event.target.value)}
@@ -468,12 +468,12 @@ export function LeadDetailPageClient({
             >
               Enviar
             </Button>
-          </form>
+          </Form>
         </SectionContainer>
       ) : null}
 
       {activeTab === "activities" ? (
-        <SectionContainer title="Historico de Atividades">
+        <SectionContainer title="Histórico de Atividades">
           {!lead.activities.length ? (
             <div className="text-sm text-neutral-muted">
               Nenhuma atividade registrada

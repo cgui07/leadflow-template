@@ -33,8 +33,8 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
           Redefinir senha
         </div>
         <div style="font-size: 15px; line-height: 1.6; color: ${emailColors.body}; margin: 0 0 24px;">
-          Recebemos uma solicitacao para redefinir a senha da sua conta LeadFlow.
-          Clique no botao abaixo para criar uma nova senha.
+          Recebemos uma solicitação para redefinir a senha da sua conta LeadFlow.
+          Clique no botão abaixo para criar uma nova senha.
         </div>
         <a
           href="${resetUrl}"
@@ -43,7 +43,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
           Redefinir minha senha
         </a>
         <div style="font-size: 13px; line-height: 1.6; color: ${emailColors.muted}; margin: 24px 0 0;">
-          Este link expira em 1 hora. Se voce nao solicitou essa alteracao, ignore este e-mail.
+          Este link expira em 1 hora. Se você não solicitou essa alteração, ignore este e-mail.
         </div>
       </div>
     `,
@@ -51,6 +51,6 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
 
   if (error) {
     console.error("[email] Failed to send password reset email:", error);
-    throw new Error("Falha ao enviar e-mail de redefinicao");
+    throw new Error("Falha ao enviar e-mail de redefinição");
   }
 }

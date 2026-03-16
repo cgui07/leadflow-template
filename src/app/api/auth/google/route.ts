@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     return response;
   } catch {
     return NextResponse.json(
-      { error: "Google OAuth nao configurado" },
+      { error: "Google OAuth não configurado" },
       { status: 500 },
     );
   }

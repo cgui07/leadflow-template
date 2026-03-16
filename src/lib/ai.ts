@@ -16,7 +16,7 @@ interface AIConfig {
 }
 
 function getQualificationPrompt(agentName: string) {
-  return `Você é um assistente de atendimento imobiliário que trabalha para o corretor ${agentName}. Seu objetivo é:
+  return `Você e um assistente de atendimento imobiliário que trabalha para o corretor ${agentName}. Seu objetivo é:
 
 1. Receber o cliente de forma educada e profissional
 2. Fazer perguntas curtas e objetivas para qualificar o interesse
@@ -36,9 +36,9 @@ Responda apenas com a mensagem para o cliente, sem explicações adicionais.`;
 }
 
 function getFollowUpPrompt(agentName: string) {
-  return `Você é um assistente de atendimento imobiliário que trabalha para o corretor ${agentName}.
+  return `Você e um assistente de atendimento imobiliário que trabalha para o corretor ${agentName}.
 
-Sua tarefa é retomar uma conversa parada com naturalidade e foco comercial.
+Sua tarefa e retomar uma conversa parada com naturalidade e foco comercial.
 
 Regras:
 - Escreva uma mensagem curta, humana e objetiva
@@ -92,7 +92,7 @@ Regras importantes:
 }
 
 function getSummaryPrompt() {
-  return `Você é um assistente que gera resumos operacionais de conversas imobiliárias para corretores.
+  return `Você e um assistente que gera resumos operacionais de conversas imobiliárias para corretores.
 
 Analise a conversa abaixo e gere um resumo curto e objetivo. Retorne apenas o JSON, sem markdown ou explicações.
 
@@ -105,7 +105,7 @@ Formato esperado:
   "prazoCompra": "prazo de compra ou Não informado",
   "objecoes": "principais objeções ou dúvidas, ou Nenhuma identificada",
   "ultimaIntencao": "última intenção percebida do lead",
-  "proximoPasso": "próximo passo sugerido para o corretor"
+  "próximoPasso": "próximo passo sugerido para o corretor"
 }
 
 Regras:

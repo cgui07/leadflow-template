@@ -77,7 +77,7 @@ export function TenantBrandPreview({ branding }: TenantBrandPreviewProps) {
 
         <div className="rounded-2xl border border-neutral-border p-4">
           <div className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-muted">
-            Navegacao
+            Navegação
           </div>
           <div className="space-y-2">
             <div

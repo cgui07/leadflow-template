@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (err instanceof SyntaxError) {
-      return error("Payload invalido");
+      return error("Payload inválido");
     }
 
     return handleError(err);
