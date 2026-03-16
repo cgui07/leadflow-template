@@ -48,7 +48,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       typeof body.content === "string" ? body.content.trim() : "";
 
     if (!content) {
-      return error("Mensagem obrigatoria", 400);
+      return error("Mensagem obrigatória", 400);
     }
 
     const conv = await prisma.conversation.findFirst({

@@ -16,17 +16,13 @@ export function LandingPage() {
         <LandingHeader
           brand={landingContent.brand}
           contactAction={landingContent.header.contactAction}
-          flowAction={landingContent.header.flowAction}
         />
-        <div className="grid flex-1 gap-10 py-10 sm:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
+        <div className="grid flex-1 gap-10 py-10 sm:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-12">
           <LandingHero content={landingContent.hero} />
           <LandingDashboardPreview content={landingContent.preview} />
         </div>
       </Container>
-      <Section
-        className="border-y border-neutral-border bg-white/70 backdrop-blur"
-        id={landingContent.process.id}
-      >
+      <Section className="border-y border-neutral-border bg-white/70 py-10 backdrop-blur sm:py-20">
         <LandingProcessSection content={landingContent.process} />
       </Section>
       <Section>

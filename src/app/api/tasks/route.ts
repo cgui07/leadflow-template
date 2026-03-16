@@ -28,15 +28,15 @@ export async function POST(req: NextRequest) {
     const dueAt = new Date(data.dueAt);
 
     if (!title) {
-      return error("Titulo obrigatorio");
+      return error("Título obrigatório");
     }
 
     if (Number.isNaN(dueAt.getTime())) {
-      return error("Data de vencimento invalida");
+      return error("Data de vencimento inválida");
     }
 
     if (data.type && (typeof data.type !== "string" || !isTaskType(data.type))) {
-      return error("Tipo de tarefa invalido", 400);
+      return error("Tipo de tarefa inválido", 400);
     }
 
     let leadId: string | null = null;
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (!lead) {
-        return error("Lead nao encontrado", 404);
+        return error("Lead não encontrado", 404);
       }
 
       leadId = lead.id;

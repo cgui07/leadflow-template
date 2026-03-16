@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { useSearchParams } from "next/navigation";
 import { PasswordField } from "@/components/forms";
 import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
 import { ShieldCheck, ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
 import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
@@ -18,7 +18,6 @@ export default function ResetPasswordPage() {
 }
 
 function ResetPasswordForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token")?.trim() || "";
 
@@ -45,6 +44,12 @@ function ResetPasswordForm() {
       try {
         const res = await fetch(
           `/api/auth/reset-password?token=${encodeURIComponent(token)}`,
+          {
+            cache: "no-store",
+            headers: {
+              "Cache-Control": "no-store",
+            },
+          },
         );
 
         if (!res.ok) {
@@ -105,7 +110,7 @@ function ResetPasswordForm() {
         return;
       }
 
-      router.push("/dashboard");
+      window.location.assign("/dashboard");
     } catch {
       setError("Erro de conexão");
     } finally {

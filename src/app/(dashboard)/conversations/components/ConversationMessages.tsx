@@ -15,7 +15,7 @@ function formatMessageTime(createdAt: string) {
 
 function getSenderLabel(sender: string) {
   if (sender === "bot") return "Bot";
-  if (sender === "agent") return "Voce";
+  if (sender === "agent") return "Você";
   return "Cliente";
 }
 
@@ -39,7 +39,7 @@ function MediaFallback({
     return (
       <div className="flex items-center gap-2">
         <FileVideo className="h-4 w-4 shrink-0" />
-        <span>{fileName || "Video enviado"}</span>
+        <span>{fileName || "Vídeo enviado"}</span>
       </div>
     );
   }
@@ -48,7 +48,7 @@ function MediaFallback({
     return (
       <div className="flex items-center gap-2">
         <FileAudio className="h-4 w-4 shrink-0" />
-        <span>{fileName || "Audio enviado"}</span>
+        <span>{fileName || "Áudio enviado"}</span>
       </div>
     );
   }

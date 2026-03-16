@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { PasswordField, TextField } from "@/components/forms";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-strength";
 import { PasswordStrengthMeter } from "@/components/forms/PasswordStrengthMeter";
@@ -38,7 +38,6 @@ interface RegisterFormState {
 }
 
 function RegisterForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get("token");
 
@@ -68,7 +67,12 @@ function RegisterForm() {
       return;
     }
 
-    fetch(`/api/auth/invite?token=${encodeURIComponent(inviteToken)}`)
+    fetch(`/api/auth/invite?token=${encodeURIComponent(inviteToken)}`, {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    })
       .then(async (res) => {
         if (!res.ok) throw new Error("invalid");
         return (await res.json()) as InviteInfo;
@@ -121,7 +125,7 @@ function RegisterForm() {
         return;
       }
 
-      router.push("/dashboard");
+      window.location.assign("/dashboard");
     } catch {
       setError("Erro de conexão");
     } finally {

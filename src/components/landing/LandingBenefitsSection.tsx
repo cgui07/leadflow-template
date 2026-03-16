@@ -20,6 +20,7 @@ export function LandingBenefitsSection({
     <div className="grid gap-6 sm:gap-8 lg:grid-cols-[0.9fr_1.1fr]">
       <div className="rounded-2xl border border-neutral-border bg-neutral-ink p-6 text-white shadow-hero-soft sm:rounded-[2rem] sm:p-8">
         <LandingSectionIntro
+          className="mx-auto text-center sm:mx-0 sm:text-left"
           description={content.description}
           descriptionClassName="text-neutral-muted"
           eyebrow={content.eyebrow}

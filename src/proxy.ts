@@ -18,6 +18,11 @@ const PUBLIC_PREFIXES = [
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const token = request.cookies.get("leadflow_token")?.value;
+
+  if (pathname === "/" && token) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
 
   if (PUBLIC_PATHS.has(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
     return NextResponse.next();
@@ -26,8 +31,6 @@ export function proxy(request: NextRequest) {
   if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) {
     return NextResponse.next();
   }
-
-  const token = request.cookies.get("leadflow_token")?.value;
 
   if (!token) {
     const loginUrl = new URL("/login", request.url);

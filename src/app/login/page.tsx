@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { PasswordField, TextField } from "@/components/forms";
 
 export default function LoginPage() {
@@ -15,7 +15,6 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
   const authError = searchParams.get("error");
@@ -53,7 +52,7 @@ function LoginForm() {
         return;
       }
 
-      router.push(redirect);
+      window.location.assign(redirect);
     } catch {
       setError("Erro de conexão");
     } finally {

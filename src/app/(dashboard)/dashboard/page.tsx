@@ -93,7 +93,7 @@ export default function DashboardPage() {
   const title = useBrandText("dashboardTitle", "Dashboard");
   const subtitle = useBrandText(
     "dashboardSubtitle",
-    "Visao geral dos seus leads e atendimentos",
+    "Visão geral dos seus leads e atendimentos",
   );
   const showAttentionQueue = useFeatureFlag("attentionQueue");
 
@@ -127,7 +127,7 @@ export default function DashboardPage() {
           trend={{ value: kpis?.qualifiedLeads || 0, label: "qualificados" }}
         />
         <KpiCard
-          label="Conversas nao lidas"
+          label="Conversas não lidas"
           value={String(kpis?.unreadConversations || 0)}
           icon={<MessageSquare className="h-5 w-5" />}
           iconVariant="purple"
@@ -160,7 +160,7 @@ export default function DashboardPage() {
           ) : (
             <EmptyState
               title="Nenhum lead ainda"
-              description="Seus leads aparecerao aqui quando comecarem a chegar via WhatsApp ou quando voce criar manualmente."
+              description="Seus leads aparecerão aqui quando começarem a chegar via WhatsApp ou quando você criar manualmente."
             />
           )}
         </SectionContainer>

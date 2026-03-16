@@ -24,7 +24,7 @@ export async function GET(
       },
     });
 
-    if (!lead) return error("Lead nao encontrado", 404);
+    if (!lead) return error("Lead não encontrado", 404);
 
     return json(lead);
   } catch (err) {
@@ -44,13 +44,13 @@ export async function PATCH(
     const existing = await prisma.lead.findFirst({
       where: { id, userId: user.id },
     });
-    if (!existing) return error("Lead nao encontrado", 404);
+    if (!existing) return error("Lead não encontrado", 404);
 
     if (
       data.status &&
       (typeof data.status !== "string" || !isLeadStatus(data.status))
     ) {
-      return error("Status de lead invalido", 400);
+      return error("Status de lead inválido", 400);
     }
 
     if (data.pipelineStageId !== undefined && data.pipelineStageId !== null) {
@@ -58,7 +58,7 @@ export async function PATCH(
         typeof data.pipelineStageId !== "string" ||
         !data.pipelineStageId.trim()
       ) {
-        return error("Estagio invalido", 400);
+        return error("Estágio inválido", 400);
       }
 
       const stage = await prisma.pipelineStage.findFirst({
@@ -67,7 +67,7 @@ export async function PATCH(
       });
 
       if (!stage) {
-        return error("Estagio nao encontrado", 404);
+        return error("Estágio não encontrado", 404);
       }
     }
 
@@ -151,7 +151,7 @@ export async function DELETE(
     const existing = await prisma.lead.findFirst({
       where: { id, userId: user.id },
     });
-    if (!existing) return error("Lead nao encontrado", 404);
+    if (!existing) return error("Lead não encontrado", 404);
 
     await prisma.lead.delete({ where: { id } });
 

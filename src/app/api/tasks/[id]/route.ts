@@ -13,7 +13,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (!existing) return error("Tarefa não encontrada", 404);
 
     if (data.status && (typeof data.status !== "string" || !isTaskStatus(data.status))) {
-      return error("Status de tarefa invalido", 400);
+      return error("Status de tarefa inválido", 400);
     }
 
     if (
@@ -21,7 +21,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       data.dueAt !== null &&
       Number.isNaN(new Date(data.dueAt).getTime())
     ) {
-      return error("Data de vencimento invalida", 400);
+      return error("Data de vencimento inválida", 400);
     }
 
     const task = await prisma.task.update({

@@ -1,16 +1,13 @@
-import { ButtonLink } from "@/components/ui";
-import { LandingMobileMenu } from "./LandingMobileMenu";
+import { ButtonLink, WhatsAppIcon } from "@/components/ui";
 import type { LandingAction, LandingBrand } from "@/features/landing/content";
 
 interface LandingHeaderProps {
   brand: LandingBrand;
-  flowAction: LandingAction;
   contactAction: LandingAction;
 }
 
 export function LandingHeader({
   brand,
-  flowAction,
   contactAction,
 }: LandingHeaderProps) {
   return (
@@ -24,27 +21,15 @@ export function LandingHeader({
             {brand.description}
           </div>
         </div>
-        <div className="hidden items-center gap-3 sm:flex">
-          <ButtonLink
-            className="h-10 rounded-full bg-white/80 px-4 text-xs shadow-sm backdrop-blur hover:bg-white"
-            href={flowAction.href}
-            variant="outline"
-          >
-            {flowAction.label}
-          </ButtonLink>
-          <ButtonLink
-            className="h-10 rounded-full bg-neutral-ink px-4 text-xs shadow-none hover:bg-neutral-deep"
-            href={contactAction.href}
-            rel={contactAction.external ? "noreferrer" : undefined}
-            target={contactAction.external ? "_blank" : undefined}
-          >
-            {contactAction.label}
-          </ButtonLink>
-        </div>
-        <LandingMobileMenu
-          contactAction={contactAction}
-          flowAction={flowAction}
-        />
+        <ButtonLink
+          className="h-11 rounded-full bg-[#25D366] px-4 text-xs text-white shadow-none hover:bg-[#1fbe5a] focus-visible:ring-[#25D366] sm:px-5"
+          icon={<WhatsAppIcon className="h-4 w-4 shrink-0" />}
+          href={contactAction.href}
+          rel={contactAction.external ? "noreferrer" : undefined}
+          target={contactAction.external ? "_blank" : undefined}
+        >
+          {contactAction.label}
+        </ButtonLink>
       </div>
     </div>
   );

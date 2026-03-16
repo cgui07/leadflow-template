@@ -1,4 +1,6 @@
-import { ButtonLink, Card, CardContent } from "@/components/ui";
+import { Card, CardContent } from "@/components/ui";
+import { LandingHeroSignals } from "./LandingHeroSignals";
+import { LandingContactAction } from "./LandingContactAction";
 import type {
   LandingHeroContent,
   LandingHighlight,
@@ -15,35 +17,30 @@ interface HeroHighlightCardProps {
 export function LandingHero({ content }: LandingHeroProps) {
   return (
     <div className="max-w-2xl">
-      <div className="inline-flex rounded-full border border-teal-dark/15 bg-white/85 px-3 py-1.5 text-xs font-medium text-teal-deep shadow-sm backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
-        {content.eyebrow}
+      <div className="mb-6 sm:mb-8">
+        <LandingHeroSignals signals={content.signals} />
       </div>
-      <div className="font-display mt-6 text-3xl font-semibold leading-[1.08] tracking-tight text-neutral-ink sm:mt-8 sm:text-5xl lg:text-6xl">
+      <div className="flex justify-center sm:justify-start">
+        <div className="inline-flex rounded-full border border-teal-dark/15 bg-white/85 px-3 py-1.5 text-center text-xs font-medium text-teal-deep shadow-sm backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
+          {content.eyebrow}
+        </div>
+      </div>
+      <div className="font-display mt-6 text-center text-3xl font-semibold leading-[1.08] tracking-tight text-neutral-ink sm:mt-8 sm:text-left sm:text-5xl lg:text-6xl">
         {content.title}
       </div>
-      <div className="font-body mt-5 max-w-xl text-base leading-7 text-neutral sm:mt-6 sm:text-lg sm:leading-8 lg:text-xl">
+      <div className="font-body mx-auto mt-5 max-w-xl text-center text-base leading-7 text-neutral sm:mx-0 sm:mt-6 sm:text-left sm:text-lg sm:leading-8 lg:text-xl">
         {content.description}
       </div>
-      <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:gap-4">
-        <ButtonLink
-          className="rounded-full bg-neutral-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-neutral-deep"
-          href={content.primaryAction.href}
-          rel={content.primaryAction.external ? "noreferrer" : undefined}
+      <div className="mt-8 sm:mt-10">
+        <LandingContactAction
+          action={content.primaryAction}
+          align="mobile-center"
+          buttonClassName="w-full rounded-full bg-neutral-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-neutral-deep sm:w-auto"
+          noteClassName="max-w-lg"
           size="lg"
-          target={content.primaryAction.external ? "_blank" : undefined}
-        >
-          {content.primaryAction.label}
-        </ButtonLink>
-        <ButtonLink
-          className="rounded-full border-neutral-border bg-white/80 text-neutral-dark shadow-sm backdrop-blur hover:bg-white"
-          href={content.secondaryAction.href}
-          size="lg"
-          variant="outline"
-        >
-          {content.secondaryAction.label}
-        </ButtonLink>
+        />
       </div>
-      <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] gap-3 sm:mt-12 sm:gap-4">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4 xl:mt-12">
         {content.highlights.map((highlight) => (
           <HeroHighlightCard highlight={highlight} key={highlight.label} />
         ))}
@@ -55,14 +52,14 @@ export function LandingHero({ content }: LandingHeroProps) {
 function HeroHighlightCard({ highlight }: HeroHighlightCardProps) {
   return (
     <Card
-      className="min-h-[7.5rem] rounded-2xl border-neutral-border bg-white/90 shadow-sm backdrop-blur sm:min-h-[8.5rem] sm:rounded-3xl"
+      className="rounded-2xl border-neutral-border bg-white/90 shadow-sm backdrop-blur sm:rounded-3xl"
       noPadding
     >
-      <CardContent className="flex min-h-[7.5rem] flex-col justify-between p-4 sm:min-h-[8.5rem] sm:p-6">
-        <div className="text-[10px] text-neutral-muted sm:text-sm">
+      <CardContent className="flex min-h-[5.5rem] flex-col items-center justify-between p-4 text-center sm:min-h-[6.5rem] sm:items-start sm:p-5 sm:text-left">
+        <div className="text-[10px] text-neutral-muted sm:text-xs">
           {highlight.label}
         </div>
-        <div className="font-display text-lg font-semibold leading-tight text-neutral-ink sm:text-2xl lg:text-[2rem]">
+        <div className="font-display text-lg font-semibold leading-tight text-neutral-ink sm:text-[1.75rem]">
           {highlight.value}
         </div>
       </CardContent>

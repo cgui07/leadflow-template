@@ -44,7 +44,7 @@ export function LandingDashboardPreview({
 }: LandingDashboardPreviewProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-neutral-border bg-neutral-ink p-3 text-white shadow-hero sm:rounded-[2rem] sm:p-4">
-      <div className="grid gap-3 sm:gap-4 lg:grid-cols-[0.92fr_1.08fr]">
+      <div className="grid gap-3 sm:gap-4 lg:items-start lg:grid-cols-[0.8fr_1.2fr] xl:grid-cols-[0.78fr_1.22fr]">
         <LeadPriorityPanel
           priorityLeads={content.priorityLeads}
           summary={content.summary}
@@ -67,7 +67,7 @@ function LeadPriorityPanel({
   priorityLeads,
 }: LeadPriorityPanelProps) {
   return (
-    <div className="rounded-xl bg-white/6 p-3 sm:rounded-3xl sm:p-4">
+    <div className="self-start rounded-xl bg-white/6 p-3 sm:rounded-3xl sm:p-4">
       <div className="text-[10px] uppercase tracking-[0.24em] text-neutral-muted sm:text-xs">
         {summary.label}
       </div>
@@ -144,7 +144,7 @@ function ConversationPreview({ conversation }: ConversationPreviewProps) {
           <div className="text-[10px] uppercase tracking-[0.24em] text-neutral sm:text-xs">
             {conversation.profileLabel}
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4 sm:gap-3">
+          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:mt-4 sm:gap-3.5 lg:grid-cols-1">
             {conversation.profileFields.map((field) => (
               <ProfileFieldCard field={field} key={field.label} />
             ))}
@@ -178,11 +178,13 @@ function ConversationBubble({ entry }: ConversationBubbleProps) {
 
 function ProfileFieldCard({ field }: ProfileFieldCardProps) {
   return (
-    <div className="rounded-xl bg-neutral-surface p-2.5 sm:rounded-2xl sm:p-3">
-      <div className="text-[10px] text-neutral-muted sm:text-xs">
+    <div className="rounded-xl bg-neutral-surface p-2.5 sm:min-h-[7rem] sm:rounded-2xl sm:p-3.5 lg:min-h-0">
+      <div className="text-[10px] leading-4 text-neutral-muted sm:text-[11px]">
         {field.label}
       </div>
-      <div className="mt-0.5 text-sm font-semibold sm:mt-1">{field.value}</div>
+      <div className="mt-1 text-sm font-semibold leading-5 tracking-tight text-neutral-ink sm:text-[1.05rem] sm:leading-6 lg:mt-2">
+        {field.value}
+      </div>
     </div>
   );
 }

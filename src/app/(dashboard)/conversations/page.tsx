@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { useFetch } from "@/lib/hooks";
 import { MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -327,23 +328,23 @@ export default function ConversationsPage() {
       title="Conversas"
       subtitle={subtitle}
     >
-      <div className="hidden h-[calc(100vh-13rem)] overflow-hidden rounded-xl border border-neutral-border bg-white md:flex">
-        <div className="w-80 shrink-0 border-r border-neutral-border">
+      <div className="flex h-[calc(100vh-13rem)] overflow-hidden rounded-xl border border-neutral-border bg-white">
+        <div
+          className={cn(
+            "w-full shrink-0 border-r border-neutral-border md:block md:w-80",
+            selected ? "hidden" : "block",
+          )}
+        >
           {conversationList}
         </div>
-        <div className="flex flex-1 flex-col">{chatPanel}</div>
-      </div>
-
-      <div className="md:hidden">
-        {!selected ? (
-          <div className="h-[calc(100vh-13rem)] overflow-hidden rounded-xl border border-neutral-border bg-white">
-            {conversationList}
-          </div>
-        ) : (
-          <div className="flex h-[calc(100vh-13rem)] flex-col overflow-hidden rounded-xl border border-neutral-border bg-white">
-            {chatPanel}
-          </div>
-        )}
+        <div
+          className={cn(
+            "flex min-w-0 flex-1 flex-col md:flex",
+            selected ? "flex" : "hidden",
+          )}
+        >
+          {chatPanel}
+        </div>
       </div>
     </PageContainer>
   );

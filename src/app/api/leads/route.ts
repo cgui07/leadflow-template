@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     const phone = typeof data.phone === "string" ? data.phone.trim() : "";
 
     if (!name || !phone) {
-      return error("Nome e telefone sao obrigatorios", 400);
+      return error("Nome e telefone são obrigatórios", 400);
     }
 
     const lead = await prisma.lead.create({
