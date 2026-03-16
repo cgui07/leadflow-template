@@ -15,6 +15,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "LeadFlow",
   description: "Plataforma de gestao de leads e pipeline de vendas",
+  icons: {
+    icon: [
+      { url: "/favicon.ico?v=lead-logo-1" },
+      { url: "/icon.png?v=lead-logo-1", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico?v=lead-logo-1",
+    apple: "/apple-icon.png?v=lead-logo-1",
+  },
 };
 
 export default function RootLayout({

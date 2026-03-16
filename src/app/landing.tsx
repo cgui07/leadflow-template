@@ -29,7 +29,10 @@ export function LandingPage() {
         <LandingBenefitsSection content={landingContent.benefits} />
       </Section>
       <Section className="border-t border-neutral-border" spacing="compact">
-        <LandingFooter content={landingContent.footer} />
+        <LandingFooter
+          brand={landingContent.brand}
+          content={landingContent.footer}
+        />
       </Section>
     </div>
   );

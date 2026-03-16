@@ -1,5 +1,8 @@
 import { appColors } from "../../tailwind.config";
 
+export const DEFAULT_BRAND_NAME = "LeadFlow";
+export const DEFAULT_BRAND_LOGO_URL = "/lead-logo.png";
+
 export const BRAND_COLOR_KEYS = [
   "blue",
   "purple",
@@ -149,8 +152,8 @@ export const DEFAULT_CUSTOM_TEXTS: Record<TenantTextKey, string> = {
 };
 
 export const DEFAULT_BRANDING: TenantBranding = {
-  name: "LeadFlow",
-  logoUrl: null,
+  name: DEFAULT_BRAND_NAME,
+  logoUrl: DEFAULT_BRAND_LOGO_URL,
   colorPrimary: "blue",
   colorSecondary: "purple",
   customTexts: { ...DEFAULT_CUSTOM_TEXTS },

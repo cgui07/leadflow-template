@@ -1,10 +1,14 @@
 import { cn } from "@/lib/utils";
-import { getBrandChipClass, type BrandColorKey } from "@/lib/branding";
+import { BrandLogo } from "@/components/ui";
+import {
+  getBrandChipClass,
+  type TenantBranding,
+} from "@/lib/branding";
+
+type AuthBrandIdentity = Pick<TenantBranding, "colorPrimary" | "logoUrl" | "name">;
 
 interface AuthBrandHeaderProps {
-  color?: BrandColorKey;
-  logoUrl?: string | null;
-  name: string;
+  branding: AuthBrandIdentity;
 }
 
 function getBrandInitials(name: string): string {
@@ -21,25 +25,24 @@ function getBrandInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
-export function AuthBrandHeader({
-  color = "blue",
-  logoUrl,
-  name,
-}: AuthBrandHeaderProps) {
+export function AuthBrandHeader({ branding }: AuthBrandHeaderProps) {
+  const { colorPrimary, logoUrl, name } = branding;
+
   return (
     <div className="flex items-center gap-2">
       {logoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <BrandLogo
           src={logoUrl}
-          alt={name}
+          alt={`${name} logo`}
+          width={32}
+          height={32}
           className="h-8 w-8 rounded-lg object-contain"
         />
       ) : (
         <div
           className={cn(
             "flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white",
-            getBrandChipClass(color),
+            getBrandChipClass(colorPrimary),
           )}
         >
           {getBrandInitials(name)}

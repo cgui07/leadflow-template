@@ -5,6 +5,7 @@ import { AuthAlert } from "./AuthAlert";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useState, type FormEvent } from "react";
+import { DEFAULT_BRANDING } from "@/lib/branding";
 import { getResponseErrorMessage } from "../utils";
 import { AuthBrandHeader } from "./AuthBrandHeader";
 import { PasswordField, TextField } from "@/components/forms";
@@ -52,7 +53,7 @@ export function LoginForm({ initialError, redirectPath }: LoginFormProps) {
   return (
     <div>
       <div className="mb-10">
-        <AuthBrandHeader name="LeadFlow" color="blue" />
+        <AuthBrandHeader branding={DEFAULT_BRANDING} />
         <div className="mt-3 text-sm text-gray-smoke">
           Entre na sua conta para acessar a plataforma
         </div>

@@ -13,4 +13,5 @@ export { Tabs } from "./Tabs";
 export { EmptyState } from "./EmptyState";
 export { LoadingState } from "./LoadingState";
 export { ActionMenu } from "./ActionMenu";
+export { BrandLogo } from "./BrandLogo";
 export { WhatsAppIcon } from "./WhatsAppIcon";

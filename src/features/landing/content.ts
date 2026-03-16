@@ -7,6 +7,7 @@ export interface LandingAction {
 
 export interface LandingBrand {
   description: string;
+  logoUrl?: string | null;
   name: string;
 }
 
@@ -155,6 +156,7 @@ const contactHref =
 export const landingContent = {
   brand: {
     name: "LeadFlow",
+    logoUrl: "/lead-logo.png",
     description: "Atendimento e qualificacao de leads para corretores autonomos.",
   },
   header: {

@@ -90,11 +90,7 @@ export function RegisterForm({ invite, inviteToken }: RegisterFormProps) {
   return (
     <div>
       <div className="mb-8">
-        <AuthBrandHeader
-          name={branding.name}
-          logoUrl={branding.logoUrl}
-          color={branding.colorPrimary}
-        />
+        <AuthBrandHeader branding={branding} />
         <div className="mt-3 text-sm text-gray-smoke">
           Crie sua conta para acessar a plataforma
         </div>

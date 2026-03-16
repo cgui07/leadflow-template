@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui";
+import { Badge, BrandLogo } from "@/components/ui";
 import {
   BRAND_COLOR_LABELS,
   TENANT_FEATURE_FLAGS,
@@ -36,10 +36,11 @@ export function TenantBrandPreview({ branding }: TenantBrandPreviewProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             {branding.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <BrandLogo
                 src={branding.logoUrl}
-                alt={branding.name}
+                alt={`${branding.name} logo`}
+                width={48}
+                height={48}
                 className="h-12 w-12 rounded-2xl bg-white-90 object-contain p-2"
               />
             ) : (
