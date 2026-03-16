@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import {
+  Form,
   TextField,
   SelectField,
   DateField,
@@ -212,9 +213,9 @@ function ActionCard({
     <div
       className={`rounded-lg border p-3 sm:p-4 ${
         overdue
-          ? "border-red-blush bg-red-pale/50"
+          ? "border-red-blush bg-red-pale-50"
           : finished
-            ? "border-neutral-line bg-neutral-surface/50"
+            ? "border-neutral-line bg-neutral-surface-50"
             : "border-neutral-border"
       }`}
     >
@@ -515,7 +516,7 @@ export function LeadActionsSection({
         title={editingId ? "Editar ação" : "Nova ação"}
         size="md"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <Form onSubmit={handleSubmit} className="space-y-4">
           {!editingId && (
             <SelectField
               label="Tipo"
@@ -571,7 +572,7 @@ export function LeadActionsSection({
               {editingId ? "Salvar" : "Criar"}
             </Button>
           </div>
-        </form>
+        </Form>
       </Modal>
     </>
   );

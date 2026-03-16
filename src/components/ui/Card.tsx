@@ -1,13 +1,39 @@
 import { cn } from "@/lib/utils";
+import type { MouseEventHandler, ReactNode } from "react";
 
 interface CardProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   hoverable?: boolean;
-  onClick?: () => void;
-  header?: React.ReactNode;
-  footer?: React.ReactNode;
+  onClick?: MouseEventHandler<HTMLDivElement>;
+  header?: ReactNode;
+  footer?: ReactNode;
   noPadding?: boolean;
+}
+
+interface CardSectionProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function CardHeader({ children, className }: CardSectionProps) {
+  return (
+    <div className={cn("border-b border-neutral-pale px-6 py-4", className)}>
+      {children}
+    </div>
+  );
+}
+
+export function CardContent({ children, className }: CardSectionProps) {
+  return <div className={className}>{children}</div>;
+}
+
+export function CardFooter({ children, className }: CardSectionProps) {
+  return (
+    <div className={cn("border-t border-neutral-pale px-6 py-4", className)}>
+      {children}
+    </div>
+  );
 }
 
 export function Card({
@@ -23,19 +49,15 @@ export function Card({
     <div
       onClick={onClick}
       className={cn(
-        "bg-white rounded-xl border border-neutral-border",
-        hoverable && "hover:border-neutral-line hover:shadow-sm transition-all",
+        "rounded-xl border border-neutral-border bg-white",
+        hoverable && "transition-all hover:border-neutral-line hover:shadow-sm",
         onClick && "cursor-pointer",
-        className
+        className,
       )}
     >
-      {header && (
-        <div className="px-6 py-4 border-b border-neutral-pale">{header}</div>
-      )}
-      <div className={cn(!noPadding && "p-6")}>{children}</div>
-      {footer && (
-        <div className="px-6 py-4 border-t border-neutral-pale">{footer}</div>
-      )}
+      {header ? <CardHeader>{header}</CardHeader> : null}
+      <CardContent className={cn(!noPadding && "p-6")}>{children}</CardContent>
+      {footer ? <CardFooter>{footer}</CardFooter> : null}
     </div>
   );
 }

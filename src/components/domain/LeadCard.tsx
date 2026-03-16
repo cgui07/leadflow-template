@@ -1,8 +1,12 @@
 import { cn } from "@/lib/utils";
+import type { Lead } from "@/types";
 import { Badge } from "@/components/ui/Badge";
-import type { Lead, LeadStatus } from "@/types";
-import { Building2, Mail, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { ActionMenu } from "@/components/ui/ActionMenu";
+import {
+  LEAD_STATUS_BADGE_VARIANTS,
+  LEAD_STATUS_LABELS,
+} from "@/lib/lead-status";
 
 interface LeadCardProps {
   lead: Lead;
@@ -12,22 +16,6 @@ interface LeadCardProps {
   className?: string;
 }
 
-const statusConfig: Record<
-  LeadStatus,
-  {
-    label: string;
-    variant: "default" | "success" | "warning" | "error" | "info" | "purple";
-  }
-> = {
-  new: { label: "Novo", variant: "info" },
-  contacted: { label: "Contatado", variant: "default" },
-  qualified: { label: "Qualificado", variant: "purple" },
-  proposal: { label: "Proposta", variant: "warning" },
-  negotiation: { label: "Negociação", variant: "warning" },
-  won: { label: "Ganho", variant: "success" },
-  lost: { label: "Perdido", variant: "error" },
-};
-
 export function LeadCard({
   lead,
   onClick,
@@ -35,8 +23,6 @@ export function LeadCard({
   onDelete,
   className,
 }: LeadCardProps) {
-  const status = statusConfig[lead.status];
-
   const formattedValue = lead.value
     ? new Intl.NumberFormat("pt-BR", {
         style: "currency",
@@ -67,10 +53,10 @@ export function LeadCard({
           <div className="text-sm font-medium text-neutral-ink truncate">
             {lead.name}
           </div>
-          {lead.company && (
+          {lead.region && (
             <div className="flex items-center gap-1 text-xs text-neutral mt-0.5">
-              <Building2 className="h-3 w-3" />
-              {lead.company}
+              <MapPin className="h-3 w-3" />
+              {lead.region}
             </div>
           )}
         </div>
@@ -91,8 +77,8 @@ export function LeadCard({
         )}
       </div>
       <div className="flex items-center justify-between pt-1">
-        <Badge variant={status.variant} size="sm" dot>
-          {status.label}
+        <Badge variant={LEAD_STATUS_BADGE_VARIANTS[lead.status]} size="sm" dot>
+          {LEAD_STATUS_LABELS[lead.status]}
         </Badge>
         {formattedValue && (
           <div className="text-xs font-semibold text-neutral-dark">

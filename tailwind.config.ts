@@ -8,6 +8,41 @@ export const appColors = {
   warning:   "#eab308",
   danger:    "#ef4444",
   info:      "#38bdf8",
+  "primary-10": "#3366ff1a",
+  "primary-70": "#3366ffb3",
+  "success-20": "#22c55e33",
+  "warning-5": "#eab3080d",
+  "warning-30": "#eab3084d",
+  "danger-10": "#ef44441a",
+  "info-10": "#38bdf81a",
+  "black-50": "#00000080",
+  "white-5": "#ffffff0d",
+  "white-6": "#ffffff0f",
+  "white-7": "#ffffff12",
+  "white-8": "#ffffff14",
+  "white-10": "#ffffff1a",
+  "white-15": "#ffffff26",
+  "white-20": "#ffffff33",
+  "white-35": "#ffffff59",
+  "white-55": "#ffffff8c",
+  "white-70": "#ffffffb3",
+  "white-78": "#ffffffc7",
+  "white-85": "#ffffffd9",
+  "white-90": "#ffffffe6",
+  "white-95": "#fffffff2",
+  "blue-ice-60": "#bfdbfe99",
+  "blue-ice-70": "#bfdbfeb3",
+  "blue-ice-80": "#bfdbfecc",
+  "green-mint-10": "#86efac1a",
+  "green-mint-40": "#86efac66",
+  "green-emerald-18": "#10b9812e",
+  "orange-amber-15": "#f59e0b26",
+  "yellow-butter-12": "#fef08a1f",
+  "teal-dark-15": "#0f766e26",
+  "red-pale-50": "#fef2f280",
+  "neutral-surface-50": "#f8fafc80",
+  whatsapp: "#25D366",
+  "whatsapp-dark": "#1fbe5a",
 
   blue: {
     DEFAULT:  "#3b82f6",
@@ -155,6 +190,8 @@ export const appBoxShadows = {
 export const appBackgroundImages = {
   "landing-hero":
     "radial-gradient(circle at top left, rgba(15,118,110,0.18), transparent 34%), radial-gradient(circle at top right, rgba(202,138,4,0.18), transparent 28%), linear-gradient(180deg, #fffbf0 0%, #ffffff 46%, #f5f5f5 100%)",
+  "landing-flow-journey":
+    "radial-gradient(circle at top left, rgba(103,232,249,0.16), transparent 26%), radial-gradient(circle at bottom right, rgba(250,204,21,0.18), transparent 30%), linear-gradient(180deg, #0f172a 0%, #111827 100%)",
 } as const;
 
 const config: Config = {

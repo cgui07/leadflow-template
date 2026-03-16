@@ -1,31 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  createGoogleAuthorizationRequest,
+  GOOGLE_OAUTH_COOKIE_MAX_AGE_SECONDS,
+  GOOGLE_OAUTH_REDIRECT_COOKIE,
+  GOOGLE_OAUTH_STATE_COOKIE,
+} from "@/features/auth/oauth";
 
 export async function GET(req: NextRequest) {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
+  try {
+    const { authorizationUrl, redirectPath, state } =
+      createGoogleAuthorizationRequest({
+        origin: req.nextUrl.origin,
+        redirect: req.nextUrl.searchParams.get("redirect"),
+      });
+    const response = NextResponse.redirect(authorizationUrl);
+    const secure = process.env.NODE_ENV === "production";
 
-  if (!clientId) {
+    response.cookies.set(GOOGLE_OAUTH_STATE_COOKIE, state, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure,
+      maxAge: GOOGLE_OAUTH_COOKIE_MAX_AGE_SECONDS,
+      path: "/",
+    });
+    response.cookies.set(GOOGLE_OAUTH_REDIRECT_COOKIE, redirectPath, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure,
+      maxAge: GOOGLE_OAUTH_COOKIE_MAX_AGE_SECONDS,
+      path: "/",
+    });
+
+    return response;
+  } catch {
     return NextResponse.json(
       { error: "Google OAuth não configurado" },
       { status: 500 },
     );
   }
-
-  const redirect = req.nextUrl.searchParams.get("redirect") || "/dashboard";
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
-  const callbackUrl = new URL("/api/auth/google/callback", appUrl);
-
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: callbackUrl.toString(),
-    response_type: "code",
-    scope: "openid email profile",
-    access_type: "offline",
-    prompt: "consent",
-    state: redirect,
-  });
-
-  const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
-
-  return NextResponse.redirect(googleAuthUrl);
 }

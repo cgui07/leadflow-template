@@ -1,5 +1,8 @@
 import { appColors } from "../../tailwind.config";
 
+export const DEFAULT_BRAND_NAME = "LeadFlow";
+export const DEFAULT_BRAND_LOGO_URL = "/lead-logo.png";
+
 export const BRAND_COLOR_KEYS = [
   "blue",
   "purple",
@@ -10,6 +13,14 @@ export const BRAND_COLOR_KEYS = [
 ] as const;
 
 export type BrandColorKey = (typeof BRAND_COLOR_KEYS)[number];
+export const BRAND_COLOR_LABELS: Record<BrandColorKey, string> = {
+  blue: "Azul",
+  purple: "Roxo",
+  teal: "Teal",
+  orange: "Laranja",
+  pink: "Rosa",
+  indigo: "Indigo",
+};
 export const TENANT_TEXT_FIELDS = [
   {
     key: "dashboardTitle",
@@ -141,13 +152,21 @@ export const DEFAULT_CUSTOM_TEXTS: Record<TenantTextKey, string> = {
 };
 
 export const DEFAULT_BRANDING: TenantBranding = {
-  name: "LeadFlow",
-  logoUrl: null,
+  name: DEFAULT_BRAND_NAME,
+  logoUrl: DEFAULT_BRAND_LOGO_URL,
   colorPrimary: "blue",
   colorSecondary: "purple",
   customTexts: { ...DEFAULT_CUSTOM_TEXTS },
   featureFlags: { ...DEFAULT_FEATURE_FLAGS },
 };
+
+export function createDefaultBranding(): TenantBranding {
+  return {
+    ...DEFAULT_BRANDING,
+    customTexts: { ...DEFAULT_CUSTOM_TEXTS },
+    featureFlags: { ...DEFAULT_FEATURE_FLAGS },
+  };
+}
 
 export function isBrandColorKey(value: string): value is BrandColorKey {
   return BRAND_COLOR_KEYS.includes(value as BrandColorKey);
@@ -198,7 +217,7 @@ export function sanitizeTenantFeatureFlags(
 
 export function buildBranding(input?: BrandingInput | null): TenantBranding {
   if (!input) {
-    return { ...DEFAULT_BRANDING };
+    return createDefaultBranding();
   }
 
   return {

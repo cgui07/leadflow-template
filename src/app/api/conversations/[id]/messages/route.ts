@@ -1,110 +1,63 @@
-import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
-import { json, error, requireAuth, handleError } from "@/lib/api";
-import { getWhatsAppConfig, resolveSendTarget } from "@/lib/whatsapp";
+import { error, handleError, json, requireAuth } from "@/lib/api";
+import {
+  listConversationMessages,
+  sendConversationMessage,
+} from "@/features/conversations/server";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await requireAuth();
     const { id } = await params;
-    const url = req.nextUrl;
-    const cursor = url.searchParams.get("cursor");
-    const limit = parseInt(url.searchParams.get("limit") || "50");
-
-    const conv = await prisma.conversation.findFirst({
-      where: { id, lead: { userId: user.id } },
+    const cursor = req.nextUrl.searchParams.get("cursor");
+    const limit = Number.parseInt(req.nextUrl.searchParams.get("limit") || "50", 10);
+    const messages = await listConversationMessages(user.id, id, {
+      cursor,
+      limit,
     });
-    if (!conv) return error("Conversa não encontrada", 404);
-
-    const messages = await prisma.message.findMany({
-      where: { conversationId: id },
-      orderBy: { createdAt: "desc" },
-      take: limit,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-    });
-
-    if (conv.unreadCount > 0) {
-      await prisma.conversation.update({
-        where: { id },
-        data: { unreadCount: 0 },
-      });
-    }
 
     return json(messages);
   } catch (err) {
+    if (err instanceof Error && err.message === "CONVERSATION_NOT_FOUND") {
+      return error("Conversa não encontrada", 404);
+    }
+
     return handleError(err);
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await requireAuth();
     const { id } = await params;
-    const { content } = await req.json();
-
-    const conv = await prisma.conversation.findFirst({
-      where: { id, lead: { userId: user.id } },
-      include: { lead: { include: { user: { include: { settings: true } } } } },
-    });
-    if (!conv) return error("Conversa não encontrada", 404);
-
-    if (conv.status === "bot") {
-      await prisma.conversation.update({
-        where: { id },
-        data: { status: "human" },
-      });
-    }
-
-    const message = await prisma.message.create({
-      data: {
-        conversationId: id,
-        direction: "outbound",
-        sender: "agent",
-        content,
-        type: "text",
-        status: "sent",
-      },
-    });
-
-    await prisma.conversation.update({
-      where: { id },
-      data: { lastMessageAt: new Date() },
-    });
-
-    await prisma.lead.update({
-      where: { id: conv.leadId },
-      data: { lastContactAt: new Date() },
-    });
-
-    const settings = conv.lead.user.settings;
-    if (settings?.whatsappPhoneId) {
-      try {
-        const { sendWhatsAppMessage } = await import("@/lib/whatsapp");
-        const replyJid = resolveSendTarget(conv.whatsappChatId, conv.lead.phone);
-        if (!replyJid) {
-          throw new Error(`Cannot resolve WhatsApp recipient JID for conversation ${conv.id}`);
-        }
-
-        const wa = await sendWhatsAppMessage(
-          getWhatsAppConfig(settings.whatsappPhoneId),
-          replyJid,
-          content
-        );
-        await prisma.message.update({
-          where: { id: message.id },
-          data: { whatsappMsgId: wa.key?.id ?? wa.messages?.[0]?.id },
-        });
-      } catch (e) {
-        console.error("WhatsApp send failed:", e);
-        await prisma.message.update({
-          where: { id: message.id },
-          data: { status: "failed" },
-        });
-      }
-    }
+    const message = await sendConversationMessage(
+      user.id,
+      id,
+      (await req.json()) as Record<string, unknown>,
+    );
 
     return json(message, 201);
   } catch (err) {
+    if (err instanceof Error) {
+      if (err.message === "CONVERSATION_MESSAGE_REQUIRED") {
+        return error("Mensagem obrigatoria", 400);
+      }
+
+      if (err.message === "CONVERSATION_NOT_FOUND") {
+        return error("Conversa não encontrada", 404);
+      }
+    }
+
+    if (err instanceof SyntaxError) {
+      return error("Payload inválido");
+    }
+
     return handleError(err);
   }
 }

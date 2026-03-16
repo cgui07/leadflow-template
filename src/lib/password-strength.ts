@@ -20,15 +20,37 @@ export interface PasswordStrengthResult {
 function getHint(checks: PasswordChecks) {
   const missing: string[] = [];
 
-  if (!checks.length) missing.push(`use pelo menos ${MIN_PASSWORD_LENGTH} caracteres`);
-  if (!checks.upper) missing.push("adicione letra maiuscula");
-  if (!checks.lower) missing.push("adicione letra minuscula");
-  if (!checks.number) missing.push("adicione número");
-  if (!checks.symbol) missing.push("adicione simbolo");
+  if (!checks.length) {
+    missing.push(`use pelo menos ${MIN_PASSWORD_LENGTH} caracteres`);
+  }
 
-  if (missing.length === 0) return "Senha bem equilibrada";
-  if (missing.length === 1) return `Dica: ${missing[0]}`;
-  if (missing.length === 2) return `Dica: ${missing[0]} e ${missing[1]}`;
+  if (!checks.upper) {
+    missing.push("adicione letra maiúscula");
+  }
+
+  if (!checks.lower) {
+    missing.push("adicione letra minúscula");
+  }
+
+  if (!checks.number) {
+    missing.push("adicione número");
+  }
+
+  if (!checks.symbol) {
+    missing.push("adicione símbolo");
+  }
+
+  if (missing.length === 0) {
+    return "Senha bem equilibrada";
+  }
+
+  if (missing.length === 1) {
+    return `Dica: ${missing[0]}`;
+  }
+
+  if (missing.length === 2) {
+    return `Dica: ${missing[0]} e ${missing[1]}`;
+  }
 
   return "Misture letras, números e símbolos";
 }
@@ -41,8 +63,12 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
     number: /\d/.test(password),
     symbol: /[^A-Za-z0-9]/.test(password),
   };
-
-  const varietyCount = [checks.lower, checks.upper, checks.number, checks.symbol].filter(Boolean).length;
+  const varietyCount = [
+    checks.lower,
+    checks.upper,
+    checks.number,
+    checks.symbol,
+  ].filter(Boolean).length;
 
   let score = 0;
 
@@ -91,7 +117,7 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
   if (score === 3) {
     return {
       score,
-      label: "Media",
+      label: "Média",
       hint: getHint(checks),
       barClassName: "bg-orange-amber",
       textClassName: "text-yellow-gold",

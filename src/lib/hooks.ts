@@ -1,96 +1,118 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import {
-  DEFAULT_BRANDING,
-  type TenantBranding,
-} from "@/lib/branding";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export const AUTH_REFRESH_EVENT = "leadflow:auth-refresh";
+const NO_STORE_FETCH_OPTIONS = {
+  cache: "no-store" as const,
+  credentials: "same-origin" as const,
+  headers: {
+    "Cache-Control": "no-store",
+    Pragma: "no-cache",
+  },
+};
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  avatarUrl?: string;
-  role: string;
-  tenantId?: string | null;
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === "AbortError";
 }
 
-export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [branding, setBranding] = useState<TenantBranding>(DEFAULT_BRANDING);
-  const [loading, setLoading] = useState(true);
-
-  const loadSession = useCallback(async (showLoading = false) => {
-    if (showLoading) {
-      setLoading(true);
-    }
-
-    fetch("/api/auth/me")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        setUser(data?.user || null);
-        setBranding(data?.branding || DEFAULT_BRANDING);
-      })
-      .catch(() => {
-        setUser(null);
-        setBranding(DEFAULT_BRANDING);
-      })
-      .finally(() => {
-        if (showLoading) {
-          setLoading(false);
-        }
-      });
-  }, []);
-
-  useEffect(() => {
-    queueMicrotask(() => {
-      void loadSession(true);
-    });
-
-    function handleRefresh() {
-      void loadSession(false);
-    }
-
-    window.addEventListener(AUTH_REFRESH_EVENT, handleRefresh);
-    return () => {
-      window.removeEventListener(AUTH_REFRESH_EVENT, handleRefresh);
-    };
-  }, [loadSession]);
-
-  const logout = useCallback(async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/login";
-  }, []);
-
-  return { user, branding, loading, logout };
+interface UseFetchOptions<T> {
+  initialData?: T | null;
+  revalidateOnMount?: boolean;
 }
 
-export function useFetch<T>(url: string | null) {
-  const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(true);
+export function useFetch<T>(
+  url: string | null,
+  options?: UseFetchOptions<T>,
+) {
+  const hasInitialData = options && "initialData" in options;
+  const initialData = options?.initialData ?? null;
+  const initialUrlRef = useRef(url);
+  const [data, setData] = useState<T | null>(hasInitialData ? initialData : null);
+  const revalidateOnMount = options?.revalidateOnMount ?? !hasInitialData;
+  const [loading, setLoading] = useState(Boolean(url) && (revalidateOnMount || !hasInitialData));
   const [error, setError] = useState<string | null>(null);
 
-  const refetch = useCallback(() => {
-    if (!url) return;
-    setError(null);
-    setLoading(true);
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) throw new Error("Erro ao carregar dados");
-        return res.json();
-      })
-      .then(setData)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [url]);
+  const runFetch = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!url) {
+        setData(null);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      setError(null);
+      setLoading(true);
+
+      try {
+        const response = await fetch(url, {
+          ...NO_STORE_FETCH_OPTIONS,
+          signal,
+        });
+
+        if (!response.ok) {
+          const payload = (await response.json().catch(() => null)) as
+            | { error?: string }
+            | null;
+          throw new Error(payload?.error || "Erro ao carregar dados");
+        }
+
+        const nextData = (await response.json()) as T;
+
+        if (signal?.aborted) {
+          return;
+        }
+
+        setData(nextData);
+      } catch (fetchError) {
+        if (isAbortError(fetchError)) {
+          return;
+        }
+
+        if (!signal?.aborted) {
+          setError(
+            fetchError instanceof Error
+              ? fetchError.message
+              : "Erro ao carregar dados",
+          );
+        }
+      } finally {
+        if (!signal?.aborted) {
+          setLoading(false);
+        }
+      }
+    },
+    [url],
+  );
 
   useEffect(() => {
-    if (!url) return;
-    queueMicrotask(refetch);
-  }, [url, refetch]);
+    if (!url) {
+      setData(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    if (
+      url === initialUrlRef.current &&
+      hasInitialData &&
+      !revalidateOnMount
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    void runFetch(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
+  }, [hasInitialData, revalidateOnMount, runFetch, url]);
+
+  const refetch = useCallback(() => {
+    return runFetch();
+  }, [runFetch]);
 
   return { data, loading, error, refetch };
 }

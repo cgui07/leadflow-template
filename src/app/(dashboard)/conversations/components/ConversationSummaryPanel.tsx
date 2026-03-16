@@ -21,7 +21,7 @@ const summaryFields: Array<{
   { label: "Prazo de compra", key: "prazoCompra" },
   { label: "Objeções/Dúvidas", key: "objecoes" },
   { label: "Última intenção", key: "ultimaIntencao" },
-  { label: "Próximo passo", key: "proximoPasso" },
+  { label: "Próximo passo", key: "próximoPasso" },
 ];
 
 export function ConversationSummaryPanel({

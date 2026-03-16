@@ -20,6 +20,13 @@ body {
   color: var(--foreground);
 }
 
+.landing-flow-spotlight {
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

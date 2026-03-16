@@ -1,23 +1,15 @@
-import { json, error } from "@/lib/api";
-import { getCurrentUser } from "@/lib/auth";
-import { buildBranding } from "@/lib/branding";
+import { error, json } from "@/lib/api";
+import { getSession } from "@/features/auth/session";
 
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user) return error("Não autorizado", 401);
+  const session = await getSession();
 
-  const branding = buildBranding(user.tenant);
+  if (!session) {
+    return error("Não autorizado", 401);
+  }
 
   return json({
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      avatarUrl: user.avatarUrl,
-      role: user.role,
-      tenantId: user.tenantId,
-    },
-    branding,
+    user: session.user,
+    branding: session.branding,
   });
 }

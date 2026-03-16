@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { getPipelineColorDotClass } from "@/lib/ui-colors";
 import type { PipelineStage, SelectedLead } from "../types";
@@ -32,9 +33,11 @@ export function MoveLeadDrawer({
           const isMoving = movingLeadId === selectedLead?.id;
 
           return (
-            <button
+            <Button
               key={stage.id}
               type="button"
+              variant="unstyled"
+              size="md"
               disabled={isCurrentStage || isMoving}
               onClick={() => {
                 if (!selectedLead || isCurrentStage) {
@@ -43,7 +46,7 @@ export function MoveLeadDrawer({
 
                 onMoveLead(selectedLead.id, stage.id);
               }}
-              className="flex w-full items-center justify-between rounded-xl border border-neutral-border bg-white px-4 py-3 text-left transition hover:bg-neutral-surface disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-auto w-full justify-between rounded-xl border border-neutral-border bg-white px-4 py-3 text-left transition hover:bg-neutral-surface disabled:opacity-60"
             >
               <div className="flex items-center gap-3">
                 <div
@@ -61,7 +64,7 @@ export function MoveLeadDrawer({
               <div className="text-xs font-medium text-neutral-muted">
                 {isCurrentStage ? "Atual" : "Selecionar"}
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>

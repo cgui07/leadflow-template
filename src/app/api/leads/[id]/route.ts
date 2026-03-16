@@ -1,93 +1,82 @@
-import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
-import { json, error, requireAuth, handleError } from "@/lib/api";
+import { error, handleError, json, requireAuth } from "@/lib/api";
+import { deleteLead, getLeadDetail, updateLead } from "@/features/leads/server";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await requireAuth();
     const { id } = await params;
+    const lead = await getLeadDetail(user.id, id);
 
-    const lead = await prisma.lead.findFirst({
-      where: { id, userId: user.id },
-      include: {
-        pipelineStage: true,
-        conversation: {
-          include: { messages: { orderBy: { createdAt: "desc" }, take: 50 } },
-        },
-        activities: { orderBy: { createdAt: "desc" }, take: 20 },
-        tasks: { orderBy: { dueAt: "asc" }, where: { status: "pending" } },
-        leadActions: { orderBy: [{ status: "asc" }, { createdAt: "desc" }] },
-      },
-    });
-
-    if (!lead) return error("Lead não encontrado", 404);
-
-    return json(lead);
-  } catch (err) {
-    return handleError(err);
-  }
-}
-
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const user = await requireAuth();
-    const { id } = await params;
-    const data = await req.json();
-
-    const existing = await prisma.lead.findFirst({ where: { id, userId: user.id } });
-    if (!existing) return error("Lead não encontrado", 404);
-
-    if (data.status && data.status !== existing.status) {
-      await prisma.activity.create({
-        data: {
-          userId: user.id,
-          leadId: id,
-          type: "status_change",
-          title: `Status alterado para ${data.status}`,
-          metadata: { from: existing.status, to: data.status },
-        },
-      });
+    if (!lead) {
+      return error("Lead não encontrado", 404);
     }
 
-    const lead = await prisma.lead.update({
-      where: { id },
-      data: {
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        status: data.status,
-        score: data.score,
-        value: data.value,
-        region: data.region,
-        priceMin: data.priceMin,
-        priceMax: data.priceMax,
-        propertyType: data.propertyType,
-        purpose: data.purpose,
-        timeline: data.timeline,
-        bedrooms: data.bedrooms,
-        notes: data.notes,
-        pipelineStageId: data.pipelineStageId,
-      },
-    });
-
     return json(lead);
   } catch (err) {
     return handleError(err);
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await requireAuth();
     const { id } = await params;
+    const lead = await updateLead(
+      user.id,
+      id,
+      (await req.json()) as Record<string, unknown>,
+    );
 
-    const existing = await prisma.lead.findFirst({ where: { id, userId: user.id } });
-    if (!existing) return error("Lead não encontrado", 404);
+    return json(lead);
+  } catch (err) {
+    if (err instanceof Error) {
+      if (err.message === "LEAD_NOT_FOUND") {
+        return error("Lead não encontrado", 404);
+      }
 
-    await prisma.lead.delete({ where: { id } });
+      if (err.message === "LEAD_STATUS_INVALID") {
+        return error("Status de lead inválido", 400);
+      }
+
+      if (err.message === "LEAD_STAGE_INVALID") {
+        return error("Estágio inválido", 400);
+      }
+
+      if (err.message === "LEAD_STAGE_NOT_FOUND") {
+        return error("Estágio não encontrado", 404);
+      }
+    }
+
+    if (err instanceof SyntaxError) {
+      return error("Payload inválido");
+    }
+
+    return handleError(err);
+  }
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const user = await requireAuth();
+    const { id } = await params;
+    await deleteLead(user.id, id);
 
     return json({ ok: true });
   } catch (err) {
+    if (err instanceof Error && err.message === "LEAD_NOT_FOUND") {
+      return error("Lead não encontrado", 404);
+    }
+
     return handleError(err);
   }
 }

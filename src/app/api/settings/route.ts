@@ -1,106 +1,16 @@
-import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
 import { error, handleError, json, requireAuth } from "@/lib/api";
-import { normalizeAutoReplyDelaySeconds } from "@/lib/auto-reply-delay";
 import {
-  DEFAULT_AI_MODEL_BY_PROVIDER,
-  isSupportedAIModel,
-  isSupportedAIProvider,
-  type AIProvider,
-} from "@/lib/ai-models";
-
-type SettingsPayload = {
-  aiProvider?: string;
-  aiApiKey?: string | null;
-  aiModel?: string;
-  greetingMessage?: string | null;
-  autoReplyEnabled?: boolean;
-  autoReplyDelaySeconds?: number;
-  followUpEnabled?: boolean;
-  followUpDelayHours?: number;
-  maxFollowUps?: number;
-};
-
-type PrismaSettingsPayload = Omit<SettingsPayload, "autoReplyDelaySeconds"> & {
-  auto_reply_delay_seconds?: number;
-};
-
-function pickAllowedSettings(input: Record<string, unknown>): SettingsPayload {
-  const next: SettingsPayload = {};
-
-  if (typeof input.aiProvider === "string") next.aiProvider = input.aiProvider;
-  if (typeof input.aiApiKey === "string" || input.aiApiKey === null) {
-    next.aiApiKey = input.aiApiKey;
-  }
-  if (typeof input.aiModel === "string") next.aiModel = input.aiModel;
-  if (
-    typeof input.greetingMessage === "string" ||
-    input.greetingMessage === null
-  ) {
-    next.greetingMessage = input.greetingMessage;
-  }
-  if (typeof input.autoReplyEnabled === "boolean") {
-    next.autoReplyEnabled = input.autoReplyEnabled;
-  }
-  if (
-    typeof input.autoReplyDelaySeconds === "number" &&
-    Number.isFinite(input.autoReplyDelaySeconds)
-  ) {
-    next.autoReplyDelaySeconds = normalizeAutoReplyDelaySeconds(
-      input.autoReplyDelaySeconds,
-    );
-  }
-  if (typeof input.followUpEnabled === "boolean") {
-    next.followUpEnabled = input.followUpEnabled;
-  }
-  if (
-    typeof input.followUpDelayHours === "number" &&
-    Number.isFinite(input.followUpDelayHours)
-  ) {
-    next.followUpDelayHours = input.followUpDelayHours;
-  }
-  if (
-    typeof input.maxFollowUps === "number" &&
-    Number.isFinite(input.maxFollowUps)
-  ) {
-    next.maxFollowUps = input.maxFollowUps;
-  }
-
-  return next;
-}
-
-function normalizeProvider(
-  provider: string | undefined,
-  fallback: AIProvider = "openai",
-): AIProvider {
-  return provider && isSupportedAIProvider(provider) ? provider : fallback;
-}
+  getUserSettings,
+  updateUserSettings,
+} from "@/features/settings/server";
 
 export async function GET() {
   try {
     const user = await requireAuth();
+    const settings = await getUserSettings(user.id, { maskApiKey: true });
 
-    const settings = await prisma.userSettings.findUnique({
-      where: { userId: user.id },
-    });
-
-    if (!settings) {
-      return error("Configurações não encontradas", 404);
-    }
-
-    return json({
-      aiApiKey: settings.aiApiKey
-        ? "••••••" + settings.aiApiKey.slice(-4)
-        : null,
-      aiProvider: settings.aiProvider,
-      aiModel: settings.aiModel,
-      greetingMessage: settings.greetingMessage,
-      autoReplyEnabled: settings.autoReplyEnabled,
-      autoReplyDelaySeconds: settings.auto_reply_delay_seconds,
-      followUpEnabled: settings.followUpEnabled,
-      followUpDelayHours: settings.followUpDelayHours,
-      maxFollowUps: settings.maxFollowUps,
-    });
+    return json(settings);
   } catch (err) {
     return handleError(err);
   }
@@ -109,40 +19,17 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   try {
     const user = await requireAuth();
-    const body = await req.json();
-    const currentSettings = await prisma.userSettings.findUnique({
-      where: { userId: user.id },
-      select: { aiProvider: true },
-    });
-    const currentProvider = normalizeProvider(currentSettings?.aiProvider);
-    const rawData = pickAllowedSettings(body);
-    const { autoReplyDelaySeconds, ...restData } = rawData;
-    const nextProvider = normalizeProvider(rawData.aiProvider, currentProvider);
-    const data: PrismaSettingsPayload = {
-      ...restData,
-      aiProvider: nextProvider,
-    };
-
-    if (typeof autoReplyDelaySeconds === "number") {
-      data.auto_reply_delay_seconds = autoReplyDelaySeconds;
-    }
-
-    if (rawData.aiModel) {
-      data.aiModel = isSupportedAIModel(nextProvider, rawData.aiModel)
-        ? rawData.aiModel
-        : DEFAULT_AI_MODEL_BY_PROVIDER[nextProvider];
-    } else if (rawData.aiProvider) {
-      data.aiModel = DEFAULT_AI_MODEL_BY_PROVIDER[nextProvider];
-    }
-
-    const settings = await prisma.userSettings.upsert({
-      where: { userId: user.id },
-      create: { userId: user.id, ...data },
-      update: data,
+    const body = (await req.json()) as Record<string, unknown>;
+    const settings = await updateUserSettings(user.id, body, {
+      maskApiKey: true,
     });
 
     return json(settings);
   } catch (err) {
+    if (err instanceof SyntaxError) {
+      return error("Payload inválido");
+    }
+
     return handleError(err);
   }
 }

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useBranding } from "@/components/providers/BrandingProvider";
 import {
   getBrandActiveNavClass,
@@ -128,10 +129,11 @@ export function Sidebar({
           {!collapsed && (
             <div className="flex items-center gap-2">
               {branding.logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <BrandLogo
                   src={branding.logoUrl}
-                  alt={branding.name}
+                  alt={`${branding.name} logo`}
+                  width={24}
+                  height={24}
                   className="h-6 w-6 rounded object-contain"
                 />
               ) : null}
@@ -214,7 +216,7 @@ export function Sidebar({
         </div>
       </aside>
 
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-border bg-white/95 backdrop-blur-lg md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-border bg-white-95 backdrop-blur-lg md:hidden">
         <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
           {mobileItems.map((item) => {
             const isActive =
