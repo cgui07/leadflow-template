@@ -5,9 +5,11 @@ import { json, requireAuth, handleError } from "@/lib/api";
 import {
   buildWebhookUrl,
   createInstance,
+  deleteInstance,
   getConnectionStatus,
   getQrCode,
   instanceNameForUser,
+  logoutInstance,
   resolveAppUrl,
   setInstanceWebhook,
 } from "@/lib/evolution";
@@ -55,7 +57,10 @@ export async function POST(req: NextRequest) {
 
         qrcode = await getQrCode(instanceName);
       } catch (error) {
-        if (error instanceof Error && /not exist|not found|404/i.test(error.message)) {
+        if (
+          error instanceof Error &&
+          /not exist|not found|404/i.test(error.message)
+        ) {
           const result = await createInstance(user.id);
           await setInstanceWebhook(instanceName, webhookUrl);
           qrcode = result.qrcode;
@@ -64,12 +69,22 @@ export async function POST(req: NextRequest) {
         }
       }
     } else {
+      try {
+        await logoutInstance(instanceName);
+      } catch {}
+      try {
+        await deleteInstance(instanceName);
+      } catch {}
+
       let result: Awaited<ReturnType<typeof createInstance>> | null = null;
 
       try {
         result = await createInstance(user.id);
       } catch (error) {
-        if (!(error instanceof Error) || !/exists|already/i.test(error.message)) {
+        if (
+          !(error instanceof Error) ||
+          !/exists|already/i.test(error.message)
+        ) {
           throw error;
         }
       }

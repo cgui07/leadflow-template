@@ -4,7 +4,8 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageSquare, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { MessageSquare, Phone, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { TextField } from "@/components/forms";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 
 type ConnectionStatus = "disconnected" | "connecting" | "connected";
@@ -17,6 +18,10 @@ export function WhatsAppConnection() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showPairing, setShowPairing] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [pairingCode, setPairingCode] = useState<string | null>(null);
+  const [pairingLoading, setPairingLoading] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPolling = useCallback(() => {
@@ -68,7 +73,8 @@ export function WhatsAppConnection() {
             if (qrData.qrcode) setQrCode(qrData.qrcode);
           }
         }
-      } catch {} finally {
+      } catch {
+      } finally {
         setLoading(false);
       }
     }
@@ -146,6 +152,33 @@ export function WhatsAppConnection() {
     }
   }
 
+  async function handleRequestPairingCode() {
+    setPairingLoading(true);
+    setErrorMsg(null);
+    setPairingCode(null);
+
+    try {
+      const res = await fetch("/api/whatsapp/pairing-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMsg(data.error || "Erro ao gerar código de pareamento");
+        return;
+      }
+
+      setPairingCode(data.pairingCode);
+      startPolling();
+    } catch {
+      setErrorMsg("Erro ao gerar código de pareamento");
+    } finally {
+      setPairingLoading(false);
+    }
+  }
+
   if (loading) {
     return (
       <SectionContainer
@@ -193,7 +226,8 @@ export function WhatsAppConnection() {
                 Seu WhatsApp não está conectado
               </p>
               <p className="mt-1 text-sm text-neutral-muted">
-                Conecte para enviar e receber mensagens diretamente pela plataforma
+                Conecte para enviar e receber mensagens diretamente pela
+                plataforma
               </p>
             </div>
             <Button onClick={handleConnect} loading={actionLoading}>
@@ -221,7 +255,8 @@ export function WhatsAppConnection() {
                   </div>
                 </div>
                 <p className="text-xs text-neutral-muted">
-                  Abra o WhatsApp {" > "}Dispositivos conectados{" > "}Conectar dispositivo
+                  Abra o WhatsApp {" > "}Dispositivos conectados{" > "}Conectar
+                  dispositivo
                 </p>
                 <Button
                   variant="ghost"
@@ -231,6 +266,60 @@ export function WhatsAppConnection() {
                 >
                   Atualizar QR Code
                 </Button>
+
+                <div className="pt-2">
+                  <div className="flex items-center gap-3">
+                    <div className="h-px flex-1 bg-neutral-line" />
+                    <span className="text-xs text-neutral-muted">ou</span>
+                    <div className="h-px flex-1 bg-neutral-line" />
+                  </div>
+
+                  {!showPairing ? (
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      onClick={() => setShowPairing(true)}
+                      className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary-70 transition-colors hover:text-primary"
+                    >
+                      <Phone className="h-4 w-4" />
+                      Conectar com número de telefone
+                    </Button>
+                  ) : pairingCode ? (
+                    <div className="mt-3 space-y-2">
+                      <div className="text-sm font-medium text-neutral-dark">
+                        Digite este código no seu WhatsApp:
+                      </div>
+                      <div className="mx-auto w-fit rounded-xl bg-neutral-pale px-6 py-3 font-mono text-2xl font-bold tracking-widest text-neutral-dark">
+                        {pairingCode}
+                      </div>
+                      <div className="text-xs text-neutral-muted">
+                        Abra o WhatsApp {" > "} Dispositivos conectados {" > "}{" "}
+                        Conectar dispositivo {" > "} Conectar com número
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-3 flex items-center justify-center gap-2">
+                      <TextField
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="+55 11 99999-9999"
+                        icon={<Phone className="h-4 w-4" />}
+                        fieldSize="sm"
+                        fullWidth={false}
+                        className="w-48"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleRequestPairingCode}
+                        loading={pairingLoading}
+                        disabled={!phoneNumber.replace(/\D/g, "").length}
+                      >
+                        Gerar código
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <div className="flex flex-col items-center gap-3 py-4">
@@ -277,7 +366,9 @@ export function WhatsAppConnection() {
           </div>
         )}
 
-        {errorMsg && <p className="text-center text-sm text-danger">{errorMsg}</p>}
+        {errorMsg && (
+          <div className="text-center text-sm text-danger">{errorMsg}</div>
+        )}
       </div>
     </SectionContainer>
   );
