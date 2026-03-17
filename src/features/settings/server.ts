@@ -1,10 +1,7 @@
 import { prisma } from "@/lib/db";
 import { maskSecret, normalizeSettingsProvider } from "./utils";
 import { normalizeAutoReplyDelaySeconds } from "@/lib/auto-reply-delay";
-import type {
-  TenantCustomizationSettings,
-  UserSettings,
-} from "./contracts";
+import type { TenantCustomizationSettings, UserSettings } from "./contracts";
 import {
   DEFAULT_AI_MODEL_BY_PROVIDER,
   isSupportedAIModel,
@@ -22,6 +19,7 @@ const USER_SETTINGS_SELECT = {
   aiApiKey: true,
   aiProvider: true,
   aiModel: true,
+  openaiTranscriptionKey: true,
   greetingMessage: true,
   autoReplyEnabled: true,
   auto_reply_delay_seconds: true,
@@ -49,6 +47,7 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   aiProvider: "openai",
   aiApiKey: null,
   aiModel: DEFAULT_AI_MODEL_BY_PROVIDER.openai,
+  openaiTranscriptionKey: null,
   greetingMessage: null,
   autoReplyEnabled: true,
   autoReplyDelaySeconds: 0,
@@ -64,6 +63,7 @@ type UserSettingsRecord = {
   aiApiKey: string | null;
   aiProvider: string;
   aiModel: string;
+  openaiTranscriptionKey: string | null;
   greetingMessage: string | null;
   autoReplyEnabled: boolean;
   auto_reply_delay_seconds: number;
@@ -81,7 +81,10 @@ type TenantAccessContext = {
 };
 
 type UserSettingsPayload = Partial<UserSettings>;
-type PrismaUserSettingsPayload = Omit<UserSettingsPayload, "autoReplyDelaySeconds" | "facebookPageId"> & {
+type PrismaUserSettingsPayload = Omit<
+  UserSettingsPayload,
+  "autoReplyDelaySeconds" | "facebookPageId"
+> & {
   auto_reply_delay_seconds?: number;
 };
 
@@ -115,6 +118,9 @@ async function mapUserSettings(
     aiModel: isSupportedAIModel(provider, settings.aiModel)
       ? settings.aiModel
       : DEFAULT_AI_MODEL_BY_PROVIDER[provider],
+    openaiTranscriptionKey: maskApiKey
+      ? maskSecret(settings.openaiTranscriptionKey)
+      : settings.openaiTranscriptionKey,
     greetingMessage: settings.greetingMessage ?? null,
     autoReplyEnabled: settings.autoReplyEnabled,
     autoReplyDelaySeconds: normalizeAutoReplyDelaySeconds(
@@ -131,7 +137,9 @@ async function mapUserSettings(
   };
 }
 
-function pickAllowedSettings(input: Record<string, unknown>): UserSettingsPayload {
+function pickAllowedSettings(
+  input: Record<string, unknown>,
+): UserSettingsPayload {
   const next: UserSettingsPayload = {};
 
   if (typeof input.aiProvider === "string") {
@@ -140,6 +148,13 @@ function pickAllowedSettings(input: Record<string, unknown>): UserSettingsPayloa
 
   if (typeof input.aiApiKey === "string" || input.aiApiKey === null) {
     next.aiApiKey = input.aiApiKey;
+  }
+
+  if (
+    typeof input.openaiTranscriptionKey === "string" ||
+    input.openaiTranscriptionKey === null
+  ) {
+    next.openaiTranscriptionKey = input.openaiTranscriptionKey;
   }
 
   if (typeof input.aiModel === "string") {
@@ -184,11 +199,17 @@ function pickAllowedSettings(input: Record<string, unknown>): UserSettingsPayloa
     next.maxFollowUps = input.maxFollowUps;
   }
 
-  if (typeof input.facebookPageId === "string" || input.facebookPageId === null) {
+  if (
+    typeof input.facebookPageId === "string" ||
+    input.facebookPageId === null
+  ) {
     next.facebookPageId = input.facebookPageId;
   }
 
-  if (typeof input.facebookPageAccessToken === "string" || input.facebookPageAccessToken === null) {
+  if (
+    typeof input.facebookPageAccessToken === "string" ||
+    input.facebookPageAccessToken === null
+  ) {
     next.facebookPageAccessToken = input.facebookPageAccessToken;
   }
 
@@ -207,19 +228,17 @@ function requireTenantAccess(context: TenantAccessContext): string {
   return context.tenantId;
 }
 
-function mapTenantCustomization(
-  tenant: {
-    id: string;
-    slug: string;
-    status: string;
-    name: string;
-    logoUrl: string | null;
-    colorPrimary: string;
-    colorSecondary: string;
-    customTexts: unknown;
-    featureFlags: unknown;
-  },
-): TenantCustomizationSettings {
+function mapTenantCustomization(tenant: {
+  id: string;
+  slug: string;
+  status: string;
+  name: string;
+  logoUrl: string | null;
+  colorPrimary: string;
+  colorSecondary: string;
+  customTexts: unknown;
+  featureFlags: unknown;
+}): TenantCustomizationSettings {
   return {
     id: tenant.id,
     slug: tenant.slug,
@@ -249,10 +268,15 @@ export async function updateUserSettings(
     where: { userId },
     select: { aiProvider: true },
   });
-  const currentProvider = normalizeSettingsProvider(currentSettings?.aiProvider);
+  const currentProvider = normalizeSettingsProvider(
+    currentSettings?.aiProvider,
+  );
   const rawData = pickAllowedSettings(input);
   const { autoReplyDelaySeconds, facebookPageId, ...restData } = rawData;
-  const nextProvider = normalizeSettingsProvider(rawData.aiProvider, currentProvider);
+  const nextProvider = normalizeSettingsProvider(
+    rawData.aiProvider,
+    currentProvider,
+  );
   const data: PrismaUserSettingsPayload = {
     ...restData,
     aiProvider: nextProvider,

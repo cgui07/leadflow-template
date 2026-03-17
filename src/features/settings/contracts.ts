@@ -10,6 +10,7 @@ export interface UserSettings {
   followUpEnabled: boolean;
   followUpDelayHours: number;
   maxFollowUps: number;
+  openaiTranscriptionKey: string | null;
   facebookPageId: string | null;
   facebookPageAccessToken: string | null;
   facebookAutoOutreach: boolean;
@@ -29,7 +30,12 @@ export interface TenantCustomizationResponse {
 
 export type TenantCustomizationUpdateInput = Pick<
   TenantCustomizationSettings,
-  "name" | "logoUrl" | "colorPrimary" | "colorSecondary" | "customTexts" | "featureFlags"
+  | "name"
+  | "logoUrl"
+  | "colorPrimary"
+  | "colorSecondary"
+  | "customTexts"
+  | "featureFlags"
 >;
 
 export type SettingsSection = "automation" | "facebook" | "design";

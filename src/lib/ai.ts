@@ -1,7 +1,10 @@
 import { prisma } from "./db";
 import { checkHotLeadAlert } from "./alerts";
 import { upsertLeadActionFromAI } from "./lead-actions";
-import { DEFAULT_AI_MODEL_BY_PROVIDER, isSupportedAIProvider } from "./ai-models";
+import {
+  DEFAULT_AI_MODEL_BY_PROVIDER,
+  isSupportedAIProvider,
+} from "./ai-models";
 import {
   calculateLeadScore,
   getLeadStatusFromScore,
@@ -13,12 +16,19 @@ export interface AIConfig {
   provider: string;
   apiKey: string;
   model: string;
+  transcriptionApiKey?: string;
 }
 
 type AnthropicContentPart =
   | { type: "text"; text: string }
-  | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
-  | { type: "document"; source: { type: "base64"; media_type: string; data: string } };
+  | {
+      type: "image";
+      source: { type: "base64"; media_type: string; data: string };
+    }
+  | {
+      type: "document";
+      source: { type: "base64"; media_type: string; data: string };
+    };
 
 export type MessageContent = string | AnthropicContentPart[];
 
@@ -129,7 +139,9 @@ Regras:
 - O próximo passo deve ser uma ação concreta para o corretor`;
 }
 
-function formatContentForOpenAI(content: MessageContent): string | Array<Record<string, unknown>> {
+function formatContentForOpenAI(
+  content: MessageContent,
+): string | Array<Record<string, unknown>> {
   if (typeof content === "string") return content;
 
   return content.map((part) => {
@@ -144,7 +156,10 @@ function formatContentForOpenAI(content: MessageContent): string | Array<Record<
       };
     }
     if (part.type === "document") {
-      return { type: "text", text: "[Documento recebido - conteúdo não suportado neste provedor]" };
+      return {
+        type: "text",
+        text: "[Documento recebido - conteúdo não suportado neste provedor]",
+      };
     }
     return { type: "text", text: "" };
   });
@@ -155,7 +170,9 @@ async function callAI(
   systemPrompt: string,
   messages: Array<{ role: string; content: MessageContent }>,
 ) {
-  const provider = isSupportedAIProvider(config.provider) ? config.provider : "openai";
+  const provider = isSupportedAIProvider(config.provider)
+    ? config.provider
+    : "openai";
   const model = config.model || DEFAULT_AI_MODEL_BY_PROVIDER[provider];
   const hasMultimodal = messages.some((m) => Array.isArray(m.content));
   const maxTokens = hasMultimodal ? 1024 : 300;
@@ -266,10 +283,15 @@ export async function extractLeadProfile(
     })
     .join("\n");
 
-  const result = await callAI(config, getExtractionPrompt(), [{ role: "user", content: conversationText }]);
+  const result = await callAI(config, getExtractionPrompt(), [
+    { role: "user", content: conversationText },
+  ]);
 
   try {
-    const cleaned = result.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+    const cleaned = result
+      .replace(/```json?\n?/g, "")
+      .replace(/```/g, "")
+      .trim();
     return JSON.parse(cleaned);
   } catch {
     console.error("Failed to parse AI extraction:", result);
@@ -279,20 +301,33 @@ export async function extractLeadProfile(
 
 export async function generateConversationSummary(
   config: AIConfig,
-  conversationMessages: Array<{ direction: string; content: string; sender: string }>,
+  conversationMessages: Array<{
+    direction: string;
+    content: string;
+    sender: string;
+  }>,
 ) {
   const conversationText = conversationMessages
     .map((message) => {
       const role =
-        message.direction === "inbound" ? "Cliente" : message.sender === "bot" ? "Bot" : "Corretor";
+        message.direction === "inbound"
+          ? "Cliente"
+          : message.sender === "bot"
+            ? "Bot"
+            : "Corretor";
       return `${role}: ${message.content}`;
     })
     .join("\n");
 
-  const result = await callAI(config, getSummaryPrompt(), [{ role: "user", content: conversationText }]);
+  const result = await callAI(config, getSummaryPrompt(), [
+    { role: "user", content: conversationText },
+  ]);
 
   try {
-    const cleaned = result.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+    const cleaned = result
+      .replace(/```json?\n?/g, "")
+      .replace(/```/g, "")
+      .trim();
     return JSON.parse(cleaned);
   } catch {
     console.error("Failed to parse AI summary:", result);
@@ -312,7 +347,10 @@ export async function qualifyLead(leadId: string, config: AIConfig) {
 
   if (!lead?.conversation?.messages.length) return null;
 
-  const extractedProfile = await extractLeadProfile(config, lead.conversation.messages);
+  const extractedProfile = await extractLeadProfile(
+    config,
+    lead.conversation.messages,
+  );
   if (!extractedProfile) return null;
 
   const normalizedProfile = normalizeExtractedLeadProfile(extractedProfile);
@@ -362,10 +400,14 @@ export async function qualifyLead(leadId: string, config: AIConfig) {
     actionPromises.push(upsertLeadActionFromAI(lead.userId, lead.id, "visit"));
   }
   if (normalizedProfile.requestedProposal) {
-    actionPromises.push(upsertLeadActionFromAI(lead.userId, lead.id, "proposal"));
+    actionPromises.push(
+      upsertLeadActionFromAI(lead.userId, lead.id, "proposal"),
+    );
   }
   if (normalizedProfile.requestedFinancing) {
-    actionPromises.push(upsertLeadActionFromAI(lead.userId, lead.id, "financing"));
+    actionPromises.push(
+      upsertLeadActionFromAI(lead.userId, lead.id, "financing"),
+    );
   }
   if (actionPromises.length > 0) {
     await Promise.all(actionPromises);
