@@ -123,7 +123,8 @@ export async function listLeads(
 
 export async function createLead(userId: string, input: Record<string, unknown>) {
   const name = typeof input.name === "string" ? input.name.trim() : "";
-  const phone = typeof input.phone === "string" ? input.phone.trim() : "";
+  const rawPhone = typeof input.phone === "string" ? input.phone.trim() : "";
+  const phone = rawPhone.replace(/\D/g, "") || rawPhone;
 
   if (!name || !phone) {
     throw new Error("LEAD_NAME_PHONE_REQUIRED");

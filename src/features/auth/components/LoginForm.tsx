@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { AuthAlert } from "./AuthAlert";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useState, type FormEvent } from "react";
 import { DEFAULT_BRANDING } from "@/lib/branding";
@@ -16,7 +15,6 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ initialError, redirectPath }: LoginFormProps) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(initialError);
@@ -43,7 +41,7 @@ export function LoginForm({ initialError, redirectPath }: LoginFormProps) {
 
       window.location.replace(redirectPath);
     } catch {
-      setError("Erro de conexao.");
+      setError("Erro de conexão.");
     } finally {
       setLoading(false);
     }
@@ -126,7 +124,7 @@ export function LoginForm({ initialError, redirectPath }: LoginFormProps) {
       </a>
 
       <div className="mt-6 text-center text-sm text-gray-smoke">
-        O acesso e controlado por convite.
+        O acesso é controlado por convite.
       </div>
     </div>
   );

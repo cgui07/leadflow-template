@@ -40,6 +40,12 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+const GROUP_JID_SUFFIX = "@g.us";
+
+function isGroupJid(value: MaybeJid) {
+  return isNonEmptyString(value) && value.endsWith(GROUP_JID_SUFFIX);
+}
+
 function isLidJid(value: MaybeJid) {
   return isNonEmptyString(value) && value.endsWith(LID_SUFFIX);
 }
@@ -180,6 +186,8 @@ export function rememberMapping(event: LidMappingEvent | null | undefined) {
   return { lid: lidCandidates[0], pnJid };
 }
 
+export { isGroupJid };
+
 export function resolveReplyJid(remoteJid: MaybeJid) {
   return normalizePhoneNumberJid(remoteJid);
 }
@@ -316,7 +324,9 @@ export async function processIncomingMessage(userId: string, message: {
 }) {
   const remoteJid = message.from;
   const resolvedReplyJid = resolveReplyJid(remoteJid);
-  const phone = resolvedReplyJid ? getPhoneIdentity(resolvedReplyJid) : remoteJid;
+  const phone = resolvedReplyJid
+    ? getPhoneIdentity(resolvedReplyJid)
+    : toPhoneDigits(remoteJid) || remoteJid;
   const contactName = message.pushName || phone;
   const content = message.text || "";
 

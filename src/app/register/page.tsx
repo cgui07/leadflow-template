@@ -27,11 +27,11 @@ function RegisterUnavailableState({ message }: { message: string }) {
         <AuthCard>
           <div className="space-y-4 text-center">
             <div className="text-xl font-bold text-gray-iron">
-              Cadastro indisponivel
+              Cadastro indisponível
             </div>
             <AuthAlert className="text-left">{message}</AuthAlert>
             <div className="text-sm text-gray-smoke">
-              O acesso a este sistema e controlado. Solicite um convite ao
+              O acesso a este sistema é controlado. Solicite um convite ao
               administrador.
             </div>
             <Link
@@ -58,7 +58,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
 
   if (!inviteToken) {
     return (
-      <RegisterUnavailableState message="Cadastro disponivel apenas por convite." />
+      <RegisterUnavailableState message="Cadastro disponível apenas por convite." />
     );
   }
 
@@ -97,7 +97,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
               <div>
                 <div className="font-semibold">Acesso controlado</div>
                 <div className="text-sm text-blue-ice-60">
-                  Apenas usuarios convidados podem acessar
+                  Apenas usuários convidados podem acessar
                 </div>
               </div>
             </div>

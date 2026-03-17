@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     if (err instanceof Error) {
       if (err.message === "PIPELINE_MOVE_INVALID") {
-        return error("Lead e estagio sao obrigatorios");
+        return error("Lead e estágio são obrigatórios");
       }
 
       if (err.message === "PIPELINE_LEAD_NOT_FOUND") {

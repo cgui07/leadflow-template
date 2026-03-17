@@ -42,7 +42,7 @@ export async function upsertLeadActionFromAI(
       type: "lead_action_created",
       title: `${ACTION_TYPE_LABELS[type]} detectada pela IA`,
       description:
-        "Ação criada automáticamente a partir de sinal detectado na conversa.",
+        "Ação criada automaticamente a partir de sinal detectado na conversa.",
     },
   });
 

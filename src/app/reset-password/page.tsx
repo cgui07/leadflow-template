@@ -29,7 +29,7 @@ function InvalidResetPasswordState({ message }: { message: string }) {
               <ShieldCheck className="h-7 w-7 text-danger" />
             </div>
             <div className="text-xl font-bold text-gray-iron">
-              Link indisponivel
+              Link indisponível
             </div>
             <AuthAlert className="text-left">{message}</AuthAlert>
             <Link

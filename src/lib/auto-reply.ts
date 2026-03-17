@@ -134,13 +134,11 @@ export async function processScheduledAutoReply(
     return;
   }
 
-  const latestMessage = conversation.messages[0];
+  const latestInbound = conversation.messages.find(
+    (m) => m.direction === "inbound",
+  );
 
-  if (
-    !latestMessage ||
-    latestMessage.id !== input.triggerMessageId ||
-    latestMessage.direction !== "inbound"
-  ) {
+  if (!latestInbound || latestInbound.id !== input.triggerMessageId) {
     return;
   }
 

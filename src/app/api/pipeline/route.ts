@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     return json(stage, 201);
   } catch (err) {
     if (err instanceof Error && err.message === "PIPELINE_STAGE_NAME_REQUIRED") {
-      return error("Nome do estagio e obrigatorio");
+      return error("Nome do estágio é obrigatório");
     }
 
     if (err instanceof SyntaxError) {

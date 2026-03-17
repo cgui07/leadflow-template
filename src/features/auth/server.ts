@@ -131,7 +131,7 @@ export async function getInviteRegistrationInfo(
   const inviteToken = assertRequiredString(
     token,
     "INVITE_TOKEN_REQUIRED",
-    "Token de convite e obrigatório",
+    "Token de convite é obrigatório",
   );
   const invite = await validateInviteToken(inviteToken);
 
@@ -156,7 +156,7 @@ export async function registerWithInvite(
   const inviteToken = assertRequiredString(
     input.inviteToken,
     "REGISTER_INVITE_REQUIRED",
-    "Cadastro disponivel apenas por convite",
+    "Cadastro disponível apenas por convite",
   );
   const invite = await validateInviteToken(inviteToken);
 

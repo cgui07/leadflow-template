@@ -83,7 +83,7 @@ function getNavItems(canManagePlatform: boolean): NavItem[] {
         ]
       : []),
     {
-      label: "Configuracoes",
+      label: "Configurações",
       href: "/settings",
       icon: <Settings size={20} />,
       iconMobile: <Settings size={22} />,
@@ -101,7 +101,7 @@ interface SidebarProps {
 
 export function Sidebar({
   canManagePlatform = false,
-  userName = "Usuario",
+  userName = "Usuário",
   userEmail = "user@email.com",
   onLogout,
 }: SidebarProps) {
@@ -321,7 +321,7 @@ export function Sidebar({
             className="flex w-full items-center gap-3 rounded-xl border border-neutral-border px-4 py-3 text-sm font-medium text-neutral-dark transition-colors hover:bg-neutral-surface"
           >
             <Settings size={18} />
-            Configuracões
+            Configurações
           </Link>
           {canManagePlatform ? (
             <Link
