@@ -14,6 +14,7 @@ import {
   getBrandTextClass,
 } from "@/lib/branding";
 import {
+  Building2,
   CheckSquare,
   ChevronLeft,
   Kanban,
@@ -33,59 +34,74 @@ interface NavItem {
   mobileVisible?: boolean;
 }
 
-const navItems: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: <LayoutDashboard size={20} />,
-    iconMobile: <LayoutDashboard size={22} />,
-    mobileVisible: true,
-  },
-  {
-    label: "Conversas",
-    href: "/conversations",
-    icon: <MessageSquare size={20} />,
-    iconMobile: <MessageSquare size={22} />,
-    mobileVisible: true,
-  },
-  {
-    label: "Leads",
-    href: "/leads",
-    icon: <Users size={20} />,
-    iconMobile: <Users size={22} />,
-    mobileVisible: true,
-  },
-  {
-    label: "Pipeline",
-    href: "/pipeline",
-    icon: <Kanban size={20} />,
-    iconMobile: <Kanban size={22} />,
-    mobileVisible: true,
-  },
-  {
-    label: "Tarefas",
-    href: "/tasks",
-    icon: <CheckSquare size={20} />,
-    iconMobile: <CheckSquare size={22} />,
-    mobileVisible: true,
-  },
-  {
-    label: "Configurações",
-    href: "/settings",
-    icon: <Settings size={20} />,
-    iconMobile: <Settings size={22} />,
-    mobileVisible: false,
-  },
-];
+function getNavItems(canManagePlatform: boolean): NavItem[] {
+  return [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: <LayoutDashboard size={20} />,
+      iconMobile: <LayoutDashboard size={22} />,
+      mobileVisible: true,
+    },
+    {
+      label: "Conversas",
+      href: "/conversations",
+      icon: <MessageSquare size={20} />,
+      iconMobile: <MessageSquare size={22} />,
+      mobileVisible: true,
+    },
+    {
+      label: "Leads",
+      href: "/leads",
+      icon: <Users size={20} />,
+      iconMobile: <Users size={22} />,
+      mobileVisible: true,
+    },
+    {
+      label: "Pipeline",
+      href: "/pipeline",
+      icon: <Kanban size={20} />,
+      iconMobile: <Kanban size={22} />,
+      mobileVisible: true,
+    },
+    {
+      label: "Tarefas",
+      href: "/tasks",
+      icon: <CheckSquare size={20} />,
+      iconMobile: <CheckSquare size={22} />,
+      mobileVisible: true,
+    },
+    ...(canManagePlatform
+      ? [
+          {
+            label: "Clientes",
+            href: "/clients",
+            icon: <Building2 size={20} />,
+            iconMobile: <Building2 size={22} />,
+            mobileVisible: false,
+          } satisfies NavItem,
+        ]
+      : []),
+    {
+      label: "Configuracoes",
+      href: "/settings",
+      icon: <Settings size={20} />,
+      iconMobile: <Settings size={22} />,
+      mobileVisible: false,
+    },
+  ];
+}
 
 interface SidebarProps {
+  canManagePlatform?: boolean;
   userName?: string;
   userEmail?: string;
   onLogout?: () => Promise<void> | void;
 }
 
 export function Sidebar({
-  userName = "Usuário",
+  canManagePlatform = false,
+  userName = "Usuario",
   userEmail = "user@email.com",
   onLogout,
 }: SidebarProps) {
@@ -94,6 +110,7 @@ export function Sidebar({
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const pathname = usePathname();
+  const navItems = getNavItems(canManagePlatform);
 
   async function handleLogout() {
     try {
@@ -137,7 +154,9 @@ export function Sidebar({
                   className="h-6 w-6 rounded object-contain"
                 />
               ) : null}
-              <div className="text-lg font-bold tracking-tight">{branding.name}</div>
+              <div className="text-lg font-bold tracking-tight">
+                {branding.name}
+              </div>
             </div>
           )}
           <Button
@@ -158,7 +177,9 @@ export function Sidebar({
         <div className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
           {navItems.map((item) => {
             const isActive =
-              item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
 
             return (
               <Link
@@ -209,7 +230,9 @@ export function Sidebar({
             {!collapsed && (
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium">{userName}</div>
-                <div className="truncate text-xs text-neutral-muted">{userEmail}</div>
+                <div className="truncate text-xs text-neutral-muted">
+                  {userEmail}
+                </div>
               </div>
             )}
           </Button>
@@ -220,7 +243,9 @@ export function Sidebar({
         <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
           {mobileItems.map((item) => {
             const isActive =
-              item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
 
             return (
               <Link
@@ -296,8 +321,18 @@ export function Sidebar({
             className="flex w-full items-center gap-3 rounded-xl border border-neutral-border px-4 py-3 text-sm font-medium text-neutral-dark transition-colors hover:bg-neutral-surface"
           >
             <Settings size={18} />
-            Configurações
+            Configuracões
           </Link>
+          {canManagePlatform ? (
+            <Link
+              href="/clients"
+              onClick={() => setShowAccountModal(false)}
+              className="flex w-full items-center gap-3 rounded-xl border border-neutral-border px-4 py-3 text-sm font-medium text-neutral-dark transition-colors hover:bg-neutral-surface"
+            >
+              <Building2 size={18} />
+              Clientes
+            </Link>
+          ) : null}
           <Button
             variant="danger"
             fullWidth

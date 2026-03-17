@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { prisma } from "./db";
+import { normalizeTenantSlug } from "./tenant-slug";
 import {
   buildBranding,
   createDefaultBranding,
@@ -15,14 +16,7 @@ function buildTenantName(name: string | null | undefined, email: string): string
 }
 
 function slugifyTenantValue(value: string): string {
-  const normalized = value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  return normalized.slice(0, 48) || "workspace";
+  return normalizeTenantSlug(value, 48);
 }
 
 async function resolveUniqueTenantSlug(
