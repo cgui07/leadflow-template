@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { Column } from "@/types";
 import { Badge } from "@/components/ui/Badge";
