@@ -41,8 +41,7 @@ export function LoginForm({ initialError, redirectPath }: LoginFormProps) {
         return;
       }
 
-      router.replace(redirectPath);
-      router.refresh();
+      window.location.replace(redirectPath);
     } catch {
       setError("Erro de conexao.");
     } finally {
