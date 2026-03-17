@@ -15,21 +15,20 @@ const OPENAI_MODEL_OPTIONS: SelectOption[] = [
 ];
 
 const ANTHROPIC_MODEL_OPTIONS: SelectOption[] = [
-  { value: "claude-3-5-haiku-20241022", label: "Claude 3.5 Haiku" },
-  { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet" },
-  { value: "claude-3-7-sonnet-20250219", label: "Claude 3.7 Sonnet" },
-  { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
-  { value: "claude-opus-4-20250514", label: "Claude Opus 4" },
+  { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5" },
+  { value: "claude-sonnet-4-6-20250627", label: "Claude Sonnet 4.6" },
+  { value: "claude-opus-4-6-20250627", label: "Claude Opus 4.6" },
 ];
 
-export const AI_MODEL_OPTIONS_BY_PROVIDER: Record<AIProvider, SelectOption[]> = {
-  openai: OPENAI_MODEL_OPTIONS,
-  anthropic: ANTHROPIC_MODEL_OPTIONS,
-};
+export const AI_MODEL_OPTIONS_BY_PROVIDER: Record<AIProvider, SelectOption[]> =
+  {
+    openai: OPENAI_MODEL_OPTIONS,
+    anthropic: ANTHROPIC_MODEL_OPTIONS,
+  };
 
 export const DEFAULT_AI_MODEL_BY_PROVIDER: Record<AIProvider, string> = {
   openai: "gpt-4o-mini",
-  anthropic: "claude-sonnet-4-20250514",
+  anthropic: "claude-haiku-4-5-20251001",
 };
 
 export function isSupportedAIProvider(value: string): value is AIProvider {

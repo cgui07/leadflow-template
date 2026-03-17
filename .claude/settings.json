@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://187.77.242.80:8080/webhook/find/lf-0556f349-25ce-4072-8a22-2985a8b8cbfc -H 'apikey: Vascodagrana010711200418098765750180')",
+      "Bash(node -e \"let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\(''''url:'''',j.url\\);console.log\\(''''enabled:'''',j.enabled\\);console.log\\(''''events:'''',j.events\\)}\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://leadflow-ia-flame.vercel.app/api/whatsapp/webhook?token=32b9aeb9b31b66be504045903fc6b67a193cafbb69bd172a\" -X POST -H \"Content-Type: application/json\" -d '{\"\"event\"\":\"\"MESSAGES_UPSERT\"\",\"\"instance\"\":\"\"lf-0556f349-25ce-4072-8a22-2985a8b8cbfc\"\",\"\"data\"\":{\"\"key\"\":{\"\"remoteJid\"\":\"\"5511999999999@s.whatsapp.net\"\",\"\"fromMe\"\":false,\"\"id\"\":\"\"test123\"\"},\"\"message\"\":{\"\"conversation\"\":\"\"teste\"\"},\"\"messageType\"\":\"\"conversation\"\",\"\"pushName\"\":\"\"Teste\"\"}}')",
+      "Bash(curl -s -b /tmp/leadflow_cookies.txt http://localhost:3004/api/whatsapp/status)",
+      "Bash(curl -s -c /tmp/lf_cookies.txt http://localhost:3003/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"cguilherme052@gmail.com\"\",\"\"password\"\":\"\"Vascodagrana02\"\"}')",
+      "Bash(curl -s -b /tmp/lf_cookies.txt http://localhost:3003/api/whatsapp/status)",
+      "Bash(curl -s -b /tmp/lf_cookies.txt http://localhost:3003/api/settings)",
+      "Bash(node -e \"let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\(JSON.stringify\\(j,null,2\\)\\)}\\)\")"
+    ]
+  }
+}
