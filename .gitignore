@@ -34,3 +34,5 @@ next-env.d.ts
 /.claude/settings.local.json
 /.vscode/settings.json
 /db-migrations.local.txt
+docker-compose.yml
+evolution-docker-compose.yml
