@@ -1,6 +1,8 @@
 import { prisma } from "./db";
 import { generateAutoReply, qualifyLead } from "./ai";
+import type { AIConfig, MessageContent } from "./ai";
 import { normalizeAutoReplyDelaySeconds } from "./auto-reply-delay";
+import { resolveMediaContent } from "./media";
 import {
   getWhatsAppConfig,
   resolveSendTarget,
@@ -20,6 +22,74 @@ function wait(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+const MEDIA_TYPES = new Set(["image", "audio", "document"]);
+
+async function enrichMessageWithMedia(
+  message: { content: string; type: string; metadata: unknown; whatsappMsgId: string | null; direction: string },
+  instanceName: string,
+  aiConfig: AIConfig,
+): Promise<MessageContent> {
+  if (message.direction !== "inbound" || !MEDIA_TYPES.has(message.type)) {
+    return message.content;
+  }
+
+  const meta = (message.metadata || {}) as Record<string, unknown>;
+
+  try {
+    const media = await resolveMediaContent({
+      mediaType: message.type,
+      base64Data: (meta.base64 as string) || null,
+      mimeType: (meta.mimetype as string) || "application/octet-stream",
+      fileName: (meta.fileName as string) || undefined,
+      seconds: (meta.seconds as number) || undefined,
+      instanceName,
+      messageId: message.whatsappMsgId || "",
+      aiConfig,
+    });
+
+    if (!media) return message.content;
+
+    if (media.type === "audio" && media.transcription) {
+      return `[Transcrição do áudio]: ${media.transcription}`;
+    }
+
+    if (media.type === "image") {
+      const parts: MessageContent = [
+        {
+          type: "image",
+          source: { type: "base64", media_type: media.mimeType, data: media.base64 },
+        },
+      ];
+      if (message.content && message.content !== "[Imagem recebida]") {
+        parts.push({ type: "text", text: message.content });
+      } else {
+        parts.push({ type: "text", text: "O cliente enviou esta imagem." });
+      }
+      return parts;
+    }
+
+    if (media.type === "document") {
+      const parts: MessageContent = [
+        {
+          type: "document",
+          source: { type: "base64", media_type: media.mimeType, data: media.base64 },
+        },
+        {
+          type: "text",
+          text: media.fileName
+            ? `O cliente enviou o documento: ${media.fileName}`
+            : "O cliente enviou um documento.",
+        },
+      ];
+      return parts;
+    }
+  } catch (err) {
+    console.error("[auto-reply] Media enrichment failed:", err);
+  }
+
+  return message.content;
 }
 
 export async function processScheduledAutoReply(
@@ -92,19 +162,38 @@ export async function processScheduledAutoReply(
   const orderedMessages = [...conversation.messages].reverse();
 
   if (settings.aiApiKey) {
-    const aiConfig = {
+    const aiConfig: AIConfig = {
       provider: settings.aiProvider,
       apiKey: settings.aiApiKey,
       model: settings.aiModel,
     };
+
+    const enrichedMessages: Array<{ direction: string; content: MessageContent; sender: string }> = [];
+    for (const message of orderedMessages) {
+      if (message.id === input.triggerMessageId) {
+        const enrichedContent = await enrichMessageWithMedia(
+          message,
+          settings.whatsappPhoneId!,
+          aiConfig,
+        );
+        enrichedMessages.push({
+          direction: message.direction,
+          content: enrichedContent,
+          sender: message.sender,
+        });
+      } else {
+        enrichedMessages.push({
+          direction: message.direction,
+          content: message.content,
+          sender: message.sender,
+        });
+      }
+    }
+
     const reply = await generateAutoReply(
       aiConfig,
       conversation.lead.user.name,
-      orderedMessages.map((message) => ({
-        direction: message.direction,
-        content: message.content,
-        sender: message.sender,
-      })),
+      enrichedMessages,
     );
 
     if (!reply) {

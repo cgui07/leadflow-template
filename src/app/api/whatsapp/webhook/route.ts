@@ -97,6 +97,7 @@ export async function POST(req: NextRequest) {
         mimetype: data.message.audioMessage.mimetype,
         seconds: data.message.audioMessage.seconds,
         fileLength: data.message.audioMessage.fileLength,
+        base64: data.message.audioMessage.base64 || data.message.base64,
       };
     } else if (data.message?.imageMessage) {
       mediaType = "image";
@@ -107,6 +108,7 @@ export async function POST(req: NextRequest) {
         caption: data.message.imageMessage.caption,
         width: data.message.imageMessage.width,
         height: data.message.imageMessage.height,
+        base64: data.message.imageMessage.base64 || data.message.base64,
       };
     } else if (data.message?.videoMessage) {
       mediaType = "video";
@@ -116,6 +118,7 @@ export async function POST(req: NextRequest) {
         mimetype: data.message.videoMessage.mimetype,
         caption: data.message.videoMessage.caption,
         seconds: data.message.videoMessage.seconds,
+        base64: data.message.videoMessage.base64 || data.message.base64,
       };
     } else if (data.message?.documentMessage) {
       mediaType = "document";
@@ -126,6 +129,7 @@ export async function POST(req: NextRequest) {
         mimetype: data.message.documentMessage.mimetype,
         fileName: data.message.documentMessage.fileName,
         fileLength: data.message.documentMessage.fileLength,
+        base64: data.message.documentMessage.base64 || data.message.base64,
       };
     } else if (data.message?.stickerMessage) {
       mediaType = "sticker";
