@@ -32,27 +32,37 @@ export async function POST(req: NextRequest) {
     let qrcode: string | null = null;
 
     if (existingInstance) {
-      await setInstanceWebhook(instanceName, webhookUrl);
-      const status = await getConnectionStatus(instanceName);
+      try {
+        await setInstanceWebhook(instanceName, webhookUrl);
+        const status = await getConnectionStatus(instanceName);
 
-      if (status === "connected") {
-        await prisma.userSettings.upsert({
-          where: { userId: user.id },
-          create: {
-            userId: user.id,
-            whatsappPhoneId: instanceName,
-            whatsappWebhookToken: webhookToken,
-          },
-          update: {
-            whatsappPhoneId: instanceName,
-            whatsappWebhookToken: webhookToken,
-          },
-        });
+        if (status === "connected") {
+          await prisma.userSettings.upsert({
+            where: { userId: user.id },
+            create: {
+              userId: user.id,
+              whatsappPhoneId: instanceName,
+              whatsappWebhookToken: webhookToken,
+            },
+            update: {
+              whatsappPhoneId: instanceName,
+              whatsappWebhookToken: webhookToken,
+            },
+          });
 
-        return json({ status: "connected", qrcode: null });
+          return json({ status: "connected", qrcode: null });
+        }
+
+        qrcode = await getQrCode(instanceName);
+      } catch (error) {
+        if (error instanceof Error && /not exist|not found|404/i.test(error.message)) {
+          const result = await createInstance(user.id);
+          await setInstanceWebhook(instanceName, webhookUrl);
+          qrcode = result.qrcode;
+        } else {
+          throw error;
+        }
       }
-
-      qrcode = await getQrCode(instanceName);
     } else {
       let result: Awaited<ReturnType<typeof createInstance>> | null = null;
 
