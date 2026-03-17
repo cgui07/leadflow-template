@@ -51,6 +51,7 @@ model UserSettings {
   auto_reply_delay_seconds Int     @default(0)
   facebookPageAccessToken  String? @map("facebook_page_access_token")
   facebookAutoOutreach     Boolean @default(true) @map("facebook_auto_outreach")
+  openaiTranscriptionKey   String? @map("openai_transcription_key")
   user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")

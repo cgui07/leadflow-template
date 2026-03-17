@@ -17,7 +17,10 @@ interface AutomationSettingsSectionProps {
   modelOptions: typeof AI_PROVIDER_OPTIONS;
   saveError: string | null;
   selectedProvider: AIProvider;
-  update: <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => void;
+  update: <K extends keyof UserSettings>(
+    key: K,
+    value: UserSettings[K],
+  ) => void;
 }
 
 function parseInteger(value: string, fallback: number): number {
@@ -66,7 +69,9 @@ export function AutomationSettingsSection({
               />
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="text-xs text-neutral md:col-start-2">{modelHelpText}</div>
+              <div className="text-xs text-neutral md:col-start-2">
+                {modelHelpText}
+              </div>
             </div>
 
             <TextField
@@ -76,6 +81,19 @@ export function AutomationSettingsSection({
               onChange={(event) => update("aiApiKey", event.target.value)}
               placeholder="Chave de API"
             />
+
+            {selectedProvider !== "openai" && (
+              <TextField
+                label="OpenAI API key (transcrição de áudio)"
+                type="password"
+                value={form.openaiTranscriptionKey || ""}
+                onChange={(event) =>
+                  update("openaiTranscriptionKey", event.target.value)
+                }
+                placeholder="Chave OpenAI para transcrever áudios"
+                description="Necessária para transcrição de áudio ao usar Anthropic como provedor principal."
+              />
+            )}
 
             <CheckboxField
               variant="switch"

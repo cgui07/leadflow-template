@@ -27,7 +27,13 @@ function wait(ms: number) {
 const MEDIA_TYPES = new Set(["image", "audio", "document"]);
 
 async function enrichMessageWithMedia(
-  message: { content: string; type: string; metadata: unknown; whatsappMsgId: string | null; direction: string },
+  message: {
+    content: string;
+    type: string;
+    metadata: unknown;
+    whatsappMsgId: string | null;
+    direction: string;
+  },
   instanceName: string,
   aiConfig: AIConfig,
 ): Promise<MessageContent> {
@@ -59,7 +65,11 @@ async function enrichMessageWithMedia(
       const parts: MessageContent = [
         {
           type: "image",
-          source: { type: "base64", media_type: media.mimeType, data: media.base64 },
+          source: {
+            type: "base64",
+            media_type: media.mimeType,
+            data: media.base64,
+          },
         },
       ];
       if (message.content && message.content !== "[Imagem recebida]") {
@@ -74,7 +84,11 @@ async function enrichMessageWithMedia(
       const parts: MessageContent = [
         {
           type: "document",
-          source: { type: "base64", media_type: media.mimeType, data: media.base64 },
+          source: {
+            type: "base64",
+            media_type: media.mimeType,
+            data: media.base64,
+          },
         },
         {
           type: "text",
@@ -164,9 +178,14 @@ export async function processScheduledAutoReply(
       provider: settings.aiProvider,
       apiKey: settings.aiApiKey,
       model: settings.aiModel,
+      transcriptionApiKey: settings.openaiTranscriptionKey ?? undefined,
     };
 
-    const enrichedMessages: Array<{ direction: string; content: MessageContent; sender: string }> = [];
+    const enrichedMessages: Array<{
+      direction: string;
+      content: MessageContent;
+      sender: string;
+    }> = [];
     for (const message of orderedMessages) {
       if (message.id === input.triggerMessageId) {
         const enrichedContent = await enrichMessageWithMedia(

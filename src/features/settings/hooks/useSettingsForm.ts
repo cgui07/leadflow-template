@@ -18,7 +18,10 @@ interface UseSettingsFormResult {
   saved: boolean;
   saving: boolean;
   selectedProvider: AIProvider;
-  update: <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => void;
+  update: <K extends keyof UserSettings>(
+    key: K,
+    value: UserSettings[K],
+  ) => void;
   save: () => Promise<void>;
 }
 
@@ -33,9 +36,12 @@ function isUserSettings(value: unknown): value is UserSettings {
   );
 }
 
-export function useSettingsForm(initialSettings: UserSettings): UseSettingsFormResult {
+export function useSettingsForm(
+  initialSettings: UserSettings,
+): UseSettingsFormResult {
   const [form, setForm] = useState<UserSettings>(initialSettings);
-  const [serverSnapshot, setServerSnapshot] = useState<UserSettings>(initialSettings);
+  const [serverSnapshot, setServerSnapshot] =
+    useState<UserSettings>(initialSettings);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -71,7 +77,10 @@ export function useSettingsForm(initialSettings: UserSettings): UseSettingsFormR
       ? "Mostrando os modelos OpenAI suportados por esta integração."
       : "Mostrando os modelos Anthropic suportados por esta integração.";
 
-  function update<K extends keyof UserSettings>(key: K, value: UserSettings[K]) {
+  function update<K extends keyof UserSettings>(
+    key: K,
+    value: UserSettings[K],
+  ) {
     setForm((current) => ({ ...current, [key]: value }));
     setSaved(false);
     setSaveError(null);
@@ -90,8 +99,15 @@ export function useSettingsForm(initialSettings: UserSettings): UseSettingsFormR
             : form.aiApiKey?.trim()
               ? form.aiApiKey
               : null,
+        openaiTranscriptionKey:
+          form.openaiTranscriptionKey === serverSnapshot.openaiTranscriptionKey
+            ? undefined
+            : form.openaiTranscriptionKey?.trim()
+              ? form.openaiTranscriptionKey
+              : null,
         facebookPageAccessToken:
-          form.facebookPageAccessToken === serverSnapshot.facebookPageAccessToken
+          form.facebookPageAccessToken ===
+          serverSnapshot.facebookPageAccessToken
             ? undefined
             : form.facebookPageAccessToken?.trim()
               ? form.facebookPageAccessToken
