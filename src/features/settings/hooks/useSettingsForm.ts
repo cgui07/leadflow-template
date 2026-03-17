@@ -90,6 +90,12 @@ export function useSettingsForm(initialSettings: UserSettings): UseSettingsFormR
             : form.aiApiKey?.trim()
               ? form.aiApiKey
               : null,
+        facebookPageAccessToken:
+          form.facebookPageAccessToken === serverSnapshot.facebookPageAccessToken
+            ? undefined
+            : form.facebookPageAccessToken?.trim()
+              ? form.facebookPageAccessToken
+              : null,
       };
 
       const response = await fetch("/api/settings", {

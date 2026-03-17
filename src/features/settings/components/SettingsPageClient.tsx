@@ -3,12 +3,13 @@
 import { useEffect, useMemo } from "react";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
-import { Bot, Palette, Save } from "lucide-react";
+import { Bot, Megaphone, Palette, Save } from "lucide-react";
 import { useSettingsForm } from "../hooks/useSettingsForm";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { AutomationSettingsSection } from "./AutomationSettingsSection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { FacebookSettingsSection } from "./FacebookSettingsSection";
 import { TenantCustomizationSection } from "./TenantCustomizationSection";
 import type {
   SettingsSection,
@@ -27,7 +28,9 @@ function resolveSection(
   requestedSection: string | null,
   canManageTenant: boolean,
 ): SettingsSection {
-  return canManageTenant && requestedSection === "design" ? "design" : "automation";
+  if (requestedSection === "facebook") return "facebook";
+  if (canManageTenant && requestedSection === "design") return "design";
+  return "automation";
 }
 
 export function SettingsPageClient({
@@ -58,6 +61,11 @@ export function SettingsPageClient({
         id: "automation",
         label: "IA e WhatsApp",
         icon: <Bot className="h-4 w-4" />,
+      },
+      {
+        id: "facebook",
+        label: "Facebook Ads",
+        icon: <Megaphone className="h-4 w-4" />,
       },
       ...(canManageTenant
         ? [
@@ -92,7 +100,7 @@ export function SettingsPageClient({
       title="Configuracoes"
       subtitle={subtitle}
       actions={
-        activeSection === "automation" ? (
+        activeSection === "automation" || activeSection === "facebook" ? (
           <Button
             icon={<Save className="h-4 w-4" />}
             onClick={save}
@@ -124,6 +132,12 @@ export function SettingsPageClient({
             modelOptions={modelOptions}
             saveError={saveError}
             selectedProvider={selectedProvider}
+            update={update}
+          />
+        ) : activeSection === "facebook" ? (
+          <FacebookSettingsSection
+            form={form}
+            saveError={saveError}
             update={update}
           />
         ) : initialTenant ? (

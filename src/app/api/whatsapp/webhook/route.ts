@@ -3,7 +3,7 @@ import { scheduleFollowUp } from "@/lib/followup";
 import { mapEvolutionState } from "@/lib/evolution";
 import { processScheduledAutoReply } from "@/lib/auto-reply";
 import { after, NextRequest, NextResponse } from "next/server";
-import { processIncomingMessage, rememberMapping } from "@/lib/whatsapp";
+import { isGroupJid, processIncomingMessage, rememberMapping } from "@/lib/whatsapp";
 
 const INBOUND_MESSAGE_EVENTS = new Set(["messages.upsert", "MESSAGES_UPSERT"]);
 
@@ -76,6 +76,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (key?.fromMe) {
+      return NextResponse.json({ ok: true });
+    }
+
+    if (isGroupJid(key?.remoteJid)) {
       return NextResponse.json({ ok: true });
     }
 

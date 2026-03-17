@@ -10,6 +10,9 @@ export interface UserSettings {
   followUpEnabled: boolean;
   followUpDelayHours: number;
   maxFollowUps: number;
+  facebookPageId: string | null;
+  facebookPageAccessToken: string | null;
+  facebookAutoOutreach: boolean;
 }
 
 export type UserSettingsUpdateInput = Partial<UserSettings>;
@@ -29,4 +32,4 @@ export type TenantCustomizationUpdateInput = Pick<
   "name" | "logoUrl" | "colorPrimary" | "colorSecondary" | "customTexts" | "featureFlags"
 >;
 
-export type SettingsSection = "automation" | "design";
+export type SettingsSection = "automation" | "facebook" | "design";

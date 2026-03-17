@@ -28,6 +28,9 @@ const USER_SETTINGS_SELECT = {
   followUpEnabled: true,
   followUpDelayHours: true,
   maxFollowUps: true,
+  facebookPageAccessToken: true,
+  facebookAutoOutreach: true,
+  userId: true,
 } as const;
 
 const TENANT_CUSTOMIZATION_SELECT = {
@@ -52,6 +55,9 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   followUpEnabled: true,
   followUpDelayHours: 24,
   maxFollowUps: 3,
+  facebookPageId: null,
+  facebookPageAccessToken: null,
+  facebookAutoOutreach: true,
 };
 
 type UserSettingsRecord = {
@@ -64,6 +70,9 @@ type UserSettingsRecord = {
   followUpEnabled: boolean;
   followUpDelayHours: number;
   maxFollowUps: number;
+  facebookPageAccessToken: string | null;
+  facebookAutoOutreach: boolean;
+  userId: string;
 };
 
 type TenantAccessContext = {
@@ -72,7 +81,7 @@ type TenantAccessContext = {
 };
 
 type UserSettingsPayload = Partial<UserSettings>;
-type PrismaUserSettingsPayload = Omit<UserSettingsPayload, "autoReplyDelaySeconds"> & {
+type PrismaUserSettingsPayload = Omit<UserSettingsPayload, "autoReplyDelaySeconds" | "facebookPageId"> & {
   auto_reply_delay_seconds?: number;
 };
 
@@ -82,10 +91,10 @@ export class TenantAccessError extends Error {
   }
 }
 
-function mapUserSettings(
+async function mapUserSettings(
   settings: UserSettingsRecord | null | undefined,
   maskApiKey: boolean,
-): UserSettings {
+): Promise<UserSettings> {
   if (!settings) {
     return { ...DEFAULT_USER_SETTINGS };
   }
@@ -94,6 +103,11 @@ function mapUserSettings(
     settings.aiProvider,
     DEFAULT_USER_SETTINGS.aiProvider as AIProvider,
   );
+
+  const facebookPage = await prisma.facebookPageMapping.findFirst({
+    where: { userId: settings.userId },
+    select: { pageId: true },
+  });
 
   return {
     aiProvider: provider,
@@ -109,6 +123,11 @@ function mapUserSettings(
     followUpEnabled: settings.followUpEnabled,
     followUpDelayHours: settings.followUpDelayHours,
     maxFollowUps: settings.maxFollowUps,
+    facebookPageId: facebookPage?.pageId ?? null,
+    facebookPageAccessToken: maskApiKey
+      ? maskSecret(settings.facebookPageAccessToken)
+      : settings.facebookPageAccessToken,
+    facebookAutoOutreach: settings.facebookAutoOutreach,
   };
 }
 
@@ -163,6 +182,18 @@ function pickAllowedSettings(input: Record<string, unknown>): UserSettingsPayloa
     Number.isFinite(input.maxFollowUps)
   ) {
     next.maxFollowUps = input.maxFollowUps;
+  }
+
+  if (typeof input.facebookPageId === "string" || input.facebookPageId === null) {
+    next.facebookPageId = input.facebookPageId;
+  }
+
+  if (typeof input.facebookPageAccessToken === "string" || input.facebookPageAccessToken === null) {
+    next.facebookPageAccessToken = input.facebookPageAccessToken;
+  }
+
+  if (typeof input.facebookAutoOutreach === "boolean") {
+    next.facebookAutoOutreach = input.facebookAutoOutreach;
   }
 
   return next;
@@ -220,7 +251,7 @@ export async function updateUserSettings(
   });
   const currentProvider = normalizeSettingsProvider(currentSettings?.aiProvider);
   const rawData = pickAllowedSettings(input);
-  const { autoReplyDelaySeconds, ...restData } = rawData;
+  const { autoReplyDelaySeconds, facebookPageId, ...restData } = rawData;
   const nextProvider = normalizeSettingsProvider(rawData.aiProvider, currentProvider);
   const data: PrismaUserSettingsPayload = {
     ...restData,
@@ -237,6 +268,20 @@ export async function updateUserSettings(
       : DEFAULT_AI_MODEL_BY_PROVIDER[nextProvider];
   } else if (rawData.aiProvider) {
     data.aiModel = DEFAULT_AI_MODEL_BY_PROVIDER[nextProvider];
+  }
+
+  if (facebookPageId !== undefined) {
+    if (facebookPageId) {
+      await prisma.facebookPageMapping.upsert({
+        where: { pageId: facebookPageId },
+        create: { pageId: facebookPageId, userId },
+        update: { userId },
+      });
+    } else {
+      await prisma.facebookPageMapping.deleteMany({
+        where: { userId },
+      });
+    }
   }
 
   const settings = await prisma.userSettings.upsert({
