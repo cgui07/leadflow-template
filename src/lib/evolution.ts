@@ -59,14 +59,14 @@ interface CreateInstanceResult {
   qrcode?: { base64: string; code: string };
 }
 
-export async function createInstance(userId: string): Promise<{ instanceName: string; qrcode: string | null }> {
+export async function createInstance(userId: string, qrcode = true): Promise<{ instanceName: string; qrcode: string | null }> {
   const instanceName = instanceNameForUser(userId);
 
   const data = await evolutionFetch<CreateInstanceResult>("/instance/create", {
     method: "POST",
     body: JSON.stringify({
       instanceName,
-      qrcode: true,
+      qrcode,
       integration: "WHATSAPP-BAILEYS",
     }),
   });
@@ -101,6 +101,13 @@ interface ConnectResult {
 export async function getQrCode(instanceName: string): Promise<string | null> {
   const data = await evolutionFetch<ConnectResult>(`/instance/connect/${instanceName}`);
   return data.base64 || null;
+}
+
+export async function getPairingCode(instanceName: string, phoneNumber: string): Promise<string | null> {
+  const data = await evolutionFetch<{ pairingCode?: string }>(
+    `/instance/connect/${instanceName}?number=${encodeURIComponent(phoneNumber)}`
+  );
+  return data.pairingCode || null;
 }
 
 interface ConnectionStateResult {

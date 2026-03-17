@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { logoutInstance } from "@/lib/evolution";
+import { deleteInstance, logoutInstance } from "@/lib/evolution";
 import { json, error, requireAuth, handleError } from "@/lib/api";
 
 export async function POST() {
@@ -19,6 +19,17 @@ export async function POST() {
     } catch (err) {
       console.error("[whatsapp] Logout error:", err);
     }
+
+    try {
+      await deleteInstance(settings.whatsappPhoneId);
+    } catch (err) {
+      console.error("[whatsapp] Delete error:", err);
+    }
+
+    await prisma.userSettings.update({
+      where: { userId: user.id },
+      data: { whatsappPhoneId: null, whatsappWebhookToken: null },
+    });
 
     return json({ status: "disconnected" });
   } catch (err) {
