@@ -142,6 +142,18 @@ async function callAI(
       }),
     });
     const data = await res.json();
+    console.log(
+      "[ai] Anthropic response status:",
+      res.status,
+      "model:",
+      model,
+      "data:",
+      JSON.stringify(data).substring(0, 300),
+    );
+    if (!res.ok) {
+      console.error("[ai] Anthropic API error:", JSON.stringify(data));
+      return "";
+    }
     return data.content?.[0]?.text || "";
   }
 
