@@ -1,0 +1,32 @@
+name: Run Automations
+
+on:
+  schedule:
+    - cron: "0 */2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: leadflow-automations
+  cancel-in-progress: false
+
+jobs:
+  trigger-cron:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger production cron endpoint
+        env:
+          CRON_APP_URL: ${{ secrets.CRON_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "CRON_APP_URL or CRON_SECRET is not configured. Skipping scheduled call."
+            exit 0
+          fi
+
+          APP_URL="${CRON_APP_URL%/}"
+
+          curl --fail --show-error --silent \
+            -X POST "$APP_URL/api/cron" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -H "Content-Type: application/json"
