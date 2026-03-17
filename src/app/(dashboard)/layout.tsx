@@ -13,7 +13,11 @@ export default async function DashboardLayout({
   return (
     <BrandingProvider branding={session.branding}>
       <div className="flex h-screen overflow-hidden bg-neutral-surface">
-        <Sidebar userName={session.user.name} userEmail={session.user.email} />
+        <Sidebar
+          canManagePlatform={session.canManagePlatform}
+          userName={session.user.name}
+          userEmail={session.user.email}
+        />
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar />
           <div className="flex-1 overflow-y-auto p-4 pb-20 sm:p-6 md:pb-6">

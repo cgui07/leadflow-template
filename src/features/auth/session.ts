@@ -2,6 +2,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { buildBranding } from "@/lib/branding";
+import { isPlatformAdminUser } from "@/lib/platform-admin";
 
 export interface SessionUser {
   id: string;
@@ -17,6 +18,7 @@ export interface SessionData {
   user: SessionUser;
   branding: ReturnType<typeof buildBranding>;
   canManageTenant: boolean;
+  canManagePlatform: boolean;
 }
 
 function mapSessionUser(user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>): SessionUser {
@@ -42,6 +44,7 @@ export const getSession = cache(async (): Promise<SessionData | null> => {
     user: mapSessionUser(user),
     branding: buildBranding(user.tenant),
     canManageTenant: user.role === "admin" && Boolean(user.tenantId),
+    canManagePlatform: isPlatformAdminUser(user),
   };
 });
 
