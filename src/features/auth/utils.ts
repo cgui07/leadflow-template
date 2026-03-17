@@ -5,7 +5,7 @@ export type SearchParamValue = string | string[] | undefined;
 export function getLoginErrorMessage(code?: string | null): string {
   switch (code) {
     case "no_account":
-      return "Conta não encontrada. O acesso e por convite.";
+      return "Conta não encontrada. O acesso é por convite.";
     case "account_suspended":
       return "Conta suspensa. Entre em contato com o administrador.";
     case "google_auth_failed":

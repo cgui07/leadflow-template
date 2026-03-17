@@ -209,7 +209,7 @@ export function LeadDetailPageClient({
     showLeadActions
       ? {
           id: "actions",
-          label: "Acoes",
+          label: "Ações",
           count: lead.leadActions.filter((action) => {
             return !["completed", "cancelled"].includes(action.status);
           }).length,
@@ -326,14 +326,14 @@ export function LeadDetailPageClient({
             {lead.notes ? (
               <div className="mt-4 rounded-lg bg-gray-ghost p-3">
                 <div className="mb-1 text-xs font-medium text-neutral-muted">
-                  Observacoes da IA
+                  Observações da IA
                 </div>
                 <div className="text-sm text-neutral-dark">{lead.notes}</div>
               </div>
             ) : null}
           </SectionContainer>
 
-          <SectionContainer title="Informacoes">
+          <SectionContainer title="Informações">
             <div className="space-y-3 text-sm">
               <div className="rounded-xl border border-warning-30 bg-warning-5 p-3">
                 <div className="text-xs font-semibold uppercase tracking-wide text-warning">
@@ -358,7 +358,7 @@ export function LeadDetailPageClient({
                 <div className="mt-2 text-xs text-neutral-muted">
                   {needsManualPhone
                     ? "Este contato entrou como @lid na Evolution 1.8. Informe o número real do WhatsApp para liberar respostas."
-                    : "Você pode salvar so os digitos ou usar o formato 5511999999999@s.whatsapp.net."}
+                    : "Você pode salvar só os dígitos ou usar o formato 5511999999999@s.whatsapp.net."}
                 </div>
               </div>
 
@@ -368,7 +368,7 @@ export function LeadDetailPageClient({
                 value={new Date(lead.createdAt).toLocaleDateString("pt-BR")}
               />
               <InfoRow
-                label="Ultimo contato"
+                label="Último contato"
                 value={
                   lead.lastContactAt
                     ? new Date(lead.lastContactAt).toLocaleDateString("pt-BR")

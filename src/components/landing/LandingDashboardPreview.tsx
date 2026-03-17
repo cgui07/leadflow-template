@@ -110,7 +110,7 @@ function PriorityLeadCard({ lead }: PriorityLeadCardProps) {
         {lead.detail}
       </div>
       <div className="mt-3 flex items-center justify-between text-[10px] text-neutral sm:mt-4 sm:text-xs">
-        <div>Proxima ação</div>
+        <div>Próxima ação</div>
         <div>{lead.eta}</div>
       </div>
     </div>

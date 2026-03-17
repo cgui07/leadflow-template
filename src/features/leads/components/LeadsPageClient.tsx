@@ -198,7 +198,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
         <div className="w-full max-w-md flex-1">
           <TextField
             icon={<Search className="h-4 w-4" />}
-            placeholder="Buscar por nome, telefone ou regiao..."
+            placeholder="Buscar por nome, telefone ou região..."
             value={search}
             onChange={(event) => {
               setSearch(event.target.value);
@@ -247,7 +247,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
             {data.pages > 1 ? (
               <div className="flex items-center justify-between border-t border-neutral-border px-4 py-3">
                 <div className="text-sm text-neutral-muted">
-                  Pagina {data.page} de {data.pages}
+                  Página {data.page} de {data.pages}
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -264,7 +264,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
                     disabled={page >= data.pages}
                     onClick={() => setPage(page + 1)}
                   >
-                    Proxima
+                    Próxima
                   </Button>
                 </div>
               </div>
@@ -276,7 +276,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
             description={
               deferredSearch
                 ? "Tente uma busca diferente."
-                : "Seus leads aparecerao aqui quando começarem a chegar via WhatsApp."
+                : "Seus leads aparecerão aqui quando começarem a chegar via WhatsApp."
             }
           />
         )}
@@ -317,7 +317,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
             placeholder="Ex: Zona Sul, Barra da Tijuca"
           />
           <TextareaField
-            label="Observacoes"
+            label="Observações"
             value={form.notes}
             onChange={(event) => setForm({ ...form, notes: event.target.value })}
             rows={3}

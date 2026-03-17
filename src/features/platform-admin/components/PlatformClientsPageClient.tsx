@@ -74,7 +74,7 @@ const accessStateConfig: Record<
   pending: { label: "Link pendente", variant: "warning" },
   active: { label: "Ativo", variant: "success" },
   suspended: { label: "Suspenso", variant: "error" },
-  setup: { label: "Sem ativacao", variant: "default" },
+  setup: { label: "Sem ativação", variant: "default" },
 };
 
 function formatDate(dateValue: string | null): string {
@@ -175,7 +175,7 @@ export function PlatformClientsPageClient({
       render: (_, row) => (
         <div>
           <div className="font-medium text-neutral-dark">
-            {row.ownerName || "Aguardando ativacao"}
+            {row.ownerName || "Aguardando ativação"}
           </div>
           <div className="text-xs text-neutral-muted">
             {row.ownerEmail || row.activationEmail || "-"}
@@ -202,7 +202,7 @@ export function PlatformClientsPageClient({
               : row.accessState === "active"
                 ? `Ativado em ${formatDate(row.activatedAt)}`
                 : row.accessState === "suspended"
-                  ? "Login bloqueado ate reativacao"
+                  ? "Login bloqueado até a reativação"
                   : "Gere um novo link para liberar o acesso"}
           </div>
         </div>
@@ -484,7 +484,7 @@ export function PlatformClientsPageClient({
         tone: "success",
         message:
           client.status === "active"
-            ? "Cliente suspenso. O login fica bloqueado ate reativação."
+            ? "Cliente suspenso. O login fica bloqueado até a reativação."
             : "Cliente reativado com sucesso.",
       });
       await refetch();
@@ -545,7 +545,7 @@ export function PlatformClientsPageClient({
 
         <SectionContainer
           title="Carteira de clientes"
-          description="Acompanhe quem ja ativou a conta, quem ainda precisa receber o link e quem esta suspenso."
+          description="Acompanhe quem já ativou a conta, quem ainda precisa receber o link e quem está suspenso."
           noPadding
         >
           <Tabs
@@ -566,7 +566,7 @@ export function PlatformClientsPageClient({
               <EmptyState
                 icon={<Building2 className="h-6 w-6" />}
                 title="Nenhum cliente cadastrado"
-                description="Comece criando o primeiro workspace e envie o link de ativacao assim que o pagamento for confirmado."
+                description="Comece criando o primeiro workspace e envie o link de ativação assim que o pagamento for confirmado."
                 action={
                   <Button
                     icon={<Plus className="h-4 w-4" />}
@@ -587,7 +587,7 @@ export function PlatformClientsPageClient({
         open={showCreateModal}
         onClose={closeCreateModal}
         title="Novo cliente"
-        description="Crie o workspace do corretor e ja deixe o link de ativação pronto."
+        description="Crie o workspace do corretor e já deixe o link de ativação pronto."
         size="md"
       >
         <Form onSubmit={handleCreateClient} className="space-y-4">
@@ -644,12 +644,12 @@ export function PlatformClientsPageClient({
         open={showRegenerateModal}
         onClose={closeRegenerateModal}
         title="Gerar novo link"
-        description="Use este fluxo quando o corretor nao ativou a conta a tempo ou quando o email precisa mudar."
+        description="Use este fluxo quando o corretor não ativou a conta a tempo ou quando o email precisar mudar."
         size="md"
       >
         <Form onSubmit={handleRegenerateLink} className="space-y-4">
           <TextField
-            label="Email de ativacao"
+            label="Email de ativação"
             type="email"
             value={regenerateForm.email}
             onChange={(event) =>
@@ -676,7 +676,7 @@ export function PlatformClientsPageClient({
           />
 
           <div className="rounded-xl border border-neutral-border bg-neutral-surface px-4 py-3 text-sm text-neutral-dark">
-            O link anterior sera encerrado automaticamente. Assim voce evita
+            O link anterior será encerrado automaticamente. Assim você evita
             dois acessos pendentes para o mesmo cliente.
           </div>
 
@@ -701,7 +701,7 @@ export function PlatformClientsPageClient({
           setActivationSummary(null);
           setCopiedActivationLink(false);
         }}
-        title="Link de ativacao pronto"
+        title="Link de ativação pronto"
         description="Envie esse link ao corretor para que ele conclua o cadastro e defina a senha."
         size="md"
       >
@@ -728,7 +728,7 @@ export function PlatformClientsPageClient({
             <div className="rounded-xl border border-neutral-border bg-neutral-surface px-4 py-4 text-sm text-neutral-dark">
               O corretor vai abrir esse link, criar a senha e entrar como admin
               do proprio workspace. Depois disso, novos acessos devem usar login
-              normal ou recuperacao de senha.
+              normal ou recuperação de senha.
             </div>
 
             <div className="flex justify-end gap-3 pt-2">

@@ -49,7 +49,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (err instanceof Error && err.message === "TENANT_NAME_REQUIRED") {
-      return error("Nome da marca e obrigatorio");
+      return error("Nome da marca é obrigatório");
     }
 
     if (err instanceof SyntaxError) {

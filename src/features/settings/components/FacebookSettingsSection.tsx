@@ -40,18 +40,18 @@ export function FacebookSettingsSection({
               type="password"
               value={form.facebookPageAccessToken || ""}
               onChange={(event) => update("facebookPageAccessToken", event.target.value)}
-              placeholder="Token de acesso da pagina"
+              placeholder="Token de acesso da página"
             />
 
             <CheckboxField
               variant="switch"
-              label="Envio automatico via WhatsApp"
+              label="Envio automático via WhatsApp"
               checked={form.facebookAutoOutreach}
               onChange={(checked) => update("facebookAutoOutreach", checked)}
             />
 
             <p className="text-xs text-neutral">
-              Quando ativado, novos leads de campanhas recebem automaticamente a mensagem de saudacao via WhatsApp.
+              Quando ativado, novos leads de campanhas recebem automaticamente a mensagem de saudação via WhatsApp.
             </p>
           </div>
         </SectionContainer>
@@ -66,7 +66,7 @@ export function FacebookSettingsSection({
                 https://seu-dominio/api/facebook/webhook
               </code>
             </p>
-            <p>4. Gere o Page Access Token com permissoes pages_manage_ads + leads_retrieval</p>
+            <p>4. Gere o Page Access Token com permissões pages_manage_ads + leads_retrieval</p>
             <p>5. Cole o Page ID e Access Token nos campos ao lado</p>
           </div>
         </SectionContainer>

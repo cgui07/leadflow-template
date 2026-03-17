@@ -127,7 +127,7 @@ export function DashboardPageContent({
           ) : (
             <EmptyState
               title="Nenhum lead ainda"
-              description="Seus leads aparecerao aqui quando começarem a chegar via WhatsApp ou quando você criar manualmente."
+              description="Seus leads aparecerão aqui quando começarem a chegar via WhatsApp ou quando você criar manualmente."
             />
           )}
         </SectionContainer>

@@ -17,13 +17,13 @@ export function TenantBrandPreview({ branding }: TenantBrandPreviewProps) {
   const dashboardTitle = branding.customTexts.dashboardTitle || "Dashboard";
   const dashboardSubtitle =
     branding.customTexts.dashboardSubtitle ||
-    "Visao geral dos seus leads e atendimentos";
+    "Visão geral dos seus leads e atendimentos";
   const conversationsSubtitle =
     branding.customTexts.conversationsSubtitle ||
     "Gerencie suas conversas do WhatsApp";
   const settingsSubtitle =
     branding.customTexts.settingsSubtitle ||
-    "Configure suas integracoes e preferencias";
+    "Configure suas integrações e preferências";
   const enabledFeatures = TENANT_FEATURE_FLAGS.filter((feature) => {
     return branding.featureFlags[feature.key];
   });
@@ -66,12 +66,12 @@ export function TenantBrandPreview({ branding }: TenantBrandPreviewProps) {
           <div
             className={`rounded-xl px-3 py-2 text-xs font-medium ${getBrandSoftSurfaceClass(branding.colorPrimary)}`}
           >
-            Primaria: {BRAND_COLOR_LABELS[branding.colorPrimary]}
+            Primária: {BRAND_COLOR_LABELS[branding.colorPrimary]}
           </div>
           <div
             className={`rounded-xl px-3 py-2 text-xs font-medium ${getBrandSoftSurfaceClass(branding.colorSecondary)}`}
           >
-            Secundaria: {BRAND_COLOR_LABELS[branding.colorSecondary]}
+            Secundária: {BRAND_COLOR_LABELS[branding.colorSecondary]}
           </div>
         </div>
 
@@ -107,7 +107,7 @@ export function TenantBrandPreview({ branding }: TenantBrandPreviewProps) {
               badgeClass={getBrandChipClass(branding.colorSecondary)}
             />
             <PreviewCopy
-              title="Configuracoes"
+              title="Configurações"
               subtitle={settingsSubtitle}
               badgeClass={getBrandChipClass(branding.colorPrimary)}
             />

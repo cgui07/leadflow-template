@@ -45,7 +45,7 @@ export function AutomationSettingsSection({
         <WhatsAppConnection />
 
         <SectionContainer
-          title="Inteligencia artificial"
+          title="Inteligência artificial"
           icon={<Bot className="h-5 w-5 text-secondary" />}
         >
           <div className="space-y-4">
@@ -79,7 +79,7 @@ export function AutomationSettingsSection({
 
             <CheckboxField
               variant="switch"
-              label="Resposta automatica"
+              label="Resposta automática"
               checked={form.autoReplyEnabled}
               onChange={(checked) => update("autoReplyEnabled", checked)}
             />
@@ -95,7 +95,7 @@ export function AutomationSettingsSection({
 
         <SectionContainer title="Mensagem de saudação">
           <TextareaField
-            label="Mensagem padrao para novos contatos quando a IA não estiver configurada"
+            label="Mensagem padrão para novos contatos quando a IA não estiver configurada"
             value={form.greetingMessage || ""}
             onChange={(event) => update("greetingMessage", event.target.value)}
             rows={4}
@@ -104,13 +104,13 @@ export function AutomationSettingsSection({
         </SectionContainer>
 
         <SectionContainer
-          title="Follow-up automatico"
+          title="Follow-up automático"
           icon={<Bell className="h-5 w-5 text-accent" />}
         >
           <div className="space-y-4">
             <CheckboxField
               variant="switch"
-              label="Ativar follow-ups automaticos"
+              label="Ativar follow-ups automáticos"
               checked={form.followUpEnabled}
               onChange={(checked) => update("followUpEnabled", checked)}
             />
@@ -128,7 +128,7 @@ export function AutomationSettingsSection({
               max={168}
             />
             <TextField
-              label="Maximo de follow-ups por lead"
+              label="Máximo de follow-ups por lead"
               type="number"
               value={String(form.maxFollowUps)}
               onChange={(event) =>

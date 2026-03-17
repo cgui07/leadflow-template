@@ -25,7 +25,7 @@ export function MoveLeadDrawer({
       open={open}
       onClose={onClose}
       title={selectedLead ? `Mover ${selectedLead.name}` : undefined}
-      description="Escolha o estagio de destino para este lead."
+      description="Escolha o estágio de destino para este lead."
     >
       <div className="space-y-2">
         {stages.map((stage) => {

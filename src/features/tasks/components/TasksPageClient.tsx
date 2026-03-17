@@ -163,7 +163,7 @@ export function TasksPageClient({
       <Tabs
         tabs={[
           { id: "pending", label: "Pendentes" },
-          { id: "completed", label: "Concluidas" },
+          { id: "completed", label: "Concluídas" },
           { id: "all", label: "Todas" },
         ]}
         activeTab={tab}
@@ -289,7 +289,7 @@ export function TasksPageClient({
             required
           />
           <TextareaField
-            label="Descricao"
+            label="Descrição"
             value={form.description}
             onChange={(event) =>
               setForm({ ...form, description: event.target.value })

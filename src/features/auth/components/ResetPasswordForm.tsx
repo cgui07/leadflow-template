@@ -60,7 +60,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       router.replace("/dashboard");
       router.refresh();
     } catch {
-      setError("Erro de conexao.");
+      setError("Erro de conexão.");
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           label="Nova senha"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          placeholder={`Minimo ${MIN_PASSWORD_LENGTH} caracteres`}
+          placeholder={`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`}
           minLength={MIN_PASSWORD_LENGTH}
           autoComplete="new-password"
           required

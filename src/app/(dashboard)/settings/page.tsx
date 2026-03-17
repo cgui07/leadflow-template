@@ -5,7 +5,7 @@ import {
   getUserSettings,
 } from "@/features/settings/server";
 
-const DEFAULT_SUBTITLE = "Configure suas integracoes e preferencias";
+const DEFAULT_SUBTITLE = "Configure suas integrações e preferências";
 
 export default async function SettingsPage() {
   const session = await requireSession();

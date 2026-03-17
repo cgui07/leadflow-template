@@ -97,7 +97,7 @@ export function SettingsPageClient({
 
   return (
     <PageContainer
-      title="Configuracoes"
+      title="Configurações"
       subtitle={subtitle}
       actions={
         activeSection === "automation" || activeSection === "facebook" ? (
@@ -114,7 +114,7 @@ export function SettingsPageClient({
       <div className="space-y-6">
         <SectionContainer
           title="Áreas de configuração"
-          description="Escolha se quer ajustar automacoes do workspace ou a identidade visual do cliente."
+          description="Escolha se quer ajustar automações do workspace ou a identidade visual do cliente."
           noPadding
         >
           <Tabs

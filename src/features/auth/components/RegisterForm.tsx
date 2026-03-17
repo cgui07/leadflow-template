@@ -81,7 +81,7 @@ export function RegisterForm({ invite, inviteToken }: RegisterFormProps) {
       router.replace("/dashboard");
       router.refresh();
     } catch {
-      setError("Erro de conexao.");
+      setError("Erro de conexão.");
     } finally {
       setLoading(false);
     }
@@ -132,7 +132,7 @@ export function RegisterForm({ invite, inviteToken }: RegisterFormProps) {
             label="Senha"
             value={form.password}
             onChange={(event) => updateField("password", event.target.value)}
-            placeholder={`Minimo ${MIN_PASSWORD_LENGTH} caracteres`}
+            placeholder={`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`}
             minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"
             required
@@ -167,7 +167,7 @@ export function RegisterForm({ invite, inviteToken }: RegisterFormProps) {
       </Form>
 
       <div className="mt-6 text-center text-sm text-gray-smoke">
-        Ja tem uma conta?{" "}
+        Já tem uma conta?{" "}
         <Link
           href="/login"
           className="font-semibold text-primary transition-colors hover:text-blue-royal"

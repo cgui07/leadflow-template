@@ -6,7 +6,7 @@ import {
 } from "@/features/dashboard/server";
 
 const DEFAULT_TITLE = "Dashboard";
-const DEFAULT_SUBTITLE = "Visao geral dos seus leads e atendimentos";
+const DEFAULT_SUBTITLE = "Visão geral dos seus leads e atendimentos";
 
 export default async function DashboardPage() {
   const session = await requireSession();

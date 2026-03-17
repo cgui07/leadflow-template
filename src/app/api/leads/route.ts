@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     return json(lead, 201);
   } catch (err) {
     if (err instanceof Error && err.message === "LEAD_NAME_PHONE_REQUIRED") {
-      return error("Nome e telefone sao obrigatorios", 400);
+      return error("Nome e telefone são obrigatórios", 400);
     }
 
     if (err instanceof SyntaxError) {

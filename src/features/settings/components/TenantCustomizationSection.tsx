@@ -109,7 +109,7 @@ export function TenantCustomizationSection({
               <InfoCard
                 icon={<Settings2 className="h-4 w-4 text-neutral-muted" />}
                 label="Aplicação imediata"
-                value="Sidebar, titulos e modulos opcionais"
+                value="Sidebar, títulos e módulos opcionais"
               />
             </div>
 
@@ -125,7 +125,7 @@ export function TenantCustomizationSection({
       </SectionContainer>
 
       <SectionContainer
-        title="Experiencia por cliente"
+        title="Experiência por cliente"
         description="Controle textos operacionais e recursos ligados para este tenant."
         icon={<Settings2 className="h-5 w-5 text-accent" />}
       >
@@ -161,7 +161,7 @@ export function TenantCustomizationSection({
                 Recursos do tenant
               </div>
               <div className="mt-1 text-sm text-neutral">
-                Você pode ligar ou desligar modulos sem alterar o resto da base.
+                Você pode ligar ou desligar módulos sem alterar o resto da base.
               </div>
             </div>
 

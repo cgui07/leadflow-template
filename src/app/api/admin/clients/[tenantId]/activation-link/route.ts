@@ -45,7 +45,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
     }
 
     if (err instanceof SyntaxError) {
-      return error("Payload invalido");
+      return error("Payload inválido");
     }
 
     return handleError(err);

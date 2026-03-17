@@ -28,11 +28,11 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     if (err instanceof Error) {
       if (err.message === "TASK_TITLE_REQUIRED") {
-        return error("Título obrigatorio");
+        return error("Título obrigatório");
       }
 
       if (err.message === "TASK_DUE_AT_INVALID") {
-        return error("Data de vencimento invalida");
+        return error("Data de vencimento inválida");
       }
 
       if (err.message === "TASK_TYPE_INVALID") {
