@@ -9,11 +9,18 @@ import {
   normalizeExtractedLeadProfile,
 } from "./lead-scoring";
 
-interface AIConfig {
+export interface AIConfig {
   provider: string;
   apiKey: string;
   model: string;
 }
+
+type AnthropicContentPart =
+  | { type: "text"; text: string }
+  | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
+  | { type: "document"; source: { type: "base64"; media_type: string; data: string } };
+
+export type MessageContent = string | AnthropicContentPart[];
 
 function getQualificationPrompt(agentName: string) {
   return `Você e um assistente de atendimento imobiliário que trabalha para o corretor ${agentName}. Seu objetivo é:
@@ -31,6 +38,9 @@ Regras:
 - Não mencione preços específicos de imóveis
 - Faça uma pergunta por vez
 - Se o cliente perguntar sobre um imóvel específico, diga que o corretor vai entrar em contato com opções
+- Quando o cliente enviar uma imagem, analise o conteúdo visual e responda de forma relevante
+- Quando receber a transcrição de um áudio, responda ao conteúdo falado naturalmente
+- Quando o cliente enviar um documento, analise o conteúdo e responda de forma relevante
 
 Responda apenas com a mensagem para o cliente, sem explicações adicionais.`;
 }
@@ -115,13 +125,36 @@ Regras:
 - O próximo passo deve ser uma ação concreta para o corretor`;
 }
 
+function formatContentForOpenAI(content: MessageContent): string | Array<Record<string, unknown>> {
+  if (typeof content === "string") return content;
+
+  return content.map((part) => {
+    if (part.type === "text") return part;
+    if (part.type === "image") {
+      return {
+        type: "image_url",
+        image_url: {
+          url: `data:${part.source.media_type};base64,${part.source.data}`,
+          detail: "low",
+        },
+      };
+    }
+    if (part.type === "document") {
+      return { type: "text", text: "[Documento recebido - conteúdo não suportado neste provedor]" };
+    }
+    return { type: "text", text: "" };
+  });
+}
+
 async function callAI(
   config: AIConfig,
   systemPrompt: string,
-  messages: Array<{ role: string; content: string }>,
+  messages: Array<{ role: string; content: MessageContent }>,
 ) {
   const provider = isSupportedAIProvider(config.provider) ? config.provider : "openai";
   const model = config.model || DEFAULT_AI_MODEL_BY_PROVIDER[provider];
+  const hasMultimodal = messages.some((m) => Array.isArray(m.content));
+  const maxTokens = hasMultimodal ? 1024 : 300;
 
   if (provider === "anthropic") {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -133,7 +166,7 @@ async function callAI(
       },
       body: JSON.stringify({
         model,
-        max_tokens: 300,
+        max_tokens: maxTokens,
         system: systemPrompt,
         messages: messages.map((message) => ({
           role: message.role === "assistant" ? "assistant" : "user",
@@ -165,8 +198,14 @@ async function callAI(
     },
     body: JSON.stringify({
       model,
-      max_tokens: 300,
-      messages: [{ role: "system", content: systemPrompt }, ...messages],
+      max_tokens: maxTokens,
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages.map((m) => ({
+          role: m.role,
+          content: formatContentForOpenAI(m.content),
+        })),
+      ],
     }),
   });
   const data = await res.json();
@@ -184,7 +223,7 @@ export async function generateAutoReply(
   agentName: string,
   conversationMessages: Array<{
     direction: string;
-    content: string;
+    content: MessageContent;
     sender: string;
   }>,
 ) {
