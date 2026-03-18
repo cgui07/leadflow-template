@@ -17,6 +17,7 @@ import {
   Building2,
   CheckSquare,
   ChevronLeft,
+  Home,
   Kanban,
   LayoutDashboard,
   LogOut,
@@ -70,6 +71,13 @@ function getNavItems(canManagePlatform: boolean): NavItem[] {
       icon: <CheckSquare size={20} />,
       iconMobile: <CheckSquare size={22} />,
       mobileVisible: true,
+    },
+    {
+      label: "Imóveis",
+      href: "/properties",
+      icon: <Home size={20} />,
+      iconMobile: <Home size={22} />,
+      mobileVisible: false,
     },
     ...(canManagePlatform
       ? [

@@ -4,7 +4,8 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageSquare, Phone, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { Phone, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { TextField } from "@/components/forms";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 
@@ -183,7 +184,7 @@ export function WhatsAppConnection() {
     return (
       <SectionContainer
         title="WhatsApp"
-        icon={<MessageSquare className="h-5 w-5 text-success" />}
+        icon={<WhatsAppIcon className="h-6 w-6 text-whatsapp" />}
       >
         <div className="flex items-center justify-center py-8">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-line border-t-primary" />
@@ -195,7 +196,7 @@ export function WhatsAppConnection() {
   return (
     <SectionContainer
       title="WhatsApp"
-      icon={<MessageSquare className="h-5 w-5 text-success" />}
+      icon={<WhatsAppIcon className="h-6 w-6 text-whatsapp" />}
       actions={
         <Badge
           variant={
@@ -222,13 +223,13 @@ export function WhatsAppConnection() {
               <WifiOff className="h-7 w-7 text-neutral" />
             </div>
             <div>
-              <p className="text-sm font-medium text-neutral-dark">
+              <div className="text-sm font-medium text-neutral-dark">
                 Seu WhatsApp não está conectado
-              </p>
-              <p className="mt-1 text-sm text-neutral-muted">
+              </div>
+              <div className="mt-1 text-sm text-neutral-muted">
                 Conecte para enviar e receber mensagens diretamente pela
                 plataforma
-              </p>
+              </div>
             </div>
             <Button onClick={handleConnect} loading={actionLoading}>
               Conectar WhatsApp
@@ -254,10 +255,10 @@ export function WhatsAppConnection() {
                     />
                   </div>
                 </div>
-                <p className="text-xs text-neutral-muted">
+                <div className="text-xs text-neutral-muted">
                   Abra o WhatsApp {" > "}Dispositivos conectados{" > "}Conectar
                   dispositivo
-                </p>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -336,12 +337,12 @@ export function WhatsAppConnection() {
               <Wifi className="h-7 w-7 text-green-dark" />
             </div>
             <div>
-              <p className="text-sm font-medium text-neutral-dark">
+              <div className="text-sm font-medium text-neutral-dark">
                 WhatsApp conectado com sucesso
-              </p>
-              <p className="mt-1 text-sm text-neutral-muted">
+              </div>
+              <div className="mt-1 text-sm text-neutral-muted">
                 Mensagens estão sendo enviadas e recebidas automaticamente
-              </p>
+              </div>
             </div>
             <div className="flex justify-center gap-2">
               <Button
