@@ -3,13 +3,14 @@
 import { useEffect, useMemo } from "react";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
-import { Bot, Megaphone, Palette, Save } from "lucide-react";
+import { Bot, Calendar, Megaphone, Palette, Save } from "lucide-react";
 import { useSettingsForm } from "../hooks/useSettingsForm";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { AutomationSettingsSection } from "./AutomationSettingsSection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FacebookSettingsSection } from "./FacebookSettingsSection";
+import { GoogleCalendarSettings } from "./GoogleCalendarSettings";
 import { TenantCustomizationSection } from "./TenantCustomizationSection";
 import type {
   SettingsSection,
@@ -29,6 +30,7 @@ function resolveSection(
   canManageTenant: boolean,
 ): SettingsSection {
   if (requestedSection === "facebook") return "facebook";
+  if (requestedSection === "calendar") return "calendar";
   if (canManageTenant && requestedSection === "design") return "design";
   return "automation";
 }
@@ -66,6 +68,11 @@ export function SettingsPageClient({
         id: "facebook",
         label: "Facebook Ads",
         icon: <Megaphone className="h-4 w-4" />,
+      },
+      {
+        id: "calendar",
+        label: "Google Agenda",
+        icon: <Calendar className="h-4 w-4" />,
       },
       ...(canManageTenant
         ? [
@@ -140,6 +147,8 @@ export function SettingsPageClient({
             saveError={saveError}
             update={update}
           />
+        ) : activeSection === "calendar" ? (
+          <GoogleCalendarSettings />
         ) : initialTenant ? (
           <TenantCustomizationSection initialTenant={initialTenant} />
         ) : null}

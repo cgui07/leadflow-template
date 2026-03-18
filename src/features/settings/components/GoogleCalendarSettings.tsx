@@ -1,0 +1,177 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { Calendar, CheckCircle, ExternalLink, Loader, Unlink } from "lucide-react";
+import { SectionContainer } from "@/components/layout/SectionContainer";
+import { Button } from "@/components/ui/Button";
+
+interface CalendarStatus {
+  connected: boolean;
+  calendarId: string | null;
+  connectedAt: string | null;
+}
+
+export function GoogleCalendarSettings() {
+  const [status, setStatus] = useState<CalendarStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  useEffect(() => {
+    fetchStatus();
+
+    // Show feedback from OAuth redirect query params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("calendar_connected")) {
+      setMessage({ type: "success", text: "Google Agenda conectado com sucesso!" });
+    } else if (params.get("calendar_error")) {
+      setMessage({
+        type: "error",
+        text: `Erro ao conectar: ${params.get("calendar_error")}`,
+      });
+    }
+  }, []);
+
+  async function fetchStatus() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/settings/google-calendar");
+      if (res.ok) {
+        const data = (await res.json()) as CalendarStatus;
+        setStatus(data);
+      }
+    } catch {
+      // silent
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDisconnect() {
+    if (!confirm("Deseja desconectar o Google Agenda? Os agendamentos existentes não serão afetados.")) {
+      return;
+    }
+    setDisconnecting(true);
+    try {
+      const res = await fetch("/api/settings/google-calendar", {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setStatus({ connected: false, calendarId: null, connectedAt: null });
+        setMessage({ type: "success", text: "Google Agenda desconectado." });
+      }
+    } catch {
+      setMessage({ type: "error", text: "Erro ao desconectar." });
+    } finally {
+      setDisconnecting(false);
+    }
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <SectionContainer
+        title="Google Agenda"
+        icon={<Calendar className="h-5 w-5 text-secondary" />}
+      >
+        <div className="space-y-4">
+          {message && (
+            <div
+              className={`rounded-xl border px-4 py-3 text-sm ${
+                message.type === "success"
+                  ? "border-green-200 bg-green-50 text-green-800"
+                  : "border-red-blush bg-red-pale text-red-dark"
+              }`}
+            >
+              {message.text}
+            </div>
+          )}
+
+          {loading ? (
+            <div className="flex items-center gap-2 text-sm text-neutral">
+              <Loader className="h-4 w-4 animate-spin" />
+              Verificando conexão...
+            </div>
+          ) : status?.connected ? (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4">
+                <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium text-green-800">
+                    Google Agenda conectado
+                  </p>
+                  <p className="text-xs text-green-700">
+                    Agenda: {status.calendarId ?? "primary"}
+                  </p>
+                  {status.connectedAt && (
+                    <p className="text-xs text-green-600">
+                      Desde{" "}
+                      {new Date(status.connectedAt).toLocaleDateString(
+                        "pt-BR",
+                      )}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <Button
+                variant="secondary"
+                icon={<Unlink className="h-4 w-4" />}
+                onClick={handleDisconnect}
+                loading={disconnecting}
+              >
+                Desconectar
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-neutral">
+                Conecte sua conta Google para que a IA possa verificar
+                disponibilidade e criar eventos automaticamente ao agendar
+                visitas com clientes.
+              </p>
+
+              <a href="/api/settings/google-calendar/connect">
+                <Button icon={<ExternalLink className="h-4 w-4" />}>
+                  Conectar Google Agenda
+                </Button>
+              </a>
+            </div>
+          )}
+        </div>
+      </SectionContainer>
+
+      <SectionContainer title="Como funciona">
+        <div className="space-y-3 text-sm text-neutral">
+          <p>
+            1. Clique em <strong>Conectar Google Agenda</strong> e autorize o
+            acesso via conta Google.
+          </p>
+          <p>
+            2. Quando um cliente propuser uma data de visita no WhatsApp, a IA
+            verificará automaticamente sua agenda.
+          </p>
+          <p>
+            3. Se o horário estiver livre, o evento é criado com lembrete — e
+            o cliente recebe uma confirmação.
+          </p>
+          <p>
+            4. Se estiver ocupado, o sistema sugere horários alternativos
+            disponíveis.
+          </p>
+          <p>
+            5. 1 dia antes da visita, o sistema envia uma mensagem de
+            confirmação ao cliente. Basta responder <strong>SIM</strong> ou{" "}
+            <strong>NÃO</strong>.
+          </p>
+          <p className="text-xs">
+            Os tokens de acesso são armazenados com segurança e renovados
+            automaticamente.
+          </p>
+        </div>
+      </SectionContainer>
+    </div>
+  );
+}

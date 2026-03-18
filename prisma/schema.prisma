@@ -8,28 +8,30 @@ datasource db {
 }
 
 model User {
-  id                     String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                     String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                   String
-  email                  String                @unique
-  passwordHash           String?               @map("password_hash")
+  email                  String                 @unique
+  passwordHash           String?                @map("password_hash")
   phone                  String?
-  avatarUrl              String?               @map("avatar_url")
-  role                   String                @default("agent")
-  createdAt              DateTime              @default(now()) @map("created_at")
-  updatedAt              DateTime              @updatedAt @map("updated_at")
-  passwordResetTokenHash String?               @unique @map("password_reset_token_hash")
-  passwordResetExpiresAt DateTime?             @map("password_reset_expires_at") @db.Timestamptz(6)
-  googleId               String?               @unique @map("google_id")
-  tenantId               String?               @map("tenant_id") @db.Uuid
-  status                 String                @default("active") @db.VarChar(20)
+  avatarUrl              String?                @map("avatar_url")
+  role                   String                 @default("agent")
+  createdAt              DateTime               @default(now()) @map("created_at")
+  updatedAt              DateTime               @updatedAt @map("updated_at")
+  passwordResetTokenHash String?                @unique @map("password_reset_token_hash")
+  passwordResetExpiresAt DateTime?              @map("password_reset_expires_at") @db.Timestamptz(6)
+  googleId               String?                @unique @map("google_id")
+  tenantId               String?                @map("tenant_id") @db.Uuid
+  status                 String                 @default("active") @db.VarChar(20)
   activities             Activity[]
+  appointments           appointments[]
+  calendar_connections   calendar_connections[]
   facebookPages          FacebookPageMapping[]
   leadActions            LeadAction[]
   leads                  Lead[]
   properties             properties[]
   tasks                  Task[]
   settings               UserSettings?
-  tenant                 Tenant?               @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tenant                 Tenant?                @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   voiceReplyUsage        VoiceReplyUsage[]
 
   @@index([tenantId], map: "idx_users_tenant_id")
@@ -99,6 +101,7 @@ model Lead {
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")
   activities      Activity[]
+  appointments    appointments[]
   conversation    Conversation?
   leadActions     LeadAction[]
   pipelineStage   PipelineStage? @relation(fields: [pipelineStageId], references: [id])
@@ -194,21 +197,22 @@ model Task {
 }
 
 model LeadAction {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId      String    @map("user_id") @db.Uuid
-  leadId      String    @map("lead_id") @db.Uuid
-  type        String    @db.VarChar
-  status      String    @default("pending") @db.VarChar
-  title       String    @db.VarChar
-  notes       String?
-  origin      String    @default("manual") @db.VarChar
-  scheduledAt DateTime? @map("scheduled_at") @db.Timestamptz(6)
-  reminderAt  DateTime? @map("reminder_at") @db.Timestamptz(6)
-  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
-  lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String         @map("user_id") @db.Uuid
+  leadId       String         @map("lead_id") @db.Uuid
+  type         String         @db.VarChar
+  status       String         @default("pending") @db.VarChar
+  title        String         @db.VarChar
+  notes        String?
+  origin       String         @default("manual") @db.VarChar
+  scheduledAt  DateTime?      @map("scheduled_at") @db.Timestamptz(6)
+  reminderAt   DateTime?      @map("reminder_at") @db.Timestamptz(6)
+  completedAt  DateTime?      @map("completed_at") @db.Timestamptz(6)
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime       @default(now()) @map("updated_at") @db.Timestamptz(6)
+  appointments appointments[]
+  lead         Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([leadId, type, status], map: "idx_lead_actions_lead_type_status")
   @@index([userId, status, scheduledAt], map: "idx_lead_actions_user_status_scheduled")
@@ -285,4 +289,46 @@ model properties {
   users         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id, created_at(sort: Desc)], map: "Property_userId_idx")
+}
+
+model appointments {
+  id                   String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id              String      @db.Uuid
+  lead_id              String      @db.Uuid
+  lead_action_id       String?     @db.Uuid
+  title                String      @db.VarChar(255)
+  scheduled_at         DateTime    @db.Timestamptz(6)
+  duration_minutes     Int         @default(60)
+  address              String?
+  notes                String?
+  status               String      @default("pending_confirmation") @db.VarChar(30)
+  google_event_id      String?     @db.VarChar(255)
+  google_calendar_id   String?     @db.VarChar(255)
+  confirmation_sent_at DateTime?   @db.Timestamptz(6)
+  confirmation_reply   String?     @db.VarChar(30)
+  created_at           DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime    @default(now()) @db.Timestamptz(6)
+  lead_actions         LeadAction? @relation(fields: [lead_action_id], references: [id], onUpdate: NoAction)
+  leads                Lead        @relation(fields: [lead_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                User        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([lead_id], map: "idx_appointments_lead_id")
+  @@index([user_id, scheduled_at], map: "idx_appointments_user_scheduled")
+  @@index([user_id, status], map: "idx_appointments_user_status")
+}
+
+model calendar_connections {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String    @db.Uuid
+  provider         String    @default("google") @db.VarChar(20)
+  access_token     String?
+  refresh_token    String?
+  token_expires_at DateTime? @db.Timestamptz(6)
+  calendar_id      String    @default("primary") @db.VarChar(255)
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @db.Timestamptz(6)
+  users            User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, provider])
+  @@index([user_id], map: "idx_calendar_connections_user_id")
 }
