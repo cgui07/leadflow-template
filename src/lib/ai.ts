@@ -32,28 +32,72 @@ type AnthropicContentPart =
 
 export type MessageContent = string | AnthropicContentPart[];
 
-function getQualificationPrompt(agentName: string) {
+interface PropertyCatalogItem {
+  title: string | null;
+  type: string | null;
+  purpose: string | null;
+  price: string | null;
+  area: string | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  parking_spots: number | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
+  amenities: string[];
+  description: string | null;
+}
+
+function formatPropertyForPrompt(p: PropertyCatalogItem, index: number) {
+  const parts: string[] = [`${index + 1}. ${p.title ?? "Imóvel"}`];
+  if (p.type) parts.push(`   Tipo: ${p.type}`);
+  if (p.purpose) parts.push(`   Finalidade: ${p.purpose}`);
+  if (p.price) parts.push(`   Preço: R$ ${Number(p.price).toLocaleString("pt-BR")}`);
+  if (p.area) parts.push(`   Área: ${p.area} m²`);
+  const quartos = [
+    p.bedrooms != null ? `${p.bedrooms} quarto(s)` : null,
+    p.bathrooms != null ? `${p.bathrooms} banheiro(s)` : null,
+    p.parking_spots != null && p.parking_spots > 0 ? `${p.parking_spots} vaga(s)` : null,
+  ].filter(Boolean).join(", ");
+  if (quartos) parts.push(`   Detalhes: ${quartos}`);
+  const location = [p.neighborhood, p.city, p.state].filter(Boolean).join(", ");
+  if (location) parts.push(`   Localização: ${location}`);
+  if (p.amenities.length > 0) parts.push(`   Comodidades: ${p.amenities.join(", ")}`);
+  if (p.description) parts.push(`   Descrição: ${p.description}`);
+  return parts.join("\n");
+}
+
+function getQualificationPrompt(agentName: string, properties?: PropertyCatalogItem[]) {
+  const catalogSection = properties && properties.length > 0
+    ? `\n\nCATÁLOGO DE IMÓVEIS DISPONÍVEIS:\n${properties.map(formatPropertyForPrompt).join("\n\n")}`
+    : ``;
+
   return `Você é o corretor ${agentName}. Você NÃO é um assistente, NÃO é uma IA e NÃO é um bot. Nunca revele, insinue ou dê a entender que é uma inteligência artificial, um sistema automatizado ou qualquer coisa que não seja o próprio corretor. Se o cliente perguntar se está falando com um robô, responda naturalmente que é o ${agentName}.
 
 Seu objetivo é:
 1. Receber o cliente de forma educada e profissional
-2. Fazer perguntas curtas e objetivas para qualificar o interesse
-3. Coletar: região desejada, tipo de imóvel, faixa de valor, prazo de compra e finalidade (morar ou investir)
-4. Identificar o nível de interesse do cliente
-5. Quando o lead estiver qualificado, combinar um próximo passo (visita, ligação, envio de opções)
+2. Qualificar o interesse: região desejada, tipo de imóvel, faixa de valor, prazo e finalidade (morar ou investir)
+3. Quando o cliente perguntar sobre um imóvel do catálogo, apresentá-lo de forma envolvente e persuasiva — destacando os pontos mais atraentes, despertando desejo e criando senso de oportunidade
+4. Conduzir o cliente ao próximo passo: visita, ligação ou envio de mais detalhes
 
-Regras:
-- Mensagens curtas, com no máximo 2 frases
-- Tom profissional, mas amigável e humano
-- Preste atenção ao nome do cliente e use pronomes e artigos corretos para o gênero (ex: "a Renata", "o Carlos", "ela", "ele"). Na dúvida, use linguagem neutra
-- Não invente informações sobre imóveis disponíveis
-- Não mencione preços específicos de imóveis
-- Faça uma pergunta por vez
-- Se o cliente perguntar sobre um imóvel específico, diga que vai verificar as opções e retornará
-- Quando o cliente enviar uma imagem, analise o conteúdo visual e responda de forma relevante
-- Quando receber a transcrição de um áudio, responda ao conteúdo falado naturalmente
-- Quando o cliente enviar um documento, analise o conteúdo e responda de forma relevante
-- Nunca use termos como "como assistente", "como IA", "fui programado", "não tenho acesso" ou similares
+Regras gerais:
+- Mensagens curtas, com no máximo 2-3 frases
+- Tom profissional, caloroso e entusiasmado — como um corretor apaixonado pelo que vende
+- Use o nome do cliente e pronomes corretos para o gênero. Na dúvida, use linguagem neutra
+- Faça uma pergunta por vez para manter o diálogo fluindo
+
+Quando apresentar um imóvel do catálogo:
+- NÃO liste dados frios — transforme-os em benefícios reais para o cliente
+- Destaque o que é mais especial: localização privilegiada, espaço, lazer, custo-benefício, valorização
+- Use linguagem que gere emoção e desejo ("perfeito para quem busca...", "imagine acordar com...", "uma oportunidade única...")
+- Ao final, convide para um próximo passo concreto (visita, mais fotos, ligação)
+- Se o imóvel não estiver no catálogo, diga que vai verificar e retornará em breve
+
+Outros tipos de mensagem:
+- Imagem: analise e responda de forma relevante
+- Áudio transcrito: responda ao conteúdo falado naturalmente
+- Documento: analise e responda de forma relevante
+- Nunca use termos como "como assistente", "como IA", "fui programado", "não tenho acesso" ou similares${catalogSection}
 
 Responda apenas com a mensagem para o cliente, sem explicações adicionais.`;
 }
@@ -247,13 +291,14 @@ export async function generateAutoReply(
     content: MessageContent;
     sender: string;
   }>,
+  properties?: PropertyCatalogItem[],
 ) {
   const messages = conversationMessages.map((message) => ({
     role: message.direction === "inbound" ? "user" : "assistant",
     content: message.content,
   }));
 
-  return callAI(config, getQualificationPrompt(agentName), messages);
+  return callAI(config, getQualificationPrompt(agentName, properties), messages);
 }
 
 export async function generateFollowUpMessage(
@@ -414,4 +459,80 @@ export async function qualifyLead(leadId: string, config: AIConfig) {
   }
 
   return updated;
+}
+
+export interface ExtractedProperty {
+  title: string | null;
+  type: string | null;
+  purpose: string | null;
+  price: number | null;
+  area: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  parkingSpots: number | null;
+  address: string | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
+  amenities: string[];
+  description: string | null;
+}
+
+export async function extractPropertyData(
+  config: AIConfig,
+  rawText: string,
+): Promise<ExtractedProperty | null> {
+  const systemPrompt = `Você é um assistente especializado em imóveis. Analise o texto abaixo e extraia os dados estruturados do imóvel. Retorne APENAS o JSON, sem markdown ou explicações.
+
+Formato esperado:
+{
+  "title": "título curto do imóvel (ex: Apartamento 3 quartos no Leblon) ou null",
+  "type": "apartamento|casa|terreno|comercial|studio|cobertura|galpao|sala ou null",
+  "purpose": "venda|aluguel ou null",
+  "price": número em reais sem pontos ou vírgulas (ex: 850000) ou null,
+  "area": número em m² (ex: 120) ou null,
+  "bedrooms": número inteiro ou null,
+  "bathrooms": número inteiro ou null,
+  "parkingSpots": número inteiro ou null,
+  "address": "endereço completo ou null",
+  "neighborhood": "bairro ou null",
+  "city": "cidade ou null",
+  "state": "sigla do estado (ex: SP) ou null",
+  "amenities": ["lista", "de", "comodidades"] ou [],
+  "description": "descrição limpa e comercial do imóvel em 2-3 frases ou null"
+}
+
+Regras:
+- Extraia apenas o que está explicitamente no texto
+- Não invente informações
+- price deve ser número puro (sem R$, pontos ou vírgulas)
+- amenities: piscina, churrasqueira, academia, portaria 24h, varanda, etc.`;
+
+  try {
+    const result = await callAI(config, systemPrompt, [
+      { role: "user", content: rawText },
+    ]);
+    if (!result) return null;
+    const parsed = JSON.parse(result);
+    return {
+      title: parsed.title ?? null,
+      type: parsed.type ?? null,
+      purpose: parsed.purpose ?? null,
+      price: typeof parsed.price === "number" ? parsed.price : null,
+      area: typeof parsed.area === "number" ? parsed.area : null,
+      bedrooms: typeof parsed.bedrooms === "number" ? parsed.bedrooms : null,
+      bathrooms: typeof parsed.bathrooms === "number" ? parsed.bathrooms : null,
+      parkingSpots:
+        typeof parsed.parkingSpots === "number" ? parsed.parkingSpots : null,
+      address: parsed.address ?? null,
+      neighborhood: parsed.neighborhood ?? null,
+      city: parsed.city ?? null,
+      state: parsed.state ?? null,
+      amenities: Array.isArray(parsed.amenities) ? parsed.amenities : [],
+      description: parsed.description ?? null,
+    };
+  } catch (err) {
+    console.error("[ai] extractPropertyData failed:", err);
+    return null;
+  }
 }

@@ -207,10 +207,43 @@ export async function processScheduledAutoReply(
       }
     }
 
+    let propertiesCatalog: Array<{
+      title: string | null;
+      type: string | null;
+      purpose: string | null;
+      price: string | null;
+      area: string | null;
+      bedrooms: number | null;
+      bathrooms: number | null;
+      parking_spots: number | null;
+      neighborhood: string | null;
+      city: string | null;
+      state: string | null;
+      amenities: string[];
+      description: string | null;
+    }> = [];
+
+    try {
+      const userProperties = await prisma.properties.findMany({
+        where: { user_id: conversation.lead.userId },
+        orderBy: { created_at: "desc" },
+        take: 20,
+      });
+      console.log("[auto-reply] properties found:", userProperties.length, "for userId:", conversation.lead.userId);
+      propertiesCatalog = userProperties.map((p) => ({
+        ...p,
+        price: p.price?.toString() ?? null,
+        area: p.area?.toString() ?? null,
+      }));
+    } catch (err) {
+      console.error("[auto-reply] failed to fetch properties:", err);
+    }
+
     const reply = await generateAutoReply(
       aiConfig,
       conversation.lead.user.name,
       enrichedMessages,
+      propertiesCatalog.length > 0 ? propertiesCatalog : undefined,
     );
 
     if (!reply) {

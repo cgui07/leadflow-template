@@ -98,9 +98,9 @@ function getOpenAIKeyForTranscription(aiConfig: {
   apiKey: string;
   transcriptionApiKey?: string;
 }): string | null {
+  if (aiConfig.provider === "openai") return aiConfig.apiKey;
   if (aiConfig.transcriptionApiKey) return aiConfig.transcriptionApiKey;
   if (OPENAI_TRANSCRIPTION_KEY) return OPENAI_TRANSCRIPTION_KEY;
-  if (aiConfig.provider === "openai") return aiConfig.apiKey;
   return null;
 }
 
