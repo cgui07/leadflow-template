@@ -10,16 +10,16 @@ export async function GET(req: NextRequest) {
     const leadId = searchParams.get("leadId");
     const status = searchParams.get("status");
 
-    const appointments = await prisma.appointment.findMany({
+    const appointments = await prisma.appointments.findMany({
       where: {
-        userId: user.id,
-        ...(leadId ? { leadId } : {}),
+        user_id: user.id,
+        ...(leadId ? { lead_id: leadId } : {}),
         ...(status ? { status } : {}),
       },
       include: {
-        lead: { select: { id: true, name: true, phone: true } },
+        leads: { select: { id: true, name: true, phone: true } },
       },
-      orderBy: { scheduledAt: "asc" },
+      orderBy: { scheduled_at: "asc" },
       take: 50,
     });
 
@@ -48,7 +48,6 @@ export async function POST(req: NextRequest) {
       return error("scheduledAt inválido", 400);
     }
 
-    // Verify lead belongs to this user
     const lead = await prisma.lead.findFirst({
       where: { id: leadId, userId: user.id },
       select: { id: true },

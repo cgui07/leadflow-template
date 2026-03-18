@@ -14,11 +14,11 @@ export async function GET(
     const user = await requireAuth();
     const { id } = await params;
 
-    const appointment = await prisma.appointment.findFirst({
-      where: { id, userId: user.id },
+    const appointment = await prisma.appointments.findFirst({
+      where: { id, user_id: user.id },
       include: {
-        lead: { select: { id: true, name: true, phone: true } },
-        leadAction: { select: { id: true, type: true, status: true } },
+        leads: { select: { id: true, name: true, phone: true } },
+        lead_actions: { select: { id: true, type: true, status: true } },
       },
     });
 
@@ -38,13 +38,12 @@ export async function PATCH(
     const { id } = await params;
     const body = (await req.json()) as Record<string, unknown>;
 
-    const appointment = await prisma.appointment.findFirst({
-      where: { id, userId: user.id },
+    const appointment = await prisma.appointments.findFirst({
+      where: { id, user_id: user.id },
       select: { id: true },
     });
     if (!appointment) return error("Agendamento não encontrado", 404);
 
-    // Rescheduling
     if (typeof body.scheduledAt === "string") {
       const newDate = new Date(body.scheduledAt);
       if (isNaN(newDate.getTime())) return error("scheduledAt inválido", 400);
@@ -59,7 +58,6 @@ export async function PATCH(
       return json(result);
     }
 
-    // Simple field updates (notes, address, title)
     const allowedUpdates: Record<string, unknown> = {};
     if (typeof body.notes === "string" || body.notes === null) {
       allowedUpdates.notes = body.notes;
@@ -75,9 +73,9 @@ export async function PATCH(
       return error("Nenhum campo válido para atualizar", 400);
     }
 
-    const updated = await prisma.appointment.update({
+    const updated = await prisma.appointments.update({
       where: { id },
-      data: { ...allowedUpdates, updatedAt: new Date() },
+      data: { ...allowedUpdates, updated_at: new Date() },
     });
 
     return json(updated);
