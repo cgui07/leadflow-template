@@ -33,6 +33,7 @@ type AnthropicContentPart =
 export type MessageContent = string | AnthropicContentPart[];
 
 interface PropertyCatalogItem {
+  id?: string;
   title: string | null;
   type: string | null;
   purpose: string | null;
@@ -46,10 +47,12 @@ interface PropertyCatalogItem {
   state: string | null;
   amenities: string[];
   description: string | null;
+  hasPdf?: boolean;
 }
 
 function formatPropertyForPrompt(p: PropertyCatalogItem, index: number) {
-  const parts: string[] = [`${index + 1}. ${p.title ?? "Imóvel"}`];
+  const idTag = p.id ? ` [ID:${p.id}]` : "";
+  const parts: string[] = [`${index + 1}.${idTag} ${p.title ?? "Imóvel"}`];
   if (p.type) parts.push(`   Tipo: ${p.type}`);
   if (p.purpose) parts.push(`   Finalidade: ${p.purpose}`);
   if (p.price) parts.push(`   Preço: R$ ${Number(p.price).toLocaleString("pt-BR")}`);
@@ -64,6 +67,7 @@ function formatPropertyForPrompt(p: PropertyCatalogItem, index: number) {
   if (location) parts.push(`   Localização: ${location}`);
   if (p.amenities.length > 0) parts.push(`   Comodidades: ${p.amenities.join(", ")}`);
   if (p.description) parts.push(`   Descrição: ${p.description}`);
+  if (p.hasPdf) parts.push(`   📎 PDF disponível`);
   return parts.join("\n");
 }
 
@@ -92,6 +96,7 @@ Quando apresentar um imóvel do catálogo:
 - Use linguagem que gere emoção e desejo ("perfeito para quem busca...", "imagine acordar com...", "uma oportunidade única...")
 - Ao final, convide para um próximo passo concreto (visita, mais fotos, ligação)
 - Se o imóvel não estiver no catálogo, diga que vai verificar e retornará em breve
+- Quando mencionar um imóvel que possui PDF disponível (marcado com 📎), inclua a tag [ENVIAR_PDF:ID] no final da sua mensagem (substitua ID pelo código entre colchetes do imóvel). Essa tag será processada pelo sistema e não será visível ao cliente
 
 Outros tipos de mensagem:
 - Imagem: analise e responda de forma relevante

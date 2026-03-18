@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { requireAuth, json, error, handleError } from "@/lib/api";
 import { deleteProperty } from "@/features/properties/server";
+import { requireAuth, json, error, handleError } from "@/lib/api";
 
 export async function DELETE(
   _req: NextRequest,

@@ -231,6 +231,8 @@ export async function GET() {
 - **`src/components/domain/`** — conhecem leads, conversas, etc.
 - **`src/components/forms/`** — campos com estilo consistente
 - **`src/features/<domain>/`** — toda lógica de negócio, hooks e server actions
+- **Nunca use tags HTML nuas** — sempre use componentes do projeto. Nunca `<button>`, `<input>`, `<textarea>` direto. Use `Button`, `TextField`, `TextareaField`, etc. de `src/components/ui/` ou `src/components/forms/`
+- **Delete confirmations** — use `DeleteConfirmationModal` de `src/components/ui/DeleteConfirmationModal` em vez de `window.confirm()`. É mais estético e segue o padrão visual do projeto
 
 ---
 

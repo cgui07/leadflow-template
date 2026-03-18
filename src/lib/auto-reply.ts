@@ -1,24 +1,36 @@
 import { prisma } from "./db";
-import { generateAutoReply, qualifyLead } from "./ai";
-import type { AIConfig, MessageContent } from "./ai";
-import { normalizeAutoReplyDelaySeconds } from "./auto-reply-delay";
 import { resolveMediaContent } from "./media";
-import {
-  getWhatsAppConfig,
-  resolveSendTarget,
-  sendAndSaveMessage,
-  sendAndSaveAudioPTT,
-} from "./whatsapp";
+import { getPropertyPdfUrl } from "./storage";
 import { generateSpeechBase64 } from "./elevenlabs";
+import type { AIConfig, MessageContent } from "./ai";
+import { generateAutoReply, qualifyLead } from "./ai";
+import { normalizeAutoReplyDelaySeconds } from "./auto-reply-delay";
+import {
+  handleConfirmationReplyIfNeeded,
+  handleSchedulingIfNeeded,
+} from "./scheduling-handler";
 import {
   shouldUseVoiceReply,
   getVoiceUsageThisMonth,
   incrementVoiceUsage,
 } from "./voice-reply";
 import {
-  handleConfirmationReplyIfNeeded,
-  handleSchedulingIfNeeded,
-} from "./scheduling-handler";
+  getWhatsAppConfig,
+  resolveSendTarget,
+  sendAndSaveMessage,
+  sendAndSaveAudioPTT,
+} from "./whatsapp";
+
+function extractPdfTags(reply: string): { cleanReply: string; propertyIds: string[] } {
+  const regex = /\[ENVIAR_PDF:([a-f0-9-]+)\]/gi;
+  const propertyIds: string[] = [];
+  let match;
+  while ((match = regex.exec(reply)) !== null) {
+    propertyIds.push(match[1]);
+  }
+  const cleanReply = reply.replace(regex, "").trim();
+  return { cleanReply, propertyIds };
+}
 
 interface ProcessScheduledAutoReplyInput {
   conversationId: string;
@@ -240,6 +252,7 @@ export async function processScheduledAutoReply(
     }
 
     let propertiesCatalog: Array<{
+      id?: string;
       title: string | null;
       type: string | null;
       purpose: string | null;
@@ -253,6 +266,7 @@ export async function processScheduledAutoReply(
       state: string | null;
       amenities: string[];
       description: string | null;
+      hasPdf?: boolean;
     }> = [];
 
     try {
@@ -264,8 +278,10 @@ export async function processScheduledAutoReply(
       console.log("[auto-reply] properties found:", userProperties.length, "for userId:", conversation.lead.userId);
       propertiesCatalog = userProperties.map((p) => ({
         ...p,
+        id: p.id,
         price: p.price?.toString() ?? null,
         area: p.area?.toString() ?? null,
+        hasPdf: Boolean(p.pdf_url),
       }));
     } catch (err) {
       console.error("[auto-reply] failed to fetch properties:", err);
@@ -281,6 +297,9 @@ export async function processScheduledAutoReply(
     if (!reply) {
       return;
     }
+
+    // Extract [ENVIAR_PDF:id] tags from AI reply
+    const { cleanReply, propertyIds: pdfPropertyIds } = extractPdfTags(reply);
 
     const messageCount = orderedMessages.length + 1;
     let sentAsVoice = false;
@@ -300,7 +319,7 @@ export async function processScheduledAutoReply(
       const currentMonthUsage = await getVoiceUsageThisMonth(conversation.lead.userId);
 
       const decision = shouldUseVoiceReply({
-        replyText: reply,
+        replyText: cleanReply,
         inboundText: latestInbound.content,
         isFirstBotReply,
         recentOutboundMessages: recentOutbound,
@@ -318,13 +337,13 @@ export async function processScheduledAutoReply(
 
       if (decision.useVoice) {
         try {
-          const base64Audio = await generateSpeechBase64(reply, elevenlabsVoiceId, elevenlabsApiKey);
+          const base64Audio = await generateSpeechBase64(cleanReply, elevenlabsVoiceId, elevenlabsApiKey);
 
           await sendAndSaveAudioPTT(
             getWhatsAppConfig(settings.whatsappPhoneId!),
             conversation.id,
             replyJid,
-            reply,
+            cleanReply,
             base64Audio,
             "bot",
           );
@@ -342,9 +361,43 @@ export async function processScheduledAutoReply(
         getWhatsAppConfig(settings.whatsappPhoneId!),
         conversation.id,
         replyJid,
-        reply,
+        cleanReply,
         "bot",
       );
+    }
+
+    // Send property PDFs mentioned in the AI reply
+    if (pdfPropertyIds.length > 0) {
+      try {
+        const propertiesWithPdf = await prisma.properties.findMany({
+          where: {
+            id: { in: pdfPropertyIds },
+            user_id: conversation.lead.userId,
+            pdf_url: { not: null },
+          },
+          select: { id: true, title: true, pdf_url: true, pdf_filename: true },
+        });
+
+        for (const prop of propertiesWithPdf) {
+          const signedUrl = await getPropertyPdfUrl(prop.pdf_url!);
+          await sendAndSaveMessage(
+            getWhatsAppConfig(settings.whatsappPhoneId!),
+            conversation.id,
+            replyJid,
+            `📋 ${prop.title ?? "Detalhes do imóvel"}`,
+            "bot",
+            {
+              type: "document",
+              url: signedUrl,
+              caption: `📋 ${prop.title ?? "Detalhes do imóvel"}`,
+              fileName: prop.pdf_filename ?? "imovel.pdf",
+              mimetype: "application/pdf",
+            },
+          );
+        }
+      } catch (err) {
+        console.error("[auto-reply] Failed to send property PDFs:", err);
+      }
     }
 
     if (messageCount >= 3 && messageCount % 2 === 1) {

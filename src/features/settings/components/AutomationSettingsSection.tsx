@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Bell, Bot, Mic2 } from "lucide-react";
 import type { UserSettings } from "../contracts";
+import { VoiceCloneRecorder } from "./VoiceCloneRecorder";
 import { AI_PROVIDER_OPTIONS, type AIProvider } from "@/lib/ai-models";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { WhatsAppConnection } from "@/components/domain/WhatsAppConnection";
@@ -13,7 +14,6 @@ import {
   TextField,
   TextareaField,
 } from "@/components/forms";
-import { VoiceCloneRecorder } from "./VoiceCloneRecorder";
 
 interface AutomationSettingsSectionProps {
   form: UserSettings;

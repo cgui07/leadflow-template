@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionContainer } from "@/components/layout/SectionContainer";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import {
   Form,
   TextField,
@@ -156,6 +157,7 @@ function ActionCard({
   onError,
 }: ActionCardProps) {
   const [loading, setLoading] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const overdue = isOverdue(action);
   const finished = ["completed", "cancelled"].includes(action.status);
 
@@ -184,9 +186,11 @@ function ActionCard({
     }
   }
 
-  async function handleDelete() {
-    if (!confirm("Excluir esta ação?")) return;
+  function handleDeleteClick() {
+    setDeleteModalOpen(true);
+  }
 
+  async function handleDeleteConfirm() {
     setLoading(true);
 
     try {
@@ -202,9 +206,9 @@ function ActionCard({
 
       onError("");
       onRefetch();
+      setDeleteModalOpen(false);
     } catch (error) {
       onError(getErrorMessage(error, "Não foi possível excluir a ação."));
-    } finally {
       setLoading(false);
     }
   }
@@ -327,13 +331,23 @@ function ActionCard({
             variant="ghost"
             size="sm"
             icon={<Trash2 size={14} />}
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             loading={loading}
             aria-label="Excluir"
             className="h-auto p-1 text-neutral-line hover:text-danger"
           />
         </div>
       </div>
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Excluir ação"
+        description={`Tem certeza que deseja excluir a ação "${action.title || ACTION_TYPE_LABELS[action.type as LeadActionType] || "sem título"}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        loading={loading}
+      />
     </div>
   );
 }

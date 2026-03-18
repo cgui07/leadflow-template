@@ -3,14 +3,15 @@
 import { useEffect, useMemo } from "react";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
-import { Bot, Calendar, Megaphone, Palette, Save } from "lucide-react";
 import { useSettingsForm } from "../hooks/useSettingsForm";
+import { SelectField } from "@/components/forms/SelectField";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { GoogleCalendarSettings } from "./GoogleCalendarSettings";
+import { FacebookSettingsSection } from "./FacebookSettingsSection";
+import { Bot, Calendar, Megaphone, Palette, Save } from "lucide-react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { AutomationSettingsSection } from "./AutomationSettingsSection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { FacebookSettingsSection } from "./FacebookSettingsSection";
-import { GoogleCalendarSettings } from "./GoogleCalendarSettings";
 import { TenantCustomizationSection } from "./TenantCustomizationSection";
 import type {
   SettingsSection,
@@ -86,6 +87,15 @@ export function SettingsPageClient({
     ];
   }, [canManageTenant]);
 
+  const tabOptions = useMemo(
+    () =>
+      tabs.map((tab) => ({
+        value: tab.id,
+        label: tab.label,
+      })),
+    [tabs]
+  );
+
   useEffect(() => {
     if (requestedSection === activeSection) {
       return;
@@ -124,12 +134,24 @@ export function SettingsPageClient({
           description="Escolha se quer ajustar automações do workspace ou a identidade visual do cliente."
           noPadding
         >
-          <Tabs
-            tabs={tabs}
-            activeTab={activeSection}
-            onTabChange={handleSectionChange}
-            className="px-6 pt-2"
-          />
+          {/* Desktop: Tabs */}
+          <div className="hidden md:block px-6 pt-2">
+            <Tabs
+              tabs={tabs}
+              activeTab={activeSection}
+              onTabChange={handleSectionChange}
+            />
+          </div>
+
+          {/* Mobile: SelectField */}
+          <div className="md:hidden px-6 pt-2">
+            <SelectField
+              options={tabOptions}
+              value={activeSection}
+              onChange={handleSectionChange}
+              placeholder="Selecione uma área..."
+            />
+          </div>
         </SectionContainer>
 
         {activeSection === "automation" ? (

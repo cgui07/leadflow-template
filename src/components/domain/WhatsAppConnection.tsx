@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Phone, RefreshCw, Wifi, WifiOff } from "lucide-react";
-import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { TextField } from "@/components/forms";
+import { Button } from "@/components/ui/Button";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { Phone, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 
 type ConnectionStatus = "disconnected" | "connecting" | "connected";

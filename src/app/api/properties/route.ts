@@ -1,6 +1,6 @@
+import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
 import { requireAuth, json, error, handleError } from "@/lib/api";
-import { prisma } from "@/lib/db";
 import {
   extractAndSaveProperty,
   listProperties,

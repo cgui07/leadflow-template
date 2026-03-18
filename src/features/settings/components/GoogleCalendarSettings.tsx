@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Calendar, CheckCircle, ExternalLink, Loader, Unlink } from "lucide-react";
-import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Button } from "@/components/ui/Button";
+import { SectionContainer } from "@/components/layout/SectionContainer";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
+import { Calendar, CheckCircle, ExternalLink, Loader, Unlink } from "lucide-react";
 
 interface CalendarStatus {
   connected: boolean;
@@ -15,6 +16,7 @@ export function GoogleCalendarSettings() {
   const [status, setStatus] = useState<CalendarStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [disconnectModalOpen, setDisconnectModalOpen] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -50,10 +52,11 @@ export function GoogleCalendarSettings() {
     }
   }
 
-  async function handleDisconnect() {
-    if (!confirm("Deseja desconectar o Google Agenda? Os agendamentos existentes não serão afetados.")) {
-      return;
-    }
+  function handleDisconnectClick() {
+    setDisconnectModalOpen(true);
+  }
+
+  async function handleDisconnectConfirm() {
     setDisconnecting(true);
     try {
       const res = await fetch("/api/settings/google-calendar", {
@@ -67,6 +70,7 @@ export function GoogleCalendarSettings() {
       setMessage({ type: "error", text: "Erro ao desconectar." });
     } finally {
       setDisconnecting(false);
+      setDisconnectModalOpen(false);
     }
   }
 
@@ -119,7 +123,7 @@ export function GoogleCalendarSettings() {
               <Button
                 variant="secondary"
                 icon={<Unlink className="h-4 w-4" />}
-                onClick={handleDisconnect}
+                onClick={handleDisconnectClick}
                 loading={disconnecting}
               >
                 Desconectar
@@ -172,6 +176,16 @@ export function GoogleCalendarSettings() {
           </p>
         </div>
       </SectionContainer>
+
+      <DeleteConfirmationModal
+        open={disconnectModalOpen}
+        onClose={() => setDisconnectModalOpen(false)}
+        onConfirm={handleDisconnectConfirm}
+        title="Desconectar Google Agenda"
+        description="Deseja desconectar o Google Agenda? Os agendamentos existentes não serão afetados."
+        confirmText="Desconectar"
+        loading={disconnecting}
+      />
     </div>
   );
 }

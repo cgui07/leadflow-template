@@ -1,7 +1,7 @@
-import { NextRequest } from "next/server";
-import { error, handleError, json, requireAuth } from "@/lib/api";
 import { prisma } from "@/lib/db";
+import { NextRequest } from "next/server";
 import { createAppointment } from "@/lib/appointments";
+import { error, handleError, json, requireAuth } from "@/lib/api";
 
 export async function GET(req: NextRequest) {
   try {

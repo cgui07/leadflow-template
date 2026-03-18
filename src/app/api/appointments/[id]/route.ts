@@ -1,6 +1,6 @@
+import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
 import { error, handleError, json, requireAuth } from "@/lib/api";
-import { prisma } from "@/lib/db";
 import {
   cancelAppointment,
   rescheduleAppointment,

@@ -12,6 +12,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { useFeatureFlag } from "@/components/providers/BrandingProvider";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import {
   getPipelineColorSoftClass,
   getScoreTextClass,
@@ -75,6 +76,8 @@ export function LeadDetailPageClient({
   const [phoneInput, setPhoneInput] = useState(initialLead.phone);
   const [savingPhone, setSavingPhone] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const showLeadActions = useFeatureFlag("leadActions");
 
   useEffect(() => {
@@ -180,12 +183,12 @@ export function LeadDetailPageClient({
     }
   }
 
-  async function handleDelete() {
-    const confirmed = window.confirm("Tem certeza que deseja excluir este lead?");
-    if (!confirmed) {
-      return;
-    }
+  function handleDeleteClick() {
+    setDeleteModalOpen(true);
+  }
 
+  async function handleDeleteConfirm() {
+    setDeleting(true);
     setActionError(null);
 
     const response = await fetch(`/api/leads/${leadId}`, { method: "DELETE" });
@@ -195,6 +198,7 @@ export function LeadDetailPageClient({
 
     if (!response.ok) {
       setActionError(payload?.error || "Não foi possível excluir o lead.");
+      setDeleting(false);
       return;
     }
 
@@ -236,7 +240,7 @@ export function LeadDetailPageClient({
               </option>
             ))}
           </select>
-          <Button variant="danger" onClick={handleDelete}>
+          <Button variant="danger" onClick={handleDeleteClick}>
             Excluir
           </Button>
         </div>
@@ -541,6 +545,16 @@ export function LeadDetailPageClient({
           )}
         </SectionContainer>
       ) : null}
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Excluir lead"
+        description={`Tem certeza que deseja excluir o lead "${lead.name}"? Esta ação não pode ser desfeita e todas as conversas associadas serão removidas.`}
+        confirmText="Excluir"
+        loading={deleting}
+      />
     </PageContainer>
   );
 }
