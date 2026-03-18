@@ -28,6 +28,9 @@ const USER_SETTINGS_SELECT = {
   maxFollowUps: true,
   facebookPageAccessToken: true,
   facebookAutoOutreach: true,
+  elevenlabsVoiceId: true,
+  voiceReplyEnabled: true,
+  voiceReplyMonthlyLimit: true,
   userId: true,
 } as const;
 
@@ -57,6 +60,9 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   facebookPageId: null,
   facebookPageAccessToken: null,
   facebookAutoOutreach: true,
+  elevenlabsVoiceId: null,
+  voiceReplyEnabled: false,
+  voiceReplyMonthlyLimit: 50,
 };
 
 type UserSettingsRecord = {
@@ -72,6 +78,9 @@ type UserSettingsRecord = {
   maxFollowUps: number;
   facebookPageAccessToken: string | null;
   facebookAutoOutreach: boolean;
+  elevenlabsVoiceId: string | null;
+  voiceReplyEnabled: boolean;
+  voiceReplyMonthlyLimit: number;
   userId: string;
 };
 
@@ -134,6 +143,9 @@ async function mapUserSettings(
       ? maskSecret(settings.facebookPageAccessToken)
       : settings.facebookPageAccessToken,
     facebookAutoOutreach: settings.facebookAutoOutreach,
+    elevenlabsVoiceId: settings.elevenlabsVoiceId,
+    voiceReplyEnabled: settings.voiceReplyEnabled,
+    voiceReplyMonthlyLimit: settings.voiceReplyMonthlyLimit,
   };
 }
 
@@ -215,6 +227,22 @@ function pickAllowedSettings(
 
   if (typeof input.facebookAutoOutreach === "boolean") {
     next.facebookAutoOutreach = input.facebookAutoOutreach;
+  }
+
+  if (typeof input.elevenlabsVoiceId === "string" || input.elevenlabsVoiceId === null) {
+    next.elevenlabsVoiceId = input.elevenlabsVoiceId;
+  }
+
+  if (typeof input.voiceReplyEnabled === "boolean") {
+    next.voiceReplyEnabled = input.voiceReplyEnabled;
+  }
+
+  if (
+    typeof input.voiceReplyMonthlyLimit === "number" &&
+    Number.isFinite(input.voiceReplyMonthlyLimit) &&
+    input.voiceReplyMonthlyLimit >= 0
+  ) {
+    next.voiceReplyMonthlyLimit = input.voiceReplyMonthlyLimit;
   }
 
   return next;

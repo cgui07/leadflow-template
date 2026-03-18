@@ -30,6 +30,7 @@ model User {
   tasks                  Task[]
   settings               UserSettings?
   tenant                 Tenant?               @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  voiceReplyUsage        VoiceReplyUsage[]
 
   @@index([tenantId], map: "idx_users_tenant_id")
   @@map("users")
@@ -53,6 +54,9 @@ model UserSettings {
   facebookPageAccessToken  String? @map("facebook_page_access_token")
   facebookAutoOutreach     Boolean @default(true) @map("facebook_auto_outreach")
   openaiTranscriptionKey   String? @map("openai_transcription_key")
+  elevenlabsVoiceId        String? @map("elevenlabs_voice_id")
+  voiceReplyEnabled        Boolean @default(false) @map("voice_reply_enabled")
+  voiceReplyMonthlyLimit   Int     @default(50) @map("voice_reply_monthly_limit")
   user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
@@ -243,6 +247,19 @@ model Tenant {
   users          User[]
 
   @@map("tenants")
+}
+
+model VoiceReplyUsage {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  month     String   @db.VarChar(7)
+  count     Int      @default(0)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, month])
+  @@index([userId, month], map: "idx_voice_reply_usage_user_month")
+  @@map("voice_reply_usage")
 }
 
 model properties {
