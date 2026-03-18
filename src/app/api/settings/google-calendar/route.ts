@@ -11,8 +11,8 @@ export async function GET() {
 
     return json({
       connected: Boolean(connection),
-      calendarId: connection?.calendarId ?? null,
-      connectedAt: connection?.createdAt ?? null,
+      calendarId: connection?.calendar_id ?? null,
+      connectedAt: connection?.created_at ?? null,
     });
   } catch (err) {
     return handleError(err);

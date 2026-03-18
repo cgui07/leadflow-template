@@ -49,32 +49,32 @@ export async function exchangeGoogleCalendarCode(
 
   const expiresAt = new Date(Date.now() + (data.expires_in as number) * 1000);
 
-  await prisma.calendarConnection.upsert({
-    where: { userId_provider: { userId, provider: "google" } },
+  await prisma.calendar_connections.upsert({
+    where: { user_id_provider: { user_id: userId, provider: "google" } },
     create: {
-      userId,
+      user_id: userId,
       provider: "google",
-      accessToken: data.access_token as string,
-      refreshToken: (data.refresh_token as string) ?? null,
-      tokenExpiresAt: expiresAt,
-      calendarId: "primary",
+      access_token: data.access_token as string,
+      refresh_token: (data.refresh_token as string) ?? null,
+      token_expires_at: expiresAt,
+      calendar_id: "primary",
     },
     update: {
-      accessToken: data.access_token as string,
+      access_token: data.access_token as string,
       ...(data.refresh_token
-        ? { refreshToken: data.refresh_token as string }
+        ? { refresh_token: data.refresh_token as string }
         : {}),
-      tokenExpiresAt: expiresAt,
-      updatedAt: new Date(),
+      token_expires_at: expiresAt,
+      updated_at: new Date(),
     },
   });
 }
 
 async function refreshGoogleToken(connection: {
   id: string;
-  refreshToken: string | null;
+  refresh_token: string | null;
 }): Promise<string> {
-  if (!connection.refreshToken) {
+  if (!connection.refresh_token) {
     throw new Error("No refresh token available");
   }
 
@@ -82,7 +82,7 @@ async function refreshGoogleToken(connection: {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      refresh_token: connection.refreshToken,
+      refresh_token: connection.refresh_token,
       client_id: process.env.GOOGLE_CLIENT_ID!,
       client_secret: process.env.GOOGLE_CLIENT_SECRET!,
       grant_type: "refresh_token",
@@ -97,12 +97,12 @@ async function refreshGoogleToken(connection: {
 
   const expiresAt = new Date(Date.now() + (data.expires_in as number) * 1000);
 
-  await prisma.calendarConnection.update({
+  await prisma.calendar_connections.update({
     where: { id: connection.id },
     data: {
-      accessToken: data.access_token as string,
-      tokenExpiresAt: expiresAt,
-      updatedAt: new Date(),
+      access_token: data.access_token as string,
+      token_expires_at: expiresAt,
+      updated_at: new Date(),
     },
   });
 
@@ -112,18 +112,17 @@ async function refreshGoogleToken(connection: {
 async function getValidAccessToken(
   userId: string,
 ): Promise<{ token: string; calendarId: string } | null> {
-  const connection = await prisma.calendarConnection.findUnique({
-    where: { userId_provider: { userId, provider: "google" } },
+  const connection = await prisma.calendar_connections.findUnique({
+    where: { user_id_provider: { user_id: userId, provider: "google" } },
   });
 
-  if (!connection?.accessToken) return null;
+  if (!connection?.access_token) return null;
 
-  // Refresh if expiring within 5 minutes
-  const isExpiring = connection.tokenExpiresAt
-    ? connection.tokenExpiresAt < new Date(Date.now() + 5 * 60 * 1000)
+  const isExpiring = connection.token_expires_at
+    ? connection.token_expires_at < new Date(Date.now() + 5 * 60 * 1000)
     : true;
 
-  let token = connection.accessToken;
+  let token = connection.access_token;
 
   if (isExpiring) {
     try {
@@ -134,19 +133,19 @@ async function getValidAccessToken(
     }
   }
 
-  return { token, calendarId: connection.calendarId };
+  return { token, calendarId: connection.calendar_id };
 }
 
 export async function getCalendarConnection(userId: string) {
-  return prisma.calendarConnection.findUnique({
-    where: { userId_provider: { userId, provider: "google" } },
-    select: { id: true, calendarId: true, createdAt: true },
+  return prisma.calendar_connections.findUnique({
+    where: { user_id_provider: { user_id: userId, provider: "google" } },
+    select: { id: true, calendar_id: true, created_at: true },
   });
 }
 
 export async function disconnectGoogleCalendar(userId: string): Promise<void> {
-  await prisma.calendarConnection.deleteMany({
-    where: { userId, provider: "google" },
+  await prisma.calendar_connections.deleteMany({
+    where: { user_id: userId, provider: "google" },
   });
 }
 
@@ -163,7 +162,6 @@ export async function checkCalendarAvailability(
   const auth = await getValidAccessToken(userId);
 
   if (!auth) {
-    // No calendar connected — assume available
     return { isAvailable: true, conflictingEvents: [] };
   }
 
@@ -328,8 +326,8 @@ export async function suggestAlternativeSlots(
   durationMinutes: number,
 ): Promise<Date[]> {
   const slots: Date[] = [];
-
   const candidates: Date[] = [];
+
   for (const offsetHours of [0.5, 1, 2, 3]) {
     const candidate = new Date(
       preferredDate.getTime() + offsetHours * 60 * 60 * 1000,
@@ -339,12 +337,10 @@ export async function suggestAlternativeSlots(
     }
   }
 
-  // Same time next day
   const nextDay = new Date(preferredDate);
   nextDay.setDate(nextDay.getDate() + 1);
   candidates.push(nextDay);
 
-  // Next day +1h
   const nextDayPlus = new Date(nextDay);
   nextDayPlus.setHours(Math.min(nextDay.getHours() + 1, 18));
   candidates.push(nextDayPlus);

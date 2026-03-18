@@ -50,14 +50,14 @@ export async function createAppointment(
       duration,
     );
 
-    const appointment = await prisma.appointment.create({
+    const appointment = await prisma.appointments.create({
       data: {
-        userId: input.userId,
-        leadId: input.leadId,
-        leadActionId: input.leadActionId ?? null,
+        user_id: input.userId,
+        lead_id: input.leadId,
+        lead_action_id: input.leadActionId ?? null,
         title: input.title,
-        scheduledAt: input.scheduledAt,
-        durationMinutes: duration,
+        scheduled_at: input.scheduledAt,
+        duration_minutes: duration,
         address: input.address ?? null,
         notes: input.notes ?? null,
         status: "conflict",
@@ -68,7 +68,7 @@ export async function createAppointment(
       appointment: {
         id: appointment.id,
         title: appointment.title,
-        scheduledAt: appointment.scheduledAt,
+        scheduledAt: appointment.scheduled_at,
         status: appointment.status,
         googleEventId: null,
       },
@@ -94,19 +94,19 @@ export async function createAppointment(
     googleCalendarId = created.calendarId;
   }
 
-  const appointment = await prisma.appointment.create({
+  const appointment = await prisma.appointments.create({
     data: {
-      userId: input.userId,
-      leadId: input.leadId,
-      leadActionId: input.leadActionId ?? null,
+      user_id: input.userId,
+      lead_id: input.leadId,
+      lead_action_id: input.leadActionId ?? null,
       title: input.title,
-      scheduledAt: input.scheduledAt,
-      durationMinutes: duration,
+      scheduled_at: input.scheduledAt,
+      duration_minutes: duration,
       address: input.address ?? null,
       notes: input.notes ?? null,
       status: "confirmed",
-      googleEventId,
-      googleCalendarId,
+      google_event_id: googleEventId,
+      google_calendar_id: googleCalendarId,
     },
   });
 
@@ -136,7 +136,7 @@ export async function createAppointment(
     appointment: {
       id: appointment.id,
       title: appointment.title,
-      scheduledAt: appointment.scheduledAt,
+      scheduledAt: appointment.scheduled_at,
       status: appointment.status,
       googleEventId,
     },
@@ -149,28 +149,28 @@ export async function cancelAppointment(
   appointmentId: string,
   userId: string,
 ): Promise<boolean> {
-  const appointment = await prisma.appointment.findUnique({
+  const appointment = await prisma.appointments.findUnique({
     where: { id: appointmentId },
   });
 
-  if (!appointment || appointment.userId !== userId) return false;
+  if (!appointment || appointment.user_id !== userId) return false;
 
-  if (appointment.googleEventId && appointment.googleCalendarId) {
+  if (appointment.google_event_id && appointment.google_calendar_id) {
     await deleteCalendarEvent(
       userId,
-      appointment.googleEventId,
-      appointment.googleCalendarId,
+      appointment.google_event_id,
+      appointment.google_calendar_id,
     );
   }
 
-  await prisma.appointment.update({
+  await prisma.appointments.update({
     where: { id: appointmentId },
-    data: { status: "cancelled", updatedAt: new Date() },
+    data: { status: "cancelled", updated_at: new Date() },
   });
 
-  if (appointment.leadActionId) {
+  if (appointment.lead_action_id) {
     await prisma.leadAction.update({
-      where: { id: appointment.leadActionId },
+      where: { id: appointment.lead_action_id },
       data: { status: "cancelled" },
     });
   }
@@ -178,7 +178,7 @@ export async function cancelAppointment(
   await prisma.activity.create({
     data: {
       userId,
-      leadId: appointment.leadId,
+      leadId: appointment.lead_id,
       type: "appointment_cancelled",
       title: "Visita cancelada",
       description: `Agendamento cancelado: ${appointment.title}`,
@@ -194,13 +194,13 @@ export async function rescheduleAppointment(
   newScheduledAt: Date,
   address?: string | null,
 ): Promise<AppointmentResult | null> {
-  const appointment = await prisma.appointment.findUnique({
+  const appointment = await prisma.appointments.findUnique({
     where: { id: appointmentId },
   });
 
-  if (!appointment || appointment.userId !== userId) return null;
+  if (!appointment || appointment.user_id !== userId) return null;
 
-  const duration = appointment.durationMinutes;
+  const duration = appointment.duration_minutes;
   const endTime = new Date(newScheduledAt.getTime() + duration * 60 * 1000);
   const availability = await checkCalendarAvailability(
     userId,
@@ -218,9 +218,9 @@ export async function rescheduleAppointment(
       appointment: {
         id: appointment.id,
         title: appointment.title,
-        scheduledAt: appointment.scheduledAt,
+        scheduledAt: appointment.scheduled_at,
         status: appointment.status,
-        googleEventId: appointment.googleEventId,
+        googleEventId: appointment.google_event_id,
       },
       calendarCreated: false,
       wasAvailable: false,
@@ -228,11 +228,11 @@ export async function rescheduleAppointment(
     };
   }
 
-  if (appointment.googleEventId && appointment.googleCalendarId) {
+  if (appointment.google_event_id && appointment.google_calendar_id) {
     await updateCalendarEvent(
       userId,
-      appointment.googleEventId,
-      appointment.googleCalendarId,
+      appointment.google_event_id,
+      appointment.google_calendar_id,
       {
         startTime: newScheduledAt,
         endTime,
@@ -241,19 +241,19 @@ export async function rescheduleAppointment(
     );
   }
 
-  const updated = await prisma.appointment.update({
+  const updated = await prisma.appointments.update({
     where: { id: appointmentId },
     data: {
-      scheduledAt: newScheduledAt,
+      scheduled_at: newScheduledAt,
       address: address ?? appointment.address,
       status: "confirmed",
-      updatedAt: new Date(),
+      updated_at: new Date(),
     },
   });
 
-  if (appointment.leadActionId) {
+  if (appointment.lead_action_id) {
     await prisma.leadAction.update({
-      where: { id: appointment.leadActionId },
+      where: { id: appointment.lead_action_id },
       data: { scheduledAt: newScheduledAt },
     });
   }
@@ -261,7 +261,7 @@ export async function rescheduleAppointment(
   await prisma.activity.create({
     data: {
       userId,
-      leadId: appointment.leadId,
+      leadId: appointment.lead_id,
       type: "appointment_rescheduled",
       title: "Visita remarcada",
       description: `Remarcada para ${newScheduledAt.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`,
@@ -272,11 +272,11 @@ export async function rescheduleAppointment(
     appointment: {
       id: updated.id,
       title: updated.title,
-      scheduledAt: updated.scheduledAt,
+      scheduledAt: updated.scheduled_at,
       status: updated.status,
-      googleEventId: updated.googleEventId,
+      googleEventId: updated.google_event_id,
     },
-    calendarCreated: Boolean(updated.googleEventId),
+    calendarCreated: Boolean(updated.google_event_id),
     wasAvailable: true,
   };
 }
@@ -285,29 +285,28 @@ export async function confirmAppointmentReply(
   leadId: string,
   reply: "confirmed" | "cancelled",
 ): Promise<boolean> {
-  const appointment = await prisma.appointment.findFirst({
-    where: { leadId, status: "pending_confirmation" },
-    orderBy: { scheduledAt: "asc" },
+  const appointment = await prisma.appointments.findFirst({
+    where: { lead_id: leadId, status: "pending_confirmation" },
+    orderBy: { scheduled_at: "asc" },
   });
 
   if (!appointment) return false;
 
   if (reply === "confirmed") {
-    await prisma.appointment.update({
+    await prisma.appointments.update({
       where: { id: appointment.id },
       data: {
         status: "confirmed",
-        confirmationReply: "confirmed",
-        updatedAt: new Date(),
+        confirmation_reply: "confirmed",
+        updated_at: new Date(),
       },
     });
   } else {
-    await cancelAppointment(appointment.id, appointment.userId);
-    // Update confirmationReply even after cancel (best effort)
-    await prisma.appointment
+    await cancelAppointment(appointment.id, appointment.user_id);
+    await prisma.appointments
       .update({
         where: { id: appointment.id },
-        data: { confirmationReply: "cancelled" },
+        data: { confirmation_reply: "cancelled" },
       })
       .catch(() => undefined);
   }
@@ -316,12 +315,12 @@ export async function confirmAppointmentReply(
 }
 
 export async function getPendingAppointmentForLead(leadId: string) {
-  return prisma.appointment.findFirst({
+  return prisma.appointments.findFirst({
     where: {
-      leadId,
+      lead_id: leadId,
       status: { in: ["confirmed", "pending_confirmation"] },
     },
-    orderBy: { scheduledAt: "asc" },
+    orderBy: { scheduled_at: "asc" },
   });
 }
 

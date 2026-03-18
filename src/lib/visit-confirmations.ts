@@ -1,10 +1,3 @@
-/**
- * visit-confirmations.ts
- *
- * Cron-driven logic that:
- * 1. Sends a WhatsApp confirmation message 1 day before each confirmed visit.
- * 2. Marks appointments as "no_show" when no reply is received after they pass.
- */
 import { prisma } from "./db";
 import { getWhatsAppConfig, sendAndSaveMessage } from "./whatsapp";
 
@@ -19,7 +12,6 @@ export async function processVisitConfirmations(): Promise<
 > {
   const results: VisitConfirmationResult[] = [];
 
-  // ── 1. Send confirmation messages for appointments scheduled tomorrow ──────
   const now = new Date();
   const tomorrowStart = new Date(now);
   tomorrowStart.setDate(tomorrowStart.getDate() + 1);
@@ -28,14 +20,14 @@ export async function processVisitConfirmations(): Promise<
   const tomorrowEnd = new Date(tomorrowStart);
   tomorrowEnd.setHours(23, 59, 59, 999);
 
-  const upcoming = await prisma.appointment.findMany({
+  const upcoming = await prisma.appointments.findMany({
     where: {
-      scheduledAt: { gte: tomorrowStart, lte: tomorrowEnd },
+      scheduled_at: { gte: tomorrowStart, lte: tomorrowEnd },
       status: "confirmed",
-      confirmationSentAt: null,
+      confirmation_sent_at: null,
     },
     include: {
-      lead: {
+      leads: {
         include: {
           conversation: true,
           user: { include: { settings: true } },
@@ -46,14 +38,14 @@ export async function processVisitConfirmations(): Promise<
 
   for (const appt of upcoming) {
     try {
-      const settings = appt.lead.user.settings;
-      const conversation = appt.lead.conversation;
+      const settings = appt.leads.user.settings;
+      const conversation = appt.leads.conversation;
 
       if (!settings?.whatsappPhoneId || !conversation?.whatsappChatId) {
         continue;
       }
 
-      const time = appt.scheduledAt.toLocaleTimeString("pt-BR", {
+      const time = appt.scheduled_at.toLocaleTimeString("pt-BR", {
         hour: "2-digit",
         minute: "2-digit",
         timeZone: "America/Sao_Paulo",
@@ -73,12 +65,12 @@ export async function processVisitConfirmations(): Promise<
         "bot",
       );
 
-      await prisma.appointment.update({
+      await prisma.appointments.update({
         where: { id: appt.id },
         data: {
           status: "pending_confirmation",
-          confirmationSentAt: new Date(),
-          updatedAt: new Date(),
+          confirmation_sent_at: new Date(),
+          updated_at: new Date(),
         },
       });
 
@@ -93,23 +85,23 @@ export async function processVisitConfirmations(): Promise<
     }
   }
 
-  // ── 2. Mark passed appointments with no reply as "no_show" ────────────────
+  // Mark passed appointments with no reply as "no_show"
   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
 
-  const expired = await prisma.appointment.findMany({
+  const expired = await prisma.appointments.findMany({
     where: {
       status: "pending_confirmation",
-      confirmationSentAt: { lt: twoDaysAgo },
-      confirmationReply: null,
-      scheduledAt: { lt: now },
+      confirmation_sent_at: { lt: twoDaysAgo },
+      confirmation_reply: null,
+      scheduled_at: { lt: now },
     },
     select: { id: true },
   });
 
   if (expired.length > 0) {
-    await prisma.appointment.updateMany({
+    await prisma.appointments.updateMany({
       where: { id: { in: expired.map((e) => e.id) } },
-      data: { status: "no_show", updatedAt: new Date() },
+      data: { status: "no_show", updated_at: new Date() },
     });
 
     for (const e of expired) {
