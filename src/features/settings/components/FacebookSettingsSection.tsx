@@ -1,7 +1,7 @@
 import { Megaphone } from "lucide-react";
 import type { UserSettings } from "../contracts";
-import { SectionContainer } from "@/components/layout/SectionContainer";
 import { CheckboxField, TextField } from "@/components/forms";
+import { SectionContainer } from "@/components/layout/SectionContainer";
 
 interface FacebookSettingsSectionProps {
   form: UserSettings;

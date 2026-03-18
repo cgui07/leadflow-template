@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { useRef, useState, useEffect } from "react";
 import { Mic, Square, Send, RotateCcw, Check, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 
 type RecorderState =
   | "idle"

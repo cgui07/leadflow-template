@@ -1,16 +1,16 @@
 import { prisma } from "@/lib/db";
-import { after, NextRequest, NextResponse } from "next/server";
-import { getDefaultPipelineStageId } from "@/lib/pipeline";
 import { scheduleFollowUp } from "@/lib/followup";
+import { getDefaultPipelineStageId } from "@/lib/pipeline";
+import { after, NextRequest, NextResponse } from "next/server";
+import {
+  getWhatsAppConfig,
+  sendAndSaveMessage,
+} from "@/lib/whatsapp";
 import {
   fetchLeadData,
   getFacebookVerifyToken,
   verifyFacebookSignature,
 } from "@/lib/facebook";
-import {
-  getWhatsAppConfig,
-  sendAndSaveMessage,
-} from "@/lib/whatsapp";
 
 export async function GET(req: NextRequest) {
   const mode = req.nextUrl.searchParams.get("hub.mode");
