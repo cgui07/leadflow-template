@@ -15,6 +15,10 @@ import {
   getVoiceUsageThisMonth,
   incrementVoiceUsage,
 } from "./voice-reply";
+import {
+  handleConfirmationReplyIfNeeded,
+  handleSchedulingIfNeeded,
+} from "./scheduling-handler";
 
 interface ProcessScheduledAutoReplyInput {
   conversationId: string;
@@ -161,6 +165,27 @@ export async function processScheduledAutoReply(
 
   if (!latestInbound || latestInbound.id !== input.triggerMessageId) {
     return;
+  }
+
+  // ── Appointment confirmation short-circuit ────────────────────────────────
+  // If the client replied SIM/NÃO to a pending visit confirmation, handle it
+  // directly and skip the normal AI reply.
+  const replyJidEarly = resolveSendTarget(
+    input.remoteJidAlt,
+    input.remoteJid,
+    conversation.whatsappChatId,
+    conversation.lead.phone,
+  );
+  if (replyJidEarly) {
+    const handled = await handleConfirmationReplyIfNeeded(
+      conversation.lead.id,
+      conversation.lead.user.id,
+      conversation.id,
+      replyJidEarly,
+      latestInbound.content,
+      settings,
+    );
+    if (handled) return;
   }
 
   const replyJid = resolveSendTarget(
@@ -325,6 +350,23 @@ export async function processScheduledAutoReply(
     if (messageCount >= 3 && messageCount % 2 === 1) {
       await qualifyLead(conversation.lead.id, aiConfig);
     }
+
+    // ── Scheduling intent detection ─────────────────────────────────────────
+    // Runs after the AI reply so it never blocks the main response.
+    // Only fires when there is an open "visit" LeadAction for this lead.
+    await handleSchedulingIfNeeded({
+      userId: conversation.lead.userId,
+      leadId: conversation.lead.id,
+      leadName: conversation.lead.name,
+      conversationId: conversation.id,
+      messages: orderedMessages.map((m) => ({
+        direction: m.direction,
+        content: m.content,
+      })),
+      replyJid,
+      aiConfig,
+      settings,
+    });
 
     return;
   }

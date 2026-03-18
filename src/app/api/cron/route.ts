@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { requireCronAuth } from "@/lib/cron";
 import { processEscalations } from "@/lib/alerts";
 import { processFollowUps } from "@/lib/followup";
+import { processVisitConfirmations } from "@/lib/visit-confirmations";
 
 export async function POST(req: NextRequest) {
   const authError = requireCronAuth(req);
@@ -11,14 +12,20 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const [followUpResults, escalationResults] = await Promise.all([
-      processFollowUps(),
-      processEscalations(),
-    ]);
+    const [followUpResults, escalationResults, visitConfirmationResults] =
+      await Promise.all([
+        processFollowUps(),
+        processEscalations(),
+        processVisitConfirmations(),
+      ]);
 
     return json({
       followUps: { processed: followUpResults.length, results: followUpResults },
       escalations: { processed: escalationResults.length, results: escalationResults },
+      visitConfirmations: {
+        processed: visitConfirmationResults.length,
+        results: visitConfirmationResults,
+      },
       timestamp: new Date().toISOString(),
     });
   } catch (err) {
