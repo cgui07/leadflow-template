@@ -112,6 +112,12 @@ export function useSettingsForm(
             : form.facebookPageAccessToken?.trim()
               ? form.facebookPageAccessToken
               : null,
+        elevenlabsVoiceId:
+          form.elevenlabsVoiceId === serverSnapshot.elevenlabsVoiceId
+            ? undefined
+            : form.elevenlabsVoiceId?.trim()
+              ? form.elevenlabsVoiceId.trim()
+              : null,
       };
 
       const response = await fetch("/api/settings", {

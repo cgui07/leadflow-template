@@ -7,7 +7,14 @@ import {
   getWhatsAppConfig,
   resolveSendTarget,
   sendAndSaveMessage,
+  sendAndSaveAudioPTT,
 } from "./whatsapp";
+import { generateSpeechBase64 } from "./elevenlabs";
+import {
+  shouldUseVoiceReply,
+  getVoiceUsageThisMonth,
+  incrementVoiceUsage,
+} from "./voice-reply";
 
 interface ProcessScheduledAutoReplyInput {
   conversationId: string;
@@ -250,15 +257,70 @@ export async function processScheduledAutoReply(
       return;
     }
 
-    await sendAndSaveMessage(
-      getWhatsAppConfig(settings.whatsappPhoneId),
-      conversation.id,
-      replyJid,
-      reply,
-      "bot",
-    );
-
     const messageCount = orderedMessages.length + 1;
+    let sentAsVoice = false;
+
+    // Attempt voice reply when ElevenLabs is configured
+    const elevenlabsApiKey = process.env.ELEVENLABS_API_KEY;
+    const elevenlabsVoiceId = (settings as Record<string, unknown>).elevenlabsVoiceId as string | null | undefined;
+    const voiceReplyEnabled = (settings as Record<string, unknown>).voiceReplyEnabled as boolean | null | undefined;
+    const voiceReplyMonthlyLimit = (settings as Record<string, unknown>).voiceReplyMonthlyLimit as number | null | undefined;
+
+    if (elevenlabsApiKey && elevenlabsVoiceId && voiceReplyEnabled) {
+      const recentOutbound = orderedMessages
+        .filter((m) => m.direction === "outbound")
+        .map((m) => ({ type: m.type }));
+
+      const isFirstBotReply = recentOutbound.length === 0;
+      const currentMonthUsage = await getVoiceUsageThisMonth(conversation.lead.userId);
+
+      const decision = shouldUseVoiceReply({
+        replyText: reply,
+        inboundText: latestInbound.content,
+        isFirstBotReply,
+        recentOutboundMessages: recentOutbound,
+        voiceEnabled: true,
+        monthlyLimit: voiceReplyMonthlyLimit ?? 50,
+        currentMonthUsage,
+      });
+
+      console.log(
+        "[auto-reply] Voice decision:",
+        decision.useVoice,
+        decision.reason,
+        `(usage: ${currentMonthUsage}/${voiceReplyMonthlyLimit ?? 50})`,
+      );
+
+      if (decision.useVoice) {
+        try {
+          const base64Audio = await generateSpeechBase64(reply, elevenlabsVoiceId, elevenlabsApiKey);
+
+          await sendAndSaveAudioPTT(
+            getWhatsAppConfig(settings.whatsappPhoneId!),
+            conversation.id,
+            replyJid,
+            reply,
+            base64Audio,
+            "bot",
+          );
+
+          await incrementVoiceUsage(conversation.lead.userId);
+          sentAsVoice = true;
+        } catch (err) {
+          console.error("[auto-reply] Voice generation failed, falling back to text:", err);
+        }
+      }
+    }
+
+    if (!sentAsVoice) {
+      await sendAndSaveMessage(
+        getWhatsAppConfig(settings.whatsappPhoneId!),
+        conversation.id,
+        replyJid,
+        reply,
+        "bot",
+      );
+    }
 
     if (messageCount >= 3 && messageCount % 2 === 1) {
       await qualifyLead(conversation.lead.id, aiConfig);

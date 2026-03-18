@@ -298,6 +298,110 @@ export async function sendWhatsAppMedia(
   return data;
 }
 
+export async function sendWhatsAppAudioPTT(
+  config: WhatsAppConfig,
+  to: string,
+  base64Audio: string,
+): Promise<unknown> {
+  const resolvedTo = resolveReplyJid(to);
+  if (!resolvedTo) {
+    throw new Error(`Cannot resolve WhatsApp recipient JID: ${to}`);
+  }
+
+  const evolutionNumber = toEvolutionNumber(resolvedTo);
+  if (!evolutionNumber) {
+    throw new Error(`Cannot convert WhatsApp recipient into Evolution number: ${resolvedTo}`);
+  }
+
+  const url = `${EVOLUTION_API_URL}/message/sendWhatsAppAudio/${config.phoneId}`;
+  console.log("[whatsapp] Sending voice PTT", JSON.stringify({ to, resolvedTo }));
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      apikey: config.token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      number: evolutionNumber,
+      audio: base64Audio,
+      encoding: true,
+    }),
+  });
+
+  const raw = await res.text();
+  const data = parseJsonResponse(raw);
+
+  if (!res.ok) {
+    console.error("WhatsApp audio PTT send error:", data);
+    const message =
+      typeof data === "object" && data && "message" in data && typeof data.message === "string"
+        ? data.message
+        : "Failed to send WhatsApp audio PTT";
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+export async function sendAndSaveAudioPTT(
+  config: WhatsAppConfig,
+  conversationId: string,
+  recipient: string,
+  textContent: string,
+  base64Audio: string,
+  sender: "bot" | "agent",
+) {
+  let replyJid = resolveReplyJid(recipient);
+
+  if (!replyJid) {
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+      select: {
+        whatsappChatId: true,
+        lead: { select: { phone: true } },
+      },
+    });
+
+    replyJid = resolveSendTarget(
+      recipient,
+      conversation?.whatsappChatId,
+      conversation?.lead?.phone,
+    );
+  }
+
+  if (!replyJid) {
+    console.warn("[whatsapp] Skipping audio PTT because recipient could not be resolved:", recipient);
+    return null;
+  }
+
+  const waResponse = await sendWhatsAppAudioPTT(config, replyJid, base64Audio);
+  const waData = waResponse as Record<string, unknown>;
+  const waMessageId =
+    (waData.key as Record<string, unknown>)?.id ??
+    (waData.messages as Array<Record<string, unknown>>)?.[0]?.id;
+
+  const message = await prisma.message.create({
+    data: {
+      conversationId,
+      direction: "outbound",
+      sender,
+      content: textContent,
+      type: "audio",
+      status: "sent",
+      whatsappMsgId: waMessageId as string | undefined,
+      metadata: toInputJsonValue({ sentAsVoice: true, voiceProvider: "elevenlabs" }),
+    },
+  });
+
+  await prisma.conversation.update({
+    where: { id: conversationId },
+    data: { lastMessageAt: new Date() },
+  });
+
+  return message;
+}
+
 export async function markAsRead(config: WhatsAppConfig, messageId: string) {
   const url = `${EVOLUTION_API_URL}/chat/markMessageAsRead/${config.phoneId}`;
 

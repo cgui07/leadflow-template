@@ -14,6 +14,10 @@ export interface UserSettings {
   facebookPageId: string | null;
   facebookPageAccessToken: string | null;
   facebookAutoOutreach: boolean;
+  // ElevenLabs voice reply
+  elevenlabsVoiceId: string | null;
+  voiceReplyEnabled: boolean;
+  voiceReplyMonthlyLimit: number;
 }
 
 export type UserSettingsUpdateInput = Partial<UserSettings>;

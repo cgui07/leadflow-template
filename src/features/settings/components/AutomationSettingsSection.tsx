@@ -1,4 +1,7 @@
-import { Bell, Bot } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Bell, Bot, Mic2 } from "lucide-react";
 import type { UserSettings } from "../contracts";
 import { AI_PROVIDER_OPTIONS, type AIProvider } from "@/lib/ai-models";
 import { SectionContainer } from "@/components/layout/SectionContainer";
@@ -10,6 +13,7 @@ import {
   TextField,
   TextareaField,
 } from "@/components/forms";
+import { VoiceCloneRecorder } from "./VoiceCloneRecorder";
 
 interface AutomationSettingsSectionProps {
   form: UserSettings;
@@ -36,6 +40,8 @@ export function AutomationSettingsSection({
   selectedProvider,
   update,
 }: AutomationSettingsSectionProps) {
+  const [hasVoiceId, setHasVoiceId] = useState(!!form.elevenlabsVoiceId);
+
   return (
     <>
       {saveError && (
@@ -158,6 +164,52 @@ export function AutomationSettingsSection({
               min={1}
               max={10}
             />
+          </div>
+        </SectionContainer>
+
+        <SectionContainer
+          title="Resposta em áudio"
+          icon={<Mic2 className="h-5 w-5 text-primary" />}
+        >
+          <div className="space-y-4">
+            <CheckboxField
+              variant="switch"
+              label="Ativar respostas em áudio"
+              checked={form.voiceReplyEnabled}
+              onChange={(checked) => update("voiceReplyEnabled", checked)}
+            />
+
+            {form.voiceReplyEnabled && (
+              <div className="space-y-3">
+                <CheckboxField
+                  variant="switch"
+                  label="Já tenho o Voice ID do ElevenLabs"
+                  checked={hasVoiceId}
+                  onChange={(checked) => {
+                    setHasVoiceId(checked);
+                    if (!checked) update("elevenlabsVoiceId", null);
+                  }}
+                />
+
+                {hasVoiceId ? (
+                  <TextField
+                    label="Voice ID"
+                    value={form.elevenlabsVoiceId || ""}
+                    onChange={(e) => update("elevenlabsVoiceId", e.target.value || null)}
+                    placeholder="Ex: pNInz6obpgDQGcFmaJgB"
+                    description="Cole o ID da voz do ElevenLabs."
+                  />
+                ) : (
+                  <VoiceCloneRecorder
+                    currentVoiceId={form.elevenlabsVoiceId}
+                    onVoiceCloned={(voiceId) => {
+                      update("elevenlabsVoiceId", voiceId);
+                      setHasVoiceId(true);
+                    }}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </SectionContainer>
       </div>

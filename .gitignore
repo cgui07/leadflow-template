@@ -1,5 +1,4 @@
 
-CLAUDE.md
 /node_modules
 /.pnp
 .pnp.*
@@ -32,6 +31,7 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+/.claude/settings.json
 /.claude/settings.local.json
 /.vscode/settings.json
 /db-migrations.local.txt
