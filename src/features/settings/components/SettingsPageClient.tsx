@@ -1,10 +1,10 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { useEffect, useMemo } from "react";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
 import { useSettingsForm } from "../hooks/useSettingsForm";
-import { SelectField } from "@/components/forms/SelectField";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { GoogleCalendarSettings } from "./GoogleCalendarSettings";
 import { FacebookSettingsSection } from "./FacebookSettingsSection";
@@ -87,15 +87,6 @@ export function SettingsPageClient({
     ];
   }, [canManageTenant]);
 
-  const tabOptions = useMemo(
-    () =>
-      tabs.map((tab) => ({
-        value: tab.id,
-        label: tab.label,
-      })),
-    [tabs]
-  );
-
   useEffect(() => {
     if (requestedSection === activeSection) {
       return;
@@ -143,14 +134,24 @@ export function SettingsPageClient({
             />
           </div>
 
-          {/* Mobile: SelectField */}
-          <div className="md:hidden px-6 pt-2">
-            <SelectField
-              options={tabOptions}
-              value={activeSection}
-              onChange={handleSectionChange}
-              placeholder="Selecione uma área..."
-            />
+          <div className="flex flex-wrap gap-2 px-4 pt-2 pb-1 md:hidden">
+            {tabs.map((tab) => (
+              <Button
+                key={tab.id}
+                type="button"
+                variant="ghost"
+                icon={tab.icon}
+                onClick={() => handleSectionChange(tab.id)}
+                className={cn(
+                  "h-auto rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors",
+                  activeSection === tab.id
+                    ? "bg-primary text-white hover:bg-blue-royal"
+                    : "border border-neutral-border bg-neutral-surface text-neutral-dark hover:bg-neutral-pale",
+                )}
+              >
+                {tab.label}
+              </Button>
+            ))}
           </div>
         </SectionContainer>
 

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import type { ConversationItem } from "../types";
 import { getScoreBadgeClass } from "@/lib/ui-colors";
@@ -26,27 +27,26 @@ export function ConversationHeader({
   const isBot = conversation.status === "bot";
 
   return (
-    <div className="flex items-center justify-between gap-2 border-b border-neutral-border px-3 py-3 sm:px-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onBack}
-        icon={<ArrowLeft size={18} />}
-        aria-label="Voltar"
-        className="md:hidden"
-      />
-
+    <div className="flex items-center justify-between gap-2 bg-teal-dark px-3 py-2.5 sm:px-4">
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-border text-xs font-bold sm:h-9 sm:w-9 sm:text-sm">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          icon={<ArrowLeft size={18} className="text-white" />}
+          aria-label="Voltar"
+          className="md:hidden"
+        />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-mist text-sm font-bold text-teal-dark">
           {conversation.lead.name.charAt(0).toUpperCase()}
         </div>
         <div className="min-w-0">
-          <div className="truncate text-sm font-semibold">
+          <div className="truncate text-sm font-semibold text-white">
             {conversation.lead.name}
           </div>
           <div className="mt-0.5 flex items-center gap-2">
             <ConversationStatusBadge status={conversation.status} />
-            <div className="hidden truncate text-xs text-neutral-muted sm:block">
+            <div className="hidden truncate text-xs text-teal-mist sm:block">
               {conversation.lead.phone}
             </div>
           </div>
@@ -55,29 +55,34 @@ export function ConversationHeader({
 
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <div
-          className={`hidden rounded-full px-2 py-1 text-xs font-medium sm:inline-flex ${getScoreBadgeClass(conversation.lead.score)}`}
+          className={cn(
+            "hidden rounded-full px-2 py-1 text-xs font-medium sm:inline-flex",
+            getScoreBadgeClass(conversation.lead.score),
+          )}
         >
           Score: {conversation.lead.score}
         </div>
 
         {isBot ? (
           <Button
-            variant="primary"
+            variant="ghost"
             size="sm"
-            icon={<User size={14} />}
+            icon={<User size={14} className="text-white" />}
             onClick={onToggleMode}
             loading={switching}
+            className="border border-white/30 text-white hover:bg-white/10"
           >
             <span className="hidden sm:inline">Assumir conversa</span>
             <span className="sm:hidden">Assumir</span>
           </Button>
         ) : (
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
-            icon={<Bot size={14} />}
+            icon={<Bot size={14} className="text-white" />}
             onClick={onToggleMode}
             loading={switching}
+            className="border border-white/30 text-white hover:bg-white/10"
           >
             <span className="hidden sm:inline">Devolver ao bot</span>
             <span className="sm:hidden">Bot</span>
@@ -86,13 +91,14 @@ export function ConversationHeader({
 
         {showSummary && (
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
-            icon={<Sparkles size={14} />}
+            icon={<Sparkles size={14} className="text-white" />}
             onClick={onGenerateSummary}
             loading={summaryLoading}
+            className="border border-white/30 text-white hover:bg-white/10"
           >
-            <span className="hidden sm:inline">Gerar resumo</span>
+            <span className="hidden sm:inline">Resumo</span>
           </Button>
         )}
       </div>

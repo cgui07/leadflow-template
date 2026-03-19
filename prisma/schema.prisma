@@ -289,6 +289,7 @@ model properties {
   pdf_url       String?
   pdf_filename  String?  @db.VarChar(255)
   pdf_size      Int?
+  pdfs          Json     @default("[]")
   users         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id, created_at(sort: Desc)], map: "Property_userId_idx")

@@ -324,6 +324,16 @@ export async function getPendingAppointmentForLead(leadId: string) {
   });
 }
 
+export async function getActiveAppointmentForLead(leadId: string) {
+  return prisma.appointments.findFirst({
+    where: {
+      lead_id: leadId,
+      status: { in: ["confirmed", "pending_confirmation", "conflict"] },
+    },
+    orderBy: { scheduled_at: "desc" },
+  });
+}
+
 export async function getOpenVisitActionForLead(leadId: string) {
   return prisma.leadAction.findFirst({
     where: {
@@ -332,5 +342,21 @@ export async function getOpenVisitActionForLead(leadId: string) {
       status: { in: ["pending", "awaiting_schedule"] },
     },
     orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function ensureVisitAction(userId: string, leadId: string) {
+  const existing = await getOpenVisitActionForLead(leadId);
+  if (existing) return existing;
+
+  return prisma.leadAction.create({
+    data: {
+      userId,
+      leadId,
+      type: "visit",
+      status: "pending",
+      title: "Visita solicitada",
+      origin: "ai",
+    },
   });
 }

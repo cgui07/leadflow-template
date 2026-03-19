@@ -17,7 +17,7 @@ interface MessageInputProps {
 export function MessageInput({
   onSend,
   onAttach,
-  placeholder = "Digite uma mensagem...",
+  placeholder = "Mensagem",
   disabled,
   sending,
   className,
@@ -33,7 +33,8 @@ export function MessageInput({
       setSubmitting(true);
       await onSend?.(trimmed);
       setMessage("");
-    } catch {} finally {
+    } catch {
+    } finally {
       setSubmitting(false);
     }
   }
@@ -45,10 +46,13 @@ export function MessageInput({
     }
   }
 
+  const isLoading = sending || submitting;
+  const canSend = message.trim().length > 0 && !disabled && !isLoading;
+
   return (
     <div
       className={cn(
-        "flex items-end gap-2 px-4 py-3 border-t border-neutral-border",
+        "flex items-end gap-2 bg-neutral-surface px-3 py-2 sm:px-4 sm:py-3",
         className,
       )}
     >
@@ -57,8 +61,9 @@ export function MessageInput({
           variant="ghost"
           size="sm"
           onClick={onAttach}
-          disabled={disabled || sending || submitting}
-          icon={<Paperclip className="h-5 w-5" />}
+          disabled={disabled || isLoading}
+          icon={<Paperclip className="h-5 w-5 text-neutral" />}
+          className="shrink-0"
         />
       )}
       <textarea
@@ -66,21 +71,27 @@ export function MessageInput({
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        disabled={disabled || sending || submitting}
+        disabled={disabled || isLoading}
         rows={1}
         className={cn(
-          "flex-1 resize-none rounded-lg border border-neutral-border px-3 py-2 text-sm",
+          "flex-1 resize-none rounded-xl border-0 bg-white px-4 py-2.5 text-sm shadow-sm",
           "placeholder:text-neutral-muted",
-          "focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent",
+          "focus:outline-none focus:ring-2 focus:ring-teal-DEFAULT/30",
           "disabled:bg-neutral-surface disabled:cursor-not-allowed",
           "max-h-32",
         )}
       />
       <Button
         onClick={handleSend}
-        loading={sending || submitting}
-        disabled={disabled || sending || submitting || !message.trim()}
+        loading={isLoading}
+        disabled={!canSend}
         icon={<Send className="h-5 w-5" />}
+        className={cn(
+          "shrink-0 rounded-full",
+          canSend
+            ? "bg-whatsapp text-white hover:bg-whatsapp-dark"
+            : "bg-neutral-border text-neutral-muted",
+        )}
       />
     </div>
   );

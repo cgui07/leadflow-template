@@ -5,8 +5,10 @@ import { getWhatsAppConfig, sendAndSaveMessage } from "./whatsapp";
 import {
   createAppointment,
   cancelAppointment,
+  rescheduleAppointment,
   getPendingAppointmentForLead,
-  getOpenVisitActionForLead,
+  getActiveAppointmentForLead,
+  ensureVisitAction,
   confirmAppointmentReply,
 } from "./appointments";
 
@@ -94,12 +96,6 @@ export async function handleConfirmationReplyIfNeeded(
 export async function handleSchedulingIfNeeded(
   input: HandleSchedulingInput,
 ): Promise<void> {
-  const openAction = await getOpenVisitActionForLead(input.leadId);
-  if (!openAction) return;
-
-  const existing = await getPendingAppointmentForLead(input.leadId);
-  if (existing) return;
-
   const intent = await extractSchedulingIntent(input.aiConfig, input.messages);
 
   if (!intent.hasIntent || !intent.proposedDate || !intent.proposedTime) return;
@@ -109,8 +105,52 @@ export async function handleSchedulingIfNeeded(
     `${intent.proposedDate}T${intent.proposedTime}:00`,
   );
   if (isNaN(scheduledAt.getTime())) return;
-
   if (scheduledAt < new Date()) return;
+
+  if (intent.isReschedulingRequest) {
+    const active = await getActiveAppointmentForLead(input.leadId);
+    if (!active) return;
+
+    const result = await rescheduleAppointment(
+      active.id,
+      input.userId,
+      scheduledAt,
+      intent.address,
+    );
+
+    if (!result || !input.settings.whatsappPhoneId) return;
+
+    const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
+
+    if (result.wasAvailable) {
+      await sendAndSaveMessage(
+        config,
+        input.conversationId,
+        input.replyJid,
+        `✅ Visita remarcada para ${formatDate(scheduledAt)} às ${formatTime(scheduledAt)}!${intent.address ? `\n📍 ${intent.address}` : ""}${result.calendarCreated ? " Agenda atualizada. 📅" : ""}`,
+        "bot",
+      );
+    } else if (result.alternativeSlots && result.alternativeSlots.length > 0) {
+      await sendAndSaveMessage(
+        config,
+        input.conversationId,
+        input.replyJid,
+        `Esse novo horário também está ocupado. Que tal um desses?\n\n${formatSlots(result.alternativeSlots)}`,
+        "bot",
+      );
+    }
+    return;
+  }
+
+  const existing = await getPendingAppointmentForLead(input.leadId);
+  if (existing) return;
+
+  const openAction = await ensureVisitAction(input.userId, input.leadId);
+
+  const oldConflict = await getActiveAppointmentForLead(input.leadId);
+  if (oldConflict && oldConflict.status === "conflict") {
+    await cancelAppointment(oldConflict.id, input.userId);
+  }
 
   const result = await createAppointment({
     userId: input.userId,
@@ -126,52 +166,51 @@ export async function handleSchedulingIfNeeded(
   const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
 
   if (result.wasAvailable) {
-    const time = scheduledAt.toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "America/Sao_Paulo",
-    });
-    const date = scheduledAt.toLocaleDateString("pt-BR", {
-      weekday: "long",
-      day: "2-digit",
-      month: "2-digit",
-      timeZone: "America/Sao_Paulo",
-    });
-    const calendarNote = result.calendarCreated
-      ? " Adicionado na agenda do corretor. 📅"
-      : "";
-
     await sendAndSaveMessage(
       config,
       input.conversationId,
       input.replyJid,
-      `✅ Visita agendada para ${date} às ${time}!${intent.address ? `\n📍 ${intent.address}` : ""}${calendarNote}`,
+      `✅ Visita agendada para ${formatDate(scheduledAt)} às ${formatTime(scheduledAt)}!${intent.address ? `\n📍 ${intent.address}` : ""}${result.calendarCreated ? " Adicionado na agenda do corretor. 📅" : ""}`,
       "bot",
     );
   } else if (result.alternativeSlots && result.alternativeSlots.length > 0) {
-    const slotsText = result.alternativeSlots
-      .map((slot) => {
-        const t = slot.toLocaleTimeString("pt-BR", {
-          hour: "2-digit",
-          minute: "2-digit",
-          timeZone: "America/Sao_Paulo",
-        });
-        const d = slot.toLocaleDateString("pt-BR", {
-          weekday: "short",
-          day: "2-digit",
-          month: "2-digit",
-          timeZone: "America/Sao_Paulo",
-        });
-        return `• ${d} às ${t}`;
-      })
-      .join("\n");
-
     await sendAndSaveMessage(
       config,
       input.conversationId,
       input.replyJid,
-      `Infelizmente esse horário já está ocupado na minha agenda. Que tal um desses?\n\n${slotsText}`,
+      `Infelizmente esse horário já está ocupado na minha agenda. Que tal um desses?\n\n${formatSlots(result.alternativeSlots)}`,
       "bot",
     );
   }
+}
+
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Sao_Paulo",
+  });
+}
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "America/Sao_Paulo",
+  });
+}
+
+function formatSlots(slots: Date[]): string {
+  return slots
+    .map((slot) => {
+      const d = slot.toLocaleDateString("pt-BR", {
+        weekday: "short",
+        day: "2-digit",
+        month: "2-digit",
+        timeZone: "America/Sao_Paulo",
+      });
+      return `• ${d} às ${formatTime(slot)}`;
+    })
+    .join("\n");
 }

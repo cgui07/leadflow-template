@@ -203,6 +203,37 @@ export function resolveSendTarget(...candidates: MaybeJid[]) {
   return null;
 }
 
+export async function sendPresenceUpdate(
+  config: WhatsAppConfig,
+  to: string,
+  presence: "composing" | "recording",
+) {
+  const resolvedTo = resolveReplyJid(to);
+  if (!resolvedTo) return;
+
+  const evolutionNumber = toEvolutionNumber(resolvedTo);
+  if (!evolutionNumber) return;
+
+  const url = `${EVOLUTION_API_URL}/chat/updatePresence/${config.phoneId}`;
+
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: {
+        apikey: config.token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        number: evolutionNumber,
+        presence,
+      }),
+    });
+    console.log("[whatsapp] Presence sent:", presence, "to:", evolutionNumber);
+  } catch (err) {
+    console.warn("[whatsapp] Failed to send presence update:", err);
+  }
+}
+
 export async function sendWhatsAppMessage(config: WhatsAppConfig, to: string, text: string) {
   const resolvedTo = resolveReplyJid(to);
   if (!resolvedTo) {

@@ -23,6 +23,12 @@ import {
   X,
 } from "lucide-react";
 
+interface PdfEntry {
+  url: string;
+  filename: string;
+  size: number;
+}
+
 interface Property {
   id: string;
   raw_text: string;
@@ -40,9 +46,7 @@ interface Property {
   state: string | null;
   amenities: string[];
   description: string | null;
-  pdf_url: string | null;
-  pdf_filename: string | null;
-  pdf_size: number | null;
+  pdfs: PdfEntry[];
   createdAt: string;
 }
 
@@ -81,23 +85,16 @@ function formatFileSize(bytes: number) {
 function PropertyCard({
   property,
   onDelete,
-  onPdfChange,
+  onPdfsChange,
 }: {
   property: Property;
   onDelete: (id: string) => void;
-  onPdfChange: (
-    id: string,
-    pdf: {
-      pdf_url: string | null;
-      pdf_filename: string | null;
-      pdf_size: number | null;
-    },
-  ) => void;
+  onPdfsChange: (id: string, pdfs: PdfEntry[]) => void;
 }) {
   const [deleting, setDeleting] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
-  const [deletingPdf, setDeletingPdf] = useState(false);
+  const [deletingPdfUrl, setDeletingPdfUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleDeleteClick() {
@@ -122,8 +119,8 @@ function PropertyCard({
       alert("Apenas arquivos PDF são aceitos.");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      alert("O arquivo excede o limite de 10MB.");
+    if (file.size > 50 * 1024 * 1024) {
+      alert("O arquivo excede o limite de 50MB.");
       return;
     }
     setUploadingPdf(true);
@@ -135,8 +132,8 @@ function PropertyCard({
         body: formData,
       });
       if (res.ok) {
-        const data = await res.json();
-        onPdfChange(property.id, data);
+        const newEntry: PdfEntry = await res.json();
+        onPdfsChange(property.id, [...property.pdfs, newEntry]);
       }
     } finally {
       setUploadingPdf(false);
@@ -144,21 +141,21 @@ function PropertyCard({
     }
   }
 
-  async function handlePdfDelete() {
-    setDeletingPdf(true);
+  async function handlePdfDelete(pdfUrl: string) {
+    setDeletingPdfUrl(pdfUrl);
     try {
-      const res = await fetch(`/api/properties/${property.id}/pdf`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/properties/${property.id}/pdf?url=${encodeURIComponent(pdfUrl)}`,
+        { method: "DELETE" },
+      );
       if (res.ok) {
-        onPdfChange(property.id, {
-          pdf_url: null,
-          pdf_filename: null,
-          pdf_size: null,
-        });
+        onPdfsChange(
+          property.id,
+          property.pdfs.filter((p) => p.url !== pdfUrl),
+        );
       }
     } finally {
-      setDeletingPdf(false);
+      setDeletingPdfUrl(null);
     }
   }
 
@@ -275,37 +272,48 @@ function PropertyCard({
           hidden
           onChange={handlePdfUpload}
         />
-        {property.pdf_url ? (
-          <div className="flex items-center gap-2 w-full">
-            <FileText size={14} className="text-primary shrink-0" />
-            <span className="text-xs text-neutral-ink truncate flex-1">
-              {property.pdf_filename ?? "documento.pdf"}
-            </span>
-            {property.pdf_size && (
-              <span className="text-xs text-neutral-muted shrink-0">
-                {formatFileSize(property.pdf_size)}
-              </span>
-            )}
-            <Button
-              variant="ghost"
-              onClick={handlePdfDelete}
-              disabled={deletingPdf}
-              className="text-neutral-muted hover:text-danger shrink-0 p-0.5 rounded transition-colors"
-            >
-              <X size={14} />
-            </Button>
-          </div>
-        ) : (
+        <div className="flex flex-col gap-2 w-full">
+          {property.pdfs.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              {property.pdfs.map((pdf) => (
+                <div
+                  key={pdf.url}
+                  className="flex items-center gap-1.5 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5"
+                >
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-primary/10">
+                    <FileText size={12} className="text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-xs font-medium text-neutral-ink leading-tight">
+                      {pdf.filename}
+                    </div>
+                    <div className="text-[10px] text-neutral-muted leading-tight">
+                      {formatFileSize(pdf.size)}
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    onClick={() => handlePdfDelete(pdf.url)}
+                    disabled={deletingPdfUrl === pdf.url}
+                    className="shrink-0 rounded p-0.5 text-neutral-muted transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-50"
+                  >
+                    <X size={12} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
           <Button
             variant="ghost"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingPdf}
-            className="flex items-center gap-2 text-xs text-neutral hover:text-primary transition-colors"
+            className="flex items-center gap-1.5 text-xs text-neutral hover:text-primary transition-colors"
           >
-            <FileUp size={14} />
-            {uploadingPdf ? "Enviando..." : "Anexar PDF"}
+            <FileUp size={13} />
+            {uploadingPdf ? "Enviando..." : "Adicionar PDF"}
           </Button>
-        )}
+        </div>
       </CardFooter>
 
       <DeleteConfirmationModal
@@ -321,6 +329,8 @@ function PropertyCard({
   );
 }
 
+const MAX_PDF_SIZE = 50 * 1024 * 1024;
+
 export function PropertiesClient({
   initialProperties,
 }: {
@@ -330,6 +340,36 @@ export function PropertiesClient({
   const [rawText, setRawText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingPdfs, setPendingPdfs] = useState<File[]>([]);
+  const [dragOver, setDragOver] = useState(false);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+
+  function validateAndAddPdf(file: File) {
+    if (file.type !== "application/pdf") {
+      setError("Apenas arquivos PDF são aceitos.");
+      return;
+    }
+    if (file.size > MAX_PDF_SIZE) {
+      setError("O arquivo excede o limite de 50MB.");
+      return;
+    }
+    setError(null);
+    setPendingPdfs((prev) => [...prev, file]);
+  }
+
+  function handlePdfSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    validateAndAddPdf(file);
+    if (pdfInputRef.current) pdfInputRef.current.value = "";
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) validateAndAddPdf(file);
+  }
 
   async function handleExtract() {
     if (!rawText.trim()) return;
@@ -350,7 +390,23 @@ export function PropertiesClient({
         return;
       }
 
-      setProperties((prev) => [data, ...prev]);
+      const property = { ...(data as Property), pdfs: [] as PdfEntry[] };
+
+      for (const file of pendingPdfs) {
+        const formData = new FormData();
+        formData.append("pdf", file);
+        const pdfRes = await fetch(`/api/properties/${property.id}/pdf`, {
+          method: "POST",
+          body: formData,
+        });
+        if (pdfRes.ok) {
+          const newEntry: PdfEntry = await pdfRes.json();
+          property.pdfs.push(newEntry);
+        }
+      }
+      setPendingPdfs([]);
+
+      setProperties((prev) => [property, ...prev]);
       setRawText("");
     } catch {
       setError("Erro de conexão. Tente novamente.");
@@ -363,16 +419,9 @@ export function PropertiesClient({
     setProperties((prev) => prev.filter((p) => p.id !== id));
   }
 
-  function handlePdfChange(
-    id: string,
-    pdf: {
-      pdf_url: string | null;
-      pdf_filename: string | null;
-      pdf_size: number | null;
-    },
-  ) {
+  function handlePdfsChange(id: string, pdfs: PdfEntry[]) {
     setProperties((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...pdf } : p)),
+      prev.map((p) => (p.id === id ? { ...p, pdfs } : p)),
     );
   }
 
@@ -395,13 +444,83 @@ export function PropertiesClient({
           </div>
         </CardHeader>
 
-        <div className="px-6 py-4 space-y-4">
+        <div className="px-6 py-4 space-y-3">
           <TextareaField
             placeholder="Ex: Apartamento 3 quartos, 2 banheiros, 1 vaga, 90m², R$ 650.000, Moema - SP. Varanda gourmet, piscina, academia..."
             rows={5}
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
           />
+          <FileField
+            ref={pdfInputRef}
+            accept=".pdf"
+            hidden
+            onChange={handlePdfSelect}
+          />
+          {pendingPdfs.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              {pendingPdfs.map((file, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5"
+                >
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <FileText size={13} className="text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium text-neutral-ink">
+                      {file.name}
+                    </div>
+                    <div className="text-xs text-neutral-muted">
+                      {formatFileSize(file.size)}
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    onClick={() =>
+                      setPendingPdfs((prev) => prev.filter((_, j) => j !== i))
+                    }
+                    className="shrink-0 rounded-md p-1 text-neutral-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                  >
+                    <X size={14} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={() => pdfInputRef.current?.click()}
+            onDrop={handleDrop}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            className={[
+              "flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-5 text-center transition-colors",
+              dragOver
+                ? "border-primary bg-primary/5 text-primary"
+                : "border-neutral-border bg-neutral-surface text-neutral hover:border-primary hover:text-primary",
+            ].join(" ")}
+          >
+            <FileUp
+              size={20}
+              className={dragOver ? "text-primary" : "text-neutral-muted"}
+            />
+            <div className="space-y-0.5">
+              <div className="text-sm font-medium">
+                {dragOver
+                  ? "Solte o PDF aqui"
+                  : "Arraste um PDF ou clique para adicionar"}
+              </div>
+              <div className="text-xs text-neutral-muted">
+                Opcional · Máximo 50MB por arquivo
+              </div>
+            </div>
+          </Button>
           {error && <div className="text-xs text-danger">{error}</div>}
         </div>
 
@@ -431,7 +550,7 @@ export function PropertiesClient({
                 key={p.id}
                 property={p}
                 onDelete={handleDelete}
-                onPdfChange={handlePdfChange}
+                onPdfsChange={handlePdfsChange}
               />
             ))}
           </div>
