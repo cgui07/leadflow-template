@@ -64,13 +64,6 @@ export interface LeadDetail {
     description?: string | null;
     createdAt: string;
   }>;
-  tasks: Array<{
-    id: string;
-    title: string;
-    type: string;
-    status: string;
-    dueAt: string;
-  }>;
   leadActions: Array<{
     id: string;
     type: string;

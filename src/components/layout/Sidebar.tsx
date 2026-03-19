@@ -16,7 +16,6 @@ import {
 } from "@/lib/branding";
 import {
   Building2,
-  CheckSquare,
   ChevronLeft,
   ChevronRight,
   Grid2x2,
@@ -66,13 +65,6 @@ function getNavItems(canManagePlatform: boolean): NavItem[] {
       href: "/pipeline",
       icon: <Kanban size={20} />,
       iconMobile: <Kanban size={22} />,
-      mobileTab: true,
-    },
-    {
-      label: "Tarefas",
-      href: "/tasks",
-      icon: <CheckSquare size={20} />,
-      iconMobile: <CheckSquare size={22} />,
       mobileTab: true,
     },
     {

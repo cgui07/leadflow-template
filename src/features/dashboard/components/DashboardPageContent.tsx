@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import type { Column } from "@/types";
+import { FaWhatsapp } from "react-icons/fa";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { KpiCard } from "@/components/ui/KpiCard";
+import { Users, Plus, Flame } from "lucide-react";
 import { getScoreTextClass } from "@/lib/ui-colors";
 import { DataTable } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -12,7 +14,6 @@ import { AttentionQueueSection } from "./AttentionQueueSection";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import type { DashboardAttentionQueue, DashboardData } from "../contracts";
-import { Users, MessageSquare, CheckSquare, Plus, Flame } from "lucide-react";
 import {
   LEAD_STATUS_BADGE_VARIANTS,
   LEAD_STATUS_LABELS,
@@ -94,14 +95,8 @@ export function DashboardPageContent({
         <KpiCard
           label="Conversas não lidas"
           value={String(data.kpis.unreadConversations)}
-          icon={<MessageSquare className="h-5 w-5" />}
+          icon={<FaWhatsapp className="h-5 w-5" />}
           iconVariant="purple"
-        />
-        <KpiCard
-          label="Tarefas Pendentes"
-          value={String(data.kpis.pendingTasks)}
-          icon={<CheckSquare className="h-5 w-5" />}
-          iconVariant="teal"
         />
       </div>
 

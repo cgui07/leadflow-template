@@ -1,11 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import { useFetch } from "@/lib/hooks";
+import { Button } from "@/components/ui/Button";
 import type { PipelineStage, SelectedLead } from "../contracts";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
+import { AddStageModal } from "@/app/(dashboard)/pipeline/components/AddStageModal";
 import { MoveLeadDrawer } from "@/app/(dashboard)/pipeline/components/MoveLeadDrawer";
 import { PipelineColumn } from "@/app/(dashboard)/pipeline/components/PipelineColumn";
+import { EditStageModal } from "@/app/(dashboard)/pipeline/components/EditStageModal";
 
 interface PipelinePageClientProps {
   initialStages: PipelineStage[];
@@ -21,6 +26,10 @@ export function PipelinePageClient({
   const [selectedLead, setSelectedLead] = useState<SelectedLead | null>(null);
   const [movingLeadId, setMovingLeadId] = useState<string | null>(null);
   const [moveError, setMoveError] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingStage, setEditingStage] = useState<PipelineStage | null>(null);
+  const [deletingStage, setDeletingStage] = useState<PipelineStage | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const stages = data || [];
 
   async function moveLead(leadId: string, stageId: string) {
@@ -38,7 +47,7 @@ export function PipelinePageClient({
         | null;
 
       if (!response.ok) {
-        setMoveError(payload?.error || "Não foi possível mover o lead.");
+        setMoveError(payload?.error || "Nao foi possivel mover o lead.");
         return;
       }
 
@@ -49,10 +58,104 @@ export function PipelinePageClient({
     }
   }
 
+  async function handleAddStage(name: string, color: string) {
+    const response = await fetch("/api/pipeline", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, color }),
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(payload?.error || "Erro ao criar coluna.");
+    }
+
+    setShowAddModal(false);
+    await refetch();
+  }
+
+  async function handleEditStage(stageId: string, name: string, color: string) {
+    const response = await fetch(`/api/pipeline/${stageId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, color }),
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(payload?.error || "Erro ao editar coluna.");
+    }
+
+    setEditingStage(null);
+    await refetch();
+  }
+
+  async function handleDeleteStage() {
+    if (!deletingStage) return;
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/pipeline/${deletingStage.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        setMoveError(payload?.error || "Erro ao remover coluna.");
+        return;
+      }
+
+      setDeletingStage(null);
+      await refetch();
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  async function handleDropColumn(draggedStageId: string, targetStageId: string) {
+    if (draggedStageId === targetStageId) return;
+
+    const currentIds = stages.map((s) => s.id);
+    const fromIndex = currentIds.indexOf(draggedStageId);
+    const toIndex = currentIds.indexOf(targetStageId);
+    if (fromIndex < 0 || toIndex < 0) return;
+
+    // Don't allow moving into position 0 (default column position)
+    if (toIndex === 0) return;
+    // Don't allow moving the default column
+    if (fromIndex === 0) return;
+
+    const newIds = [...currentIds];
+    newIds.splice(fromIndex, 1);
+    newIds.splice(toIndex, 0, draggedStageId);
+
+    const response = await fetch("/api/pipeline/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stageIds: newIds }),
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      setMoveError(payload?.error || "Erro ao reordenar colunas.");
+    }
+
+    await refetch();
+  }
+
   return (
     <PageContainer
       title="Pipeline"
-      subtitle="Arraste no desktop ou mova pelo menu no mobile"
+      subtitle="Arraste leads entre colunas. Gerencie suas etapas."
+      actions={
+        <Button
+          size="sm"
+          icon={<Plus className="h-4 w-4" />}
+          onClick={() => setShowAddModal(true)}
+        >
+          Nova coluna
+        </Button>
+      }
     >
       {error || moveError ? (
         <div className="rounded-xl border border-red-blush bg-red-pale px-4 py-3 text-sm text-red-dark">
@@ -68,6 +171,9 @@ export function PipelinePageClient({
             movingLeadId={movingLeadId}
             onDropLead={moveLead}
             onSelectLead={setSelectedLead}
+            onEditStage={setEditingStage}
+            onDeleteStage={setDeletingStage}
+            onDropColumn={handleDropColumn}
           />
         ))}
       </div>
@@ -79,6 +185,35 @@ export function PipelinePageClient({
         movingLeadId={movingLeadId}
         onClose={() => setSelectedLead(null)}
         onMoveLead={moveLead}
+      />
+
+      <AddStageModal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleAddStage}
+      />
+
+      {editingStage ? (
+        <EditStageModal
+          open={Boolean(editingStage)}
+          stage={editingStage}
+          onClose={() => setEditingStage(null)}
+          onSubmit={handleEditStage}
+        />
+      ) : null}
+
+      <DeleteConfirmationModal
+        open={Boolean(deletingStage)}
+        onClose={() => setDeletingStage(null)}
+        onConfirm={handleDeleteStage}
+        title="Remover coluna"
+        description={
+          deletingStage
+            ? `Tem certeza que deseja remover "${deletingStage.name}"? Os ${deletingStage.leads.length} leads desta coluna serao movidos para a primeira coluna.`
+            : ""
+        }
+        confirmText="Remover"
+        loading={isDeleting}
       />
     </PageContainer>
   );

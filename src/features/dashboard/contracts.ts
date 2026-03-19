@@ -6,8 +6,6 @@ export interface DashboardKpis {
   qualifiedLeads: number;
   wonLeads: number;
   hotLeads: number;
-  pendingTasks: number;
-  overdueTasks: number;
   unreadConversations: number;
   pipelineValue: number;
 }

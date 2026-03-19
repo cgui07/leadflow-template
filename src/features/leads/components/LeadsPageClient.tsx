@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Column } from "@/types";
 import { useFetch } from "@/lib/hooks";
 import { Tabs } from "@/components/ui/Tabs";
+import { FaWhatsapp } from "react-icons/fa";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -12,10 +13,10 @@ import { Dropdown } from "@/components/ui/Dropdown";
 import { getScoreBadgeClass } from "@/lib/ui-colors";
 import { DataTable } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ChevronDown, Plus, Search } from "lucide-react";
 import type { LeadRow, LeadsResponse } from "../contracts";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Form, TextField, TextareaField } from "@/components/forms";
-import { ChevronDown, MessageSquare, Plus, Search } from "lucide-react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 
 const statusMap: Record<
@@ -95,7 +96,7 @@ const columns: Column<LeadRow>[] = [
     render: (_, row) =>
       row.conversation?.unreadCount ? (
         <div className="flex items-center gap-1 text-primary">
-          <MessageSquare size={14} />
+          <FaWhatsapp size={14} />
           <div className="text-xs font-bold">{row.conversation.unreadCount}</div>
         </div>
       ) : null,

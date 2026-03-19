@@ -29,7 +29,6 @@ model User {
   leadActions            LeadAction[]
   leads                  Lead[]
   properties             properties[]
-  tasks                  Task[]
   settings               UserSettings?
   tenant                 Tenant?                @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   voiceReplyUsage        VoiceReplyUsage[]
@@ -106,7 +105,6 @@ model Lead {
   leadActions     LeadAction[]
   pipelineStage   PipelineStage? @relation(fields: [pipelineStageId], references: [id])
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks           Task[]
 
   @@index([userId, status])
   @@index([userId, score(sort: Desc)])
@@ -174,26 +172,6 @@ model Activity {
 
   @@index([leadId, createdAt])
   @@map("activities")
-}
-
-model Task {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId      String    @map("user_id") @db.Uuid
-  leadId      String?   @map("lead_id") @db.Uuid
-  type        String    @default("follow_up")
-  title       String
-  description String?
-  status      String    @default("pending")
-  dueAt       DateTime  @map("due_at")
-  completedAt DateTime? @map("completed_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  lead        Lead?     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, status, dueAt])
-  @@index([leadId])
-  @@map("tasks")
 }
 
 model LeadAction {

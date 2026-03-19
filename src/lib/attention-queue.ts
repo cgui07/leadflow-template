@@ -5,7 +5,6 @@ export type AttentionQueueReason =
   | "unread"
   | "hot"
   | "no_reply"
-  | "overdue_task"
   | "overdue_action";
 
 export interface AttentionQueueItem {
@@ -18,9 +17,6 @@ export interface AttentionQueueItem {
   conversationStatus: string | null;
   lastRelevantAt: string | null;
   reasons: AttentionQueueReason[];
-  overdueTaskId: string | null;
-  overdueTaskTitle: string | null;
-  overdueTaskDueAt: string | null;
   overdueActionId: string | null;
   overdueActionTitle: string | null;
   overdueActionScheduledAt: string | null;
@@ -32,26 +28,22 @@ interface AttentionQueuePriorityInput {
   hasUnread: boolean;
   isHot: boolean;
   hasNoReply: boolean;
-  hasOverdueTask: boolean;
   hasOverdueAction: boolean;
 }
 
 const reasonOrder: Record<AttentionQueueReason, number> = {
-  overdue_task: 1,
-  overdue_action: 2,
-  unread: 3,
-  hot: 4,
-  no_reply: 5,
+  overdue_action: 1,
+  unread: 2,
+  hot: 3,
+  no_reply: 4,
 };
 
 export function getAttentionQueuePriorityRank({
   hasUnread,
   isHot,
   hasNoReply,
-  hasOverdueTask,
   hasOverdueAction,
 }: AttentionQueuePriorityInput) {
-  if (hasOverdueTask) return 1;
   if (hasOverdueAction) return 1;
   if (isHot && hasUnread) return 2;
   if (isHot && hasNoReply) return 3;

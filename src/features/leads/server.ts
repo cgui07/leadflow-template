@@ -192,7 +192,6 @@ export async function getLeadDetail(
         include: { messages: { orderBy: { createdAt: "desc" }, take: 50 } },
       },
       activities: { orderBy: { createdAt: "desc" }, take: 20 },
-      tasks: { orderBy: { dueAt: "asc" }, where: { status: "pending" } },
       leadActions: { orderBy: [{ status: "asc" }, { createdAt: "desc" }] },
     },
   });
@@ -248,13 +247,6 @@ export async function getLeadDetail(
       title: activity.title,
       description: activity.description,
       createdAt: activity.createdAt.toISOString(),
-    })),
-    tasks: lead.tasks.map((task) => ({
-      id: task.id,
-      title: task.title,
-      type: task.type,
-      status: task.status,
-      dueAt: task.dueAt.toISOString(),
     })),
     leadActions: lead.leadActions.map((action) => ({
       id: action.id,

@@ -1,11 +1,11 @@
 import { cn } from "@/lib/utils";
+import { FaWhatsapp } from "react-icons/fa";
 import type { Activity, ActivityType } from "@/types";
 import {
   ArrowRightLeft,
   CalendarCheck,
   CheckSquare,
   Mail,
-  MessageSquare,
   Phone,
   StickyNote,
 } from "lucide-react";
@@ -50,7 +50,7 @@ const typeConfig: Record<
     bg: "bg-orange-pale",
   },
   message: {
-    icon: <MessageSquare className="h-3.5 w-3.5" />,
+    icon: <FaWhatsapp className="h-3.5 w-3.5" />,
     color: "text-teal-dark",
     bg: "bg-teal-pale",
   },

@@ -10,17 +10,6 @@ export async function checkHotLeadAlert(leadId: string, previousScore: number, n
     });
     if (!lead) return;
 
-    await prisma.task.create({
-      data: {
-        userId: lead.userId,
-        leadId,
-        type: "call",
-        title: `Lead quente: ${lead.name} (score ${newScore})`,
-        description: `O lead ${lead.name} (${lead.phone}) atingiu score ${newScore}/100. Recomendado entrar em contato imediatamente.`,
-        dueAt: new Date(),
-      },
-    });
-
     await prisma.activity.create({
       data: {
         userId: lead.userId,
@@ -44,23 +33,11 @@ export async function processEscalations() {
       status: { in: ["qualifying", "qualified"] },
       score: { gte: WARM_LEAD_MIN_SCORE },
       lastContactAt: { lte: twoDaysAgo },
-      tasks: { none: { type: "call", status: "pending", createdAt: { gte: twoDaysAgo } } },
     },
     select: { id: true, userId: true, name: true, phone: true, score: true, lastContactAt: true },
   });
 
   for (const lead of staleQualified) {
-    await prisma.task.create({
-      data: {
-        userId: lead.userId,
-        leadId: lead.id,
-        type: "call",
-        title: `Sem resposta há 48h: ${lead.name}`,
-        description: `Lead com score ${lead.score} não recebe contato desde ${lead.lastContactAt?.toLocaleDateString("pt-BR")}. Recomendado retomar contato.`,
-        dueAt: now,
-      },
-    });
-
     await prisma.activity.create({
       data: {
         userId: lead.userId,
@@ -138,23 +115,11 @@ export async function processEscalations() {
     where: {
       status: "proposal",
       updatedAt: { lte: fiveDaysAgo },
-      tasks: { none: { type: "proposal", status: "pending", createdAt: { gte: fiveDaysAgo } } },
     },
     select: { id: true, userId: true, name: true },
   });
 
   for (const lead of staleProposals) {
-    await prisma.task.create({
-      data: {
-        userId: lead.userId,
-        leadId: lead.id,
-        type: "proposal",
-        title: `Proposta sem retorno: ${lead.name}`,
-        description: `A proposta para ${lead.name} foi enviada há mais de 5 dias sem retorno. Recomendado fazer follow-up.`,
-        dueAt: now,
-      },
-    });
-
     results.push({ leadId: lead.id, rule: "proposal_reminder_5d" });
   }
 
