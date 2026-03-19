@@ -119,8 +119,8 @@ function PropertyCard({
       alert("Apenas arquivos PDF são aceitos.");
       return;
     }
-    if (file.size > 50 * 1024 * 1024) {
-      alert("O arquivo excede o limite de 50MB.");
+    if (file.size > 100 * 1024 * 1024) {
+      alert("O arquivo excede o limite de 100MB.");
       return;
     }
     setUploadingPdf(true);
@@ -329,7 +329,7 @@ function PropertyCard({
   );
 }
 
-const MAX_PDF_SIZE = 50 * 1024 * 1024;
+const MAX_PDF_SIZE = 100 * 1024 * 1024;
 
 export function PropertiesClient({
   initialProperties,
@@ -350,7 +350,7 @@ export function PropertiesClient({
       return;
     }
     if (file.size > MAX_PDF_SIZE) {
-      setError("O arquivo excede o limite de 50MB.");
+      setError("O arquivo excede o limite de 100MB.");
       return;
     }
     setError(null);
@@ -517,7 +517,7 @@ export function PropertiesClient({
                   : "Arraste um PDF ou clique para adicionar"}
               </div>
               <div className="text-xs text-neutral-muted">
-                Opcional · Máximo 50MB por arquivo
+                Opcional · Máximo 100MB por arquivo
               </div>
             </div>
           </Button>

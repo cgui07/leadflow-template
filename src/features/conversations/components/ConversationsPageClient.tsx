@@ -2,18 +2,12 @@
 
 import { cn } from "@/lib/utils";
 import { useFetch } from "@/lib/hooks";
-import { MessageSquare } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { MessageInput } from "@/components/domain/chat/MessageInput";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
 import type {
   ConversationItem,
   ConversationSummary,
@@ -390,7 +384,7 @@ export function ConversationsPageClient({
   ) : (
     <div className="flex flex-1 items-center justify-center">
       <EmptyState
-        icon={<MessageSquare className="h-12 w-12 text-neutral-line" />}
+        icon={<FaWhatsapp className="h-12 w-12 text-neutral-line" />}
         title="Selecione uma conversa"
         description="Escolha uma conversa a esquerda para ver as mensagens"
       />

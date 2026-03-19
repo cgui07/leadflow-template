@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
+import { FaWhatsapp } from "react-icons/fa";
 import {
   Mail,
-  MessageSquare,
   PhoneIncoming,
   PhoneMissed,
   PhoneOutgoing,
@@ -50,7 +50,7 @@ const interactionConfig: Record<
     bg: "bg-purple-pale",
   },
   message: {
-    icon: <MessageSquare className="h-4 w-4" />,
+    icon: <FaWhatsapp className="h-4 w-4" />,
     color: "text-teal-dark",
     bg: "bg-teal-pale",
   },

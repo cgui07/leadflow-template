@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { FaWhatsapp } from "react-icons/fa";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { getScoreTextClass } from "@/lib/ui-colors";
@@ -20,7 +21,6 @@ import {
   ExternalLink,
   Flame,
   Mail,
-  MessageSquare,
   User,
 } from "lucide-react";
 import {
@@ -54,11 +54,6 @@ const reasonConfig: Record<
     variant: "error" | "warning" | "info" | "purple";
   }
 > = {
-  overdue_task: {
-    getLabel: () => "Tarefa vencida",
-    icon: <AlertTriangle size={10} />,
-    variant: "error",
-  },
   unread: {
     getLabel: (item) => {
       return item.unreadCount > 1
@@ -107,10 +102,6 @@ function formatTimeAgo(dateValue: string | null) {
 }
 
 function getRelevantStatusText(item: AttentionQueueItem) {
-  if (item.reasons.includes("overdue_task") && item.overdueTaskDueAt) {
-    return `Tarefa vencida ${formatTimeAgo(item.overdueTaskDueAt)}`;
-  }
-
   if (
     item.reasons.includes("overdue_action") &&
     item.overdueActionScheduledAt
@@ -181,11 +172,6 @@ function QueueItem({ item }: { item: AttentionQueueItem }) {
           })}
         </div>
 
-        {item.overdueTaskTitle && (
-          <div className="mt-1 text-xs text-red-dark">
-            Tarefa: {item.overdueTaskTitle}
-          </div>
-        )}
         {item.overdueActionTitle && (
           <div className="mt-1 text-xs text-red-dark">
             Ação: {item.overdueActionTitle}
@@ -199,7 +185,7 @@ function QueueItem({ item }: { item: AttentionQueueItem }) {
             <Button
               variant="primary"
               size="sm"
-              icon={<MessageSquare size={13} />}
+              icon={<FaWhatsapp size={13} />}
             >
               <span className="hidden sm:inline">Abrir conversa</span>
             </Button>

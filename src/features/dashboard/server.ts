@@ -35,8 +35,6 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     hotLeads,
     recentLeads,
     recentActivities,
-    pendingTasks,
-    overdueTasks,
     unreadConversations,
     pipelineValue,
   ] = await Promise.all([
@@ -62,10 +60,6 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       take: 10,
       include: { lead: { select: { name: true } } },
     }),
-    prisma.task.count({ where: { userId, status: "pending" } }),
-    prisma.task.count({
-      where: { userId, status: "pending", dueAt: { lte: new Date() } },
-    }),
     prisma.conversation.count({
       where: { lead: { userId }, unreadCount: { gt: 0 } },
     }),
@@ -86,8 +80,6 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       qualifiedLeads,
       wonLeads,
       hotLeads,
-      pendingTasks,
-      overdueTasks,
       unreadConversations,
       pipelineValue: toNumber(pipelineValue._sum.value),
     },
@@ -138,7 +130,6 @@ export async function getAttentionQueueItems(
       status: { notIn: ["won", "lost"] },
       OR: [
         { score: { gte: HOT_LEAD_MIN_SCORE } },
-        { tasks: { some: { status: "pending", dueAt: { lte: now } } } },
         {
           leadActions: {
             some: {
@@ -158,12 +149,6 @@ export async function getAttentionQueueItems(
           unreadCount: true,
           lastMessageAt: true,
         },
-      },
-      tasks: {
-        where: { status: "pending", dueAt: { lte: now } },
-        orderBy: { dueAt: "asc" },
-        take: 1,
-        select: { id: true, title: true, dueAt: true },
       },
       leadActions: {
         where: {
@@ -248,11 +233,6 @@ export async function getAttentionQueueItems(
       reasons.push("no_reply");
     }
 
-    const overdueTask = lead.tasks[0] ?? null;
-    if (overdueTask) {
-      reasons.push("overdue_task");
-    }
-
     const overdueAction = lead.leadActions[0] ?? null;
     if (overdueAction) {
       reasons.push("overdue_action");
@@ -266,12 +246,10 @@ export async function getAttentionQueueItems(
       hasUnread,
       isHot,
       hasNoReply,
-      hasOverdueTask: Boolean(overdueTask),
       hasOverdueAction: Boolean(overdueAction),
     });
 
     const lastRelevantAt =
-      overdueTask?.dueAt ??
       overdueAction?.scheduledAt ??
       latestInboundAt ??
       conversation?.lastMessageAt ??
@@ -287,9 +265,6 @@ export async function getAttentionQueueItems(
       conversationStatus: conversation?.status ?? null,
       lastRelevantAt: lastRelevantAt?.toISOString() ?? null,
       reasons: sortAttentionQueueReasons(reasons),
-      overdueTaskId: overdueTask?.id ?? null,
-      overdueTaskTitle: overdueTask?.title ?? null,
-      overdueTaskDueAt: overdueTask?.dueAt?.toISOString() ?? null,
       overdueActionId: overdueAction?.id ?? null,
       overdueActionTitle: overdueAction?.title ?? null,
       overdueActionScheduledAt:

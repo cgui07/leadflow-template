@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useFetch } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { Tabs } from "@/components/ui/Tabs";
-import { Badge } from "@/components/ui/Badge";
 import type { LeadDetail } from "../contracts";
 import { Button } from "@/components/ui/Button";
 import { Form, TextField } from "@/components/forms";
@@ -12,16 +11,12 @@ import { useEffect, useState, type ReactNode } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { useFeatureFlag } from "@/components/providers/BrandingProvider";
+import { getPipelineColorSoftClass, getScoreTextClass } from "@/lib/ui-colors";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
-import {
-  getPipelineColorSoftClass,
-  getScoreTextClass,
-} from "@/lib/ui-colors";
 import { LeadActionsSection } from "@/app/(dashboard)/leads/[id]/components/LeadActionsSection";
 import {
   ArrowLeft,
   Calendar,
-  Clock,
   DollarSign,
   Home,
   Mail,
@@ -63,13 +58,14 @@ export function LeadDetailPageClient({
   leadId,
 }: LeadDetailPageClientProps) {
   const router = useRouter();
-  const { data: lead, error, refetch } = useFetch<LeadDetail>(
-    `/api/leads/${leadId}`,
-    {
-      initialData: initialLead,
-      revalidateOnMount: false,
-    },
-  );
+  const {
+    data: lead,
+    error,
+    refetch,
+  } = useFetch<LeadDetail>(`/api/leads/${leadId}`, {
+    initialData: initialLead,
+    revalidateOnMount: false,
+  });
   const [activeTab, setActiveTab] = useState("profile");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -92,7 +88,9 @@ export function LeadDetailPageClient({
 
   if (!lead) {
     return (
-      <div className="p-6 text-center text-neutral-muted">Lead não encontrado</div>
+      <div className="p-6 text-center text-neutral-muted">
+        Lead não encontrado
+      </div>
     );
   }
 
@@ -104,9 +102,9 @@ export function LeadDetailPageClient({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
-    const payload = (await response.json().catch(() => null)) as
-      | { error?: string }
-      | null;
+    const payload = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
 
     if (!response.ok) {
       setActionError(payload?.error || "Não foi possível atualizar o status.");
@@ -136,9 +134,9 @@ export function LeadDetailPageClient({
           body: JSON.stringify({ content: message }),
         },
       );
-      const payload = (await response.json().catch(() => null)) as
-        | { error?: string }
-        | null;
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
 
       if (!response.ok) {
         setActionError(payload?.error || "Não foi possível enviar a mensagem.");
@@ -168,9 +166,9 @@ export function LeadDetailPageClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: nextPhone }),
       });
-      const payload = (await response.json().catch(() => null)) as
-        | { error?: string }
-        | null;
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
 
       if (!response.ok) {
         setActionError(payload?.error || "Não foi possível salvar o telefone.");
@@ -192,9 +190,9 @@ export function LeadDetailPageClient({
     setActionError(null);
 
     const response = await fetch(`/api/leads/${leadId}`, { method: "DELETE" });
-    const payload = (await response.json().catch(() => null)) as
-      | { error?: string }
-      | null;
+    const payload = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
 
     if (!response.ok) {
       setActionError(payload?.error || "Não foi possível excluir o lead.");
@@ -221,7 +219,6 @@ export function LeadDetailPageClient({
       : null,
     { id: "messages", label: "Mensagens", count: messages.length },
     { id: "activities", label: "Atividades", count: lead.activities.length },
-    { id: "tasks", label: "Tarefas", count: lead.tasks.length },
   ].filter(Boolean) as Array<{ id: string; label: string; count?: number }>;
 
   return (
@@ -269,7 +266,9 @@ export function LeadDetailPageClient({
               {lead.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <div className="text-xl font-bold text-neutral-ink">{lead.name}</div>
+              <div className="text-xl font-bold text-neutral-ink">
+                {lead.name}
+              </div>
               <div className="mt-0.5 flex items-center gap-3 text-sm text-neutral-muted">
                 <div className="flex items-center gap-1">
                   <Phone size={12} />
@@ -296,7 +295,10 @@ export function LeadDetailPageClient({
           <div
             className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[lead.status] || ""}`}
           >
-            {statusOptions.find((status) => status.value === lead.status)?.label}
+            {
+              statusOptions.find((status) => status.value === lead.status)
+                ?.label
+            }
           </div>
         </div>
       </div>
@@ -307,8 +309,16 @@ export function LeadDetailPageClient({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <SectionContainer title="Perfil do Lead (IA)">
             <div className="grid grid-cols-2 gap-4">
-              <InfoItem icon={<MapPin size={16} />} label="Região" value={lead.region} />
-              <InfoItem icon={<Home size={16} />} label="Tipo" value={lead.propertyType} />
+              <InfoItem
+                icon={<MapPin size={16} />}
+                label="Região"
+                value={lead.region}
+              />
+              <InfoItem
+                icon={<Home size={16} />}
+                label="Tipo"
+                value={lead.propertyType}
+              />
               <InfoItem
                 icon={<DollarSign size={16} />}
                 label="Faixa de valor"
@@ -318,8 +328,16 @@ export function LeadDetailPageClient({
                     : undefined
                 }
               />
-              <InfoItem icon={<Target size={16} />} label="Finalidade" value={lead.purpose} />
-              <InfoItem icon={<Calendar size={16} />} label="Prazo" value={lead.timeline} />
+              <InfoItem
+                icon={<Target size={16} />}
+                label="Finalidade"
+                value={lead.purpose}
+              />
+              <InfoItem
+                icon={<Calendar size={16} />}
+                label="Prazo"
+                value={lead.timeline}
+              />
               <InfoItem
                 icon={<Home size={16} />}
                 label="Quartos"
@@ -345,7 +363,11 @@ export function LeadDetailPageClient({
                 </div>
                 <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
                   <TextField
-                    label={needsManualPhone ? "Telefone real do contato" : "Telefone do contato"}
+                    label={
+                      needsManualPhone
+                        ? "Telefone real do contato"
+                        : "Telefone do contato"
+                    }
                     type="text"
                     value={phoneInput}
                     onChange={(event) => setPhoneInput(event.target.value)}
@@ -354,7 +376,9 @@ export function LeadDetailPageClient({
                   <Button
                     onClick={savePhone}
                     loading={savingPhone}
-                    disabled={!phoneInput.trim() || phoneInput.trim() === lead.phone}
+                    disabled={
+                      !phoneInput.trim() || phoneInput.trim() === lead.phone
+                    }
                   >
                     Salvar
                   </Button>
@@ -510,42 +534,6 @@ export function LeadDetailPageClient({
         </SectionContainer>
       ) : null}
 
-      {activeTab === "tasks" ? (
-        <SectionContainer title="Tarefas Pendentes">
-          {!lead.tasks.length ? (
-            <div className="text-sm text-neutral-muted">
-              Nenhuma tarefa pendente
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {lead.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center gap-3 rounded-lg border border-neutral-border p-3"
-                >
-                  <Clock size={16} className="text-neutral-muted" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-neutral-dark">
-                      {task.title}
-                    </div>
-                    <div className="text-xs text-neutral-muted">
-                      {new Date(task.dueAt).toLocaleDateString("pt-BR")} as{" "}
-                      {new Date(task.dueAt).toLocaleTimeString("pt-BR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                  </div>
-                  <Badge variant="warning" size="sm">
-                    {task.type}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </SectionContainer>
-      ) : null}
-
       <DeleteConfirmationModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
@@ -574,7 +562,9 @@ function InfoItem({
         {icon}
         <div className="text-xs">{label}</div>
       </div>
-      <div className="text-sm font-medium text-neutral-dark">{value || "-"}</div>
+      <div className="text-sm font-medium text-neutral-dark">
+        {value || "-"}
+      </div>
     </div>
   );
 }

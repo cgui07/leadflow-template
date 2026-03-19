@@ -1,17 +1,21 @@
-import { createClient } from "@supabase/supabase-js";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
-const BUCKET = "property-pdfs";
+const BUCKET = process.env.R2_BUCKET ?? "leadflow-pdfs";
 
-function getSupabaseClient() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    throw new Error(
-      "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY env vars",
-    );
+function getR2Client() {
+  const endpoint = process.env.R2_ENDPOINT;
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+
+  if (!endpoint || !accessKeyId || !secretAccessKey) {
+    throw new Error("Missing R2_ENDPOINT, R2_ACCESS_KEY_ID or R2_SECRET_ACCESS_KEY env vars");
   }
-  return createClient(url, key, {
-    auth: { persistSession: false },
+
+  return new S3Client({
+    region: "auto",
+    endpoint,
+    credentials: { accessKeyId, secretAccessKey },
   });
 }
 
@@ -21,29 +25,30 @@ export async function uploadPropertyPdf(
   buffer: Buffer,
   contentType: string,
 ): Promise<string> {
-  const supabase = getSupabaseClient();
-  const path = `${userId}/${propertyId}/${Date.now()}.pdf`;
+  const client = getR2Client();
+  const key = `${userId}/${propertyId}/${Date.now()}.pdf`;
 
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, buffer, { contentType, upsert: true });
+  await client.send(
+    new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    }),
+  );
 
-  if (error) {
-    throw new Error(`Supabase Storage upload failed: ${error.message}`);
-  }
-
-  return path;
+  return key;
 }
 
 export async function deletePropertyPdf(storagePath: string): Promise<void> {
-  const supabase = getSupabaseClient();
+  const client = getR2Client();
 
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .remove([storagePath]);
-
-  if (error) {
-    console.error("[storage] Delete failed:", error.message);
+  try {
+    await client.send(
+      new DeleteObjectCommand({ Bucket: BUCKET, Key: storagePath }),
+    );
+  } catch (err) {
+    console.error("[storage] Delete failed:", err);
   }
 }
 
@@ -51,15 +56,8 @@ export async function getPropertyPdfUrl(
   storagePath: string,
   expiresInSeconds = 3600,
 ): Promise<string> {
-  const supabase = getSupabaseClient();
+  const client = getR2Client();
 
-  const { data, error } = await supabase.storage
-    .from(BUCKET)
-    .createSignedUrl(storagePath, expiresInSeconds);
-
-  if (error || !data) {
-    throw new Error(`Supabase Storage sign failed: ${error?.message}`);
-  }
-
-  return data.signedUrl;
+  const command = new GetObjectCommand({ Bucket: BUCKET, Key: storagePath });
+  return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
 }

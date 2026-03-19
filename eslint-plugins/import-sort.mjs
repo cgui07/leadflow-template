@@ -1,3 +1,6 @@
+// Para aplicar este plugin e corrigir todos os imports automaticamente, rode:
+// npx eslint . --fix
+
 function classifyImport(node) {
   const specifiers = node.specifiers || [];
 
@@ -151,7 +154,10 @@ const rule = {
               const rangeEnd = lastImport.range[1];
               const newImportBlock = expectedTexts.join("\n");
 
-              return fixer.replaceTextRange([rangeStart, rangeEnd], newImportBlock);
+              return fixer.replaceTextRange(
+                [rangeStart, rangeEnd],
+                newImportBlock,
+              );
             },
           });
         }

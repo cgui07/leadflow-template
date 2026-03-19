@@ -14,6 +14,7 @@ export interface PipelineStage {
   name: string;
   color: string;
   order: number;
+  isDefault: boolean;
   leads: PipelineLead[];
 }
 

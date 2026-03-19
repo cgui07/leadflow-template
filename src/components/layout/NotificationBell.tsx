@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useFetch } from "@/lib/hooks";
+import { FaWhatsapp } from "react-icons/fa";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useEffect, useRef, useState } from "react";
@@ -18,7 +19,6 @@ import {
   ChevronRight,
   Clock3,
   Flame,
-  MessageSquare,
   User,
 } from "lucide-react";
 import {
@@ -49,10 +49,7 @@ function getOverdueActionLabel(item: AttentionQueueItem) {
     return item.overdueActionTitle;
   }
 
-  if (
-    item.overdueActionType &&
-    item.overdueActionType in ACTION_TYPE_LABELS
-  ) {
+  if (item.overdueActionType && item.overdueActionType in ACTION_TYPE_LABELS) {
     return ACTION_TYPE_LABELS[item.overdueActionType as LeadActionType];
   }
 
@@ -64,12 +61,6 @@ function getPrimaryReason(
   item: AttentionQueueItem,
 ) {
   switch (reason) {
-    case "overdue_task":
-      return {
-        label: item.overdueTaskTitle || "Tarefa vencida",
-        icon: <AlertTriangle className="h-3.5 w-3.5 text-red-dark" />,
-        tone: "text-red-dark",
-      };
     case "overdue_action":
       return {
         label: getOverdueActionLabel(item),
@@ -82,7 +73,7 @@ function getPrimaryReason(
           item.unreadCount > 1
             ? `${item.unreadCount} mensagens não lidas`
             : "Mensagem não lida",
-        icon: <MessageSquare className="h-3.5 w-3.5 text-orange-amber" />,
+        icon: <FaWhatsapp className="h-3.5 w-3.5 text-orange-amber" />,
         tone: "text-yellow-dark",
       };
     case "hot":
@@ -122,9 +113,7 @@ export function NotificationBell() {
     loading,
     error,
     refetch,
-  } = useFetch<AttentionQueueItem[]>(
-    "/api/dashboard/attention-queue",
-  );
+  } = useFetch<AttentionQueueItem[]>("/api/dashboard/attention-queue");
   const total = items?.length ?? 0;
   const visibleItems = items?.slice(0, MAX_VISIBLE_NOTIFICATIONS) ?? [];
 
@@ -200,7 +189,7 @@ export function NotificationBell() {
             </div>
           </div>
 
-          <div className="max-h-[26rem] overflow-y-auto px-3 py-3">
+          <div className="max-h-104 overflow-y-auto px-3 py-3">
             {loading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((item) => (
@@ -273,7 +262,9 @@ export function NotificationBell() {
                           </div>
                           <div className="mt-1 flex items-center gap-1.5 text-xs">
                             {primaryReason.icon}
-                            <span className={cn("truncate", primaryReason.tone)}>
+                            <span
+                              className={cn("truncate", primaryReason.tone)}
+                            >
                               {primaryReason.label}
                             </span>
                           </div>
