@@ -6,6 +6,7 @@ import { MessageSquare } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { MessageInput } from "@/components/domain/chat/MessageInput";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   useCallback,
   useDeferredValue,
@@ -13,7 +14,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type {
   ConversationItem,
   ConversationSummary,

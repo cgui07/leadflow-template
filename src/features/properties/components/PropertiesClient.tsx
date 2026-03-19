@@ -390,7 +390,7 @@ export function PropertiesClient({
         return;
       }
 
-      let property = { ...(data as Property), pdfs: [] as PdfEntry[] };
+      const property = { ...(data as Property), pdfs: [] as PdfEntry[] };
 
       for (const file of pendingPdfs) {
         const formData = new FormData();

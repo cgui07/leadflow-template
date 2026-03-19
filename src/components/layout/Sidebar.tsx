@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { FaWhatsapp } from "react-icons/fa";
 import { Modal } from "@/components/ui/Modal";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -27,7 +28,6 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
 
 interface NavItem {
   label: string;

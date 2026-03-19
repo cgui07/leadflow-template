@@ -1,10 +1,10 @@
 "use client";
 
-import { Fragment, useEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { MessageItem } from "../types";
+import { Fragment, useEffect, useRef } from "react";
 import {
   Check,
   CheckCheck,
@@ -108,17 +108,19 @@ export function ConversationMessages({ messages }: ConversationMessagesProps) {
   }
 
   const ordered = messages.slice().reverse();
-  let lastDateStr = "";
 
   return (
     <div
       ref={containerRef}
       className="flex-1 overflow-y-auto bg-neutral-surface px-3 py-2 sm:px-12 sm:py-4"
     >
-      {ordered.map((message) => {
+      {ordered.map((message, index) => {
         const msgDateStr = new Date(message.createdAt).toDateString();
-        const showDateSep = msgDateStr !== lastDateStr;
-        lastDateStr = msgDateStr;
+        const prevMessage = ordered[index - 1];
+        const prevDateStr = prevMessage
+          ? new Date(prevMessage.createdAt).toDateString()
+          : "";
+        const showDateSep = msgDateStr !== prevDateStr;
 
         const isOutbound = message.direction === "outbound";
         const isBot = message.sender === "bot";
@@ -227,7 +229,7 @@ export function ConversationMessages({ messages }: ConversationMessagesProps) {
                     )}
                   </div>
                 ) : (
-                  <div className="whitespace-pre-wrap break-words">
+                  <div className="whitespace-pre-wrap wrap-break-word">
                     {message.content}
                   </div>
                 )}
