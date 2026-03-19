@@ -20,6 +20,20 @@ interface VoiceCloneRecorderProps {
 const MIN_SECONDS = 10;
 const SUGGESTED_SECONDS = 30;
 
+function getSupportedMimeType(): string {
+  if (typeof MediaRecorder === "undefined") return "";
+  const types = [
+    "audio/mp4",
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/ogg;codecs=opus",
+  ];
+  for (const type of types) {
+    if (MediaRecorder.isTypeSupported(type)) return type;
+  }
+  return "";
+}
+
 export function VoiceCloneRecorder({
   currentVoiceId,
   onVoiceCloned,
@@ -28,15 +42,18 @@ export function VoiceCloneRecorder({
   const [elapsed, setElapsed] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioBlobMime, setAudioBlobMime] = useState("audio/webm");
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoStopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioBlobRef = useRef<Blob | null>(null);
 
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (autoStopRef.current) clearTimeout(autoStopRef.current);
       if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
   }, [audioUrl]);
@@ -48,7 +65,11 @@ export function VoiceCloneRecorder({
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const mimeType = getSupportedMimeType();
+      const recorder = new MediaRecorder(
+        stream,
+        mimeType ? { mimeType } : undefined,
+      );
       mediaRecorderRef.current = recorder;
 
       recorder.ondataavailable = (e) => {
@@ -57,8 +78,10 @@ export function VoiceCloneRecorder({
 
       recorder.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blobMime = mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type: blobMime });
         audioBlobRef.current = blob;
+        setAudioBlobMime(blobMime);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
         setState("preview");
@@ -70,6 +93,10 @@ export function VoiceCloneRecorder({
       timerRef.current = setInterval(() => {
         setElapsed((s) => s + 1);
       }, 1000);
+
+      autoStopRef.current = setTimeout(() => {
+        stopRecording();
+      }, SUGGESTED_SECONDS * 1000);
     } catch {
       setErrorMsg(
         "Não foi possível acessar o microfone. Verifique as permissões do navegador.",
@@ -82,6 +109,10 @@ export function VoiceCloneRecorder({
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
+    }
+    if (autoStopRef.current) {
+      clearTimeout(autoStopRef.current);
+      autoStopRef.current = null;
     }
     mediaRecorderRef.current?.stop();
   }
@@ -103,7 +134,12 @@ export function VoiceCloneRecorder({
 
     try {
       const formData = new FormData();
-      formData.append("audio", audioBlobRef.current, "recording.webm");
+      const ext = audioBlobMime.includes("mp4")
+        ? "m4a"
+        : audioBlobMime.includes("ogg")
+          ? "ogg"
+          : "webm";
+      formData.append("audio", audioBlobRef.current, `recording.${ext}`);
 
       const res = await fetch("/api/settings/voice-clone", {
         method: "POST",
@@ -129,6 +165,8 @@ export function VoiceCloneRecorder({
   }
 
   const isMinMet = elapsed >= MIN_SECONDS;
+  const progress = Math.min((elapsed / SUGGESTED_SECONDS) * 100, 100);
+  const remaining = Math.max(0, SUGGESTED_SECONDS - elapsed);
 
   if (state === "done") {
     return (
@@ -170,27 +208,41 @@ export function VoiceCloneRecorder({
       )}
 
       {state === "recording" && (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-red-blush bg-red-pale px-4 py-5">
+        <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-red-DEFAULT bg-white px-4 py-5">
           <div className="flex items-center gap-3">
             <span className="h-3 w-3 animate-pulse rounded-full bg-red-DEFAULT" />
             <span className="font-mono text-2xl font-bold text-red-dark">
               {formatTime(elapsed)}
             </span>
           </div>
-          <div className="text-center text-xs text-red-dark">
-            {isMinMet
-              ? `Bom! Continue por mais ${Math.max(0, SUGGESTED_SECONDS - elapsed)}s para melhor qualidade.`
-              : `Grave pelo menos ${MIN_SECONDS - elapsed}s para continuar.`}
+          <div className="w-full overflow-hidden rounded-full bg-neutral-border h-2">
+            <div
+              className="h-2 rounded-full bg-red-DEFAULT transition-all duration-1000"
+              style={{ width: `${progress}%` }}
+            />
           </div>
-          <button
+          <div className="text-center text-xs text-neutral-dark">
+            {isMinMet
+              ? remaining > 0
+                ? `Continue por mais ${remaining}s para melhor qualidade.`
+                : "Qualidade ideal atingida — parando..."
+              : `Grave pelo menos mais ${MIN_SECONDS - elapsed}s para continuar.`}
+          </div>
+
+          <Button
+            variant="ghost"
             type="button"
             onClick={stopRecording}
             disabled={!isMinMet}
-            className="flex items-center gap-2 rounded-lg bg-red-DEFAULT px-5 py-2 text-sm font-medium text-white transition hover:bg-red-crimson disabled:cursor-not-allowed disabled:opacity-40"
+            className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold transition ${
+              isMinMet
+                ? "bg-red-crimson text-white hover:bg-red-DEFAULT"
+                : "bg-red-blush text-red-dark opacity-70 cursor-not-allowed"
+            }`}
           >
-            <Square className="h-4 w-4 fill-white" />
-            Parar gravação
-          </button>
+            <Square className="h-4 w-4 fill-current" />
+            {isMinMet ? "Parar gravação" : `Aguarde ${MIN_SECONDS - elapsed}s`}
+          </Button>
         </div>
       )}
 
@@ -199,7 +251,7 @@ export function VoiceCloneRecorder({
           <div className="text-sm font-medium text-neutral-dark">
             Ouça antes de enviar:
           </div>
-          <audio controls src={audioUrl} className="w-full" />
+          <audio controls src={audioUrl} className="w-full" playsInline />
           <div className="flex gap-2">
             <Button
               variant="ghost"

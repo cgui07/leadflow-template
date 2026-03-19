@@ -6,7 +6,13 @@ import { MessageSquare } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { MessageInput } from "@/components/domain/chat/MessageInput";
-import { useDeferredValue, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type {
   ConversationItem,
@@ -40,14 +46,18 @@ export function ConversationsPageClient({
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(initialSearch);
   const deferredSearch = useDeferredValue(search);
-  const [selected, setSelected] = useState<string | null>(initialSelectedConversationId);
+  const [selected, setSelected] = useState<string | null>(
+    initialSelectedConversationId,
+  );
   const [sending, setSending] = useState(false);
   const [switching, setSwitching] = useState(false);
   const [summary, setSummary] = useState<ConversationSummary | null>(null);
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryVisible, setSummaryVisible] = useState(false);
-  const [conversationError, setConversationError] = useState<string | null>(null);
+  const [conversationError, setConversationError] = useState<string | null>(
+    null,
+  );
   const summaryAbortRef = useRef<AbortController | null>(null);
   const summaryRequestIdRef = useRef(0);
 
@@ -62,17 +72,21 @@ export function ConversationsPageClient({
     initialData: initialConversations,
     revalidateOnMount: false,
   });
-  const { data: messages, error: messagesError, refetch: refetchMessages } =
-    useFetch<MessageItem[]>(
-      selected ? `/api/conversations/${selected}/messages` : null,
-      {
-        initialData:
-          initialSelectedConversationId && initialSelectedConversationId === selected
-            ? initialMessages
-            : null,
-        revalidateOnMount: false,
-      },
-    );
+  const {
+    data: messages,
+    error: messagesError,
+    refetch: refetchMessages,
+  } = useFetch<MessageItem[]>(
+    selected ? `/api/conversations/${selected}/messages` : null,
+    {
+      initialData:
+        initialSelectedConversationId &&
+        initialSelectedConversationId === selected
+          ? initialMessages
+          : null,
+      revalidateOnMount: false,
+    },
+  );
   const selectedConversationIdFromUrl = searchParams.get("conversationId");
   const selectedConversation = conversations?.find((conversation) => {
     return conversation.id === selected;
@@ -121,6 +135,25 @@ export function ConversationsPageClient({
     resetSummaryState();
   }, [showSummary]);
 
+  useEffect(() => {
+    if (!selected) return;
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refetchMessages();
+      }
+    }, 3000);
+    return () => clearInterval(id);
+  }, [selected, refetchMessages]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refetch();
+      }
+    }, 10000);
+    return () => clearInterval(id);
+  }, [refetch]);
+
   function resetSummaryState() {
     summaryAbortRef.current?.abort();
     summaryAbortRef.current = null;
@@ -149,7 +182,9 @@ export function ConversationsPageClient({
     }
 
     const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
   }
 
   function handleSelectConversation(conversationId: string) {
@@ -183,7 +218,10 @@ export function ConversationsPageClient({
 
       if (!response.ok) {
         throw new Error(
-          await readErrorMessage(response, "Não foi possível enviar a mensagem."),
+          await readErrorMessage(
+            response,
+            "Não foi possível enviar a mensagem.",
+          ),
         );
       }
 
@@ -274,7 +312,10 @@ export function ConversationsPageClient({
 
       setSummary(data);
     } catch (error) {
-      if (controller.signal.aborted || summaryRequestIdRef.current !== requestId) {
+      if (
+        controller.signal.aborted ||
+        summaryRequestIdRef.current !== requestId
+      ) {
         return;
       }
 
@@ -284,7 +325,10 @@ export function ConversationsPageClient({
           : "Não foi possível gerar o resumo desta conversa.",
       );
     } finally {
-      if (controller.signal.aborted || summaryRequestIdRef.current !== requestId) {
+      if (
+        controller.signal.aborted ||
+        summaryRequestIdRef.current !== requestId
+      ) {
         return;
       }
 
@@ -293,7 +337,8 @@ export function ConversationsPageClient({
     }
   }
 
-  const combinedError = conversationError || conversationsError || messagesError;
+  const combinedError =
+    conversationError || conversationsError || messagesError;
   const conversationList = (
     <ConversationSidebar
       search={search}
@@ -340,7 +385,6 @@ export function ConversationsPageClient({
         onSend={handleSendMessage}
         disabled={!selected}
         sending={sending}
-        className="border-t border-neutral-border p-2 sm:p-3"
       />
     </div>
   ) : (
@@ -354,7 +398,7 @@ export function ConversationsPageClient({
   );
 
   return (
-    <PageContainer title="Conversas" subtitle={subtitle}>
+    <PageContainer title="WhatsApp" subtitle={subtitle}>
       <div className="flex h-[calc(100vh-13rem)] overflow-hidden rounded-xl border border-neutral-border bg-white">
         <div
           className={cn(

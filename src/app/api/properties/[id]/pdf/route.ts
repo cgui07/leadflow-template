@@ -1,12 +1,16 @@
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
 import { requireAuth, json, error, handleError } from "@/lib/api";
-import {
-  uploadPropertyPdf,
-  deletePropertyPdf,
-} from "@/lib/storage";
+import { uploadPropertyPdf, deletePropertyPdf } from "@/lib/storage";
 
-const MAX_PDF_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_PDF_SIZE = 50 * 1024 * 1024;
+
+type PdfEntry = { url: string; filename: string; size: number };
+
+function parsePdfs(raw: unknown): PdfEntry[] {
+  if (Array.isArray(raw)) return raw as PdfEntry[];
+  return [];
+}
 
 export async function POST(
   req: NextRequest,
@@ -18,7 +22,7 @@ export async function POST(
 
     const property = await prisma.properties.findFirst({
       where: { id, user_id: user.id },
-      select: { id: true, pdf_url: true },
+      select: { id: true, pdfs: true },
     });
 
     if (!property) {
@@ -31,78 +35,76 @@ export async function POST(
     if (!file) {
       return error("Nenhum arquivo enviado.", 400);
     }
-
     if (file.type !== "application/pdf") {
       return error("Apenas arquivos PDF são aceitos.", 400);
     }
-
     if (file.size > MAX_PDF_SIZE) {
-      return error("O arquivo excede o limite de 10MB.", 400);
-    }
-
-    // Delete old PDF if exists
-    if (property.pdf_url) {
-      await deletePropertyPdf(property.pdf_url).catch((err) =>
-        console.error("[pdf] Failed to delete old PDF:", err),
-      );
+      return error("O arquivo excede o limite de 50MB.", 400);
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const storagePath = await uploadPropertyPdf(user.id, id, buffer, file.type);
 
+    const newEntry: PdfEntry = {
+      url: storagePath,
+      filename: file.name,
+      size: file.size,
+    };
+
+    const pdfs = parsePdfs(property.pdfs);
+    pdfs.push(newEntry);
+
     await prisma.properties.update({
       where: { id },
-      data: {
-        pdf_url: storagePath,
-        pdf_filename: file.name,
-        pdf_size: file.size,
-        updated_at: new Date(),
-      },
+      data: { pdfs, updated_at: new Date() },
     });
 
-    return json({
-      pdf_url: storagePath,
-      pdf_filename: file.name,
-      pdf_size: file.size,
-    });
+    return json(newEntry);
   } catch (err) {
     return handleError(err);
   }
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const user = await requireAuth();
     const { id } = await params;
 
+    const { searchParams } = new URL(req.url);
+    const pdfUrl = searchParams.get("url");
+
+    if (!pdfUrl) {
+      return error("Parâmetro 'url' obrigatório.", 400);
+    }
+
     const property = await prisma.properties.findFirst({
       where: { id, user_id: user.id },
-      select: { id: true, pdf_url: true },
+      select: { id: true, pdfs: true },
     });
 
     if (!property) {
       return error("Imóvel não encontrado.", 404);
     }
 
-    if (!property.pdf_url) {
-      return error("Este imóvel não possui PDF.", 400);
+    const pdfs = parsePdfs(property.pdfs);
+    const exists = pdfs.some((p) => p.url === pdfUrl);
+
+    if (!exists) {
+      return error("PDF não encontrado.", 404);
     }
 
-    await deletePropertyPdf(property.pdf_url).catch((err) =>
+    await deletePropertyPdf(pdfUrl).catch((err) =>
       console.error("[pdf] Failed to delete PDF:", err),
     );
 
+    const updated = pdfs.filter((p) => p.url !== pdfUrl);
+
     await prisma.properties.update({
       where: { id },
-      data: {
-        pdf_url: null,
-        pdf_filename: null,
-        pdf_size: null,
-        updated_at: new Date(),
-      },
+      data: { pdfs: updated, updated_at: new Date() },
     });
 
     return json({ ok: true });

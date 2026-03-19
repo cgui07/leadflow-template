@@ -17,14 +17,17 @@ import {
   Building2,
   CheckSquare,
   ChevronLeft,
+  ChevronRight,
+  Grid2x2,
   Home,
   Kanban,
   LayoutDashboard,
   LogOut,
-  MessageSquare,
   Settings,
   Users,
+  X,
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 interface NavItem {
   label: string;
@@ -32,7 +35,7 @@ interface NavItem {
   icon: React.ReactNode;
   iconMobile: React.ReactNode;
   badge?: number;
-  mobileVisible?: boolean;
+  mobileTab?: boolean;
 }
 
 function getNavItems(canManagePlatform: boolean): NavItem[] {
@@ -42,42 +45,42 @@ function getNavItems(canManagePlatform: boolean): NavItem[] {
       href: "/dashboard",
       icon: <LayoutDashboard size={20} />,
       iconMobile: <LayoutDashboard size={22} />,
-      mobileVisible: true,
+      mobileTab: true,
     },
     {
-      label: "Conversas",
+      label: "WhatsApp",
       href: "/conversations",
-      icon: <MessageSquare size={20} />,
-      iconMobile: <MessageSquare size={22} />,
-      mobileVisible: true,
+      icon: <FaWhatsapp size={20} />,
+      iconMobile: <FaWhatsapp size={22} />,
+      mobileTab: true,
     },
     {
       label: "Leads",
       href: "/leads",
       icon: <Users size={20} />,
       iconMobile: <Users size={22} />,
-      mobileVisible: true,
+      mobileTab: true,
     },
     {
       label: "Pipeline",
       href: "/pipeline",
       icon: <Kanban size={20} />,
       iconMobile: <Kanban size={22} />,
-      mobileVisible: true,
+      mobileTab: true,
     },
     {
       label: "Tarefas",
       href: "/tasks",
       icon: <CheckSquare size={20} />,
       iconMobile: <CheckSquare size={22} />,
-      mobileVisible: true,
+      mobileTab: true,
     },
     {
       label: "Imóveis",
       href: "/properties",
       icon: <Home size={20} />,
       iconMobile: <Home size={22} />,
-      mobileVisible: false,
+      mobileTab: false,
     },
     ...(canManagePlatform
       ? [
@@ -86,7 +89,7 @@ function getNavItems(canManagePlatform: boolean): NavItem[] {
             href: "/clients",
             icon: <Building2 size={20} />,
             iconMobile: <Building2 size={22} />,
-            mobileVisible: false,
+            mobileTab: false,
           } satisfies NavItem,
         ]
       : []),
@@ -95,7 +98,7 @@ function getNavItems(canManagePlatform: boolean): NavItem[] {
       href: "/settings",
       icon: <Settings size={20} />,
       iconMobile: <Settings size={22} />,
-      mobileVisible: false,
+      mobileTab: false,
     },
   ];
 }
@@ -116,6 +119,7 @@ export function Sidebar({
   const branding = useBranding();
   const [collapsed, setCollapsed] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const pathname = usePathname();
   const navItems = getNavItems(canManagePlatform);
@@ -123,12 +127,10 @@ export function Sidebar({
   async function handleLogout() {
     try {
       setLoggingOut(true);
-
       if (onLogout) {
         await onLogout();
         return;
       }
-
       await fetch("/api/auth/logout", { method: "POST" });
       window.location.href = "/login";
     } finally {
@@ -136,15 +138,20 @@ export function Sidebar({
     }
   }
 
-  const mobileItems = navItems.filter((item) => item.mobileVisible);
+  const tabItems = navItems.filter((item) => item.mobileTab);
+  const extraItems = navItems.filter((item) => !item.mobileTab);
   const userInitial = userName.charAt(0).toUpperCase();
   const brandChipClass = getBrandChipClass(branding.colorPrimary);
   const activeNavClass = getBrandActiveNavClass(branding.colorPrimary);
   const activeTextClass = getBrandTextClass(branding.colorPrimary);
 
+  const isExtraActive = extraItems.some((item) =>
+    pathname.startsWith(item.href),
+  );
+
   return (
     <>
-      <aside
+      <div
         className={cn(
           "hidden h-screen shrink-0 flex-col bg-neutral-ink text-white transition-all duration-300 md:flex",
           collapsed ? "w-17" : "w-64",
@@ -245,11 +252,11 @@ export function Sidebar({
             )}
           </Button>
         </div>
-      </aside>
+      </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-border bg-white-95 backdrop-blur-lg md:hidden">
-        <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
-          {mobileItems.map((item) => {
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-border bg-white/95 backdrop-blur-lg md:hidden">
+        <div className="flex h-16 items-center justify-around px-1">
+          {tabItems.map((item) => {
             const isActive =
               item.href === "/"
                 ? pathname === "/"
@@ -260,7 +267,7 @@ export function Sidebar({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-colors",
+                  "flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-colors min-w-0",
                   isActive
                     ? activeTextClass
                     : "text-neutral-muted active:text-neutral-steel",
@@ -269,7 +276,7 @@ export function Sidebar({
                 <div className="shrink-0">{item.iconMobile}</div>
                 <div
                   className={cn(
-                    "text-[10px] font-medium leading-tight",
+                    "text-[10px] font-medium leading-tight truncate",
                     isActive && "font-semibold",
                   )}
                 >
@@ -278,24 +285,128 @@ export function Sidebar({
               </Link>
             );
           })}
+
           <Button
             variant="ghost"
-            onClick={() => setShowAccountModal(true)}
-            className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5"
+            type="button"
+            onClick={() => setShowMobileMenu(true)}
+            className={cn(
+              "flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-colors min-w-0",
+              isExtraActive || showMobileMenu
+                ? activeTextClass
+                : "text-neutral-muted active:text-neutral-steel",
+            )}
           >
+            <Grid2x2 size={22} />
             <div
               className={cn(
-                "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white",
-                brandChipClass,
+                "text-[10px] font-medium leading-tight",
+                (isExtraActive || showMobileMenu) && "font-semibold",
               )}
             >
-              {userInitial}
+              Mais
             </div>
-            <div className="text-[10px] font-medium leading-tight">Conta</div>
           </Button>
         </div>
         <div className="h-[env(safe-area-inset-bottom)]" />
       </div>
+
+      {showMobileMenu && (
+        <div className="fixed inset-0 z-60 md:hidden">
+          <div
+            className="absolute inset-0 bg-neutral-ink/50 backdrop-blur-sm"
+            onClick={() => setShowMobileMenu(false)}
+          />
+
+          <div className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white shadow-hero">
+            <div className="flex items-center justify-between px-5 pt-4 pb-2">
+              <div className="h-1 w-10 rounded-full bg-neutral-border mx-auto absolute left-1/2 -translate-x-1/2 top-3" />
+              <div className="text-base font-semibold text-neutral-ink pt-2">
+                Menu
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileMenu(false)}
+                className="rounded-full p-1.5 text-neutral-muted hover:bg-neutral-surface hover:text-neutral-dark transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="px-4 pb-3 space-y-1">
+              {extraItems.map((item) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setShowMobileMenu(false)}
+                    className={cn(
+                      "flex items-center gap-4 rounded-2xl px-4 py-3.5 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-neutral-dark hover:bg-neutral-surface",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+                        isActive
+                          ? "bg-primary/15 text-primary"
+                          : "bg-neutral-pale text-neutral-steel",
+                      )}
+                    >
+                      {item.iconMobile}
+                    </div>
+                    <div className="flex-1">{item.label}</div>
+                    <ChevronRight
+                      size={16}
+                      className={cn(
+                        isActive ? "text-primary" : "text-neutral-border",
+                      )}
+                    />
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="mx-4 border-t border-neutral-border" />
+
+            <div className="p-4 space-y-3">
+              <div className="flex items-center gap-3 rounded-2xl bg-neutral-surface px-4 py-3">
+                <div
+                  className={cn(
+                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-base font-bold text-white",
+                    brandChipClass,
+                  )}
+                >
+                  {userInitial}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold text-neutral-ink">
+                    {userName}
+                  </div>
+                  <div className="truncate text-xs text-neutral">
+                    {userEmail}
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                variant="danger"
+                fullWidth
+                loading={loggingOut}
+                icon={<LogOut className="h-4 w-4" />}
+                onClick={handleLogout}
+              >
+                {loggingOut ? "Saindo..." : "Log out"}
+              </Button>
+            </div>
+
+            <div className="h-[env(safe-area-inset-bottom)]" />
+          </div>
+        </div>
+      )}
 
       <Modal
         open={showAccountModal}

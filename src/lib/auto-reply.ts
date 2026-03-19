@@ -11,6 +11,7 @@ import {
 } from "./scheduling-handler";
 import {
   shouldUseVoiceReply,
+  detectIntentSignals,
   getVoiceUsageThisMonth,
   incrementVoiceUsage,
 } from "./voice-reply";
@@ -19,9 +20,13 @@ import {
   resolveSendTarget,
   sendAndSaveMessage,
   sendAndSaveAudioPTT,
+  sendPresenceUpdate,
 } from "./whatsapp";
 
-function extractPdfTags(reply: string): { cleanReply: string; propertyIds: string[] } {
+function extractPdfTags(reply: string): {
+  cleanReply: string;
+  propertyIds: string[];
+} {
   const regex = /\[ENVIAR_PDF:([a-f0-9-]+)\]/gi;
   const propertyIds: string[] = [];
   let match;
@@ -275,7 +280,12 @@ export async function processScheduledAutoReply(
         orderBy: { created_at: "desc" },
         take: 20,
       });
-      console.log("[auto-reply] properties found:", userProperties.length, "for userId:", conversation.lead.userId);
+      console.log(
+        "[auto-reply] properties found:",
+        userProperties.length,
+        "for userId:",
+        conversation.lead.userId,
+      );
       propertiesCatalog = userProperties.map((p) => ({
         ...p,
         id: p.id,
@@ -287,11 +297,54 @@ export async function processScheduledAutoReply(
       console.error("[auto-reply] failed to fetch properties:", err);
     }
 
+    // ── Determine voice decision BEFORE generating AI reply ─────────────
+    const elevenlabsApiKey = process.env.ELEVENLABS_API_KEY;
+    const elevenlabsVoiceId = (settings as Record<string, unknown>)
+      .elevenlabsVoiceId as string | null | undefined;
+    const voiceReplyEnabled = (settings as Record<string, unknown>)
+      .voiceReplyEnabled as boolean | null | undefined;
+    const voiceReplyMonthlyLimit = (settings as Record<string, unknown>)
+      .voiceReplyMonthlyLimit as number | null | undefined;
+
+    let willUseVoice = false;
+
+    if (elevenlabsApiKey && elevenlabsVoiceId && voiceReplyEnabled) {
+      const recentOutbound = orderedMessages
+        .filter((m) => m.direction === "outbound")
+        .map((m) => ({ type: m.type }));
+
+      const isFirstBotReply = recentOutbound.length === 0;
+      const currentMonthUsage = await getVoiceUsageThisMonth(
+        conversation.lead.userId,
+      );
+      const withinLimit = currentMonthUsage < (voiceReplyMonthlyLimit ?? 50);
+      const noRecentAudio = recentOutbound
+        .slice(0, 3)
+        .every((m) => m.type !== "audio");
+
+      if (withinLimit && noRecentAudio) {
+        if (isFirstBotReply) {
+          willUseVoice = true;
+        } else {
+          const { hasHighIntent } = detectIntentSignals(latestInbound.content);
+          willUseVoice = hasHighIntent;
+        }
+      }
+    }
+
+    const whatsappConfig = getWhatsAppConfig(settings.whatsappPhoneId!);
+    await sendPresenceUpdate(
+      whatsappConfig,
+      replyJid,
+      willUseVoice ? "recording" : "composing",
+    );
+
     const reply = await generateAutoReply(
       aiConfig,
       conversation.lead.user.name,
       enrichedMessages,
       propertiesCatalog.length > 0 ? propertiesCatalog : undefined,
+      willUseVoice,
     );
 
     if (!reply) {
@@ -304,25 +357,20 @@ export async function processScheduledAutoReply(
     const messageCount = orderedMessages.length + 1;
     let sentAsVoice = false;
 
-    // Attempt voice reply when ElevenLabs is configured
-    const elevenlabsApiKey = process.env.ELEVENLABS_API_KEY;
-    const elevenlabsVoiceId = (settings as Record<string, unknown>).elevenlabsVoiceId as string | null | undefined;
-    const voiceReplyEnabled = (settings as Record<string, unknown>).voiceReplyEnabled as boolean | null | undefined;
-    const voiceReplyMonthlyLimit = (settings as Record<string, unknown>).voiceReplyMonthlyLimit as number | null | undefined;
+    if (willUseVoice && elevenlabsApiKey && elevenlabsVoiceId) {
+      const currentMonthUsage = await getVoiceUsageThisMonth(
+        conversation.lead.userId,
+      );
 
-    if (elevenlabsApiKey && elevenlabsVoiceId && voiceReplyEnabled) {
-      const recentOutbound = orderedMessages
-        .filter((m) => m.direction === "outbound")
-        .map((m) => ({ type: m.type }));
-
-      const isFirstBotReply = recentOutbound.length === 0;
-      const currentMonthUsage = await getVoiceUsageThisMonth(conversation.lead.userId);
-
-      const decision = shouldUseVoiceReply({
+      const finalDecision = shouldUseVoiceReply({
         replyText: cleanReply,
         inboundText: latestInbound.content,
-        isFirstBotReply,
-        recentOutboundMessages: recentOutbound,
+        isFirstBotReply:
+          orderedMessages.filter((m) => m.direction === "outbound").length ===
+          0,
+        recentOutboundMessages: orderedMessages
+          .filter((m) => m.direction === "outbound")
+          .map((m) => ({ type: m.type })),
         voiceEnabled: true,
         monthlyLimit: voiceReplyMonthlyLimit ?? 50,
         currentMonthUsage,
@@ -330,17 +378,23 @@ export async function processScheduledAutoReply(
 
       console.log(
         "[auto-reply] Voice decision:",
-        decision.useVoice,
-        decision.reason,
+        finalDecision.useVoice,
+        finalDecision.reason,
         `(usage: ${currentMonthUsage}/${voiceReplyMonthlyLimit ?? 50})`,
       );
 
-      if (decision.useVoice) {
+      if (finalDecision.useVoice) {
         try {
-          const base64Audio = await generateSpeechBase64(cleanReply, elevenlabsVoiceId, elevenlabsApiKey);
+          await sendPresenceUpdate(whatsappConfig, replyJid, "recording");
+
+          const base64Audio = await generateSpeechBase64(
+            cleanReply,
+            elevenlabsVoiceId,
+            elevenlabsApiKey,
+          );
 
           await sendAndSaveAudioPTT(
-            getWhatsAppConfig(settings.whatsappPhoneId!),
+            whatsappConfig,
             conversation.id,
             replyJid,
             cleanReply,
@@ -351,14 +405,19 @@ export async function processScheduledAutoReply(
           await incrementVoiceUsage(conversation.lead.userId);
           sentAsVoice = true;
         } catch (err) {
-          console.error("[auto-reply] Voice generation failed, falling back to text:", err);
+          console.error(
+            "[auto-reply] Voice generation failed, falling back to text:",
+            err,
+          );
         }
       }
     }
 
     if (!sentAsVoice) {
+      await sendPresenceUpdate(whatsappConfig, replyJid, "composing");
+
       await sendAndSaveMessage(
-        getWhatsAppConfig(settings.whatsappPhoneId!),
+        whatsappConfig,
         conversation.id,
         replyJid,
         cleanReply,
@@ -366,7 +425,6 @@ export async function processScheduledAutoReply(
       );
     }
 
-    // Send property PDFs mentioned in the AI reply
     if (pdfPropertyIds.length > 0) {
       try {
         const propertiesWithPdf = await prisma.properties.findMany({
@@ -404,9 +462,6 @@ export async function processScheduledAutoReply(
       await qualifyLead(conversation.lead.id, aiConfig);
     }
 
-    // ── Scheduling intent detection ─────────────────────────────────────────
-    // Runs after the AI reply so it never blocks the main response.
-    // Only fires when there is an open "visit" LeadAction for this lead.
     await handleSchedulingIfNeeded({
       userId: conversation.lead.userId,
       leadId: conversation.lead.id,

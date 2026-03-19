@@ -1,3 +1,6 @@
+"use client";
+
+import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import { TextField } from "@/components/forms";
 import { Button } from "@/components/ui/Button";
@@ -12,10 +15,30 @@ interface ConversationSidebarProps {
   onSelect: (conversationId: string) => void;
 }
 
-function formatConversationTime(lastMessageAt: string) {
-  return new Date(lastMessageAt).toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
+function formatSidebarTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const todayStr = now.toDateString();
+  const yesterdayDate = new Date(now);
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+
+  if (date.toDateString() === todayStr) {
+    return date.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+  if (date.toDateString() === yesterdayDate.toDateString()) {
+    return "Ontem";
+  }
+  const diffMs = now.getTime() - date.getTime();
+  if (diffMs < 7 * 24 * 60 * 60 * 1000) {
+    return date.toLocaleDateString("pt-BR", { weekday: "short" });
+  }
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
   });
 }
 
@@ -28,10 +51,14 @@ export function ConversationSidebar({
 }: ConversationSidebarProps) {
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-neutral-border p-3">
+      <div className="bg-teal-dark px-4 py-3">
+        <div className="text-base font-bold text-white">WhatsApp</div>
+      </div>
+
+      <div className="border-b border-neutral-border bg-neutral-surface px-3 py-2">
         <TextField
-          icon={<Search className="h-4 w-4" />}
-          placeholder="Buscar conversa..."
+          icon={<Search className="h-4 w-4 text-neutral-muted" />}
+          placeholder="Pesquisar ou começar uma nova conversa"
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
         />
@@ -43,45 +70,72 @@ export function ConversationSidebar({
             Nenhuma conversa
           </div>
         ) : (
-          conversations.map((conversation) => (
-            <Button
-              key={conversation.id}
-              onClick={() => onSelect(conversation.id)}
-              variant="ghost"
-              className={`h-auto w-full justify-start border-b border-gray-ghost px-3 py-3 text-left ${
-                selectedId === conversation.id ? "bg-blue-pale" : ""
-              }`}
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-border text-sm font-bold text-neutral-dark">
-                {conversation.lead.name.charAt(0).toUpperCase()}
-              </div>
+          conversations.map((conversation) => {
+            const isSelected = selectedId === conversation.id;
+            const hasUnread = conversation.unreadCount > 0;
+            const lastMsg = conversation.messages[0];
+            const preview = lastMsg
+              ? lastMsg.direction === "outbound"
+                ? `Você: ${lastMsg.content}`
+                : lastMsg.content
+              : "Sem mensagens";
 
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                  <div className="truncate text-sm font-semibold text-neutral-ink">
-                    {conversation.lead.name}
-                  </div>
-                  {conversation.unreadCount > 0 && (
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
-                      {conversation.unreadCount}
+            return (
+              <Button
+                key={conversation.id}
+                onClick={() => onSelect(conversation.id)}
+                variant="ghost"
+                className={cn(
+                  "h-auto w-full justify-start border-b border-neutral-border px-3 py-3 text-left",
+                  isSelected ? "bg-neutral-surface" : "hover:bg-neutral-pale",
+                )}
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-teal-mist text-sm font-bold text-teal-dark">
+                  {conversation.lead.name.charAt(0).toUpperCase()}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="truncate text-base font-medium text-neutral-ink">
+                      {conversation.lead.name}
                     </div>
-                  )}
-                </div>
+                    <div
+                      className={cn(
+                        "shrink-0 text-xs",
+                        hasUnread
+                          ? "font-medium text-whatsapp"
+                          : "text-neutral-muted",
+                      )}
+                    >
+                      {conversation.lastMessageAt &&
+                        formatSidebarTime(conversation.lastMessageAt)}
+                    </div>
+                  </div>
 
-                <div className="mt-0.5 truncate text-xs text-neutral-muted">
-                  {conversation.messages[0]?.content || "Sem mensagens"}
-                </div>
-
-                <div className="mt-1 flex items-center gap-2">
-                  <ConversationStatusBadge status={conversation.status} />
-                  <div className="text-[10px] text-neutral-muted">
-                    {conversation.lastMessageAt &&
-                      formatConversationTime(conversation.lastMessageAt)}
+                  <div className="mt-0.5 flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                      <ConversationStatusBadge status={conversation.status} />
+                      <div
+                        className={cn(
+                          "truncate text-sm",
+                          hasUnread
+                            ? "font-medium text-neutral-dark"
+                            : "text-neutral-muted",
+                        )}
+                      >
+                        {preview}
+                      </div>
+                    </div>
+                    {hasUnread && (
+                      <div className="flex h-5 min-w-5 items-center justify-center rounded-full bg-whatsapp px-1 text-[11px] font-bold text-white">
+                        {conversation.unreadCount}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            </Button>
-          ))
+              </Button>
+            );
+          })
         )}
       </div>
     </div>
