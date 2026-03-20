@@ -6,7 +6,6 @@ import {
   createAppointment,
   cancelAppointment,
   rescheduleAppointment,
-  getPendingAppointmentForLead,
   getActiveAppointmentForLead,
   ensureVisitAction,
   confirmAppointmentReply,
@@ -102,12 +101,43 @@ export async function handleSchedulingIfNeeded(
 
   console.log("[scheduling] Extracted intent:", JSON.stringify(intent));
 
-  if (!intent.hasIntent || !intent.proposedDate || !intent.proposedTime) {
-    console.log("[scheduling] No valid intent detected — skipping");
+  if (!intent.hasIntent) {
+    console.log("[scheduling] No intent detected — skipping");
     return;
   }
-  if (intent.isConfirmation || intent.isCancellation) {
-    console.log("[scheduling] Intent is confirmation/cancellation — skipping");
+
+  // ── Cancelamento ──────────────────────────────────────────────────────────
+  if (intent.isCancellation) {
+    const active = await getActiveAppointmentForLead(input.leadId);
+    if (!active) {
+      console.log("[scheduling] Cancellation intent but no active appointment — skipping");
+      return;
+    }
+
+    console.log("[scheduling] Cancelling appointment:", active.id);
+    await cancelAppointment(active.id, input.userId);
+
+    if (!input.settings.whatsappPhoneId) return;
+    const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
+    await sendAndSaveMessage(
+      config,
+      input.conversationId,
+      input.replyJid,
+      "Ok, visita cancelada! Se quiser reagendar é só me falar 😊",
+      "bot",
+    );
+    return;
+  }
+
+  // ── Confirmação simples (sem data nova) ───────────────────────────────────
+  if (intent.isConfirmation) {
+    console.log("[scheduling] Confirmation intent — skipping (handled elsewhere)");
+    return;
+  }
+
+  // ── Agendamento ou reagendamento com data ─────────────────────────────────
+  if (!intent.proposedDate || !intent.proposedTime) {
+    console.log("[scheduling] Intent but no date/time — skipping");
     return;
   }
 
@@ -123,53 +153,47 @@ export async function handleSchedulingIfNeeded(
     return;
   }
 
+  // ── Reagendamento explícito ───────────────────────────────────────────────
   if (intent.isReschedulingRequest) {
     const active = await getActiveAppointmentForLead(input.leadId);
-    if (!active) return;
-
-    const result = await rescheduleAppointment(
-      active.id,
-      input.userId,
-      scheduledAt,
-      intent.address,
-    );
-
-    if (!result || !input.settings.whatsappPhoneId) return;
-
-    const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
-
-    if (result.wasAvailable) {
-      await sendAndSaveMessage(
-        config,
-        input.conversationId,
-        input.replyJid,
-        `✅ Visita remarcada para ${formatDate(scheduledAt)} às ${formatTime(scheduledAt)}!${intent.address ? `\n📍 ${intent.address}` : ""}${result.calendarCreated ? " Agenda atualizada. 📅" : ""}`,
-        "bot",
+    if (!active) {
+      console.log("[scheduling] Reschedule intent but no active appointment — creating new");
+    } else {
+      console.log("[scheduling] Rescheduling appointment:", active.id, "to", scheduledAt.toISOString());
+      const result = await rescheduleAppointment(
+        active.id,
+        input.userId,
+        scheduledAt,
+        intent.address,
       );
-    } else if (result.alternativeSlots && result.alternativeSlots.length > 0) {
-      await sendAndSaveMessage(
-        config,
-        input.conversationId,
-        input.replyJid,
-        `Esse novo horário também está ocupado. Que tal um desses?\n\n${formatSlots(result.alternativeSlots)}`,
-        "bot",
-      );
+
+      if (!result || !input.settings.whatsappPhoneId) return;
+      const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
+
+      if (result.wasAvailable) {
+        const calendarNote = result.calendarCreated ? "\nJá atualizei na agenda 📅" : "";
+        await sendAndSaveMessage(
+          config,
+          input.conversationId,
+          input.replyJid,
+          `✅ Visita remarcada para ${formatDate(scheduledAt)} às ${formatTime(scheduledAt)}!${intent.address ? `\n📍 ${intent.address}` : ""}${calendarNote}`,
+          "bot",
+        );
+      } else if (result.alternativeSlots && result.alternativeSlots.length > 0) {
+        await sendAndSaveMessage(
+          config,
+          input.conversationId,
+          input.replyJid,
+          `Esse horário já está ocupado. Que tal um desses?\n\n${formatSlots(result.alternativeSlots)}`,
+          "bot",
+        );
+      }
+      return;
     }
-    return;
   }
 
-  const existing = await getPendingAppointmentForLead(input.leadId);
-  if (existing) {
-    console.log("[scheduling] Lead already has pending/confirmed appointment:", existing.id, "status:", existing.status, "— skipping");
-    return;
-  }
-
+  // ── Novo agendamento (permite múltiplas visitas por lead) ─────────────────
   const openAction = await ensureVisitAction(input.userId, input.leadId);
-
-  const oldConflict = await getActiveAppointmentForLead(input.leadId);
-  if (oldConflict && oldConflict.status === "conflict") {
-    await cancelAppointment(oldConflict.id, input.userId);
-  }
 
   const result = await createAppointment({
     userId: input.userId,
@@ -180,16 +204,18 @@ export async function handleSchedulingIfNeeded(
     address: intent.address ?? null,
   });
 
-  if (!input.settings.whatsappPhoneId) return;
+  console.log("[scheduling] Appointment created:", result.appointment.id, "calendar:", result.calendarCreated);
 
+  if (!input.settings.whatsappPhoneId) return;
   const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
 
   if (result.wasAvailable) {
+    const calendarNote = result.calendarCreated ? "\nJá coloquei na agenda 📅" : "";
     await sendAndSaveMessage(
       config,
       input.conversationId,
       input.replyJid,
-      `✅ Visita agendada para ${formatDate(scheduledAt)} às ${formatTime(scheduledAt)}!${intent.address ? `\n📍 ${intent.address}` : ""}${result.calendarCreated ? " Adicionado na agenda do corretor. 📅" : ""}`,
+      `✅ Visita agendada para ${formatDate(scheduledAt)} às ${formatTime(scheduledAt)}!${intent.address ? `\n📍 ${intent.address}` : ""}${calendarNote}`,
       "bot",
     );
   } else if (result.alternativeSlots && result.alternativeSlots.length > 0) {
@@ -197,7 +223,7 @@ export async function handleSchedulingIfNeeded(
       config,
       input.conversationId,
       input.replyJid,
-      `Infelizmente esse horário já está ocupado na minha agenda. Que tal um desses?\n\n${formatSlots(result.alternativeSlots)}`,
+      `Esse horário já está ocupado na minha agenda. Que tal um desses?\n\n${formatSlots(result.alternativeSlots)}`,
       "bot",
     );
   }
