@@ -101,7 +101,6 @@ export async function handleSchedulingIfNeeded(
   if (!intent.hasIntent || !intent.proposedDate || !intent.proposedTime) return;
   if (intent.isConfirmation || intent.isCancellation) return;
 
-  // Parse in Brasília timezone (UTC-3) to avoid treating local times as UTC
   const scheduledAt = new Date(
     `${intent.proposedDate}T${intent.proposedTime}:00-03:00`,
   );
