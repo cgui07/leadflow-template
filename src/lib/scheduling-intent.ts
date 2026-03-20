@@ -8,6 +8,7 @@ export interface SchedulingIntent {
   isConfirmation: boolean;
   isCancellation: boolean;
   isReschedulingRequest: boolean;
+  originalDate: string | null; // date of the appointment being cancelled/rescheduled
 }
 
 function getSchedulingExtractionPrompt(): string {
@@ -24,15 +25,17 @@ Formato esperado:
   "address": "endereço mencionado pelo cliente ou null",
   "isConfirmation": true|false,
   "isCancellation": true|false,
-  "isReschedulingRequest": true|false
+  "isReschedulingRequest": true|false,
+  "originalDate": "YYYY-MM-DD" ou null
 }
 
 Regras:
 - hasIntent = true se o cliente propõe uma data/hora, confirma, cancela ou quer remarcar uma visita
 - proposedDate e proposedTime devem ser extraídos da ÚLTIMA mensagem do cliente (quando houver)
 - isConfirmation = true se o cliente está confirmando uma visita já proposta (ex: "sim", "pode ser", "confirmado") — sem data nova
-- isCancellation = true se o cliente está cancelando (ex: "preciso cancelar", "não vou poder", "não consigo ir", "desmarca"). Não precisa de data — hasIntent=true e isCancellation=true
-- isReschedulingRequest = true APENAS se o cliente quer TROCAR uma visita existente por outro horário (ex: "consegue mudar pra terça?", "vamos remarcar", "troca aquela visita pra 15h")
+- isCancellation = true se o cliente está cancelando (ex: "preciso cancelar", "não vou poder", "não consigo ir", "desmarca"). hasIntent=true e isCancellation=true. Se o cliente mencionar qual data quer cancelar, preencha proposedDate (ex: "cancela a do dia 21" → proposedDate="2026-03-21")
+- isReschedulingRequest = true APENAS se o cliente quer TROCAR uma visita existente por outro horário (ex: "consegue mudar pra terça?", "vamos remarcar", "troca aquela visita pra 15h"). Preencha originalDate com a data da visita que o cliente quer mudar, se mencionada
+- originalDate = data da visita original que o cliente quer cancelar ou remarcar (ex: "cancela a do dia 21" → originalDate="2026-03-21", "muda a visita de sexta pra segunda" → originalDate=data da sexta). null se não mencionada
 - Se o cliente pede uma visita ADICIONAL com data nova (ex: "marca outra pro dia 27", "quero visitar outro imóvel dia 29", "agenda mais uma visita"), isso é um NOVO agendamento (isReschedulingRequest=false), mesmo que já tenha visitas marcadas
 - IMPORTANTE: analise apenas a ÚLTIMA mensagem do cliente para determinar a intenção. Não confunda visitas anteriores já confirmadas com a solicitação atual
 - Se a data for relativa ("amanhã", "sábado", "próxima semana"), calcule com base na data de hoje: ${today}
@@ -52,6 +55,7 @@ export async function extractSchedulingIntent(
     isConfirmation: false,
     isCancellation: false,
     isReschedulingRequest: false,
+    originalDate: null,
   };
 
   const lastConfirmIdx = messages.findLastIndex(
@@ -132,6 +136,8 @@ export async function extractSchedulingIntent(
       isConfirmation: Boolean(parsed.isConfirmation),
       isCancellation: Boolean(parsed.isCancellation),
       isReschedulingRequest: Boolean(parsed.isReschedulingRequest),
+      originalDate:
+        typeof parsed.originalDate === "string" ? parsed.originalDate : null,
     };
   } catch (err) {
     console.error("[scheduling-intent] extraction failed:", err);
