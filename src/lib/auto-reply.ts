@@ -462,15 +462,29 @@ export async function processScheduledAutoReply(
       await qualifyLead(conversation.lead.id, aiConfig);
     }
 
+    const schedulingMessages = enrichedMessages.map((m) => ({
+      direction: m.direction,
+      content:
+        typeof m.content === "string"
+          ? m.content
+          : m.content
+              .filter(
+                (p): p is { type: "text"; text: string } => p.type === "text",
+              )
+              .map((p) => p.text)
+              .join(" ") || m.content.toString(),
+    }));
+    schedulingMessages.push({
+      direction: "outbound",
+      content: cleanReply,
+    });
+
     await handleSchedulingIfNeeded({
       userId: conversation.lead.userId,
       leadId: conversation.lead.id,
       leadName: conversation.lead.name,
       conversationId: conversation.id,
-      messages: orderedMessages.map((m) => ({
-        direction: m.direction,
-        content: m.content,
-      })),
+      messages: schedulingMessages,
       replyJid,
       aiConfig,
       settings,
