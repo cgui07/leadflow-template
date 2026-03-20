@@ -8,7 +8,8 @@ export interface SchedulingIntent {
   isConfirmation: boolean;
   isCancellation: boolean;
   isReschedulingRequest: boolean;
-  originalDate: string | null; // date of the appointment being cancelled/rescheduled
+  originalDate: string | null;
+  additionalDates: Array<{ date: string; time: string }>;
 }
 
 function getSchedulingExtractionPrompt(): string {
@@ -26,20 +27,22 @@ Formato esperado:
   "isConfirmation": true|false,
   "isCancellation": true|false,
   "isReschedulingRequest": true|false,
-  "originalDate": "YYYY-MM-DD" ou null
+  "originalDate": "YYYY-MM-DD" ou null,
+  "additionalDates": [{"date": "YYYY-MM-DD", "time": "HH:MM"}]
 }
 
 Regras:
 - hasIntent = true se o cliente propõe uma data/hora, confirma, cancela ou quer remarcar uma visita
-- proposedDate e proposedTime devem ser extraídos da ÚLTIMA mensagem do cliente (quando houver)
+- proposedDate e proposedTime = primeira data/hora mencionada pelo cliente
+- additionalDates = se o cliente mencionar MAIS DE UMA data na mesma mensagem, coloque as datas extras aqui. Funciona tanto para agendar (ex: "marca dia 10 e dia 11 às 10h") quanto para cancelar (ex: "cancela as do dia 21 e 22"). Se só mencionou uma data, retorne array vazio []
 - isConfirmation = true se o cliente está confirmando uma visita já proposta (ex: "sim", "pode ser", "confirmado") — sem data nova
-- isCancellation = true se o cliente está cancelando (ex: "preciso cancelar", "não vou poder", "não consigo ir", "desmarca"). hasIntent=true e isCancellation=true. Se o cliente mencionar qual data quer cancelar, preencha proposedDate (ex: "cancela a do dia 21" → proposedDate="2026-03-21")
+- isCancellation = true se o cliente está cancelando (ex: "preciso cancelar", "não vou poder", "não consigo ir", "desmarca"). hasIntent=true e isCancellation=true. Se o cliente mencionar qual data quer cancelar, preencha proposedDate (ex: "cancela a do dia 21" → proposedDate="2026-03-21"). Se cancelar MAIS DE UMA, coloque as extras em additionalDates (ex: "cancela as do dia 21 e 22" → proposedDate="2026-03-21", additionalDates=[{"date":"2026-03-22","time":"00:00"}])
 - isReschedulingRequest = true APENAS se o cliente quer TROCAR uma visita existente por outro horário (ex: "consegue mudar pra terça?", "vamos remarcar", "troca aquela visita pra 15h"). Preencha originalDate com a data da visita que o cliente quer mudar, se mencionada
-- originalDate = data da visita original que o cliente quer cancelar ou remarcar (ex: "cancela a do dia 21" → originalDate="2026-03-21", "muda a visita de sexta pra segunda" → originalDate=data da sexta). null se não mencionada
-- Se o cliente pede uma visita ADICIONAL com data nova (ex: "marca outra pro dia 27", "quero visitar outro imóvel dia 29", "agenda mais uma visita"), isso é um NOVO agendamento (isReschedulingRequest=false), mesmo que já tenha visitas marcadas
-- IMPORTANTE: analise apenas a ÚLTIMA mensagem do cliente para determinar a intenção. Não confunda visitas anteriores já confirmadas com a solicitação atual
+- originalDate = data da visita original que o cliente quer cancelar ou remarcar. null se não mencionada
+- Se o cliente pede uma visita ADICIONAL com data nova (ex: "marca outra pro dia 27"), isso é um NOVO agendamento (isReschedulingRequest=false)
+- IMPORTANTE: analise apenas a ÚLTIMA mensagem do cliente para determinar a intenção
 - Se a data for relativa ("amanhã", "sábado", "próxima semana"), calcule com base na data de hoje: ${today}
-- Horários como "14h", "14:00", "duas da tarde" → "14:00"
+- Horários como "14h", "14:00", "duas da tarde" → "14:00". Se o cliente diz um horário para múltiplas datas (ex: "dia 10 e 11 às 10h"), aplique o mesmo horário para todas
 - Se não houver intenção clara de agendamento, cancelamento ou remarcação, retorne hasIntent=false`;
 }
 
@@ -56,6 +59,7 @@ export async function extractSchedulingIntent(
     isCancellation: false,
     isReschedulingRequest: false,
     originalDate: null,
+    additionalDates: [],
   };
 
   const lastConfirmIdx = messages.findLastIndex(
@@ -89,7 +93,7 @@ export async function extractSchedulingIntent(
         },
         body: JSON.stringify({
           model: config.model,
-          max_tokens: 300,
+          max_tokens: 500,
           system: getSchedulingExtractionPrompt(),
           messages: [{ role: "user", content: conversationText }],
         }),
@@ -107,7 +111,7 @@ export async function extractSchedulingIntent(
         },
         body: JSON.stringify({
           model: config.model,
-          max_tokens: 300,
+          max_tokens: 500,
           messages: [
             { role: "system", content: getSchedulingExtractionPrompt() },
             { role: "user", content: conversationText },
@@ -126,6 +130,23 @@ export async function extractSchedulingIntent(
       .trim();
     const parsed = JSON.parse(cleaned) as Record<string, unknown>;
 
+    const additionalDates: Array<{ date: string; time: string }> = [];
+    if (Array.isArray(parsed.additionalDates)) {
+      for (const entry of parsed.additionalDates) {
+        if (
+          typeof entry === "object" &&
+          entry !== null &&
+          typeof (entry as Record<string, unknown>).date === "string" &&
+          typeof (entry as Record<string, unknown>).time === "string"
+        ) {
+          additionalDates.push({
+            date: (entry as Record<string, unknown>).date as string,
+            time: (entry as Record<string, unknown>).time as string,
+          });
+        }
+      }
+    }
+
     return {
       hasIntent: Boolean(parsed.hasIntent),
       proposedDate:
@@ -138,6 +159,7 @@ export async function extractSchedulingIntent(
       isReschedulingRequest: Boolean(parsed.isReschedulingRequest),
       originalDate:
         typeof parsed.originalDate === "string" ? parsed.originalDate : null,
+      additionalDates,
     };
   } catch (err) {
     console.error("[scheduling-intent] extraction failed:", err);

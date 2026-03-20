@@ -160,15 +160,59 @@ export async function handleSchedulingIfNeeded(
     if (!input.settings.whatsappPhoneId) return;
     const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
 
-    const cancelDate = formatDate(appointment.scheduled_at);
-    const cancelTime = formatTime(appointment.scheduled_at);
-    await sendAndSaveMessage(
-      config,
-      input.conversationId,
-      input.replyJid,
-      `Ok, visita de ${cancelDate} às ${cancelTime} cancelada! Se quiser reagendar é só me falar 😊`,
-      "bot",
+    const cancelledDates: string[] = [];
+    cancelledDates.push(
+      `${formatDate(appointment.scheduled_at)} às ${formatTime(appointment.scheduled_at)}`,
     );
+
+    for (const extra of intent.additionalDates) {
+      const targetDate = new Date(`${extra.date}T00:00:00-03:00`);
+      const nextDay = new Date(targetDate.getTime() + 24 * 60 * 60 * 1000);
+      const extraAppt = await prisma.appointments.findFirst({
+        where: {
+          lead_id: input.leadId,
+          status: { in: ["confirmed", "pending_confirmation"] },
+          scheduled_at: { gte: targetDate, lt: nextDay },
+        },
+      });
+      if (extraAppt) {
+        console.log(
+          "[scheduling] Cancelling additional appointment:",
+          extraAppt.id,
+          "on",
+          extra.date,
+        );
+        await cancelAppointment(extraAppt.id, input.userId);
+        cancelledDates.push(
+          `${formatDate(extraAppt.scheduled_at)} às ${formatTime(extraAppt.scheduled_at)}`,
+        );
+      } else {
+        console.log(
+          "[scheduling] No appointment found on",
+          extra.date,
+          "to cancel — skipping",
+        );
+      }
+    }
+
+    if (cancelledDates.length === 1) {
+      await sendAndSaveMessage(
+        config,
+        input.conversationId,
+        input.replyJid,
+        `Ok, visita de ${cancelledDates[0]} cancelada! Se quiser reagendar é só me falar 😊`,
+        "bot",
+      );
+    } else {
+      const list = cancelledDates.map((d) => `• ${d}`).join("\n");
+      await sendAndSaveMessage(
+        config,
+        input.conversationId,
+        input.replyJid,
+        `Ok, visitas canceladas!\n\n${list}\n\nSe quiser reagendar é só me falar 😊`,
+        "bot",
+      );
+    }
     return;
   }
 
@@ -313,6 +357,60 @@ export async function handleSchedulingIfNeeded(
       `Esse horário já está ocupado na minha agenda. Que tal um desses?\n\n${formatSlots(result.alternativeSlots)}`,
       "bot",
     );
+  }
+
+  // ── Additional dates from the same message ──────────────────────────────
+  for (const extra of intent.additionalDates) {
+    const extraAt = new Date(`${extra.date}T${extra.time}:00-03:00`);
+    if (isNaN(extraAt.getTime()) || extraAt < new Date()) {
+      console.log(
+        "[scheduling] Skipping additional date (invalid or past):",
+        extra.date,
+        extra.time,
+      );
+      continue;
+    }
+
+    const extraAction = await ensureVisitAction(input.userId, input.leadId);
+    const extraResult = await createAppointment({
+      userId: input.userId,
+      leadId: input.leadId,
+      leadActionId: extraAction.id,
+      title: `Visita — ${input.leadName}`,
+      scheduledAt: extraAt,
+      address: intent.address ?? null,
+    });
+
+    console.log(
+      "[scheduling] Additional appointment created:",
+      extraResult.appointment.id,
+      "calendar:",
+      extraResult.calendarCreated,
+    );
+
+    if (extraResult.wasAvailable) {
+      const calendarNote = extraResult.calendarCreated
+        ? "\nJá coloquei na agenda 📅"
+        : "";
+      await sendAndSaveMessage(
+        config,
+        input.conversationId,
+        input.replyJid,
+        `✅ Visita agendada para ${formatDate(extraAt)} às ${formatTime(extraAt)}!${intent.address ? `\n📍 ${intent.address}` : ""}${calendarNote}`,
+        "bot",
+      );
+    } else if (
+      extraResult.alternativeSlots &&
+      extraResult.alternativeSlots.length > 0
+    ) {
+      await sendAndSaveMessage(
+        config,
+        input.conversationId,
+        input.replyJid,
+        `O horário de ${formatDate(extraAt)} às ${formatTime(extraAt)} já está ocupado. Que tal um desses?\n\n${formatSlots(extraResult.alternativeSlots)}`,
+        "bot",
+      );
+    }
   }
 }
 
