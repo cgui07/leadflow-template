@@ -2,8 +2,8 @@ import type { AIConfig } from "./ai";
 
 export interface SchedulingIntent {
   hasIntent: boolean;
-  proposedDate: string | null; // YYYY-MM-DD
-  proposedTime: string | null; // HH:MM
+  proposedDate: string | null;
+  proposedTime: string | null;
   address: string | null;
   isConfirmation: boolean;
   isCancellation: boolean;
@@ -11,7 +11,9 @@ export interface SchedulingIntent {
 }
 
 function getSchedulingExtractionPrompt(): string {
-  const today = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
+  const today = new Date().toLocaleDateString("sv-SE", {
+    timeZone: "America/Sao_Paulo",
+  });
   return `Você é um extrator de intenções de agendamento de visitas de imóveis. Analise as mensagens abaixo e identifique se o cliente está propondo, confirmando ou cancelando uma data/hora de visita. Retorne APENAS o JSON, sem markdown ou explicações.
 
 Formato esperado:
@@ -27,11 +29,12 @@ Formato esperado:
 
 Regras:
 - hasIntent = true se o cliente propõe uma data/hora, confirma, cancela ou quer remarcar uma visita
-- proposedDate e proposedTime devem ser extraídos da última mensagem do cliente (quando houver)
+- proposedDate e proposedTime devem ser extraídos da ÚLTIMA mensagem do cliente (quando houver)
 - isConfirmation = true se o cliente está confirmando uma visita já proposta (ex: "sim", "pode ser", "confirmado") — sem data nova
 - isCancellation = true se o cliente está cancelando (ex: "preciso cancelar", "não vou poder", "não consigo ir", "desmarca"). Não precisa de data — hasIntent=true e isCancellation=true
-- isReschedulingRequest = true se o cliente quer MUDAR uma visita existente para outro horário (ex: "consegue mudar pra terça?", "vamos remarcar pra 15h?")
-- Se o cliente propõe uma data NOVA sem mencionar remarcar, é um agendamento novo (isReschedulingRequest=false)
+- isReschedulingRequest = true APENAS se o cliente quer TROCAR uma visita existente por outro horário (ex: "consegue mudar pra terça?", "vamos remarcar", "troca aquela visita pra 15h")
+- Se o cliente pede uma visita ADICIONAL com data nova (ex: "marca outra pro dia 27", "quero visitar outro imóvel dia 29", "agenda mais uma visita"), isso é um NOVO agendamento (isReschedulingRequest=false), mesmo que já tenha visitas marcadas
+- IMPORTANTE: analise apenas a ÚLTIMA mensagem do cliente para determinar a intenção. Não confunda visitas anteriores já confirmadas com a solicitação atual
 - Se a data for relativa ("amanhã", "sábado", "próxima semana"), calcule com base na data de hoje: ${today}
 - Horários como "14h", "14:00", "duas da tarde" → "14:00"
 - Se não houver intenção clara de agendamento, cancelamento ou remarcação, retorne hasIntent=false`;
@@ -51,10 +54,21 @@ export async function extractSchedulingIntent(
     isReschedulingRequest: false,
   };
 
-  const recentMessages = messages.slice(-6);
+  const lastConfirmIdx = messages.findLastIndex(
+    (m) =>
+      m.direction === "outbound" &&
+      /✅\s*Visita (agendada|remarcada|confirmada)/.test(m.content),
+  );
+  const messagesAfterLastConfirm =
+    lastConfirmIdx >= 0 ? messages.slice(lastConfirmIdx + 1) : messages;
+  const recentMessages = messagesAfterLastConfirm.slice(-6);
+
+  if (recentMessages.length === 0) return defaultResult;
+
   const conversationText = recentMessages
-    .map((m) =>
-      `${m.direction === "inbound" ? "Cliente" : "Assistente"}: ${m.content}`,
+    .map(
+      (m) =>
+        `${m.direction === "inbound" ? "Cliente" : "Assistente"}: ${m.content}`,
     )
     .join("\n");
 
@@ -114,8 +128,7 @@ export async function extractSchedulingIntent(
         typeof parsed.proposedDate === "string" ? parsed.proposedDate : null,
       proposedTime:
         typeof parsed.proposedTime === "string" ? parsed.proposedTime : null,
-      address:
-        typeof parsed.address === "string" ? parsed.address : null,
+      address: typeof parsed.address === "string" ? parsed.address : null,
       isConfirmation: Boolean(parsed.isConfirmation),
       isCancellation: Boolean(parsed.isCancellation),
       isReschedulingRequest: Boolean(parsed.isReschedulingRequest),
