@@ -4,27 +4,18 @@ import crypto from "node:crypto";
 import { prisma } from "./db";
 import { cookies } from "next/headers";
 import { ensureLegacyTenantAccess } from "./tenant";
+import { env } from "./env";
+import {
+  PASSWORD_RESET_TOKEN_TTL_MS,
+  BCRYPT_ROUNDS,
+  JWT_EXPIRY,
+  COOKIE_MAX_AGE,
+} from "./constants";
 
 const TOKEN_NAME = "leadflow_token";
-const PASSWORD_RESET_TOKEN_TTL_MS = 1000 * 60 * 60;
-const DEV_JWT_SECRET = "leadflow-dev-secret-change-in-production";
-
-function getJwtSecret() {
-  const secret = process.env.JWT_SECRET?.trim();
-
-  if (secret) {
-    return secret;
-  }
-
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("JWT_SECRET must be configured in production");
-  }
-
-  return DEV_JWT_SECRET;
-}
 
 export async function hashPassword(password: string) {
-  return bcrypt.hash(password, 12);
+  return bcrypt.hash(password, BCRYPT_ROUNDS);
 }
 
 export async function verifyPassword(password: string, hash: string) {
@@ -50,12 +41,12 @@ export function createPasswordResetToken() {
 }
 
 export function signToken(userId: string) {
-  return jwt.sign({ userId }, getJwtSecret(), { expiresIn: "7d" });
+  return jwt.sign({ userId }, env.JWT_SECRET, { expiresIn: JWT_EXPIRY });
 }
 
 export function verifyToken(token: string): { userId: string } | null {
   try {
-    return jwt.verify(token, getJwtSecret()) as { userId: string };
+    return jwt.verify(token, env.JWT_SECRET) as { userId: string };
   } catch {
     return null;
   }
@@ -123,9 +114,9 @@ export async function setAuthCookie(token: string) {
   const cookieStore = await cookies();
   cookieStore.set(TOKEN_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: COOKIE_MAX_AGE,
     path: "/",
   });
 }

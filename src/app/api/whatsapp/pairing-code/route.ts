@@ -2,16 +2,20 @@ import { prisma } from "@/lib/db";
 import { randomBytes } from "node:crypto";
 import { NextRequest } from "next/server";
 import { json, error, requireAuth, handleError } from "@/lib/api";
-import {
-  buildWebhookUrl,
-  createInstance,
-  deleteInstance,
-  getPairingCode,
-  instanceNameForUser,
-  logoutInstance,
-  resolveAppUrl,
-  setInstanceWebhook,
-} from "@/lib/evolution";
+import { env } from "@/lib/env";
+import { getEvolutionProvider } from "@/providers/whatsapp/factory";
+
+function resolveAppUrl(fallbackOrigin?: string) {
+  const appUrl = env.APP_URL || env.NEXT_PUBLIC_APP_URL || fallbackOrigin;
+  if (!appUrl) throw new Error("APP_URL não configurada para o webhook do WhatsApp");
+  return appUrl.replace(/\/+$/, "");
+}
+
+function buildWebhookUrl(appUrl: string, webhookToken: string) {
+  const url = new URL("/api/whatsapp/webhook", appUrl);
+  url.searchParams.set("token", webhookToken);
+  return url.toString();
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,31 +32,29 @@ export async function POST(req: NextRequest) {
       return error("Número de telefone inválido", 400);
     }
 
-    const instanceName = instanceNameForUser(user.id);
-
-    try { await logoutInstance(instanceName); } catch {}
-    try { await deleteInstance(instanceName); } catch {}
-
-    await createInstance(user.id, false);
-
-    const pairingCode = await getPairingCode(instanceName, digits);
-
-    if (!pairingCode) {
-      return error("Não foi possível gerar o código de pareamento", 400);
-    }
-
+    const provider = getEvolutionProvider();
     const webhookToken = randomBytes(24).toString("hex");
     const appUrl = resolveAppUrl(req.nextUrl.origin);
     const webhookUrl = buildWebhookUrl(appUrl, webhookToken);
 
-    await setInstanceWebhook(instanceName, webhookUrl);
-    await prisma.userSettings.upsert({
-      where: { userId: user.id },
-      create: { userId: user.id, whatsappPhoneId: instanceName, whatsappWebhookToken: webhookToken },
-      update: { whatsappPhoneId: instanceName, whatsappWebhookToken: webhookToken },
+    const result = await provider.createConnection(user.id, {
+      method: "pairing-code",
+      phoneNumber: digits,
+      webhookUrl,
+      webhookToken,
     });
 
-    return json({ pairingCode });
+    if (!result.pairingCode) {
+      return error("Não foi possível gerar o código de pareamento", 400);
+    }
+
+    await prisma.userSettings.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id, whatsappPhoneId: result.instanceId, whatsappWebhookToken: webhookToken },
+      update: { whatsappPhoneId: result.instanceId, whatsappWebhookToken: webhookToken },
+    });
+
+    return json({ pairingCode: result.pairingCode });
   } catch (err) {
     return handleError(err);
   }

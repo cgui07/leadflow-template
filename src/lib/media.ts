@@ -1,13 +1,16 @@
 import { getEvolutionApiKey } from "./evolution";
+import { env } from "./env";
+import { logger } from "./logger";
 
-const EVOLUTION_API_URL =
-  process.env.EVOLUTION_API_URL || "http://localhost:8080";
-const OPENAI_TRANSCRIPTION_KEY = process.env.OPENAI_TRANSCRIPTION_KEY || "";
+const EVOLUTION_API_URL = env.EVOLUTION_API_URL;
+const OPENAI_TRANSCRIPTION_KEY = env.OPENAI_TRANSCRIPTION_KEY;
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const MAX_AUDIO_SIZE = 25 * 1024 * 1024;
-const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
-const MAX_AUDIO_SECONDS = 120;
+import {
+  MAX_IMAGE_SIZE,
+  MAX_AUDIO_SIZE,
+  MAX_DOCUMENT_SIZE,
+  MAX_AUDIO_SECONDS,
+} from "./constants";
 
 export interface MediaContent {
   type: "image" | "audio" | "document";
@@ -39,7 +42,7 @@ export async function downloadMediaFromEvolution(
     const data = await res.json();
     return data.base64 || null;
   } catch (err) {
-    console.error("[media] Failed to download from Evolution:", err);
+    logger.error("Failed to download from Evolution", { error: err instanceof Error ? err.message : String(err) });
     return null;
   }
 }
@@ -61,7 +64,7 @@ export async function transcribeAudio(
     const buffer = Buffer.from(audioBase64, "base64");
 
     if (buffer.length > MAX_AUDIO_SIZE) {
-      console.warn("[media] Audio too large for transcription:", buffer.length);
+      logger.warn("Audio too large for transcription", { size: buffer.length });
       return null;
     }
 
@@ -81,14 +84,14 @@ export async function transcribeAudio(
     });
 
     if (!res.ok) {
-      console.error("[media] Whisper transcription failed:", res.status);
+      logger.error("Whisper transcription failed", { status: res.status });
       return null;
     }
 
     const data = await res.json();
     return data.text || null;
   } catch (err) {
-    console.error("[media] Transcription error:", err);
+    logger.error("Transcription error", { error: err instanceof Error ? err.message : String(err) });
     return null;
   }
 }
@@ -131,7 +134,7 @@ export async function resolveMediaContent(params: {
   }
 
   if (!base64) {
-    console.warn("[media] Could not obtain base64 for", mediaType);
+    logger.warn("Could not obtain base64", { mediaType });
     return null;
   }
 
@@ -141,7 +144,7 @@ export async function resolveMediaContent(params: {
 
   if (mediaType === "image") {
     if (buffer.length > MAX_IMAGE_SIZE) {
-      console.warn("[media] Image too large:", buffer.length);
+      logger.warn("Image too large", { size: buffer.length });
       return null;
     }
     return { type: "image", mimeType, base64 };
@@ -149,13 +152,13 @@ export async function resolveMediaContent(params: {
 
   if (mediaType === "audio") {
     if (seconds && seconds > MAX_AUDIO_SECONDS) {
-      console.warn("[media] Audio too long:", seconds, "seconds");
+      logger.warn("Audio too long", { seconds });
       return null;
     }
 
     const openaiKey = getOpenAIKeyForTranscription(aiConfig);
     if (!openaiKey) {
-      console.warn("[media] No OpenAI key available for audio transcription");
+      logger.warn("No OpenAI key available for audio transcription");
       return null;
     }
 
@@ -167,7 +170,7 @@ export async function resolveMediaContent(params: {
 
   if (mediaType === "document") {
     if (buffer.length > MAX_DOCUMENT_SIZE) {
-      console.warn("[media] Document too large:", buffer.length);
+      logger.warn("Document too large", { size: buffer.length });
       return null;
     }
     return { type: "document", mimeType, base64, fileName };

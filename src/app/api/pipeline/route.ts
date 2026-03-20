@@ -1,9 +1,9 @@
-import { NextRequest } from "next/server";
-import { error, handleError, json, requireAuth } from "@/lib/api";
+import { handleError, json, requireAuth, withApiHandler } from "@/lib/api";
 import {
   createPipelineStage,
   listPipelineStages,
 } from "@/features/pipeline/server";
+import { CreateStageSchema } from "@/lib/schemas";
 
 export async function GET() {
   try {
@@ -16,24 +16,10 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const user = await requireAuth();
-    const stage = await createPipelineStage(
-      user.id,
-      (await req.json()) as Record<string, unknown>,
-    );
-
-    return json(stage, 201);
-  } catch (err) {
-    if (err instanceof Error && err.message === "PIPELINE_STAGE_NAME_REQUIRED") {
-      return error("Nome do estágio é obrigatório");
-    }
-
-    if (err instanceof SyntaxError) {
-      return error("Payload inválido");
-    }
-
-    return handleError(err);
-  }
-}
+export const POST = withApiHandler(CreateStageSchema, async (user, data) => {
+  const stage = await createPipelineStage(
+    user.id,
+    data as Record<string, unknown>,
+  );
+  return json(stage, 201);
+});

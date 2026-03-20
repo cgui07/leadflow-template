@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 const ELEVENLABS_API_URL = "https://api.elevenlabs.io/v1";
 
 /**
@@ -22,7 +24,7 @@ export async function cloneVoice(
 
   if (!res.ok) {
     const errorText = await res.text();
-    console.error("[elevenlabs] Voice clone error:", errorText);
+    logger.error("Voice clone error", { error: errorText });
     throw new Error(`ElevenLabs voice clone failed: ${res.status}`);
   }
 
@@ -67,7 +69,7 @@ export async function generateSpeechBase64(
 
   if (!res.ok) {
     const errorText = await res.text();
-    console.error("[elevenlabs] TTS error:", errorText);
+    logger.error("TTS error", { error: errorText });
     throw new Error(`ElevenLabs TTS failed: ${res.status}`);
   }
 

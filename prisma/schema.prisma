@@ -40,6 +40,7 @@ model User {
 model UserSettings {
   id                       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId                   String  @unique @map("user_id") @db.Uuid
+  whatsappProvider         String  @default("evolution") @map("whatsapp_provider")
   whatsappPhoneId          String? @map("whatsapp_phone_id")
   whatsappToken            String? @map("whatsapp_token")
   whatsappWebhookToken     String? @map("whatsapp_webhook_token")
@@ -60,6 +61,7 @@ model UserSettings {
   voiceReplyMonthlyLimit   Int     @default(50) @map("voice_reply_monthly_limit")
   user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([whatsappPhoneId], map: "idx_user_settings_whatsapp_phone_id")
   @@map("user_settings")
 }
 
@@ -124,6 +126,7 @@ model Conversation {
   lead           Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
   messages       Message[]
 
+  @@index([whatsappChatId], map: "idx_conversations_whatsapp_chat_id")
   @@map("conversations")
 }
 

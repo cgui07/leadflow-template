@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { error, handleError, json, requireAuth } from "@/lib/api";
+import { SendMessageSchema } from "@/lib/schemas";
 import {
   listConversationMessages,
   sendConversationMessage,
@@ -36,10 +37,11 @@ export async function POST(
   try {
     const user = await requireAuth();
     const { id } = await params;
+    const data = SendMessageSchema.parse(await req.json());
     const message = await sendConversationMessage(
       user.id,
       id,
-      (await req.json()) as Record<string, unknown>,
+      data as Record<string, unknown>,
     );
 
     return json(message, 201);
@@ -48,14 +50,9 @@ export async function POST(
       if (err.message === "CONVERSATION_MESSAGE_REQUIRED") {
         return error("Mensagem obrigatoria", 400);
       }
-
       if (err.message === "CONVERSATION_NOT_FOUND") {
         return error("Conversa não encontrada", 404);
       }
-    }
-
-    if (err instanceof SyntaxError) {
-      return error("Payload inválido");
     }
 
     return handleError(err);

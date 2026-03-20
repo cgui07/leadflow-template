@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import { getWhatsAppConfig, sendAndSaveMessage } from "./whatsapp";
+import { logger } from "./logger";
 
 export interface VisitConfirmationResult {
   appointmentId: string;
@@ -77,10 +78,7 @@ export async function processVisitConfirmations(): Promise<
       results.push({ appointmentId: appt.id, action: "confirmation_sent" });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error(
-        `[visit-confirmations] Failed for appointment ${appt.id}:`,
-        message,
-      );
+      logger.error("Failed for appointment", { appointmentId: appt.id, error: message });
       results.push({ appointmentId: appt.id, action: "error", error: message });
     }
   }

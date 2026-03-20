@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
-import { deleteInstance, logoutInstance } from "@/lib/evolution";
+import { logger } from "@/lib/logger";
 import { json, error, requireAuth, handleError } from "@/lib/api";
+import { resolveProviderForUser } from "@/providers/whatsapp/factory";
 
 export async function POST() {
   try {
@@ -14,16 +15,14 @@ export async function POST() {
       return error("Nenhuma instância conectada", 404);
     }
 
-    try {
-      await logoutInstance(settings.whatsappPhoneId);
-    } catch (err) {
-      console.error("[whatsapp] Logout error:", err);
-    }
+    const { provider, instanceId } = await resolveProviderForUser(user.id);
 
     try {
-      await deleteInstance(settings.whatsappPhoneId);
+      await provider.disconnect(instanceId);
     } catch (err) {
-      console.error("[whatsapp] Delete error:", err);
+      logger.error("WhatsApp disconnect error", {
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
 
     await prisma.userSettings.update({

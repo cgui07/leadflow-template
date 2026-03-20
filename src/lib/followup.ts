@@ -1,6 +1,7 @@
 import { prisma } from "./db";
 import { generateFollowUpMessage } from "./ai";
 import { getWhatsAppConfig, sendAndSaveMessage } from "./whatsapp";
+import { logger } from "./logger";
 
 const FOLLOW_UP_TEMPLATES = [
   "Olá! Tudo bem? Estou passando para saber se você ainda tem interesse em encontrar o imóvel ideal. Posso ajudar com alguma informação?",
@@ -8,8 +9,11 @@ const FOLLOW_UP_TEMPLATES = [
   "Olá! Só passando para lembrar que sigo à disposição caso queira retomar sua busca. Se fizer sentido, posso te ajudar com os próximos passos.",
 ];
 
-const FOLLOW_UP_PROCESSING_LEASE_MINUTES = 5;
-const FOLLOW_UP_RETRY_DELAY_MINUTES = 30;
+import {
+  FOLLOW_UP_PROCESSING_LEASE_MINUTES,
+  FOLLOW_UP_RETRY_DELAY_MINUTES,
+  DEFAULT_MAX_FOLLOW_UPS,
+} from "./constants";
 
 async function loadDueLeads(now: Date) {
   return prisma.lead.findMany({
@@ -114,7 +118,7 @@ async function buildFollowUpMessage(lead: DueLead) {
 
     return aiMessage.trim() || getTemplateFollowUp(lead);
   } catch (error) {
-    console.error(`[followup] AI generation failed for lead ${lead.id}:`, error);
+    logger.error("AI generation failed for follow-up", { leadId: lead.id, error: error instanceof Error ? error.message : String(error) });
     return getTemplateFollowUp(lead);
   }
 }
@@ -147,7 +151,7 @@ export async function processFollowUps() {
       continue;
     }
 
-    if (lead.followUpCount >= (settings.maxFollowUps || 3)) {
+    if (lead.followUpCount >= (settings.maxFollowUps || DEFAULT_MAX_FOLLOW_UPS)) {
       await clearScheduledFollowUp(lead.id);
       results.push({ leadId: lead.id, status: "skipped", reason: "limit-reached" });
       continue;
@@ -182,7 +186,7 @@ export async function processFollowUps() {
 
       results.push({ leadId: lead.id, status: "sent", nextFollowUpAt: nextFollowUp.toISOString() });
     } catch (error) {
-      console.error(`Follow-up failed for lead ${lead.id}:`, error);
+      logger.error("Follow-up send failed", { leadId: lead.id, error: error instanceof Error ? error.message : String(error) });
       const retryAt = await scheduleFailedRetry(
         lead,
         now,

@@ -1,20 +1,9 @@
-import { NextRequest } from "next/server";
-import { error, handleError, json } from "@/lib/api";
-import { AuthFlowError, loginWithPassword } from "@/features/auth/server";
+import { withPublicHandler } from "@/lib/api";
+import { LoginSchema } from "@/lib/schemas";
+import { loginWithPassword } from "@/features/auth/server";
+import { json } from "@/lib/api";
 
-export async function POST(req: NextRequest) {
-  try {
-    const user = await loginWithPassword(await req.json());
-    return json({ user });
-  } catch (err) {
-    if (err instanceof AuthFlowError) {
-      return error(err.message, err.status);
-    }
-
-    if (err instanceof SyntaxError) {
-      return error("Payload inválido");
-    }
-
-    return handleError(err);
-  }
-}
+export const POST = withPublicHandler(LoginSchema, async (data) => {
+  const user = await loginWithPassword(data);
+  return json({ user });
+});

@@ -1,28 +1,10 @@
 import { NextRequest } from "next/server";
-import { error, handleError, json } from "@/lib/api";
-import {
-  AuthFlowError,
-  requestPasswordReset,
-} from "@/features/auth/server";
+import { withPublicHandler } from "@/lib/api";
+import { ForgotPasswordSchema } from "@/lib/schemas";
+import { requestPasswordReset } from "@/features/auth/server";
+import { json } from "@/lib/api";
 
-export async function POST(req: NextRequest) {
-  try {
-    const payload = (await req.json()) as { email?: string };
-    const result = await requestPasswordReset(
-      payload.email ?? "",
-      req.nextUrl.origin,
-    );
-
-    return json(result);
-  } catch (err) {
-    if (err instanceof AuthFlowError) {
-      return error(err.message, err.status);
-    }
-
-    if (err instanceof SyntaxError) {
-      return error("Payload inválido");
-    }
-
-    return handleError(err);
-  }
-}
+export const POST = withPublicHandler(ForgotPasswordSchema, async (data, req: NextRequest) => {
+  const result = await requestPasswordReset(data.email, req.nextUrl.origin);
+  return json(result);
+});

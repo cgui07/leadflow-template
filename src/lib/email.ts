@@ -1,12 +1,12 @@
 import { Resend } from "resend";
 import { appColors } from "../../tailwind.config";
+import { env } from "./env";
+import { logger } from "./logger";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(env.RESEND_API_KEY);
 
-const DEVELOPMENT_FROM_EMAIL =
-  process.env.EMAIL_FROM_DEV || "LeadFlow <onboarding@resend.dev>";
-const PRODUCTION_FROM_EMAIL =
-  process.env.EMAIL_FROM || "LeadFlow <noreply@leadflow.com>";
+const DEVELOPMENT_FROM_EMAIL = env.EMAIL_FROM_DEV;
+const PRODUCTION_FROM_EMAIL = env.EMAIL_FROM;
 
 const emailColors = {
   heading: appColors.neutral.deep,
@@ -17,7 +17,7 @@ const emailColors = {
 } as const;
 
 function getFromEmail() {
-  return process.env.NODE_ENV === "production"
+  return env.NODE_ENV === "production"
     ? PRODUCTION_FROM_EMAIL
     : DEVELOPMENT_FROM_EMAIL;
 }
@@ -50,7 +50,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   });
 
   if (error) {
-    console.error("[email] Failed to send password reset email:", error);
+    logger.error("Failed to send password reset email", { error: String(error) });
     throw new Error("Falha ao enviar e-mail de redefinição");
   }
 }

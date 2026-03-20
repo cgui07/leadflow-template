@@ -1,4 +1,5 @@
 import type { AIConfig } from "./ai";
+import { logger } from "./logger";
 
 export interface SchedulingIntent {
   hasIntent: boolean;
@@ -162,7 +163,7 @@ export async function extractSchedulingIntent(
       additionalDates,
     };
   } catch (err) {
-    console.error("[scheduling-intent] extraction failed:", err);
+    logger.error("Scheduling intent extraction failed", { error: err instanceof Error ? err.message : String(err) });
     return defaultResult;
   }
 }

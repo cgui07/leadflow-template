@@ -1,5 +1,8 @@
-const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://localhost:8080";
-const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || "";
+import { env } from "./env";
+import { logger } from "./logger";
+
+const EVOLUTION_API_URL = env.EVOLUTION_API_URL;
+const EVOLUTION_API_KEY = env.EVOLUTION_API_KEY;
 
 export function instanceNameForUser(userId: string) {
   return `lf-${userId}`;
@@ -24,7 +27,7 @@ async function evolutionFetch<T = unknown>(path: string, options?: RequestInit):
   }
 
   if (!res.ok) {
-    console.error(`[evolution] ${path} error:`, data);
+    logger.error("Evolution API error", { path, data: JSON.stringify(data).substring(0, 300) });
     const msg =
       (data as Record<string, unknown>)?.message ||
       ((data as Record<string, unknown>)?.response as Record<string, unknown>)?.message;
@@ -39,7 +42,7 @@ export function getEvolutionApiKey() {
 }
 
 export function resolveAppUrl(fallbackOrigin?: string) {
-  const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || fallbackOrigin;
+  const appUrl = env.APP_URL || env.NEXT_PUBLIC_APP_URL || fallbackOrigin;
 
   if (!appUrl) {
     throw new Error("APP_URL não configurada para o webhook do WhatsApp");

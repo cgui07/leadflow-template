@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/db";
-import { NextRequest } from "next/server";
-import { requireAuth, json, error, handleError } from "@/lib/api";
+import { error, handleError, json, requireAuth, withApiHandler } from "@/lib/api";
 import {
   extractAndSaveProperty,
   listProperties,
 } from "@/features/properties/server";
+import { CreatePropertySchema } from "@/lib/schemas";
 
 export async function GET() {
   try {
@@ -16,36 +16,24 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const user = await requireAuth();
-    const { rawText } = await req.json();
+export const POST = withApiHandler(CreatePropertySchema, async (user, data) => {
+  const settings = await prisma.userSettings.findUnique({
+    where: { userId: user.id },
+  });
 
-    if (!rawText || typeof rawText !== "string" || rawText.trim().length < 10) {
-      return error("Texto muito curto para extrair dados do imóvel.", 400);
-    }
-
-    const settings = await prisma.userSettings.findUnique({
-      where: { userId: user.id },
-    });
-
-    if (!settings?.aiApiKey) {
-      return error(
-        "Configure uma chave de IA nas configurações antes de usar esta funcionalidade.",
-        400,
-      );
-    }
-
-    const aiConfig = {
-      provider: settings.aiProvider,
-      apiKey: settings.aiApiKey,
-      model: settings.aiModel,
-    };
-
-    const property = await extractAndSaveProperty(user.id, rawText, aiConfig);
-    return json(property, 201);
-  } catch (err) {
-    if (err instanceof SyntaxError) return error("Payload inválido");
-    return handleError(err);
+  if (!settings?.aiApiKey) {
+    return error(
+      "Configure uma chave de IA nas configurações antes de usar esta funcionalidade.",
+      400,
+    );
   }
-}
+
+  const aiConfig = {
+    provider: settings.aiProvider,
+    apiKey: settings.aiApiKey,
+    model: settings.aiModel,
+  };
+
+  const property = await extractAndSaveProperty(user.id, data.rawText, aiConfig);
+  return json(property, 201);
+});

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { error, handleError, json } from "@/lib/api";
+import { error, handleError, json, withPublicHandler } from "@/lib/api";
+import { ResetPasswordSchema } from "@/lib/schemas";
 import {
   assertValidPasswordResetToken,
   AuthFlowError,
@@ -14,27 +15,11 @@ export async function GET(req: NextRequest) {
     if (err instanceof AuthFlowError) {
       return error(err.message, err.status);
     }
-
     return handleError(err);
   }
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const user = await resetPasswordWithToken(await req.json());
-    return json({
-      message: "Senha redefinida com sucesso",
-      user,
-    });
-  } catch (err) {
-    if (err instanceof AuthFlowError) {
-      return error(err.message, err.status);
-    }
-
-    if (err instanceof SyntaxError) {
-      return error("Payload inválido");
-    }
-
-    return handleError(err);
-  }
-}
+export const POST = withPublicHandler(ResetPasswordSchema, async (data) => {
+  const user = await resetPasswordWithToken(data);
+  return json({ message: "Senha redefinida com sucesso", user });
+});

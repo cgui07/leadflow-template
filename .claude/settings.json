@@ -8,7 +8,9 @@
       "Bash(curl -s -c /tmp/lf_cookies.txt http://localhost:3003/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"cguilherme052@gmail.com\"\",\"\"password\"\":\"\"Vascodagrana02\"\"}')",
       "Bash(curl -s -b /tmp/lf_cookies.txt http://localhost:3003/api/whatsapp/status)",
       "Bash(curl -s -b /tmp/lf_cookies.txt http://localhost:3003/api/settings)",
-      "Bash(node -e \"let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\(JSON.stringify\\(j,null,2\\)\\)}\\)\")"
+      "Bash(node -e \"let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\(JSON.stringify\\(j,null,2\\)\\)}\\)\")",
+      "Bash(wc -l /c/leadflow-template/src/lib/*.ts)",
+      "Bash(find /c/leadflow-template/src/features -name *PageClient.tsx)"
     ]
   }
 }

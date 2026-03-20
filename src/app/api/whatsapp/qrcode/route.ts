@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
-import { getQrCode } from "@/lib/evolution";
 import { json, error, requireAuth, handleError } from "@/lib/api";
+import { getEvolutionProvider } from "@/providers/whatsapp/factory";
 
 export async function GET() {
   try {
@@ -14,7 +14,8 @@ export async function GET() {
       return error("Instância não encontrada. Clique em Conectar primeiro.", 404);
     }
 
-    const qrcode = await getQrCode(settings.whatsappPhoneId);
+    const provider = getEvolutionProvider();
+    const qrcode = await provider.getQrCode(settings.whatsappPhoneId);
 
     return json({ qrcode });
   } catch (err) {

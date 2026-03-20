@@ -36,8 +36,7 @@ export function detectIntentSignals(text: string): IntentSignals {
   return { hasHighIntent: signals.length > 0, signals };
 }
 
-const MIN_REPLY_LENGTH = 40;
-const AUDIO_COOLDOWN_WINDOW = 3;
+import { MIN_REPLY_LENGTH, AUDIO_COOLDOWN_WINDOW } from "./constants";
 
 export interface VoiceDecisionContext {
   replyText: string;
@@ -97,22 +96,20 @@ function getCurrentMonth(): string {
 export async function getVoiceUsageThisMonth(userId: string): Promise<number> {
   const month = getCurrentMonth();
 
-  const result = await prisma.$queryRaw<Array<{ count: number }>>`
-    SELECT count FROM voice_reply_usage
-    WHERE user_id = ${userId}::uuid AND month = ${month}
-    LIMIT 1
-  `;
+  const record = await prisma.voiceReplyUsage.findUnique({
+    where: { userId_month: { userId, month } },
+    select: { count: true },
+  });
 
-  return Number(result[0]?.count ?? 0);
+  return record?.count ?? 0;
 }
 
 export async function incrementVoiceUsage(userId: string): Promise<void> {
   const month = getCurrentMonth();
 
-  await prisma.$executeRaw`
-    INSERT INTO voice_reply_usage (user_id, month, count, updated_at)
-    VALUES (${userId}::uuid, ${month}, 1, NOW())
-    ON CONFLICT (user_id, month)
-    DO UPDATE SET count = voice_reply_usage.count + 1, updated_at = NOW()
-  `;
+  await prisma.voiceReplyUsage.upsert({
+    where: { userId_month: { userId, month } },
+    create: { userId, month, count: 1 },
+    update: { count: { increment: 1 } },
+  });
 }

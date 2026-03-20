@@ -1,9 +1,9 @@
-import { NextRequest } from "next/server";
-import { error, handleError, json, requireAuth } from "@/lib/api";
+import { handleError, json, requireAuth, withApiHandler } from "@/lib/api";
 import {
   getUserSettings,
   updateUserSettings,
 } from "@/features/settings/server";
+import { UpdateSettingsSchema } from "@/lib/schemas";
 
 export async function GET() {
   try {
@@ -16,20 +16,9 @@ export async function GET() {
   }
 }
 
-export async function PATCH(req: NextRequest) {
-  try {
-    const user = await requireAuth();
-    const body = (await req.json()) as Record<string, unknown>;
-    const settings = await updateUserSettings(user.id, body, {
-      maskApiKey: true,
-    });
-
-    return json(settings);
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      return error("Payload inválido");
-    }
-
-    return handleError(err);
-  }
-}
+export const PATCH = withApiHandler(UpdateSettingsSchema, async (user, data) => {
+  const settings = await updateUserSettings(user.id, data as Record<string, unknown>, {
+    maskApiKey: true,
+  });
+  return json(settings);
+});

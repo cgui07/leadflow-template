@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { generateConversationSummary } from "@/lib/ai";
 import { getWhatsAppConfig, resolveSendTarget } from "@/lib/whatsapp";
 import type {
@@ -249,7 +250,9 @@ export async function sendConversationMessage(
         },
       });
     } catch (error) {
-      console.error("WhatsApp send failed:", error);
+      logger.error("WhatsApp send failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       await prisma.message.update({
         where: { id: message.id },
         data: { status: "failed" },

@@ -1,12 +1,14 @@
 import { prisma } from "./db";
+import { env } from "./env";
+import { logger } from "./logger";
 
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_CALENDAR_BASE = "https://www.googleapis.com/calendar/v3";
 const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 
 export function getGoogleCalendarAuthUrl(userId: string): string {
-  const clientId = process.env.GOOGLE_CLIENT_ID!;
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/settings/google-calendar/callback`;
+  const clientId = env.GOOGLE_CLIENT_ID;
+  const redirectUri = `${env.NEXT_PUBLIC_APP_URL}/api/settings/google-calendar/callback`;
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -25,15 +27,15 @@ export async function exchangeGoogleCalendarCode(
   code: string,
   userId: string,
 ): Promise<void> {
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/settings/google-calendar/callback`;
+  const redirectUri = `${env.NEXT_PUBLIC_APP_URL}/api/settings/google-calendar/callback`;
 
   const res = await fetch(GOOGLE_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       code,
-      client_id: process.env.GOOGLE_CLIENT_ID!,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      client_id: env.GOOGLE_CLIENT_ID,
+      client_secret: env.GOOGLE_CLIENT_SECRET,
       redirect_uri: redirectUri,
       grant_type: "authorization_code",
     }),
@@ -83,8 +85,8 @@ async function refreshGoogleToken(connection: {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       refresh_token: connection.refresh_token,
-      client_id: process.env.GOOGLE_CLIENT_ID!,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      client_id: env.GOOGLE_CLIENT_ID,
+      client_secret: env.GOOGLE_CLIENT_SECRET,
       grant_type: "refresh_token",
     }),
   });
@@ -117,7 +119,7 @@ async function getValidAccessToken(
   });
 
   if (!connection?.access_token) {
-    console.log("[google-calendar] No calendar connection for user:", userId);
+    logger.info("No calendar connection for user", { userId });
     return null;
   }
 
@@ -131,7 +133,7 @@ async function getValidAccessToken(
     try {
       token = await refreshGoogleToken(connection);
     } catch (err) {
-      console.error("[google-calendar] Token refresh failed:", err);
+      logger.error("Token refresh failed", { error: err instanceof Error ? err.message : String(err) });
       return null;
     }
   }
@@ -181,7 +183,7 @@ export async function checkCalendarAvailability(
   );
 
   if (!res.ok) {
-    console.error("[google-calendar] checkAvailability failed:", res.status);
+    logger.error("checkAvailability failed", { status: res.status });
     return { isAvailable: true, conflictingEvents: [] };
   }
 
@@ -218,10 +220,10 @@ export async function createCalendarEvent(
   userId: string,
   eventData: CalendarEventData,
 ): Promise<{ eventId: string; calendarId: string } | null> {
-  console.log("[google-calendar] createCalendarEvent for user:", userId);
+  logger.info("Creating calendar event", { userId });
   const auth = await getValidAccessToken(userId);
   if (!auth) {
-    console.error("[google-calendar] No valid token — cannot create event");
+    logger.error("No valid token — cannot create event");
     return null;
   }
 
@@ -259,7 +261,8 @@ export async function createCalendarEvent(
   );
 
   if (!res.ok) {
-    console.error("[google-calendar] createEvent failed:", res.status, await res.text());
+    const body = await res.text();
+    logger.error("createEvent failed", { status: res.status, body });
     return null;
   }
 
