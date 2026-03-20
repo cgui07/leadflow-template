@@ -99,7 +99,7 @@ export async function handleSchedulingIfNeeded(
   const intent = await extractSchedulingIntent(input.aiConfig, input.messages);
 
   if (!intent.hasIntent || !intent.proposedDate || !intent.proposedTime) return;
-  if (intent.isConfirmation || intent.isCancellation) return;
+  if (intent.isCancellation) return;
 
   const scheduledAt = new Date(
     `${intent.proposedDate}T${intent.proposedTime}:00-03:00`,

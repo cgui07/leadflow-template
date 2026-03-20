@@ -26,14 +26,15 @@ Formato esperado:
 }
 
 Regras:
-- hasIntent = true se o cliente propõe OU confirma uma data/hora de visita
+- hasIntent = true se o cliente propõe, aceita ou sugere uma data/hora de visita
 - proposedDate e proposedTime devem ser extraídos da última mensagem do cliente
-- isConfirmation = true se o cliente está confirmando uma visita já proposta (ex: "sim", "pode ser", "confirmado")
+- isConfirmation = true SOMENTE se o cliente responde com "sim", "ok", "confirmado" SEM propor uma nova data/hora. Se o cliente diz "sim, pode ser sábado às 14h" isso NÃO é confirmação — é uma nova proposta de agendamento (isConfirmation=false, hasIntent=true)
 - isCancellation = true se o cliente está cancelando uma visita agendada (ex: "preciso cancelar", "não vou poder")
 - isReschedulingRequest = true se o cliente quer remarcar para outro horário
 - Se a data for relativa ("amanhã", "sábado", "próxima semana"), calcule com base na data de hoje: ${today}
 - Horários como "14h", "14:00", "duas da tarde" → "14:00"
-- Se não houver intenção clara de agendamento com data/hora específica, retorne hasIntent=false`;
+- Se não houver intenção clara de agendamento com data/hora específica, retorne hasIntent=false
+- IMPORTANTE: quando o cliente propõe uma data e hora específica (mesmo concordando com sugestão do corretor), isConfirmation DEVE ser false e hasIntent DEVE ser true`;
 }
 
 export async function extractSchedulingIntent(
