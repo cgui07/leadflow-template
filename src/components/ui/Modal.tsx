@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useCallback, useEffect, useId, useRef } from "react";
 import { Button } from "./Button";
 
 type ModalSize = "sm" | "md" | "lg" | "xl";
@@ -25,6 +25,9 @@ const sizeStyles: Record<ModalSize, string> = {
   xl: "max-w-4xl",
 };
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function Modal({
   open,
   onClose,
@@ -35,6 +38,9 @@ export function Modal({
   size = "md",
   className,
 }: ModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -44,15 +50,53 @@ export function Modal({
     }
   }, [open]);
 
+  // Auto-focus first focusable element when modal opens
   useEffect(() => {
-    function handleEsc(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+    if (open && modalRef.current) {
+      const focusable = modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
     }
+  }, [open]);
+
+  // Focus trap + Escape key
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (e.key === "Tab" && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    },
+    [onClose]
+  );
+
+  useEffect(() => {
     if (open) {
-      document.addEventListener("keydown", handleEsc);
-      return () => document.removeEventListener("keydown", handleEsc);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
     }
-  }, [open, onClose]);
+  }, [open, handleKeyDown]);
 
   if (!open) return null;
 
@@ -63,6 +107,10 @@ export function Modal({
         onClick={onClose}
       />
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
         className={cn(
           "relative w-full mx-4 bg-white rounded-xl shadow-xl animate-in fade-in zoom-in-95",
           sizeStyles[size],
@@ -73,7 +121,10 @@ export function Modal({
           <div className="flex items-start justify-between px-6 pt-6 pb-0">
             <div>
               {title && (
-                <div className="text-lg font-semibold text-neutral-ink">
+                <div
+                  id={titleId}
+                  className="text-lg font-semibold text-neutral-ink"
+                >
                   {title}
                 </div>
               )}

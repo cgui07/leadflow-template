@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { Column } from "@/types";
 import { EmptyState } from "./EmptyState";
@@ -40,14 +40,15 @@ export function DataTable<T>({
     }
   }
 
-  const sortedData = sortKey
-    ? [...data].sort((a, b) => {
-        const aVal = a[sortKey as keyof T];
-        const bVal = b[sortKey as keyof T];
-        const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-        return sortDir === "asc" ? cmp : -cmp;
-      })
-    : data;
+  const sortedData = useMemo(() => {
+    if (!sortKey) return data;
+    return [...data].sort((a, b) => {
+      const aVal = a[sortKey as keyof T];
+      const bVal = b[sortKey as keyof T];
+      const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  }, [data, sortKey, sortDir]);
 
   if (loading) {
     return <LoadingState variant="table" rows={5} />;

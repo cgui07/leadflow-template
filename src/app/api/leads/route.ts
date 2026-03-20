@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createLead, listLeads } from "@/features/leads/server";
-import { error, handleError, json, requireAuth } from "@/lib/api";
+import { handleError, json, requireAuth, withApiHandler } from "@/lib/api";
+import { CreateLeadSchema } from "@/lib/schemas";
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,24 +22,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const user = await requireAuth();
-    const lead = await createLead(
-      user.id,
-      (await req.json()) as Record<string, unknown>,
-    );
-
-    return json(lead, 201);
-  } catch (err) {
-    if (err instanceof Error && err.message === "LEAD_NAME_PHONE_REQUIRED") {
-      return error("Nome e telefone são obrigatórios", 400);
-    }
-
-    if (err instanceof SyntaxError) {
-      return error("Payload inválido");
-    }
-
-    return handleError(err);
-  }
-}
+export const POST = withApiHandler(CreateLeadSchema, async (user, data) => {
+  const lead = await createLead(user.id, data as Record<string, unknown>);
+  return json(lead, 201);
+});

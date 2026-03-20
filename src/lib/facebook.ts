@@ -1,4 +1,6 @@
 import { createHmac } from "crypto";
+import { logger } from "./logger";
+import { env } from "./env";
 
 const GRAPH_API_VERSION = "v21.0";
 const GRAPH_API_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
@@ -7,7 +9,7 @@ export function verifyFacebookSignature(
   rawBody: string,
   signatureHeader: string | null,
 ): boolean {
-  const appSecret = process.env.FACEBOOK_APP_SECRET;
+  const appSecret = env.FACEBOOK_APP_SECRET;
 
   if (!appSecret || !signatureHeader) {
     return false;
@@ -27,7 +29,7 @@ export function verifyFacebookSignature(
 }
 
 export function getFacebookVerifyToken(): string {
-  return process.env.FACEBOOK_VERIFY_TOKEN || "";
+  return env.FACEBOOK_VERIFY_TOKEN;
 }
 
 interface LeadFieldData {
@@ -79,7 +81,7 @@ export async function fetchLeadData(
   const res = await fetch(url);
 
   if (!res.ok) {
-    console.error("[facebook] Failed to fetch lead data:", res.status, await res.text());
+    logger.error("Failed to fetch lead data", { status: res.status, body: await res.text() });
     return null;
   }
 
@@ -87,7 +89,7 @@ export async function fetchLeadData(
   const fieldData: LeadFieldData[] = data.field_data ?? [];
 
   if (fieldData.length === 0) {
-    console.warn("[facebook] Lead has no field_data:", leadgenId);
+    logger.warn("Lead has no field_data", { leadgenId });
     return null;
   }
 

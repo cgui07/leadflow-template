@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { buildBranding } from "@/lib/branding";
 import { validateInviteToken } from "@/lib/tenant";
 import { sendPasswordResetEmail } from "@/lib/email";
@@ -13,6 +14,7 @@ import {
   signToken,
   verifyPassword,
 } from "@/lib/auth";
+import { AppError } from "@/lib/errors";
 import type {
   AuthUserSummary,
   InviteRegistrationInfo,
@@ -22,13 +24,13 @@ import type {
   ResetPasswordInput,
 } from "./contracts";
 
-export class AuthFlowError extends Error {
+export class AuthFlowError extends AppError {
   constructor(
-    public readonly code: string,
-    public readonly status = 400,
+    code: string,
+    status = 400,
     message?: string,
   ) {
-    super(message ?? code);
+    super(code, message ?? code, status);
   }
 }
 
@@ -334,7 +336,9 @@ export async function requestPasswordReset(
       try {
         await sendPasswordResetEmail(user.email, resetUrl);
       } catch (error) {
-        console.error("[auth] Password reset email failed:", error);
+        logger.error("Password reset email failed", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         await prisma.user.update({
           where: { id: user.id },
           data: {
@@ -352,7 +356,7 @@ export async function requestPasswordReset(
 
     if (process.env.NODE_ENV !== "production") {
       previewUrl = resetUrl;
-      console.info(`[auth] Password reset link for ${user.email}: ${resetUrl}`);
+      logger.info("Password reset link generated", { email: user.email, resetUrl });
     }
   }
 

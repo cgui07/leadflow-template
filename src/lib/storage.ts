@@ -1,12 +1,14 @@
+import { logger } from "./logger";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { env } from "./env";
 
-const BUCKET = process.env.R2_BUCKET ?? "leadflow-pdfs";
+const BUCKET = env.R2_BUCKET;
 
 function getR2Client() {
-  const endpoint = process.env.R2_ENDPOINT;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+  const endpoint = env.R2_ENDPOINT;
+  const accessKeyId = env.R2_ACCESS_KEY_ID;
+  const secretAccessKey = env.R2_SECRET_ACCESS_KEY;
 
   if (!endpoint || !accessKeyId || !secretAccessKey) {
     throw new Error("Missing R2_ENDPOINT, R2_ACCESS_KEY_ID or R2_SECRET_ACCESS_KEY env vars");
@@ -48,7 +50,7 @@ export async function deletePropertyPdf(storagePath: string): Promise<void> {
       new DeleteObjectCommand({ Bucket: BUCKET, Key: storagePath }),
     );
   } catch (err) {
-    console.error("[storage] Delete failed:", err);
+    logger.error("Delete failed", { error: err instanceof Error ? err.message : String(err) });
   }
 }
 

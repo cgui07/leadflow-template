@@ -20,6 +20,36 @@ interface UseFetchOptions<T> {
   revalidateOnMount?: boolean;
 }
 
+export function useFetchMutation<T = unknown>(url: string, options?: { method?: string }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function mutate(body?: unknown): Promise<T | null> {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(url, {
+        method: options?.method ?? "POST",
+        headers: { "Content-Type": "application/json" },
+        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Erro ao processar requisição");
+        return null;
+      }
+      return await res.json();
+    } catch {
+      setError("Erro de conexão");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return { mutate, loading, error, setError };
+}
+
 export function useFetch<T>(
   url: string | null,
   options?: UseFetchOptions<T>,

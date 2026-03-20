@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
 import { createAppointment } from "@/lib/appointments";
-import { error, handleError, json, requireAuth } from "@/lib/api";
+import { error, handleError, json, requireAuth, withApiHandler } from "@/lib/api";
+import { CreateAppointmentSchema } from "@/lib/schemas";
 
 export async function GET(req: NextRequest) {
   try {
@@ -29,46 +30,28 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const user = await requireAuth();
-    const body = (await req.json()) as Record<string, unknown>;
-
-    const leadId = typeof body.leadId === "string" ? body.leadId : null;
-    const title = typeof body.title === "string" ? body.title.trim() : null;
-    const scheduledAtRaw =
-      typeof body.scheduledAt === "string" ? body.scheduledAt : null;
-
-    if (!leadId || !title || !scheduledAtRaw) {
-      return error("leadId, title e scheduledAt são obrigatórios", 400);
-    }
-
-    const scheduledAt = new Date(scheduledAtRaw);
-    if (isNaN(scheduledAt.getTime())) {
-      return error("scheduledAt inválido", 400);
-    }
-
-    const lead = await prisma.lead.findFirst({
-      where: { id: leadId, userId: user.id },
-      select: { id: true },
-    });
-    if (!lead) return error("Lead não encontrado", 404);
-
-    const result = await createAppointment({
-      userId: user.id,
-      leadId,
-      leadActionId:
-        typeof body.leadActionId === "string" ? body.leadActionId : null,
-      title,
-      scheduledAt,
-      durationMinutes:
-        typeof body.durationMinutes === "number" ? body.durationMinutes : 60,
-      address: typeof body.address === "string" ? body.address : null,
-      notes: typeof body.notes === "string" ? body.notes : null,
-    });
-
-    return json(result, 201);
-  } catch (err) {
-    return handleError(err);
+export const POST = withApiHandler(CreateAppointmentSchema, async (user, data) => {
+  const scheduledAt = new Date(data.scheduledAt);
+  if (isNaN(scheduledAt.getTime())) {
+    return error("scheduledAt inválido", 400);
   }
-}
+
+  const lead = await prisma.lead.findFirst({
+    where: { id: data.leadId, userId: user.id },
+    select: { id: true },
+  });
+  if (!lead) return error("Lead não encontrado", 404);
+
+  const result = await createAppointment({
+    userId: user.id,
+    leadId: data.leadId,
+    leadActionId: data.leadActionId ?? null,
+    title: data.title,
+    scheduledAt,
+    durationMinutes: data.durationMinutes ?? 60,
+    address: data.address ?? null,
+    notes: data.notes ?? null,
+  });
+
+  return json(result, 201);
+});

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
-import { getConnectionStatus } from "@/lib/evolution";
 import { json, requireAuth, handleError } from "@/lib/api";
+import { resolveProviderForUser } from "@/providers/whatsapp/factory";
 
 export async function GET() {
   try {
@@ -14,9 +14,10 @@ export async function GET() {
       return json({ status: "disconnected", instanceName: null });
     }
 
-    const liveStatus = await getConnectionStatus(settings.whatsappPhoneId);
+    const { provider, instanceId } = await resolveProviderForUser(user.id);
+    const info = await provider.getConnectionStatus(instanceId);
 
-    return json({ status: liveStatus, instanceName: settings.whatsappPhoneId });
+    return json({ status: info.state, instanceName: instanceId });
   } catch (err) {
     return handleError(err);
   }

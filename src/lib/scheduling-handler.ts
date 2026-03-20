@@ -10,6 +10,7 @@ import {
   ensureVisitAction,
   confirmAppointmentReply,
 } from "./appointments";
+import { logger } from "./logger";
 
 interface UserSettingsSnapshot {
   whatsappPhoneId: string | null | undefined;
@@ -95,17 +96,14 @@ export async function handleConfirmationReplyIfNeeded(
 export async function handleSchedulingIfNeeded(
   input: HandleSchedulingInput,
 ): Promise<void> {
-  console.log(
-    "[scheduling] handleSchedulingIfNeeded called for lead:",
-    input.leadId,
-  );
+  logger.info("handleSchedulingIfNeeded called", { leadId: input.leadId });
 
   const intent = await extractSchedulingIntent(input.aiConfig, input.messages);
 
-  console.log("[scheduling] Extracted intent:", JSON.stringify(intent));
+  logger.info("Extracted intent", { intent: JSON.stringify(intent) });
 
   if (!intent.hasIntent) {
-    console.log("[scheduling] No intent detected — skipping");
+    logger.info("No intent detected — skipping");
     return;
   }
 
@@ -123,12 +121,7 @@ export async function handleSchedulingIfNeeded(
           scheduled_at: { gte: targetDate, lt: nextDay },
         },
       });
-      console.log(
-        "[scheduling] Looking for appointment on",
-        cancelDateStr,
-        "found:",
-        appointment?.id ?? "none",
-      );
+      logger.info("Looking for appointment to cancel", { date: cancelDateStr, found: appointment?.id ?? "none" });
     }
 
     if (!appointment) {
@@ -143,18 +136,11 @@ export async function handleSchedulingIfNeeded(
     }
 
     if (!appointment) {
-      console.log(
-        "[scheduling] Cancellation intent but no matching appointment — skipping",
-      );
+      logger.info("Cancellation intent but no matching appointment — skipping");
       return;
     }
 
-    console.log(
-      "[scheduling] Cancelling appointment:",
-      appointment.id,
-      "scheduled_at:",
-      appointment.scheduled_at.toISOString(),
-    );
+    logger.info("Cancelling appointment", { appointmentId: appointment.id, scheduledAt: appointment.scheduled_at.toISOString() });
     await cancelAppointment(appointment.id, input.userId);
 
     if (!input.settings.whatsappPhoneId) return;
@@ -176,22 +162,13 @@ export async function handleSchedulingIfNeeded(
         },
       });
       if (extraAppt) {
-        console.log(
-          "[scheduling] Cancelling additional appointment:",
-          extraAppt.id,
-          "on",
-          extra.date,
-        );
+        logger.info("Cancelling additional appointment", { appointmentId: extraAppt.id, date: extra.date });
         await cancelAppointment(extraAppt.id, input.userId);
         cancelledDates.push(
           `${formatDate(extraAppt.scheduled_at)} às ${formatTime(extraAppt.scheduled_at)}`,
         );
       } else {
-        console.log(
-          "[scheduling] No appointment found on",
-          extra.date,
-          "to cancel — skipping",
-        );
+        logger.info("No appointment found to cancel — skipping", { date: extra.date });
       }
     }
 
@@ -217,14 +194,12 @@ export async function handleSchedulingIfNeeded(
   }
 
   if (intent.isConfirmation) {
-    console.log(
-      "[scheduling] Confirmation intent — skipping (handled elsewhere)",
-    );
+    logger.info("Confirmation intent — skipping (handled elsewhere)");
     return;
   }
 
   if (!intent.proposedDate || !intent.proposedTime) {
-    console.log("[scheduling] Intent but no date/time — skipping");
+    logger.info("Intent but no date/time — skipping");
     return;
   }
 
@@ -232,15 +207,11 @@ export async function handleSchedulingIfNeeded(
     `${intent.proposedDate}T${intent.proposedTime}:00-03:00`,
   );
   if (isNaN(scheduledAt.getTime())) {
-    console.log("[scheduling] Invalid date parsed — skipping");
+    logger.info("Invalid date parsed — skipping");
     return;
   }
   if (scheduledAt < new Date()) {
-    console.log(
-      "[scheduling] Date is in the past:",
-      scheduledAt.toISOString(),
-      "— skipping",
-    );
+    logger.info("Date is in the past — skipping", { scheduledAt: scheduledAt.toISOString() });
     return;
   }
 
@@ -257,12 +228,7 @@ export async function handleSchedulingIfNeeded(
           scheduled_at: { gte: targetDate, lt: nextDay },
         },
       });
-      console.log(
-        "[scheduling] Looking for appointment on",
-        intent.originalDate,
-        "to reschedule, found:",
-        active?.id ?? "none",
-      );
+      logger.info("Looking for appointment to reschedule", { date: intent.originalDate, found: active?.id ?? "none" });
     }
 
     if (!active) {
@@ -270,16 +236,9 @@ export async function handleSchedulingIfNeeded(
     }
 
     if (!active) {
-      console.log(
-        "[scheduling] Reschedule intent but no active appointment — creating new",
-      );
+      logger.info("Reschedule intent but no active appointment — creating new");
     } else {
-      console.log(
-        "[scheduling] Rescheduling appointment:",
-        active.id,
-        "to",
-        scheduledAt.toISOString(),
-      );
+      logger.info("Rescheduling appointment", { appointmentId: active.id, newScheduledAt: scheduledAt.toISOString() });
       const result = await rescheduleAppointment(
         active.id,
         input.userId,
@@ -328,12 +287,7 @@ export async function handleSchedulingIfNeeded(
     address: intent.address ?? null,
   });
 
-  console.log(
-    "[scheduling] Appointment created:",
-    result.appointment.id,
-    "calendar:",
-    result.calendarCreated,
-  );
+  logger.info("Appointment created", { appointmentId: result.appointment.id, calendarCreated: result.calendarCreated });
 
   if (!input.settings.whatsappPhoneId) return;
   const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
@@ -363,11 +317,7 @@ export async function handleSchedulingIfNeeded(
   for (const extra of intent.additionalDates) {
     const extraAt = new Date(`${extra.date}T${extra.time}:00-03:00`);
     if (isNaN(extraAt.getTime()) || extraAt < new Date()) {
-      console.log(
-        "[scheduling] Skipping additional date (invalid or past):",
-        extra.date,
-        extra.time,
-      );
+      logger.info("Skipping additional date (invalid or past)", { date: extra.date, time: extra.time });
       continue;
     }
 
@@ -381,12 +331,7 @@ export async function handleSchedulingIfNeeded(
       address: intent.address ?? null,
     });
 
-    console.log(
-      "[scheduling] Additional appointment created:",
-      extraResult.appointment.id,
-      "calendar:",
-      extraResult.calendarCreated,
-    );
+    logger.info("Additional appointment created", { appointmentId: extraResult.appointment.id, calendarCreated: extraResult.calendarCreated });
 
     if (extraResult.wasAvailable) {
       const calendarNote = extraResult.calendarCreated

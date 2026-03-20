@@ -13,6 +13,7 @@ import { Dropdown } from "@/components/ui/Dropdown";
 import { getScoreBadgeClass } from "@/lib/ui-colors";
 import { DataTable } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { ChevronDown, Plus, Search } from "lucide-react";
 import type { LeadRow, LeadsResponse } from "../contracts";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -189,11 +190,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
         </Button>
       }
     >
-      {error || actionError ? (
-        <div className="rounded-xl border border-red-blush bg-red-pale px-4 py-3 text-sm text-red-dark">
-          {actionError || error}
-        </div>
-      ) : null}
+      <ErrorAlert error={actionError || error} />
 
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4">
         <div className="w-full max-w-md flex-1">

@@ -2,26 +2,30 @@ import { prisma } from "@/lib/db";
 import { randomBytes } from "node:crypto";
 import { NextRequest } from "next/server";
 import { json, requireAuth, handleError } from "@/lib/api";
-import {
-  buildWebhookUrl,
-  createInstance,
-  deleteInstance,
-  getConnectionStatus,
-  getQrCode,
-  instanceNameForUser,
-  logoutInstance,
-  resolveAppUrl,
-  setInstanceWebhook,
-} from "@/lib/evolution";
+import { env } from "@/lib/env";
+import { getEvolutionProvider } from "@/providers/whatsapp/factory";
 
 function createWebhookToken() {
   return randomBytes(24).toString("hex");
 }
 
+function resolveAppUrl(fallbackOrigin?: string) {
+  const appUrl = env.APP_URL || env.NEXT_PUBLIC_APP_URL || fallbackOrigin;
+  if (!appUrl) throw new Error("APP_URL não configurada para o webhook do WhatsApp");
+  return appUrl.replace(/\/+$/, "");
+}
+
+function buildWebhookUrl(appUrl: string, webhookToken: string) {
+  const url = new URL("/api/whatsapp/webhook", appUrl);
+  url.searchParams.set("token", webhookToken);
+  return url.toString();
+}
+
 export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth();
-    const instanceName = instanceNameForUser(user.id);
+    const provider = getEvolutionProvider();
+    const instanceName = provider.instanceIdForUser(user.id);
 
     const settings = await prisma.userSettings.findUnique({
       where: { userId: user.id },
@@ -35,10 +39,10 @@ export async function POST(req: NextRequest) {
 
     if (existingInstance) {
       try {
-        await setInstanceWebhook(instanceName, webhookUrl);
-        const status = await getConnectionStatus(instanceName);
+        await provider.setWebhook(instanceName, webhookUrl);
+        const info = await provider.getConnectionStatus(instanceName);
 
-        if (status === "connected") {
+        if (info.state === "connected") {
           await prisma.userSettings.upsert({
             where: { userId: user.id },
             create: {
@@ -55,45 +59,32 @@ export async function POST(req: NextRequest) {
           return json({ status: "connected", qrcode: null });
         }
 
-        qrcode = await getQrCode(instanceName);
+        qrcode = await provider.getQrCode(instanceName);
       } catch (error) {
         if (
           error instanceof Error &&
           /not exist|not found|404/i.test(error.message)
         ) {
-          const result = await createInstance(user.id);
-          await setInstanceWebhook(instanceName, webhookUrl);
-          qrcode = result.qrcode;
+          const result = await provider.createConnection(user.id, {
+            method: "qrcode",
+            webhookUrl,
+            webhookToken,
+          });
+          qrcode = result.qrCode || null;
         } else {
           throw error;
         }
       }
     } else {
-      try {
-        await logoutInstance(instanceName);
-      } catch {}
-      try {
-        await deleteInstance(instanceName);
-      } catch {}
-
-      let result: Awaited<ReturnType<typeof createInstance>> | null = null;
-
-      try {
-        result = await createInstance(user.id);
-      } catch (error) {
-        if (
-          !(error instanceof Error) ||
-          !/exists|already/i.test(error.message)
-        ) {
-          throw error;
-        }
-      }
-
-      await setInstanceWebhook(instanceName, webhookUrl);
-      qrcode = result?.qrcode || null;
+      const result = await provider.createConnection(user.id, {
+        method: "qrcode",
+        webhookUrl,
+        webhookToken,
+      });
+      qrcode = result.qrCode || null;
 
       if (!qrcode) {
-        qrcode = await getQrCode(instanceName);
+        qrcode = await provider.getQrCode(instanceName);
       }
     }
 

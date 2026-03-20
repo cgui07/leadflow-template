@@ -1,20 +1,9 @@
-import { NextRequest } from "next/server";
-import { error, handleError, json } from "@/lib/api";
-import { AuthFlowError, registerWithInvite } from "@/features/auth/server";
+import { withPublicHandler } from "@/lib/api";
+import { RegisterSchema } from "@/lib/schemas";
+import { registerWithInvite } from "@/features/auth/server";
+import { json } from "@/lib/api";
 
-export async function POST(req: NextRequest) {
-  try {
-    const user = await registerWithInvite(await req.json());
-    return json({ user }, 201);
-  } catch (err) {
-    if (err instanceof AuthFlowError) {
-      return error(err.message, err.status);
-    }
-
-    if (err instanceof SyntaxError) {
-      return error("Payload inválido");
-    }
-
-    return handleError(err);
-  }
-}
+export const POST = withPublicHandler(RegisterSchema, async (data) => {
+  const user = await registerWithInvite(data);
+  return json({ user }, 201);
+});

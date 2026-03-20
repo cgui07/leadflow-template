@@ -1,11 +1,12 @@
 import { error } from "./api";
+import { env } from "./env";
 import { NextRequest, NextResponse } from "next/server";
 
 export function requireCronAuth(req: NextRequest): NextResponse | null {
-  const cronSecret = process.env.CRON_SECRET;
+  const cronSecret = env.CRON_SECRET;
 
   if (!cronSecret) {
-    if (process.env.NODE_ENV === "production") {
+    if (env.NODE_ENV === "production") {
       return error("CRON_SECRET não configurado", 500);
     }
 

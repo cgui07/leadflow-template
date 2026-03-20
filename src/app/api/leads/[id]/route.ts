@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
-import { error, handleError, json, requireAuth } from "@/lib/api";
+import { handleError, json, requireAuth, error } from "@/lib/api";
 import { deleteLead, getLeadDetail, updateLead } from "@/features/leads/server";
+import { UpdateLeadSchema } from "@/lib/schemas";
 
 export async function GET(
   _req: NextRequest,
@@ -28,11 +29,8 @@ export async function PATCH(
   try {
     const user = await requireAuth();
     const { id } = await params;
-    const lead = await updateLead(
-      user.id,
-      id,
-      (await req.json()) as Record<string, unknown>,
-    );
+    const data = UpdateLeadSchema.parse(await req.json());
+    const lead = await updateLead(user.id, id, data as Record<string, unknown>);
 
     return json(lead);
   } catch (err) {
@@ -40,22 +38,15 @@ export async function PATCH(
       if (err.message === "LEAD_NOT_FOUND") {
         return error("Lead não encontrado", 404);
       }
-
       if (err.message === "LEAD_STATUS_INVALID") {
         return error("Status de lead inválido", 400);
       }
-
       if (err.message === "LEAD_STAGE_INVALID") {
         return error("Estágio inválido", 400);
       }
-
       if (err.message === "LEAD_STAGE_NOT_FOUND") {
         return error("Estágio não encontrado", 404);
       }
-    }
-
-    if (err instanceof SyntaxError) {
-      return error("Payload inválido");
     }
 
     return handleError(err);

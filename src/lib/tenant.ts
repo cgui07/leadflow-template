@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { prisma } from "./db";
+import { env } from "./env";
 import { normalizeTenantSlug } from "./tenant-slug";
 import {
   buildBranding,
@@ -170,7 +171,7 @@ export function hasFeatureFlag(
 }
 
 export function isPlatformAdminEmail(email: string): boolean {
-  const raw = process.env.PLATFORM_ADMIN_EMAILS?.trim();
+  const raw = env.PLATFORM_ADMIN_EMAILS?.trim();
   if (!raw) return false;
 
   const allowedEmails = raw

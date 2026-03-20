@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useFetch } from "@/lib/hooks";
 import { Button } from "@/components/ui/Button";
+import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import type { PipelineStage, SelectedLead } from "../contracts";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
@@ -157,11 +158,7 @@ export function PipelinePageClient({
         </Button>
       }
     >
-      {error || moveError ? (
-        <div className="rounded-xl border border-red-blush bg-red-pale px-4 py-3 text-sm text-red-dark">
-          {moveError || error}
-        </div>
-      ) : null}
+      <ErrorAlert error={moveError || error} />
 
       <div className="flex flex-col gap-4 md:-mx-6 md:flex-row md:overflow-x-auto md:px-6 md:pb-4">
         {stages.map((stage) => (

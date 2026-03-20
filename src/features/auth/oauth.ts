@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { randomBytes } from "node:crypto";
 import { sanitizeAppRedirect } from "@/lib/redirect";
 import { normalizeEmail, setAuthCookie, signToken } from "@/lib/auth";
@@ -101,7 +102,7 @@ export async function authenticateWithGoogleAuthorizationCode({
   });
 
   if (!tokenResponse.ok) {
-    console.error("[google-auth] Token exchange failed:", await tokenResponse.text());
+    logger.error("Token exchange failed", { body: await tokenResponse.text() });
     throw new GoogleAuthError("google_token_failed");
   }
 
@@ -112,7 +113,7 @@ export async function authenticateWithGoogleAuthorizationCode({
   });
 
   if (!userInfoResponse.ok) {
-    console.error("[google-auth] User info fetch failed");
+    logger.error("User info fetch failed");
     throw new GoogleAuthError("google_userinfo_failed");
   }
 

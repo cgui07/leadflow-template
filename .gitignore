@@ -36,3 +36,6 @@ next-env.d.ts
 /.vscode/settings.json
 docker-compose.yml
 evolution-docker-compose.yml
+db-migrations.local.txt
+melhorias-pendentes.txt
+
