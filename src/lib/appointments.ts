@@ -34,6 +34,12 @@ export interface AppointmentResult {
 export async function createAppointment(
   input: CreateAppointmentInput,
 ): Promise<AppointmentResult> {
+  console.log("[appointment] Creating appointment:", {
+    userId: input.userId,
+    leadId: input.leadId,
+    scheduledAt: input.scheduledAt.toISOString(),
+  });
+
   const duration = input.durationMinutes ?? 60;
   const endTime = new Date(input.scheduledAt.getTime() + duration * 60 * 1000);
 
@@ -81,6 +87,8 @@ export async function createAppointment(
   let googleEventId: string | null = null;
   let googleCalendarId: string | null = null;
 
+  console.log("[appointment] Calendar available, creating Google Calendar event...");
+
   const created = await createCalendarEvent(input.userId, {
     summary: input.title,
     description: input.notes ?? undefined,
@@ -92,6 +100,9 @@ export async function createAppointment(
   if (created) {
     googleEventId = created.eventId;
     googleCalendarId = created.calendarId;
+    console.log("[appointment] ✅ Google Calendar event created:", created.eventId);
+  } else {
+    console.warn("[appointment] ⚠️ Google Calendar event NOT created — check calendar connection");
   }
 
   const appointment = await prisma.appointments.create({

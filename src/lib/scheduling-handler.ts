@@ -96,16 +96,32 @@ export async function handleConfirmationReplyIfNeeded(
 export async function handleSchedulingIfNeeded(
   input: HandleSchedulingInput,
 ): Promise<void> {
+  console.log("[scheduling] handleSchedulingIfNeeded called for lead:", input.leadId);
+
   const intent = await extractSchedulingIntent(input.aiConfig, input.messages);
 
-  if (!intent.hasIntent || !intent.proposedDate || !intent.proposedTime) return;
-  if (intent.isConfirmation || intent.isCancellation) return;
+  console.log("[scheduling] Extracted intent:", JSON.stringify(intent));
+
+  if (!intent.hasIntent || !intent.proposedDate || !intent.proposedTime) {
+    console.log("[scheduling] No valid intent detected — skipping");
+    return;
+  }
+  if (intent.isConfirmation || intent.isCancellation) {
+    console.log("[scheduling] Intent is confirmation/cancellation — skipping");
+    return;
+  }
 
   const scheduledAt = new Date(
     `${intent.proposedDate}T${intent.proposedTime}:00-03:00`,
   );
-  if (isNaN(scheduledAt.getTime())) return;
-  if (scheduledAt < new Date()) return;
+  if (isNaN(scheduledAt.getTime())) {
+    console.log("[scheduling] Invalid date parsed — skipping");
+    return;
+  }
+  if (scheduledAt < new Date()) {
+    console.log("[scheduling] Date is in the past:", scheduledAt.toISOString(), "— skipping");
+    return;
+  }
 
   if (intent.isReschedulingRequest) {
     const active = await getActiveAppointmentForLead(input.leadId);
@@ -143,7 +159,10 @@ export async function handleSchedulingIfNeeded(
   }
 
   const existing = await getPendingAppointmentForLead(input.leadId);
-  if (existing) return;
+  if (existing) {
+    console.log("[scheduling] Lead already has pending/confirmed appointment:", existing.id, "status:", existing.status, "— skipping");
+    return;
+  }
 
   const openAction = await ensureVisitAction(input.userId, input.leadId);
 

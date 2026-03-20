@@ -11,7 +11,7 @@ export interface SchedulingIntent {
 }
 
 function getSchedulingExtractionPrompt(): string {
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
   return `Você é um extrator de intenções de agendamento de visitas de imóveis. Analise as mensagens abaixo e identifique se o cliente está propondo, confirmando ou cancelando uma data/hora de visita. Retorne APENAS o JSON, sem markdown ou explicações.
 
 Formato esperado:
