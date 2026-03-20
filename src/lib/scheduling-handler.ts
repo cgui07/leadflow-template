@@ -102,7 +102,7 @@ export async function handleSchedulingIfNeeded(
   if (intent.isConfirmation || intent.isCancellation) return;
 
   const scheduledAt = new Date(
-    `${intent.proposedDate}T${intent.proposedTime}:00`,
+    `${intent.proposedDate}T${intent.proposedTime}:00-03:00`,
   );
   if (isNaN(scheduledAt.getTime())) return;
   if (scheduledAt < new Date()) return;

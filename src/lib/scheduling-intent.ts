@@ -21,7 +21,7 @@ Formato esperado:
   "proposedTime": "HH:MM" ou null,
   "address": "endereço mencionado pelo cliente ou null",
   "isConfirmation": true|false,
-  "isCardCancellation": true|false,
+  "isCancellation": true|false,
   "isReschedulingRequest": true|false
 }
 
