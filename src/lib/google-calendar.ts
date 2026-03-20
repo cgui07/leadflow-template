@@ -116,7 +116,10 @@ async function getValidAccessToken(
     where: { user_id_provider: { user_id: userId, provider: "google" } },
   });
 
-  if (!connection?.access_token) return null;
+  if (!connection?.access_token) {
+    console.log("[google-calendar] No calendar connection for user:", userId);
+    return null;
+  }
 
   const isExpiring = connection.token_expires_at
     ? connection.token_expires_at < new Date(Date.now() + 5 * 60 * 1000)
@@ -215,8 +218,12 @@ export async function createCalendarEvent(
   userId: string,
   eventData: CalendarEventData,
 ): Promise<{ eventId: string; calendarId: string } | null> {
+  console.log("[google-calendar] createCalendarEvent for user:", userId);
   const auth = await getValidAccessToken(userId);
-  if (!auth) return null;
+  if (!auth) {
+    console.error("[google-calendar] No valid token — cannot create event");
+    return null;
+  }
 
   const body = {
     summary: eventData.summary,
