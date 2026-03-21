@@ -14,6 +14,7 @@ import { ActivationSummaryModal } from "./ActivationSummaryModal";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { RegenerateActivationLinkModal } from "./RegenerateActivationLinkModal";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
+import { ClientCard } from "./ClientCard";
 import { Building2, Copy, KeyRound, PauseCircle, PlayCircle, Plus, Search, Trash2 } from "lucide-react";
 import type {
   PlatformClientAccessState,
@@ -223,7 +224,7 @@ export function PlatformClientsPageClient({ initialData }: PlatformClientsPageCl
       ) : null}
 
       <div className="flex flex-col gap-4">
-        <div className="w-full max-w-md">
+        <div className="w-full sm:max-w-md">
           <TextField
             icon={<Search className="h-4 w-4" />}
             placeholder="Buscar por cliente, slug ou email..."
@@ -241,10 +242,10 @@ export function PlatformClientsPageClient({ initialData }: PlatformClientsPageCl
             tabs={tabs}
             activeTab={statusFilter}
             onTabChange={setStatusFilter}
-            className="px-6 pt-2"
+            className="px-4 pt-2 sm:px-6"
           />
 
-          <div className="px-6 pb-6 pt-4">
+          <div className="px-4 pb-6 pt-4 sm:px-6">
             {filteredClients.length === 0 && clients.length > 0 ? (
               <EmptyState
                 icon={<Search className="h-6 w-6" />}
@@ -263,7 +264,29 @@ export function PlatformClientsPageClient({ initialData }: PlatformClientsPageCl
                 }
               />
             ) : (
-              <DataTable columns={columns} data={filteredClients} rowKey="id" />
+              <>
+                {/* Desktop: tabela */}
+                <div className="hidden md:block">
+                  <DataTable columns={columns} data={filteredClients} rowKey="id" />
+                </div>
+
+                {/* Mobile: cards */}
+                <div className="flex flex-col gap-3 md:hidden">
+                  {filteredClients.map((client) => (
+                    <ClientCard
+                      key={client.id}
+                      client={client}
+                      updatingClientId={updatingClientId}
+                      regenerating={regenerating}
+                      selectedClientId={selectedClient?.id ?? null}
+                      onCopyLink={(link) => void handleCopyLink(link)}
+                      onRegenerate={openRegenerateModal}
+                      onToggleStatus={(c) => void handleToggleStatus(c)}
+                      onDelete={setDeletingClient}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </SectionContainer>
