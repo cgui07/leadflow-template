@@ -12,8 +12,8 @@ import { usePlatformClients } from "../hooks/usePlatformClients";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ActivationSummaryModal } from "./ActivationSummaryModal";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import { RegenerateActivationLinkModal } from "./RegenerateActivationLinkModal";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import { Building2, Copy, KeyRound, PauseCircle, PlayCircle, Plus, Search, Trash2 } from "lucide-react";
 import type {
   PlatformClientAccessState,

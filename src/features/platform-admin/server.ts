@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { normalizeEmail } from "@/lib/auth";
 import { buildBranding } from "@/lib/branding";
 import { sendActivationEmail } from "@/lib/email";
@@ -328,11 +329,17 @@ export async function createPlatformClient(
     appUrl: options?.appUrl,
   });
 
-  await sendActivationEmail({
+  sendActivationEmail({
     to: ownerEmail,
     tenantName: tenant.name,
     activationLink: activation.activationLink,
     expiresAt: expiresAt.toISOString(),
+  }).catch((err: unknown) => {
+    logger.error("Failed to send activation email on create", {
+      error: err instanceof Error ? err.message : JSON.stringify(err),
+      tenantId: tenant.id,
+      to: ownerEmail,
+    });
   });
 
   return { client, activation };
@@ -435,11 +442,17 @@ export async function regeneratePlatformActivationLink(
     appUrl: options?.appUrl,
   });
 
-  await sendActivationEmail({
+  sendActivationEmail({
     to: email,
     tenantName: tenant.name,
     activationLink: activation.activationLink,
     expiresAt: expiresAt.toISOString(),
+  }).catch((err: unknown) => {
+    logger.error("Failed to send activation email on regenerate", {
+      error: err instanceof Error ? err.message : JSON.stringify(err),
+      tenantId: tenant.id,
+      to: email,
+    });
   });
 
   return { client, activation };

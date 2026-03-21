@@ -102,7 +102,7 @@ export async function sendActivationEmail(params: {
   });
 
   if (error) {
-    logger.error("Failed to send activation email", { error: String(error) });
+    logger.error("Failed to send activation email", { error: JSON.stringify(error) });
     throw new Error("Falha ao enviar e-mail de ativação");
   }
 }
