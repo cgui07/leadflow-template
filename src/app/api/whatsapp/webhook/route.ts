@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 
     // Handle connection status changes
     if (event.type === "connection_changed") {
-      const disconnected = event.state === "close" || event.state === "refused";
+      const disconnected = event.state === "disconnected";
       if (disconnected) {
         logger.error("WhatsApp instance disconnected", {
           instance: instanceName,
