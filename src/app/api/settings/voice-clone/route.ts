@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const audioFile = formData.get("audio") as File | null;
-    const voiceName = (formData.get("name") as string | null) ?? user.name ?? "Voz LeadFlow";
+    const voiceName = (formData.get("name") as string | null) ?? user.name ?? "Voz LospeFlow";
 
     if (!audioFile) {
       return error("Arquivo de áudio não enviado");

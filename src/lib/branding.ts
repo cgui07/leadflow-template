@@ -1,6 +1,6 @@
 import { appColors } from "../../tailwind.config";
 
-export const DEFAULT_BRAND_NAME = "LeadFlow";
+export const DEFAULT_BRAND_NAME = "LospeFlow";
 export const DEFAULT_BRAND_LOGO_URL = "/lead-logo.png";
 
 export const BRAND_COLOR_KEYS = [

@@ -8,8 +8,8 @@ import { normalizeEmail, setAuthCookie, signToken } from "@/lib/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
 
-export const GOOGLE_OAUTH_STATE_COOKIE = "leadflow_google_oauth_state";
-export const GOOGLE_OAUTH_REDIRECT_COOKIE = "leadflow_google_oauth_redirect";
+export const GOOGLE_OAUTH_STATE_COOKIE = "lospeflow_google_oauth_state";
+export const GOOGLE_OAUTH_REDIRECT_COOKIE = "lospeflow_google_oauth_redirect";
 export const GOOGLE_OAUTH_COOKIE_MAX_AGE_SECONDS = 60 * 10;
 
 interface GoogleTokenResponse {

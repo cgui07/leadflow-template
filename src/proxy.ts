@@ -18,7 +18,7 @@ const PUBLIC_PREFIXES = [
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("leadflow_token")?.value;
+  const token = request.cookies.get("lospeflow_token")?.value;
 
   if (pathname === "/" && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));

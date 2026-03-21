@@ -19,7 +19,7 @@ const envSchema = z.object({
   ELEVENLABS_API_KEY: z.string().optional().default(""),
 
   RESEND_API_KEY: z.string().optional().default(""),
-  EMAIL_FROM: z.string().optional().default("LeadFlow <noreply@leadflow.com>"),
+  EMAIL_FROM: z.string().optional().default("LospeFlow <noreply@lospeflow.com>"),
   EMAIL_FROM_DEV: z
     .string()
     .optional()
@@ -38,7 +38,7 @@ const envSchema = z.object({
   R2_ENDPOINT: z.string().optional().default(""),
   R2_ACCESS_KEY_ID: z.string().optional().default(""),
   R2_SECRET_ACCESS_KEY: z.string().optional().default(""),
-  R2_BUCKET: z.string().optional().default("leadflow-pdfs"),
+  R2_BUCKET: z.string().optional().default("lospeflow-pdfs"),
 
   NODE_ENV: z
     .enum(["development", "production", "test"])

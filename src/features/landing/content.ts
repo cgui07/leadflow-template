@@ -151,11 +151,11 @@ export interface LandingContent {
 }
 
 const contactHref =
-  "https://wa.me/5521981424040?text=Olá%2C%20quero%20entender%20como%20o%20LeadFlow%20funciona.";
+  "https://wa.me/5521981424040?text=Olá%2C%20quero%20entender%20como%20o%20LospeFlow%20funciona.";
 
 export const landingContent = {
   brand: {
-    name: "LeadFlow",
+    name: "LospeFlow",
     logoUrl: "/lead-logo.png",
     description:
       "Atendimento e qualificação de leads para corretores autônomos.",
@@ -172,7 +172,7 @@ export const landingContent = {
       "Responda em segundos. Organize sem esforço. Priorize com clareza.",
     title: "Transforme o WhatsApp em um funil simples de vendas imobiliárias.",
     description:
-      "O LeadFlow atende o primeiro contato, coleta informações essenciais e entrega ao corretor apenas os leads com maior probabilidade de compra.",
+      "O LospeFlow atende o primeiro contato, coleta informações essenciais e entrega ao corretor apenas os leads com maior probabilidade de compra.",
     primaryAction: {
       label: "Entenda melhor com a nossa equipe",
       href: contactHref,
@@ -268,7 +268,7 @@ export const landingContent = {
         {
           role: "Assistente",
           message:
-            "Olá, aqui e da equipe LeadFlow. Vi que você tem interesse em um imóvel. Posso te ajudar com algumas opções.",
+            "Olá, aqui e da equipe LospeFlow. Vi que você tem interesse em um imóvel. Posso te ajudar com algumas opções.",
         },
         {
           role: "Cliente",
@@ -424,7 +424,7 @@ export const landingContent = {
     ],
   },
   footer: {
-    label: "LeadFlow - WhatsApp + IA + CRM leve",
+    label: "LospeFlow - WhatsApp + IA + CRM leve",
     action: {
       label: "Falar com a equipe",
       href: contactHref,

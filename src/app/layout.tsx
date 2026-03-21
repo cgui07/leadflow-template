@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LeadFlow",
+  title: "LospeFlow",
   description: "Plataforma de gestão de leads e pipeline de vendas",
   icons: {
     icon: [

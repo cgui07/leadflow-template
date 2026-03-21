@@ -12,7 +12,7 @@ import {
   COOKIE_MAX_AGE,
 } from "./constants";
 
-const TOKEN_NAME = "leadflow_token";
+const TOKEN_NAME = "lospeflow_token";
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, BCRYPT_ROUNDS);

@@ -13,7 +13,7 @@ export async function cloneVoice(
 ): Promise<string> {
   const formData = new FormData();
   formData.append("name", voiceName);
-  formData.append("description", "Voz clonada via LeadFlow");
+  formData.append("description", "Voz clonada via LospeFlow");
   formData.append("files", audioBlob, "recording.webm");
 
   const res = await fetch(`${ELEVENLABS_API_URL}/voices/add`, {

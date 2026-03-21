@@ -33,14 +33,14 @@ export async function sendActivationEmail(params: {
   const { error } = await resend.emails.send({
     from: getFromEmail(),
     to: params.to,
-    subject: `Seu acesso ao LeadFlow está pronto — ${params.tenantName}`,
+    subject: `Seu acesso ao LospeFlow está pronto — ${params.tenantName}`,
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff;">
 
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3366ff 60%, #7c3aed 100%); padding: 40px 32px; border-radius: 16px 16px 0 0;">
           <div style="font-size: 22px; font-weight: 700; color: #ffffff; margin: 0 0 6px;">
-            LeadFlow
+            LospeFlow
           </div>
           <div style="font-size: 14px; color: rgba(255,255,255,0.75);">
             Plataforma de CRM para corretores
@@ -111,14 +111,14 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   const { error } = await resend.emails.send({
     from: getFromEmail(),
     to,
-    subject: "Redefinir sua senha - LeadFlow",
+    subject: "Redefinir sua senha - LospeFlow",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 24px;">
         <div style="font-size: 20px; font-weight: 600; color: ${emailColors.heading}; margin: 0 0 16px;">
           Redefinir senha
         </div>
         <div style="font-size: 15px; line-height: 1.6; color: ${emailColors.body}; margin: 0 0 24px;">
-          Recebemos uma solicitação para redefinir a senha da sua conta LeadFlow.
+          Recebemos uma solicitação para redefinir a senha da sua conta LospeFlow.
           Clique no botão abaixo para criar uma nova senha.
         </div>
         <a
