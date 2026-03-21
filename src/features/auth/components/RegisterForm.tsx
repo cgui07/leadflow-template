@@ -124,7 +124,6 @@ export function RegisterForm({ invite, inviteToken }: RegisterFormProps) {
           onChange={(event) => updateField("email", event.target.value)}
           placeholder="seu@email.com"
           required
-          disabled={Boolean(invite.email)}
         />
 
         <div>

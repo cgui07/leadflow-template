@@ -25,7 +25,7 @@ export function CreateClientModal({
       open={open}
       onClose={onClose}
       title="Novo cliente"
-      description="Crie o workspace do corretor e já deixe o link de ativação pronto."
+      description="Crie o workspace do corretor. Um link de ativação será gerado para enviar ao cliente."
       size="md"
     >
       <Form onSubmit={onSubmit} className="space-y-4">
@@ -45,12 +45,12 @@ export function CreateClientModal({
           required
         />
         <TextField
-          label="Email de ativação"
+          label="Email do corretor"
           type="email"
           value={form.ownerEmail}
           onChange={(event) => onFieldChange("ownerEmail", event.target.value)}
           placeholder="corretor@email.com"
-          hint="Esse email fica travado na tela de cadastro do cliente."
+          hint="O link de ativação será enviado para esse email."
           required
         />
         <TextField

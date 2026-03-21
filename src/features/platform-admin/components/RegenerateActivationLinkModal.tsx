@@ -25,15 +25,16 @@ export function RegenerateActivationLinkModal({
       open={open}
       onClose={onClose}
       title="Gerar novo link"
-      description="Use este fluxo quando o corretor não ativou a conta a tempo ou quando o email precisar mudar."
+      description="Use este fluxo quando o corretor não ativou a conta a tempo. Um novo link será gerado."
       size="md"
     >
       <Form onSubmit={onSubmit} className="space-y-4">
         <TextField
-          label="Email de ativação"
+          label="Email do corretor"
           type="email"
           value={form.email}
           onChange={(event) => onFieldChange("email", event.target.value)}
+          hint="O novo link será enviado para esse email."
           required
         />
         <TextField

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { normalizeEmail } from "@/lib/auth";
 import { buildBranding } from "@/lib/branding";
+import { sendActivationEmail } from "@/lib/email";
 import { generateInviteToken } from "@/lib/tenant";
 import { normalizeTenantSlug } from "@/lib/tenant-slug";
 import type {
@@ -216,21 +217,6 @@ function buildActivationSummary(params: {
   };
 }
 
-async function assertEmailAvailable(email: string): Promise<void> {
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true },
-  });
-
-  if (existingUser) {
-    throw new PlatformClientError(
-      "CLIENT_EMAIL_TAKEN",
-      409,
-      "Ja existe uma conta com esse email.",
-    );
-  }
-}
-
 export async function listPlatformClients(options?: {
   appUrl?: string | null;
   excludeTenantId?: string | null;
@@ -267,7 +253,7 @@ export async function createPlatformClient(
     assertRequiredString(
       input.ownerEmail,
       "CLIENT_EMAIL_REQUIRED",
-      "Email de ativação é obrigatório.",
+      "Email do corretor é obrigatório.",
     ),
   );
   const rawSlug =
@@ -277,8 +263,6 @@ export async function createPlatformClient(
   const slug = normalizeTenantSlug(rawSlug);
   const expiresInDays = parseInviteExpirationDays(input.expiresInDays);
   const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
-
-  await assertEmailAvailable(ownerEmail);
 
   const existingTenant = await prisma.tenant.findUnique({
     where: { slug },
@@ -314,7 +298,7 @@ export async function createPlatformClient(
       data: {
         tenantId: createdTenant.id,
         token: activationToken,
-        email: ownerEmail,
+        email: null,
         role: "admin",
         maxUses: 1,
         expiresAt,
@@ -334,18 +318,24 @@ export async function createPlatformClient(
     );
   }
 
-  return {
-    client,
-    activation: buildActivationSummary({
-      tenantId: tenant.id,
-      tenantName: tenant.name,
-      tenantSlug: tenant.slug,
-      email: ownerEmail,
-      token: activationToken,
-      expiresAt,
-      appUrl: options?.appUrl,
-    }),
-  };
+  const activation = buildActivationSummary({
+    tenantId: tenant.id,
+    tenantName: tenant.name,
+    tenantSlug: tenant.slug,
+    email: ownerEmail,
+    token: activationToken,
+    expiresAt,
+    appUrl: options?.appUrl,
+  });
+
+  await sendActivationEmail({
+    to: ownerEmail,
+    tenantName: tenant.name,
+    activationLink: activation.activationLink,
+    expiresAt: expiresAt.toISOString(),
+  });
+
+  return { client, activation };
 }
 
 export async function regeneratePlatformActivationLink(
@@ -365,14 +355,11 @@ export async function regeneratePlatformActivationLink(
     assertRequiredString(
       input.email,
       "CLIENT_EMAIL_REQUIRED",
-      "Email de ativação é obrigatório.",
+      "Email do corretor é obrigatório.",
     ),
   );
   const expiresInDays = parseInviteExpirationDays(input.expiresInDays);
   const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
-
-  await assertEmailAvailable(email);
-
   const activationToken = generateInviteToken();
   const now = new Date();
 
@@ -418,7 +405,7 @@ export async function regeneratePlatformActivationLink(
       data: {
         tenantId,
         token: activationToken,
-        email,
+        email: null,
         role: "admin",
         maxUses: 1,
         expiresAt,
@@ -438,18 +425,24 @@ export async function regeneratePlatformActivationLink(
     );
   }
 
-  return {
-    client,
-    activation: buildActivationSummary({
-      tenantId: tenant.id,
-      tenantName: tenant.name,
-      tenantSlug: tenant.slug,
-      email,
-      token: activationToken,
-      expiresAt,
-      appUrl: options?.appUrl,
-    }),
-  };
+  const activation = buildActivationSummary({
+    tenantId: tenant.id,
+    tenantName: tenant.name,
+    tenantSlug: tenant.slug,
+    email,
+    token: activationToken,
+    expiresAt,
+    appUrl: options?.appUrl,
+  });
+
+  await sendActivationEmail({
+    to: email,
+    tenantName: tenant.name,
+    activationLink: activation.activationLink,
+    expiresAt: expiresAt.toISOString(),
+  });
+
+  return { client, activation };
 }
 
 export async function updatePlatformClientStatus(
@@ -461,7 +454,7 @@ export async function updatePlatformClientStatus(
     throw new PlatformClientError(
       "CLIENT_INTERNAL_TENANT",
       400,
-      "ão é possível alterar o tenant interno da plataforma.",
+      "Não é possível alterar o tenant interno da plataforma.",
     );
   }
 

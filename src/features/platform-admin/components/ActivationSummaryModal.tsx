@@ -27,14 +27,14 @@ export function ActivationSummaryModal({
       open={Boolean(summary)}
       onClose={onClose}
       title="Link de ativação pronto"
-      description="Envie esse link ao corretor para que ele conclua o cadastro e defina a senha."
+      description="O email de ativação foi enviado ao corretor. Copie o link abaixo caso queira reenviar manualmente."
       size="md"
     >
       {summary ? (
         <div className="space-y-4">
           <div className="rounded-xl border border-blue-ice bg-blue-pale px-4 py-4 text-sm text-blue-navy">
             <div className="font-semibold">{summary.tenantName}</div>
-            <div className="mt-1">Email liberado: {summary.email}</div>
+            <div className="mt-1">Email enviado para: {summary.email}</div>
             <div className="mt-1">
               Link válido até {formatDate(summary.expiresAt)}
             </div>
@@ -47,9 +47,8 @@ export function ActivationSummaryModal({
           />
 
           <div className="rounded-xl border border-neutral-border bg-neutral-surface px-4 py-4 text-sm text-neutral-dark">
-            O corretor vai abrir esse link, criar a senha e entrar como admin do
-            proprio workspace. Depois disso, novos acessos devem usar login
-            normal ou recuperação de senha.
+            O corretor vai abrir o link no email, criar a senha e entrar como admin do próprio workspace.
+            Depois disso, novos acessos usam login normal ou recuperação de senha.
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
