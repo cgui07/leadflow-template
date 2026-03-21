@@ -35,9 +35,10 @@ export async function resolveProviderForUser(userId: string): Promise<{
 }> {
   const settings = await prisma.userSettings.findUnique({
     where: { userId },
+    select: { whatsappPhoneId: true },
   });
 
-  const providerType = (settings?.whatsappProvider as ProviderType) || "evolution";
+  const providerType: ProviderType = "evolution";
   const provider = getProvider(providerType);
   const instanceId = settings?.whatsappPhoneId || provider.instanceIdForUser(userId);
 
@@ -66,7 +67,7 @@ export async function resolveProviderByInstance(instanceId: string): Promise<{
 
   if (!settings) return null;
 
-  const providerType = (settings.whatsappProvider as ProviderType) || "evolution";
+  const providerType: ProviderType = "evolution";
 
   return {
     provider: getProvider(providerType),
