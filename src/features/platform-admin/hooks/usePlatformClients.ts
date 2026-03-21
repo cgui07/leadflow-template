@@ -206,7 +206,7 @@ export function usePlatformClients(initialData: PlatformClientsResponse) {
       setActivationSummary(created.activation);
       setCopiedActivationLink(false);
       setNotice({
-        tone: created.emailSent ? "success" : "warning",
+        tone: created.emailSent ? "success" : "error",
         message: created.emailSent
           ? "Cliente criado. Email de ativação enviado com sucesso."
           : "Cliente criado, mas não foi possível enviar o email. Copie o link de ativação e envie manualmente.",
@@ -258,7 +258,7 @@ export function usePlatformClients(initialData: PlatformClientsResponse) {
       setActivationSummary(regenerated.activation);
       setCopiedActivationLink(false);
       setNotice({
-        tone: regenerated.emailSent ? "success" : "warning",
+        tone: regenerated.emailSent ? "success" : "error",
         message: regenerated.emailSent
           ? "Novo link gerado e email enviado com sucesso."
           : "Novo link gerado, mas não foi possível enviar o email. Copie o link e envie manualmente.",
