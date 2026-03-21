@@ -2,20 +2,8 @@ import { prisma } from "@/lib/db";
 import { randomBytes } from "node:crypto";
 import { NextRequest } from "next/server";
 import { json, error, requireAuth, handleError } from "@/lib/api";
-import { env } from "@/lib/env";
+import { resolveAppUrl, buildWebhookUrl } from "@/lib/webhook-url";
 import { getEvolutionProvider } from "@/providers/whatsapp/factory";
-
-function resolveAppUrl(fallbackOrigin?: string) {
-  const appUrl = env.APP_URL || env.NEXT_PUBLIC_APP_URL || fallbackOrigin;
-  if (!appUrl) throw new Error("APP_URL não configurada para o webhook do WhatsApp");
-  return appUrl.replace(/\/+$/, "");
-}
-
-function buildWebhookUrl(appUrl: string, webhookToken: string) {
-  const url = new URL("/api/whatsapp/webhook", appUrl);
-  url.searchParams.set("token", webhookToken);
-  return url.toString();
-}
 
 export async function POST(req: NextRequest) {
   try {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Column } from "@/types";
 import { FaWhatsapp } from "react-icons/fa";
+import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { KpiCard } from "@/components/ui/KpiCard";
@@ -129,26 +130,28 @@ export function DashboardPageContent({
 
         <SectionContainer title="Atividade Recente">
           {data.recentActivities.length ? (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {data.recentActivities.map((activity) => (
-                <div key={activity.id} className="flex gap-3 text-sm">
-                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                  <div>
-                    <div className="font-medium text-neutral-dark">
-                      {activity.title}
+                <Card key={activity.id} noPadding>
+                  <div className="flex gap-3 px-4 py-3 text-sm">
+                    <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-neutral-dark">
+                        {activity.title}
+                      </div>
+                      {activity.description ? (
+                        <div className="mt-0.5 text-xs text-neutral-muted">
+                          {activity.description}
+                        </div>
+                      ) : null}
+                      {activity.lead ? (
+                        <div className="mt-0.5 text-xs text-neutral-muted">
+                          {activity.lead.name}
+                        </div>
+                      ) : null}
                     </div>
-                    {activity.description ? (
-                      <div className="mt-0.5 text-xs text-neutral-muted">
-                        {activity.description}
-                      </div>
-                    ) : null}
-                    {activity.lead ? (
-                      <div className="mt-0.5 text-xs text-neutral-muted">
-                        {activity.lead.name}
-                      </div>
-                    ) : null}
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           ) : (
