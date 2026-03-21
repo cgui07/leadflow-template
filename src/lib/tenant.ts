@@ -39,6 +39,12 @@ async function resolveUniqueTenantSlug(
 
 export async function ensureLegacyTenantAccess(userId: string): Promise<void> {
   await prisma.$transaction(async (tx) => {
+    // SELECT FOR UPDATE adquire um lock pessimista na linha do usuário durante a transação.
+    // Previne race conditions quando múltiplas requisições simultâneas tentam criar um Tenant
+    // para o mesmo userId (ex: abas duplicadas no onboarding). O lock garante que apenas uma
+    // execução passe pelo bloco de criação — as demais aguardam e, ao adquirir o lock, encontram
+    // tenantId já preenchido e saem pelo early return. $queryRaw é necessário porque Prisma não
+    // expõe SELECT FOR UPDATE de forma nativa.
     await tx.$queryRaw`SELECT id FROM users WHERE id = ${userId}::uuid FOR UPDATE`;
 
     const user = await tx.user.findUnique({

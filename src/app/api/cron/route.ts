@@ -1,6 +1,7 @@
 import { json, error } from "@/lib/api";
 import { NextRequest } from "next/server";
 import { requireCronAuth } from "@/lib/cron";
+import { logger } from "@/lib/logger";
 import { processEscalations } from "@/lib/alerts";
 import { processFollowUps } from "@/lib/followup";
 import { processVisitConfirmations } from "@/lib/visit-confirmations";
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (err) {
-    console.error("Cron processing error:", err);
+    logger.error("Cron processing error", { error: err instanceof Error ? err.message : String(err) });
     return error("Erro ao processar automações", 500);
   }
 }

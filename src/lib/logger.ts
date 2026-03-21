@@ -1,5 +1,20 @@
 type LogLevel = "debug" | "info" | "warn" | "error";
 
+const ALERT_WEBHOOK_URL = process.env.ALERT_WEBHOOK_URL;
+
+async function sendAlert(entry: object): Promise<void> {
+  if (!ALERT_WEBHOOK_URL) return;
+  try {
+    await fetch(ALERT_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry),
+    });
+  } catch {
+    // alerting must never crash the app
+  }
+}
+
 const LOG_LEVELS: Record<LogLevel, number> = {
   debug: 0,
   info: 1,
@@ -43,6 +58,7 @@ function emit(level: LogLevel, message: string, context?: Record<string, unknown
   switch (level) {
     case "error":
       console.error(json);
+      void sendAlert(entry);
       break;
     case "warn":
       console.warn(json);

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import type { Lead } from "@/types";
 import { Badge } from "@/components/ui/Badge";
@@ -16,7 +17,7 @@ interface LeadCardProps {
   className?: string;
 }
 
-export function LeadCard({
+export const LeadCard = memo(function LeadCard({
   lead,
   onClick,
   onEdit,
@@ -88,4 +89,4 @@ export function LeadCard({
       </div>
     </div>
   );
-}
+});

@@ -1,5 +1,6 @@
 import { getCurrentUser } from "./auth";
 import { logger } from "./logger";
+import { checkRateLimit } from "./rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError, type ZodSchema } from "zod";
 import { AppError } from "./errors";
@@ -56,6 +57,15 @@ export function withApiHandler<T = unknown>(
   return async (req: NextRequest) => {
     try {
       const user = await requireAuth();
+
+      const { allowed } = checkRateLimit(`api:${user.id}`, {
+        windowMs: 60_000,
+        maxRequests: 60,
+      });
+      if (!allowed) {
+        return error("Muitas requisições. Tente novamente em breve.", 429);
+      }
+
       const data = schema ? schema.parse(await req.json()) : (null as T);
       return await handler(user, data, req);
     } catch (err) {

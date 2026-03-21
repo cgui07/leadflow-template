@@ -2,12 +2,13 @@ import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
 import { cloneVoice, deleteVoice } from "@/lib/elevenlabs";
 import { error, handleError, json, requireAuth } from "@/lib/api";
+import { env } from "@/lib/env";
 
 export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth();
 
-    const apiKey = process.env.ELEVENLABS_API_KEY;
+    const apiKey = env.ELEVENLABS_API_KEY;
     if (!apiKey) {
       return error("ElevenLabs não configurado no servidor", 500);
     }

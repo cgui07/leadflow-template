@@ -27,6 +27,8 @@ interface HandleSchedulingInput {
   settings: UserSettingsSnapshot;
 }
 
+type SchedulingIntent = Awaited<ReturnType<typeof extractSchedulingIntent>>;
+
 const CONFIRM_PATTERN =
   /^(sim|s|yes|confirmo|confirmado|pode ser|ok|tá bom|ta bom|combinado|com certeza|claro)[\s!.]*$/i;
 
@@ -108,88 +110,7 @@ export async function handleSchedulingIfNeeded(
   }
 
   if (intent.isCancellation) {
-    let appointment;
-
-    const cancelDateStr = intent.originalDate || intent.proposedDate;
-    if (cancelDateStr) {
-      const targetDate = new Date(`${cancelDateStr}T00:00:00-03:00`);
-      const nextDay = new Date(targetDate.getTime() + 24 * 60 * 60 * 1000);
-      appointment = await prisma.appointments.findFirst({
-        where: {
-          lead_id: input.leadId,
-          status: { in: ["confirmed", "pending_confirmation"] },
-          scheduled_at: { gte: targetDate, lt: nextDay },
-        },
-      });
-      logger.info("Looking for appointment to cancel", { date: cancelDateStr, found: appointment?.id ?? "none" });
-    }
-
-    if (!appointment) {
-      appointment = await prisma.appointments.findFirst({
-        where: {
-          lead_id: input.leadId,
-          status: { in: ["confirmed", "pending_confirmation"] },
-          scheduled_at: { gte: new Date() },
-        },
-        orderBy: { scheduled_at: "asc" },
-      });
-    }
-
-    if (!appointment) {
-      logger.info("Cancellation intent but no matching appointment — skipping");
-      return;
-    }
-
-    logger.info("Cancelling appointment", { appointmentId: appointment.id, scheduledAt: appointment.scheduled_at.toISOString() });
-    await cancelAppointment(appointment.id, input.userId);
-
-    if (!input.settings.whatsappPhoneId) return;
-    const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
-
-    const cancelledDates: string[] = [];
-    cancelledDates.push(
-      `${formatDate(appointment.scheduled_at)} às ${formatTime(appointment.scheduled_at)}`,
-    );
-
-    for (const extra of intent.additionalDates) {
-      const targetDate = new Date(`${extra.date}T00:00:00-03:00`);
-      const nextDay = new Date(targetDate.getTime() + 24 * 60 * 60 * 1000);
-      const extraAppt = await prisma.appointments.findFirst({
-        where: {
-          lead_id: input.leadId,
-          status: { in: ["confirmed", "pending_confirmation"] },
-          scheduled_at: { gte: targetDate, lt: nextDay },
-        },
-      });
-      if (extraAppt) {
-        logger.info("Cancelling additional appointment", { appointmentId: extraAppt.id, date: extra.date });
-        await cancelAppointment(extraAppt.id, input.userId);
-        cancelledDates.push(
-          `${formatDate(extraAppt.scheduled_at)} às ${formatTime(extraAppt.scheduled_at)}`,
-        );
-      } else {
-        logger.info("No appointment found to cancel — skipping", { date: extra.date });
-      }
-    }
-
-    if (cancelledDates.length === 1) {
-      await sendAndSaveMessage(
-        config,
-        input.conversationId,
-        input.replyJid,
-        `Ok, visita de ${cancelledDates[0]} cancelada! Se quiser reagendar é só me falar 😊`,
-        "bot",
-      );
-    } else {
-      const list = cancelledDates.map((d) => `• ${d}`).join("\n");
-      await sendAndSaveMessage(
-        config,
-        input.conversationId,
-        input.replyJid,
-        `Ok, visitas canceladas!\n\n${list}\n\nSe quiser reagendar é só me falar 😊`,
-        "bot",
-      );
-    }
+    await handleCancellationIntent(intent, input);
     return;
   }
 
@@ -216,66 +137,168 @@ export async function handleSchedulingIfNeeded(
   }
 
   if (intent.isReschedulingRequest) {
-    let active;
+    const handled = await handleReschedulingIntent(intent, input, scheduledAt);
+    if (handled) return;
+  }
 
-    if (intent.originalDate) {
-      const targetDate = new Date(`${intent.originalDate}T00:00:00-03:00`);
-      const nextDay = new Date(targetDate.getTime() + 24 * 60 * 60 * 1000);
-      active = await prisma.appointments.findFirst({
-        where: {
-          lead_id: input.leadId,
-          status: { in: ["confirmed", "pending_confirmation"] },
-          scheduled_at: { gte: targetDate, lt: nextDay },
-        },
-      });
-      logger.info("Looking for appointment to reschedule", { date: intent.originalDate, found: active?.id ?? "none" });
-    }
+  await handleNewAppointmentIntent(intent, input, scheduledAt);
+}
 
-    if (!active) {
-      active = await getActiveAppointmentForLead(input.leadId);
-    }
+async function handleCancellationIntent(
+  intent: SchedulingIntent,
+  input: HandleSchedulingInput,
+): Promise<void> {
+  let appointment;
 
-    if (!active) {
-      logger.info("Reschedule intent but no active appointment — creating new");
-    } else {
-      logger.info("Rescheduling appointment", { appointmentId: active.id, newScheduledAt: scheduledAt.toISOString() });
-      const result = await rescheduleAppointment(
-        active.id,
-        input.userId,
-        scheduledAt,
-        intent.address,
+  const cancelDateStr = intent.originalDate || intent.proposedDate;
+  if (cancelDateStr) {
+    const targetDate = new Date(`${cancelDateStr}T00:00:00-03:00`);
+    const nextDay = new Date(targetDate.getTime() + 24 * 60 * 60 * 1000);
+    appointment = await prisma.appointments.findFirst({
+      where: {
+        lead_id: input.leadId,
+        status: { in: ["confirmed", "pending_confirmation"] },
+        scheduled_at: { gte: targetDate, lt: nextDay },
+      },
+    });
+    logger.info("Looking for appointment to cancel", { date: cancelDateStr, found: appointment?.id ?? "none" });
+  }
+
+  if (!appointment) {
+    appointment = await prisma.appointments.findFirst({
+      where: {
+        lead_id: input.leadId,
+        status: { in: ["confirmed", "pending_confirmation"] },
+        scheduled_at: { gte: new Date() },
+      },
+      orderBy: { scheduled_at: "asc" },
+    });
+  }
+
+  if (!appointment) {
+    logger.info("Cancellation intent but no matching appointment — skipping");
+    return;
+  }
+
+  logger.info("Cancelling appointment", { appointmentId: appointment.id, scheduledAt: appointment.scheduled_at.toISOString() });
+  await cancelAppointment(appointment.id, input.userId);
+
+  if (!input.settings.whatsappPhoneId) return;
+  const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
+
+  const cancelledDates: string[] = [];
+  cancelledDates.push(
+    `${formatDate(appointment.scheduled_at)} às ${formatTime(appointment.scheduled_at)}`,
+  );
+
+  for (const extra of intent.additionalDates) {
+    const targetDate = new Date(`${extra.date}T00:00:00-03:00`);
+    const nextDay = new Date(targetDate.getTime() + 24 * 60 * 60 * 1000);
+    const extraAppt = await prisma.appointments.findFirst({
+      where: {
+        lead_id: input.leadId,
+        status: { in: ["confirmed", "pending_confirmation"] },
+        scheduled_at: { gte: targetDate, lt: nextDay },
+      },
+    });
+    if (extraAppt) {
+      logger.info("Cancelling additional appointment", { appointmentId: extraAppt.id, date: extra.date });
+      await cancelAppointment(extraAppt.id, input.userId);
+      cancelledDates.push(
+        `${formatDate(extraAppt.scheduled_at)} às ${formatTime(extraAppt.scheduled_at)}`,
       );
-
-      if (!result || !input.settings.whatsappPhoneId) return;
-      const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
-
-      if (result.wasAvailable) {
-        const calendarNote = result.calendarCreated
-          ? "\nJá atualizei na agenda 📅"
-          : "";
-        await sendAndSaveMessage(
-          config,
-          input.conversationId,
-          input.replyJid,
-          `✅ Visita remarcada para ${formatDate(scheduledAt)} às ${formatTime(scheduledAt)}!${intent.address ? `\n📍 ${intent.address}` : ""}${calendarNote}`,
-          "bot",
-        );
-      } else if (
-        result.alternativeSlots &&
-        result.alternativeSlots.length > 0
-      ) {
-        await sendAndSaveMessage(
-          config,
-          input.conversationId,
-          input.replyJid,
-          `Esse horário já está ocupado. Que tal um desses?\n\n${formatSlots(result.alternativeSlots)}`,
-          "bot",
-        );
-      }
-      return;
+    } else {
+      logger.info("No appointment found to cancel — skipping", { date: extra.date });
     }
   }
 
+  if (cancelledDates.length === 1) {
+    await sendAndSaveMessage(
+      config,
+      input.conversationId,
+      input.replyJid,
+      `Ok, visita de ${cancelledDates[0]} cancelada! Se quiser reagendar é só me falar 😊`,
+      "bot",
+    );
+  } else {
+    const list = cancelledDates.map((d) => `• ${d}`).join("\n");
+    await sendAndSaveMessage(
+      config,
+      input.conversationId,
+      input.replyJid,
+      `Ok, visitas canceladas!\n\n${list}\n\nSe quiser reagendar é só me falar 😊`,
+      "bot",
+    );
+  }
+}
+
+// Returns true if rescheduling was handled, false if a new appointment should be created instead.
+async function handleReschedulingIntent(
+  intent: SchedulingIntent,
+  input: HandleSchedulingInput,
+  scheduledAt: Date,
+): Promise<boolean> {
+  let active;
+
+  if (intent.originalDate) {
+    const targetDate = new Date(`${intent.originalDate}T00:00:00-03:00`);
+    const nextDay = new Date(targetDate.getTime() + 24 * 60 * 60 * 1000);
+    active = await prisma.appointments.findFirst({
+      where: {
+        lead_id: input.leadId,
+        status: { in: ["confirmed", "pending_confirmation"] },
+        scheduled_at: { gte: targetDate, lt: nextDay },
+      },
+    });
+    logger.info("Looking for appointment to reschedule", { date: intent.originalDate, found: active?.id ?? "none" });
+  }
+
+  if (!active) {
+    active = await getActiveAppointmentForLead(input.leadId);
+  }
+
+  if (!active) {
+    logger.info("Reschedule intent but no active appointment — creating new");
+    return false;
+  }
+
+  logger.info("Rescheduling appointment", { appointmentId: active.id, newScheduledAt: scheduledAt.toISOString() });
+  const result = await rescheduleAppointment(
+    active.id,
+    input.userId,
+    scheduledAt,
+    intent.address,
+  );
+
+  if (!result || !input.settings.whatsappPhoneId) return true;
+  const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
+
+  if (result.wasAvailable) {
+    const calendarNote = result.calendarCreated ? "\nJá atualizei na agenda 📅" : "";
+    await sendAndSaveMessage(
+      config,
+      input.conversationId,
+      input.replyJid,
+      `✅ Visita remarcada para ${formatDate(scheduledAt)} às ${formatTime(scheduledAt)}!${intent.address ? `\n📍 ${intent.address}` : ""}${calendarNote}`,
+      "bot",
+    );
+  } else if (result.alternativeSlots && result.alternativeSlots.length > 0) {
+    await sendAndSaveMessage(
+      config,
+      input.conversationId,
+      input.replyJid,
+      `Esse horário já está ocupado. Que tal um desses?\n\n${formatSlots(result.alternativeSlots)}`,
+      "bot",
+    );
+  }
+  return true;
+}
+
+async function handleNewAppointmentIntent(
+  intent: SchedulingIntent,
+  input: HandleSchedulingInput,
+  scheduledAt: Date,
+): Promise<void> {
   const openAction = await ensureVisitAction(input.userId, input.leadId);
 
   const result = await createAppointment({
@@ -293,9 +316,7 @@ export async function handleSchedulingIfNeeded(
   const config = getWhatsAppConfig(input.settings.whatsappPhoneId);
 
   if (result.wasAvailable) {
-    const calendarNote = result.calendarCreated
-      ? "\nJá coloquei na agenda 📅"
-      : "";
+    const calendarNote = result.calendarCreated ? "\nJá coloquei na agenda 📅" : "";
     await sendAndSaveMessage(
       config,
       input.conversationId,
@@ -334,9 +355,7 @@ export async function handleSchedulingIfNeeded(
     logger.info("Additional appointment created", { appointmentId: extraResult.appointment.id, calendarCreated: extraResult.calendarCreated });
 
     if (extraResult.wasAvailable) {
-      const calendarNote = extraResult.calendarCreated
-        ? "\nJá coloquei na agenda 📅"
-        : "";
+      const calendarNote = extraResult.calendarCreated ? "\nJá coloquei na agenda 📅" : "";
       await sendAndSaveMessage(
         config,
         input.conversationId,
@@ -344,10 +363,7 @@ export async function handleSchedulingIfNeeded(
         `✅ Visita agendada para ${formatDate(extraAt)} às ${formatTime(extraAt)}!${intent.address ? `\n📍 ${intent.address}` : ""}${calendarNote}`,
         "bot",
       );
-    } else if (
-      extraResult.alternativeSlots &&
-      extraResult.alternativeSlots.length > 0
-    ) {
+    } else if (extraResult.alternativeSlots && extraResult.alternativeSlots.length > 0) {
       await sendAndSaveMessage(
         config,
         input.conversationId,

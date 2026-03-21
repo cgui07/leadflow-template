@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
 import { requireAuth, json, error, handleError } from "@/lib/api";
 import { uploadPropertyPdf, deletePropertyPdf } from "@/lib/storage";
+import { logger } from "@/lib/logger";
 
 const MAX_PDF_SIZE = 100 * 1024 * 1024;
 
@@ -97,7 +98,7 @@ export async function DELETE(
     }
 
     await deletePropertyPdf(pdfUrl).catch((err) =>
-      console.error("[pdf] Failed to delete PDF:", err),
+      logger.error("[pdf] Failed to delete PDF from storage", { error: err instanceof Error ? err.message : String(err) }),
     );
 
     const updated = pdfs.filter((p) => p.url !== pdfUrl);

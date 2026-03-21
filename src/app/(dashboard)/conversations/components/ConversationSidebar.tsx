@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import { TextField } from "@/components/forms";
@@ -42,7 +43,82 @@ function formatSidebarTime(dateStr: string): string {
   });
 }
 
-export function ConversationSidebar({
+interface ConversationRowProps {
+  conversation: ConversationItem;
+  isSelected: boolean;
+  onSelect: (conversationId: string) => void;
+}
+
+const ConversationRow = memo(function ConversationRow({
+  conversation,
+  isSelected,
+  onSelect,
+}: ConversationRowProps) {
+  const hasUnread = conversation.unreadCount > 0;
+  const lastMsg = conversation.messages[0];
+  const preview = lastMsg
+    ? lastMsg.direction === "outbound"
+      ? `Você: ${lastMsg.content}`
+      : lastMsg.content
+    : "Sem mensagens";
+
+  return (
+    <Button
+      onClick={() => onSelect(conversation.id)}
+      variant="ghost"
+      className={cn(
+        "h-auto w-full justify-start border-b border-neutral-border px-3 py-3 text-left",
+        isSelected ? "bg-neutral-surface" : "hover:bg-neutral-pale",
+      )}
+    >
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-teal-mist text-sm font-bold text-teal-dark">
+        {conversation.lead.name.charAt(0).toUpperCase()}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2">
+          <div className="truncate text-base font-medium text-neutral-ink">
+            {conversation.lead.name}
+          </div>
+          <div
+            className={cn(
+              "shrink-0 text-xs",
+              hasUnread
+                ? "font-medium text-whatsapp"
+                : "text-neutral-muted",
+            )}
+          >
+            {conversation.lastMessageAt &&
+              formatSidebarTime(conversation.lastMessageAt)}
+          </div>
+        </div>
+
+        <div className="mt-0.5 flex items-center justify-between gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            <ConversationStatusBadge status={conversation.status} />
+            <div
+              className={cn(
+                "truncate text-sm",
+                hasUnread
+                  ? "font-medium text-neutral-dark"
+                  : "text-neutral-muted",
+              )}
+            >
+              {preview}
+            </div>
+          </div>
+          {hasUnread && (
+            <div className="flex h-5 min-w-5 items-center justify-center rounded-full bg-whatsapp px-1 text-[11px] font-bold text-white">
+              {conversation.unreadCount}
+            </div>
+          )}
+        </div>
+      </div>
+    </Button>
+  );
+});
+
+export const ConversationSidebar = memo(function ConversationSidebar({
   search,
   selectedId,
   conversations,
@@ -70,74 +146,16 @@ export function ConversationSidebar({
             Nenhuma conversa
           </div>
         ) : (
-          conversations.map((conversation) => {
-            const isSelected = selectedId === conversation.id;
-            const hasUnread = conversation.unreadCount > 0;
-            const lastMsg = conversation.messages[0];
-            const preview = lastMsg
-              ? lastMsg.direction === "outbound"
-                ? `Você: ${lastMsg.content}`
-                : lastMsg.content
-              : "Sem mensagens";
-
-            return (
-              <Button
-                key={conversation.id}
-                onClick={() => onSelect(conversation.id)}
-                variant="ghost"
-                className={cn(
-                  "h-auto w-full justify-start border-b border-neutral-border px-3 py-3 text-left",
-                  isSelected ? "bg-neutral-surface" : "hover:bg-neutral-pale",
-                )}
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-teal-mist text-sm font-bold text-teal-dark">
-                  {conversation.lead.name.charAt(0).toUpperCase()}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="truncate text-base font-medium text-neutral-ink">
-                      {conversation.lead.name}
-                    </div>
-                    <div
-                      className={cn(
-                        "shrink-0 text-xs",
-                        hasUnread
-                          ? "font-medium text-whatsapp"
-                          : "text-neutral-muted",
-                      )}
-                    >
-                      {conversation.lastMessageAt &&
-                        formatSidebarTime(conversation.lastMessageAt)}
-                    </div>
-                  </div>
-
-                  <div className="mt-0.5 flex items-center justify-between gap-2">
-                    <div className="flex min-w-0 flex-1 items-center gap-1.5">
-                      <ConversationStatusBadge status={conversation.status} />
-                      <div
-                        className={cn(
-                          "truncate text-sm",
-                          hasUnread
-                            ? "font-medium text-neutral-dark"
-                            : "text-neutral-muted",
-                        )}
-                      >
-                        {preview}
-                      </div>
-                    </div>
-                    {hasUnread && (
-                      <div className="flex h-5 min-w-5 items-center justify-center rounded-full bg-whatsapp px-1 text-[11px] font-bold text-white">
-                        {conversation.unreadCount}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Button>
-            );
-          })
+          conversations.map((conversation) => (
+            <ConversationRow
+              key={conversation.id}
+              conversation={conversation}
+              isSelected={selectedId === conversation.id}
+              onSelect={onSelect}
+            />
+          ))
         )}
       </div>
     </div>
   );
-}
+});

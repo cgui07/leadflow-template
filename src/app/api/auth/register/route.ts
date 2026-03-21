@@ -1,9 +1,19 @@
-import { withPublicHandler } from "@/lib/api";
+import { withPublicHandler, json, error } from "@/lib/api";
 import { RegisterSchema } from "@/lib/schemas";
 import { registerWithInvite } from "@/features/auth/server";
-import { json } from "@/lib/api";
+import { checkRateLimit, getIp } from "@/lib/rate-limit";
+import type { NextRequest } from "next/server";
 
-export const POST = withPublicHandler(RegisterSchema, async (data) => {
+const handler = withPublicHandler(RegisterSchema, async (data) => {
   const user = await registerWithInvite(data);
   return json({ user }, 201);
 });
+
+export async function POST(req: NextRequest) {
+  const { allowed } = checkRateLimit(`register:${getIp(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 5,
+  });
+  if (!allowed) return error("Muitas tentativas. Tente novamente em breve.", 429);
+  return handler(req);
+}

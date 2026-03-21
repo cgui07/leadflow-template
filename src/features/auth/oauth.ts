@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { env } from "@/lib/env";
 import { randomBytes } from "node:crypto";
 import { sanitizeAppRedirect } from "@/lib/redirect";
 import { normalizeEmail, setAuthCookie, signToken } from "@/lib/auth";
@@ -29,7 +30,7 @@ export class GoogleAuthError extends Error {
 }
 
 function getGoogleClientId(): string {
-  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  const clientId = env.GOOGLE_CLIENT_ID?.trim();
 
   if (!clientId) {
     throw new Error("GOOGLE_CLIENT_ID_MISSING");
@@ -39,7 +40,7 @@ function getGoogleClientId(): string {
 }
 
 function getGoogleClientSecret(): string {
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+  const clientSecret = env.GOOGLE_CLIENT_SECRET?.trim();
 
   if (!clientSecret) {
     throw new GoogleAuthError("google_internal_error");
@@ -49,7 +50,7 @@ function getGoogleClientSecret(): string {
 }
 
 function getGoogleCallbackUrl(origin: string): URL {
-  return new URL("/api/auth/google/callback", process.env.NEXT_PUBLIC_APP_URL || origin);
+  return new URL("/api/auth/google/callback", env.NEXT_PUBLIC_APP_URL || origin);
 }
 
 export function createGoogleAuthorizationRequest({

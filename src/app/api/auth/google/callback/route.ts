@@ -6,6 +6,7 @@ import {
   GOOGLE_OAUTH_REDIRECT_COOKIE,
   GOOGLE_OAUTH_STATE_COOKIE,
 } from "@/features/auth/oauth";
+import { logger } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
       return redirectToLogin(req, err.redirectCode);
     }
 
-    console.error("[google-auth] Callback error:", err);
+    logger.error("[google-auth] Callback error", { error: err instanceof Error ? err.message : String(err) });
     return redirectToLogin(req, "google_internal_error");
   }
 }

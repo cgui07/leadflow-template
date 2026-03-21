@@ -1,60 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { useFetch } from "@/lib/hooks";
 import { FaWhatsapp } from "react-icons/fa";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useEffect, useRef, useState } from "react";
 import {
-  ACTION_TYPE_LABELS,
-  type LeadActionType,
-} from "@/lib/lead-action-config";
-import {
   AlertTriangle,
   Bell,
-  Bot,
   CheckCircle2,
   ChevronRight,
   Clock3,
   Flame,
-  User,
 } from "lucide-react";
 import {
   ATTENTION_QUEUE_NO_REPLY_THRESHOLD_HOURS,
   type AttentionQueueItem,
   type AttentionQueueReason,
 } from "@/lib/attention-queue";
+import { getOverdueActionLabel } from "./notification-bell-utils";
+import { NotificationItem } from "./NotificationItem";
 
 const MAX_VISIBLE_NOTIFICATIONS = 5;
-
-function formatTimeAgo(dateStr: string | null) {
-  if (!dateStr) return "";
-
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const minutes = Math.max(1, Math.floor(diff / 60000));
-
-  if (minutes < 60) return `${minutes}min atrás`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h atrás`;
-
-  const days = Math.floor(hours / 24);
-  return `${days}d atrás`;
-}
-
-function getOverdueActionLabel(item: AttentionQueueItem) {
-  if (item.overdueActionTitle) {
-    return item.overdueActionTitle;
-  }
-
-  if (item.overdueActionType && item.overdueActionType in ACTION_TYPE_LABELS) {
-    return ACTION_TYPE_LABELS[item.overdueActionType as LeadActionType];
-  }
-
-  return "Ação vencida";
-}
 
 function getPrimaryReason(
   reason: AttentionQueueReason,
@@ -95,14 +63,6 @@ function getPrimaryReason(
         tone: "text-neutral-dark",
       };
   }
-}
-
-function getNotificationHref(item: AttentionQueueItem) {
-  if (item.conversationId) {
-    return `/conversations?conversationId=${item.conversationId}`;
-  }
-
-  return `/leads/${item.leadId}`;
 }
 
 export function NotificationBell() {
@@ -237,57 +197,14 @@ export function NotificationBell() {
               </div>
             ) : (
               <div className="space-y-2">
-                {visibleItems.map((item) => {
-                  const primaryReason = getPrimaryReason(item.reasons[0], item);
-
-                  return (
-                    <Link
-                      key={item.leadId}
-                      href={getNotificationHref(item)}
-                      onClick={() => setOpen(false)}
-                      className="block rounded-xl border border-neutral-border bg-neutral-surface px-3 py-3 transition-colors hover:bg-neutral-pale"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-border text-sm font-semibold text-neutral-dark">
-                          {item.leadName.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="truncate text-sm font-semibold text-neutral-ink">
-                              {item.leadName}
-                            </div>
-                            <div className="shrink-0 text-[11px] text-neutral-muted">
-                              {formatTimeAgo(item.lastRelevantAt)}
-                            </div>
-                          </div>
-                          <div className="mt-1 flex items-center gap-1.5 text-xs">
-                            {primaryReason.icon}
-                            <span
-                              className={cn("truncate", primaryReason.tone)}
-                            >
-                              {primaryReason.label}
-                            </span>
-                          </div>
-                          <div className="mt-1.5 flex items-center gap-2 text-[11px] text-neutral-muted">
-                            <span className="truncate">{item.leadPhone}</span>
-                            {item.conversationStatus && (
-                              <span className="inline-flex items-center gap-1">
-                                {item.conversationStatus === "bot" ? (
-                                  <Bot className="h-3 w-3" />
-                                ) : (
-                                  <User className="h-3 w-3" />
-                                )}
-                                {item.conversationStatus === "bot"
-                                  ? "Bot"
-                                  : "Manual"}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
+                {visibleItems.map((item) => (
+                  <NotificationItem
+                    key={item.leadId}
+                    item={item}
+                    primaryReason={getPrimaryReason(item.reasons[0], item)}
+                    onClose={() => setOpen(false)}
+                  />
+                ))}
               </div>
             )}
           </div>

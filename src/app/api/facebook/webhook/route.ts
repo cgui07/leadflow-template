@@ -11,6 +11,7 @@ import {
   getFacebookVerifyToken,
   verifyFacebookSignature,
 } from "@/lib/facebook";
+import { logger } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   const mode = req.nextUrl.searchParams.get("hub.mode");
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
   const signature = req.headers.get("x-hub-signature-256");
 
   if (!verifyFacebookSignature(rawBody, signature)) {
-    console.warn("[facebook] Invalid webhook signature");
+    logger.warn("[facebook] Invalid webhook signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
   }
 
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
     try {
       await processEntries(body);
     } catch (err) {
-      console.error("[facebook] Webhook processing error:", err);
+      logger.error("[facebook] Webhook processing error", { error: err instanceof Error ? err.message : String(err) });
     }
   });
 
@@ -82,7 +83,7 @@ async function processLeadgen(pageId: string, leadgenId: string) {
   });
 
   if (!mapping) {
-    console.warn("[facebook] No mapping found for page:", pageId);
+    logger.warn("[facebook] No mapping found for page", { pageId });
     return;
   }
 
@@ -91,14 +92,14 @@ async function processLeadgen(pageId: string, leadgenId: string) {
   const pageAccessToken = settings?.facebookPageAccessToken;
 
   if (!pageAccessToken) {
-    console.warn("[facebook] No page access token for user:", user.id);
+    logger.warn("[facebook] No page access token for user", { userId: user.id });
     return;
   }
 
   const leadData = await fetchLeadData(leadgenId, pageAccessToken);
 
   if (!leadData || !leadData.phone) {
-    console.warn("[facebook] Could not fetch lead data or missing phone:", leadgenId);
+    logger.warn("[facebook] Could not fetch lead data or missing phone", { leadgenId });
     return;
   }
 
@@ -108,7 +109,7 @@ async function processLeadgen(pageId: string, leadgenId: string) {
   });
 
   if (existingLead) {
-    console.log("[facebook] Lead already exists for phone:", leadData.phone);
+    logger.info("[facebook] Lead already exists", { phone: leadData.phone });
 
     await prisma.activity.create({
       data: {
@@ -151,7 +152,7 @@ async function processLeadgen(pageId: string, leadgenId: string) {
     },
   });
 
-  console.log("[facebook] Lead created:", lead.id, leadData.phone);
+  logger.info("[facebook] Lead created", { leadId: lead.id, phone: leadData.phone });
 
   if (!settings?.facebookAutoOutreach || !settings.whatsappPhoneId) {
     return;
@@ -184,9 +185,9 @@ async function processLeadgen(pageId: string, leadgenId: string) {
       await scheduleFollowUp(lead.id, settings.followUpDelayHours);
     }
 
-    console.log("[facebook] Outreach sent to:", leadData.phone);
+    logger.info("[facebook] Outreach sent", { phone: leadData.phone });
   } catch (err) {
-    console.error("[facebook] WhatsApp outreach failed:", err);
+    logger.error("[facebook] WhatsApp outreach failed", { error: err instanceof Error ? err.message : String(err) });
 
     await prisma.activity.create({
       data: {

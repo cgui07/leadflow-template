@@ -9,9 +9,10 @@ import {
   listPlatformClients,
   PlatformClientError,
 } from "@/features/platform-admin/server";
+import { env } from "@/lib/env";
 
 function getAppUrl(req: NextRequest): string {
-  return process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
+  return env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
 }
 
 export async function GET(req: NextRequest) {

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { env } from "@/lib/env";
 import { buildBranding } from "@/lib/branding";
 import { validateInviteToken } from "@/lib/tenant";
 import { sendPasswordResetEmail } from "@/lib/email";
@@ -312,7 +313,7 @@ export async function requestPasswordReset(
   let previewUrl: string | undefined;
 
   if (user) {
-    if (process.env.NODE_ENV === "production" && !process.env.RESEND_API_KEY) {
+    if (env.NODE_ENV === "production" && !env.RESEND_API_KEY) {
       throw new AuthFlowError(
         "PASSWORD_RESET_EMAIL_NOT_CONFIGURED",
         500,
@@ -321,7 +322,7 @@ export async function requestPasswordReset(
     }
 
     const { token, tokenHash, expiresAt } = createPasswordResetToken();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
+    const appUrl = env.NEXT_PUBLIC_APP_URL || origin;
     const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
     await prisma.user.update({
@@ -332,7 +333,7 @@ export async function requestPasswordReset(
       },
     });
 
-    if (process.env.RESEND_API_KEY) {
+    if (env.RESEND_API_KEY) {
       try {
         await sendPasswordResetEmail(user.email, resetUrl);
       } catch (error) {
@@ -354,7 +355,7 @@ export async function requestPasswordReset(
       }
     }
 
-    if (process.env.NODE_ENV !== "production") {
+    if (env.NODE_ENV !== "production") {
       previewUrl = resetUrl;
       logger.info("Password reset link generated", { email: user.email, resetUrl });
     }
@@ -362,7 +363,7 @@ export async function requestPasswordReset(
 
   return {
     message: "Se o email existir, enviamos um link para redefinir a senha.",
-    previewUrl: process.env.NODE_ENV === "production" ? undefined : previewUrl,
+    previewUrl: env.NODE_ENV === "production" ? undefined : previewUrl,
   };
 }
 

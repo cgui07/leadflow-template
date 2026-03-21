@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Plus } from "lucide-react";
 import { useFetch } from "@/lib/hooks";
 import { Button } from "@/components/ui/Button";
@@ -33,7 +33,7 @@ export function PipelinePageClient({
   const [isDeleting, setIsDeleting] = useState(false);
   const stages = data || [];
 
-  async function moveLead(leadId: string, stageId: string) {
+  const moveLead = useCallback(async (leadId: string, stageId: string) => {
     setMovingLeadId(leadId);
     setMoveError(null);
 
@@ -57,9 +57,9 @@ export function PipelinePageClient({
     } finally {
       setMovingLeadId(null);
     }
-  }
+  }, [refetch]);
 
-  async function handleAddStage(name: string, color: string) {
+  const handleAddStage = useCallback(async (name: string, color: string) => {
     const response = await fetch("/api/pipeline", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -73,9 +73,9 @@ export function PipelinePageClient({
 
     setShowAddModal(false);
     await refetch();
-  }
+  }, [refetch]);
 
-  async function handleEditStage(stageId: string, name: string, color: string) {
+  const handleEditStage = useCallback(async (stageId: string, name: string, color: string) => {
     const response = await fetch(`/api/pipeline/${stageId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -89,9 +89,9 @@ export function PipelinePageClient({
 
     setEditingStage(null);
     await refetch();
-  }
+  }, [refetch]);
 
-  async function handleDeleteStage() {
+  const handleDeleteStage = useCallback(async () => {
     if (!deletingStage) return;
     setIsDeleting(true);
 
@@ -111,9 +111,9 @@ export function PipelinePageClient({
     } finally {
       setIsDeleting(false);
     }
-  }
+  }, [deletingStage, refetch]);
 
-  async function handleDropColumn(draggedStageId: string, targetStageId: string) {
+  const handleDropColumn = useCallback(async (draggedStageId: string, targetStageId: string) => {
     if (draggedStageId === targetStageId) return;
 
     const currentIds = stages.map((s) => s.id);
@@ -142,7 +142,7 @@ export function PipelinePageClient({
     }
 
     await refetch();
-  }
+  }, [stages, refetch]);
 
   return (
     <PageContainer

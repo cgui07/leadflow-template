@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { MessageInput } from "@/components/domain/chat/MessageInput";
-import { useDeferredValue, useEffect, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ConversationItem, MessageItem } from "../contracts";
 import { useConversationSummary } from "../hooks/useConversationSummary";
@@ -125,14 +125,14 @@ export function ConversationsPageClient({
     return () => clearInterval(id);
   }, [refetch]);
 
-  async function readErrorMessage(response: Response, fallback: string) {
+  const readErrorMessage = useCallback(async (response: Response, fallback: string) => {
     const data = await response.json().catch(() => null);
     return typeof data?.error === "string" && data.error.trim()
       ? data.error
       : fallback;
-  }
+  }, []);
 
-  function syncConversationQuery(conversationId: string | null) {
+  const syncConversationQuery = useCallback((conversationId: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
     if (conversationId) {
       params.set("conversationId", conversationId);
@@ -143,23 +143,23 @@ export function ConversationsPageClient({
     router.replace(query ? `${pathname}?${query}` : pathname, {
       scroll: false,
     });
-  }
+  }, [pathname, router, searchParams]);
 
-  function handleSelectConversation(conversationId: string) {
+  const handleSelectConversation = useCallback((conversationId: string) => {
     resetSummaryState();
     setConversationError(null);
     setSelected(conversationId);
     syncConversationQuery(conversationId);
-  }
+  }, [resetSummaryState, syncConversationQuery]);
 
-  function handleBack() {
+  const handleBack = useCallback(() => {
     resetSummaryState();
     setConversationError(null);
     setSelected(null);
     syncConversationQuery(null);
-  }
+  }, [resetSummaryState, syncConversationQuery]);
 
-  async function handleSendMessage(content: string) {
+  const handleSendMessage = useCallback(async (content: string) => {
     if (!selected) return;
 
     setSending(true);
@@ -192,9 +192,9 @@ export function ConversationsPageClient({
     } finally {
       setSending(false);
     }
-  }
+  }, [selected, readErrorMessage, refetchMessages, refetch]);
 
-  async function toggleBotMode(conversationId: string, currentStatus: string) {
+  const toggleBotMode = useCallback(async (conversationId: string, currentStatus: string) => {
     const nextStatus = currentStatus === "bot" ? "human" : "bot";
     setSwitching(true);
     setConversationError(null);
@@ -220,11 +220,11 @@ export function ConversationsPageClient({
     } finally {
       setSwitching(false);
     }
-  }
+  }, [readErrorMessage, refetch]);
 
-  function handleGenerateSummary() {
+  const handleGenerateSummary = useCallback(() => {
     if (selected) generateSummary(selected);
-  }
+  }, [selected, generateSummary]);
 
   const combinedError =
     conversationError || conversationsError || messagesError;

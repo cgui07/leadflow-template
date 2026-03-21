@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { scheduleFollowUp } from "@/lib/followup";
 import { processScheduledAutoReply } from "@/lib/auto-reply";
 import { after, NextRequest, NextResponse } from "next/server";
@@ -29,6 +30,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Rate limit per instance: 100 req/min
+    const { allowed: webhookAllowed } = checkRateLimit(
+      `webhook:${instanceName}`,
+      { windowMs: 60_000, maxRequests: 100 },
+    );
+    if (!webhookAllowed) {
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+    }
+
     // Resolve provider + user for this instance
     const resolved = await resolveProviderByInstance(instanceName);
     if (!resolved) {
@@ -55,6 +65,20 @@ export async function POST(req: NextRequest) {
 
     // Handle connection status changes
     if (event.type === "connection_changed") {
+      const disconnected = event.state === "close" || event.state === "refused";
+      if (disconnected) {
+        logger.error("WhatsApp instance disconnected", {
+          instance: instanceName,
+          state: event.state,
+          userId,
+        });
+      } else {
+        logger.info("WhatsApp connection state changed", {
+          instance: instanceName,
+          state: event.state,
+          userId,
+        });
+      }
       return NextResponse.json({ ok: true, status: event.state });
     }
 
