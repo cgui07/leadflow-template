@@ -497,3 +497,28 @@ export async function updatePlatformClientStatus(
 
   return client;
 }
+
+export async function deletePlatformClient(
+  tenantId: string,
+  options?: { forbidTenantId?: string | null },
+): Promise<void> {
+  if (options?.forbidTenantId && tenantId === options.forbidTenantId) {
+    throw new PlatformClientError(
+      "CLIENT_INTERNAL_TENANT",
+      400,
+      "Não é possível excluir o tenant interno da plataforma.",
+    );
+  }
+
+  try {
+    await prisma.tenant.delete({
+      where: { id: tenantId },
+    });
+  } catch {
+    throw new PlatformClientError(
+      "CLIENT_NOT_FOUND",
+      404,
+      "Cliente não encontrado.",
+    );
+  }
+}

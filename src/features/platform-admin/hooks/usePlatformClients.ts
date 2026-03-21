@@ -61,8 +61,10 @@ export function usePlatformClients(initialData: PlatformClientsResponse) {
   );
   const [selectedClient, setSelectedClient] =
     useState<PlatformClientRow | null>(null);
+  const [deletingClient, setDeletingClient] = useState<PlatformClientRow | null>(null);
   const [creating, setCreating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [updatingClientId, setUpdatingClientId] = useState<string | null>(null);
   const [slugWasEdited, setSlugWasEdited] = useState(false);
   const [copiedActivationLink, setCopiedActivationLink] = useState(false);
@@ -255,6 +257,33 @@ export function usePlatformClients(initialData: PlatformClientsResponse) {
     }
   }
 
+  async function handleDeleteClient() {
+    if (!deletingClient) return;
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/admin/clients/${deletingClient.id}`, {
+        method: "DELETE",
+      });
+
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+
+      if (!response.ok) {
+        setNotice({
+          tone: "error",
+          message: payload?.error || "Não foi possível excluir o cliente.",
+        });
+        return;
+      }
+
+      setDeletingClient(null);
+      setNotice({ tone: "success", message: "Cliente excluído permanentemente." });
+      await refetch();
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   async function handleToggleStatus(client: PlatformClientRow) {
     setNotice(null);
     setUpdatingClientId(client.id);
@@ -326,6 +355,9 @@ export function usePlatformClients(initialData: PlatformClientsResponse) {
     selectedClient,
     creating,
     regenerating,
+    isDeleting,
+    deletingClient,
+    setDeletingClient,
     updatingClientId,
     copiedActivationLink,
     openCreateModal,
@@ -337,6 +369,7 @@ export function usePlatformClients(initialData: PlatformClientsResponse) {
     handleCopyLink,
     handleCreateClient,
     handleRegenerateLink,
+    handleDeleteClient,
     handleToggleStatus,
     handleCopyActivationSummary,
   };

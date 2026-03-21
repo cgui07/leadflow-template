@@ -12,8 +12,9 @@ import { usePlatformClients } from "../hooks/usePlatformClients";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ActivationSummaryModal } from "./ActivationSummaryModal";
 import { SectionContainer } from "@/components/layout/SectionContainer";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import { RegenerateActivationLinkModal } from "./RegenerateActivationLinkModal";
-import { Building2, Copy, KeyRound, PauseCircle, PlayCircle, Plus, Search } from "lucide-react";
+import { Building2, Copy, KeyRound, PauseCircle, PlayCircle, Plus, Search, Trash2 } from "lucide-react";
 import type {
   PlatformClientAccessState,
   PlatformClientRow,
@@ -65,6 +66,9 @@ export function PlatformClientsPageClient({ initialData }: PlatformClientsPageCl
     selectedClient,
     creating,
     regenerating,
+    isDeleting,
+    deletingClient,
+    setDeletingClient,
     updatingClientId,
     copiedActivationLink,
     openCreateModal,
@@ -76,6 +80,7 @@ export function PlatformClientsPageClient({ initialData }: PlatformClientsPageCl
     handleCopyLink,
     handleCreateClient,
     handleRegenerateLink,
+    handleDeleteClient,
     handleToggleStatus,
     handleCopyActivationSummary,
   } = usePlatformClients(initialData);
@@ -182,6 +187,14 @@ export function PlatformClientsPageClient({ initialData }: PlatformClientsPageCl
           >
             {row.status === "active" ? "Suspender" : "Reativar"}
           </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            icon={<Trash2 className="h-3.5 w-3.5 text-red-500" />}
+            onClick={() => setDeletingClient(row)}
+          />
         </div>
       ),
     },
@@ -281,6 +294,20 @@ export function PlatformClientsPageClient({ initialData }: PlatformClientsPageCl
         onClose={closeActivationSummary}
         copied={copiedActivationLink}
         onCopy={() => void handleCopyActivationSummary()}
+      />
+
+      <DeleteConfirmationModal
+        open={Boolean(deletingClient)}
+        onClose={() => setDeletingClient(null)}
+        onConfirm={() => void handleDeleteClient()}
+        title="Excluir cliente"
+        description={
+          deletingClient
+            ? `Tem certeza que deseja excluir "${deletingClient.name}"? Todos os dados do workspace (leads, conversas, configurações) serão apagados permanentemente.`
+            : ""
+        }
+        confirmText="Excluir permanentemente"
+        loading={isDeleting}
       />
     </PageContainer>
   );
