@@ -107,6 +107,94 @@ export async function sendActivationEmail(params: {
   }
 }
 
+export async function sendInviteEmail(params: {
+  to: string;
+  tenantName: string;
+  inviterName: string;
+  inviteLink: string;
+  expiresAt: string;
+  role: string;
+}) {
+  const expiresDate = new Date(params.expiresAt).toLocaleDateString("pt-BR");
+  const roleLabel = params.role === "admin" ? "Administrador" : "Agente";
+
+  const { error } = await resend.emails.send({
+    from: getFromEmail(),
+    to: params.to,
+    subject: `Você foi convidado para o ${params.tenantName} no LeadFlow`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff;">
+
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3366ff 60%, #7c3aed 100%); padding: 40px 32px; border-radius: 16px 16px 0 0;">
+          <div style="font-size: 22px; font-weight: 700; color: #ffffff; margin: 0 0 6px;">
+            LeadFlow
+          </div>
+          <div style="font-size: 14px; color: rgba(255,255,255,0.75);">
+            Plataforma de CRM para corretores
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 36px 32px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 16px 16px;">
+          <div style="font-size: 22px; font-weight: 700; color: ${emailColors.heading}; margin: 0 0 12px;">
+            Você recebeu um convite 🎉
+          </div>
+          <div style="font-size: 15px; line-height: 1.7; color: ${emailColors.body}; margin: 0 0 8px;">
+            <strong>${params.inviterName}</strong> convidou você para fazer parte do workspace <strong>${params.tenantName}</strong> como <strong>${roleLabel}</strong>.
+            Clique no botão abaixo para criar sua conta e começar a usar a plataforma.
+          </div>
+
+          <!-- CTA -->
+          <div style="margin: 32px 0;">
+            <a
+              href="${params.inviteLink}"
+              style="display: inline-block; background: #3366ff; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 9999px; letter-spacing: 0.01em;"
+            >
+              Aceitar convite
+            </a>
+          </div>
+
+          <!-- Features -->
+          <div style="background: #f8faff; border: 1px solid #dbeafe; border-radius: 12px; padding: 20px 24px; margin: 0 0 28px;">
+            <div style="font-size: 13px; font-weight: 600; color: #1e3a8a; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.05em;">
+              O que você vai encontrar
+            </div>
+            <div style="font-size: 14px; color: #374151; line-height: 1.8;">
+              ✦ &nbsp;Gestão de leads com IA<br/>
+              ✦ &nbsp;Respostas automáticas no WhatsApp<br/>
+              ✦ &nbsp;Pipeline de vendas visual<br/>
+              ✦ &nbsp;Follow-ups automáticos
+            </div>
+          </div>
+
+          <!-- Link fallback -->
+          <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; margin: 0 0 24px;">
+            <div style="font-size: 12px; color: ${emailColors.muted}; margin: 0 0 6px;">
+              Se o botão não funcionar, copie e cole o link abaixo no navegador:
+            </div>
+            <div style="font-size: 12px; color: #3366ff; word-break: break-all;">
+              ${params.inviteLink}
+            </div>
+          </div>
+
+          <!-- Expiry notice -->
+          <div style="font-size: 13px; color: ${emailColors.muted}; line-height: 1.6;">
+            Este convite expira em <strong>${expiresDate}</strong>.
+            Após o cadastro, use seu login e senha normalmente.
+          </div>
+        </div>
+
+      </div>
+    `,
+  });
+
+  if (error) {
+    logger.error("Failed to send invite email", { error: JSON.stringify(error) });
+    throw new Error("Falha ao enviar e-mail de convite");
+  }
+}
+
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   const { error } = await resend.emails.send({
     from: getFromEmail(),

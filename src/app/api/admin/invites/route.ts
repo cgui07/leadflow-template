@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
 import { generateInviteToken } from "@/lib/tenant";
 import { json, error, requireAuth, handleError } from "@/lib/api";
+import { sendInviteEmail } from "@/lib/email";
+import { env } from "@/lib/env";
 
 export async function GET() {
   try {
@@ -40,10 +42,16 @@ export async function POST(req: NextRequest) {
     }
 
     const { email, role, maxUses, expiresInDays } = await req.json();
-    const tenant = await prisma.tenant.findUnique({
-      where: { id: user.tenantId },
-      select: { id: true, status: true },
-    });
+    const [tenant, inviter] = await Promise.all([
+      prisma.tenant.findUnique({
+        where: { id: user.tenantId },
+        select: { id: true, status: true, name: true },
+      }),
+      prisma.user.findUnique({
+        where: { id: user.id },
+        select: { name: true },
+      }),
+    ]);
 
     if (!tenant || tenant.status !== "active") {
       return error("Tenant não encontrado ou inativo", 404);
@@ -57,24 +65,40 @@ export async function POST(req: NextRequest) {
       Date.now() + parsedExpiresInDays * 24 * 60 * 60 * 1000,
     );
 
+    const inviteEmail =
+      typeof email === "string" && email.trim()
+        ? email.trim().toLowerCase()
+        : null;
+
     const invite = await prisma.inviteToken.create({
       data: {
         tenantId: user.tenantId,
         token,
-        email:
-          typeof email === "string" && email.trim()
-            ? email.trim().toLowerCase()
-            : null,
+        email: inviteEmail,
         role: role === "admin" ? "admin" : "agent",
         maxUses: parsedMaxUses,
         expiresAt,
       },
     });
 
+    const appUrl = env.APP_URL || env.NEXT_PUBLIC_APP_URL;
+    const inviteUrl = `/register?token=${token}`;
+
+    if (inviteEmail) {
+      await sendInviteEmail({
+        to: inviteEmail,
+        tenantName: tenant.name,
+        inviterName: inviter?.name || "Um administrador",
+        inviteLink: `${appUrl}${inviteUrl}`,
+        expiresAt: expiresAt.toISOString(),
+        role: role === "admin" ? "admin" : "agent",
+      });
+    }
+
     return json(
       {
         invite,
-        inviteUrl: `/register?token=${token}`,
+        inviteUrl,
       },
       201,
     );
