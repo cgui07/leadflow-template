@@ -36,9 +36,11 @@ export interface ActivationLinkSummary {
 export interface CreatePlatformClientResponse {
   client: PlatformClientRow;
   activation: ActivationLinkSummary;
+  emailSent: boolean;
 }
 
 export interface RegenerateActivationLinkResponse {
   client: PlatformClientRow;
   activation: ActivationLinkSummary;
+  emailSent: boolean;
 }

@@ -200,11 +200,17 @@ export function usePlatformClients(initialData: PlatformClientsResponse) {
         return;
       }
 
+      const created = payload as CreatePlatformClientResponse;
       resetCreateForm();
       setShowCreateModal(false);
-      setActivationSummary((payload as CreatePlatformClientResponse).activation);
+      setActivationSummary(created.activation);
       setCopiedActivationLink(false);
-      setNotice({ tone: "success", message: "Cliente criado. O link de ativação já está pronto para envio." });
+      setNotice({
+        tone: created.emailSent ? "success" : "warning",
+        message: created.emailSent
+          ? "Cliente criado. Email de ativação enviado com sucesso."
+          : "Cliente criado, mas não foi possível enviar o email. Copie o link de ativação e envie manualmente.",
+      });
       await refetch();
     } finally {
       setCreating(false);
@@ -247,10 +253,16 @@ export function usePlatformClients(initialData: PlatformClientsResponse) {
         return;
       }
 
+      const regenerated = payload as RegenerateActivationLinkResponse;
       closeRegenerateModal();
-      setActivationSummary((payload as RegenerateActivationLinkResponse).activation);
+      setActivationSummary(regenerated.activation);
       setCopiedActivationLink(false);
-      setNotice({ tone: "success", message: "Novo link de ativação gerado com sucesso." });
+      setNotice({
+        tone: regenerated.emailSent ? "success" : "warning",
+        message: regenerated.emailSent
+          ? "Novo link gerado e email enviado com sucesso."
+          : "Novo link gerado, mas não foi possível enviar o email. Copie o link e envie manualmente.",
+      });
       await refetch();
     } finally {
       setRegenerating(false);

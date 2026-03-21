@@ -329,20 +329,21 @@ export async function createPlatformClient(
     appUrl: options?.appUrl,
   });
 
-  sendActivationEmail({
+  const emailSent = await sendActivationEmail({
     to: ownerEmail,
     tenantName: tenant.name,
     activationLink: activation.activationLink,
     expiresAt: expiresAt.toISOString(),
-  }).catch((err: unknown) => {
+  }).then(() => true).catch((err: unknown) => {
     logger.error("Failed to send activation email on create", {
       error: err instanceof Error ? err.message : JSON.stringify(err),
       tenantId: tenant.id,
       to: ownerEmail,
     });
+    return false;
   });
 
-  return { client, activation };
+  return { client, activation, emailSent };
 }
 
 export async function regeneratePlatformActivationLink(
@@ -442,20 +443,21 @@ export async function regeneratePlatformActivationLink(
     appUrl: options?.appUrl,
   });
 
-  sendActivationEmail({
+  const emailSent = await sendActivationEmail({
     to: email,
     tenantName: tenant.name,
     activationLink: activation.activationLink,
     expiresAt: expiresAt.toISOString(),
-  }).catch((err: unknown) => {
+  }).then(() => true).catch((err: unknown) => {
     logger.error("Failed to send activation email on regenerate", {
       error: err instanceof Error ? err.message : JSON.stringify(err),
       tenantId: tenant.id,
       to: email,
     });
+    return false;
   });
 
-  return { client, activation };
+  return { client, activation, emailSent };
 }
 
 export async function updatePlatformClientStatus(
