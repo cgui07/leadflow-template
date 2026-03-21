@@ -41,7 +41,7 @@ export function Tabs({
 
   return (
     <div className={className}>
-      <div className="flex border-b border-neutral-border">
+      <div className="flex overflow-x-auto border-b border-neutral-border scrollbar-none">
         {tabs.map((tab) => {
           const isActive = active === getKey(tab);
           return (
@@ -51,7 +51,7 @@ export function Tabs({
               variant="ghost"
               onClick={() => handleChange(getKey(tab))}
               className={cn(
-                "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px h-auto gap-2",
+                "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px h-auto gap-2 whitespace-nowrap shrink-0",
                 isActive
                   ? "border-blue-royal text-blue-royal"
                   : "border-transparent text-neutral hover:text-neutral-dark hover:border-neutral-line"
