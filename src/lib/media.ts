@@ -1,6 +1,6 @@
-import { getEvolutionApiKey } from "./evolution";
 import { env } from "./env";
 import { logger } from "./logger";
+import { getEvolutionApiKey } from "./evolution";
 
 const EVOLUTION_API_URL = env.EVOLUTION_API_URL;
 const OPENAI_TRANSCRIPTION_KEY = env.OPENAI_TRANSCRIPTION_KEY;

@@ -1,11 +1,12 @@
+import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import { NextRequest, NextResponse } from "next/server";
 import { exchangeGoogleCalendarCode } from "@/lib/google-calendar";
-import { logger } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
-  const state = searchParams.get("state"); // userId passed as state
+  const state = searchParams.get("state");
   const errorParam = searchParams.get("error");
 
   const settingsUrl = `${env.NEXT_PUBLIC_APP_URL}/settings?section=calendar`;

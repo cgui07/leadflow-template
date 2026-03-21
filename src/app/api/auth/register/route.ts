@@ -1,8 +1,8 @@
-import { withPublicHandler, json, error } from "@/lib/api";
 import { RegisterSchema } from "@/lib/schemas";
-import { registerWithInvite } from "@/features/auth/server";
-import { checkRateLimit, getIp } from "@/lib/rate-limit";
 import type { NextRequest } from "next/server";
+import { checkRateLimit, getIp } from "@/lib/rate-limit";
+import { withPublicHandler, json, error } from "@/lib/api";
+import { registerWithInvite } from "@/features/auth/server";
 
 const handler = withPublicHandler(RegisterSchema, async (data) => {
   const user = await registerWithInvite(data);

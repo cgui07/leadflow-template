@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import type { LeadDetail } from "../contracts";
+import { Button } from "@/components/ui/Button";
 import { ArrowLeft, Mail, Phone } from "lucide-react";
 
 interface StatusOption {

@@ -1,10 +1,9 @@
+import { normalizePhoneNumberJid } from "./whatsapp-resolve";
 import {
   isLidJid,
-  isNonEmptyString,
   isPhoneNumberJid,
   type MaybeJid,
 } from "./whatsapp-jid";
-import { normalizePhoneNumberJid } from "./whatsapp-resolve";
 
 export interface LidMappingEvent {
   key?: {

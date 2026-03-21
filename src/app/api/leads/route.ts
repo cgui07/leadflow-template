@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
+import { CreateLeadSchema } from "@/lib/schemas";
 import { createLead, listLeads } from "@/features/leads/server";
 import { handleError, json, requireAuth, withApiHandler } from "@/lib/api";
-import { CreateLeadSchema } from "@/lib/schemas";
 
 export async function GET(req: NextRequest) {
   try {

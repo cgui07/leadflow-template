@@ -2,11 +2,11 @@
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/Button";
+import type { Property, PdfEntry } from "../types";
 import { FileField } from "@/components/forms/FileField";
+import { FileText, FileUp, Sparkles, X } from "lucide-react";
 import { TextareaField } from "@/components/forms/TextareaField";
 import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
-import { FileText, FileUp, Sparkles, X } from "lucide-react";
-import type { Property, PdfEntry } from "../types";
 
 const MAX_PDF_SIZE = 100 * 1024 * 1024;
 

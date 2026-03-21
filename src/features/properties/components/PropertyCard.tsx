@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import type { Property, PdfEntry } from "../types";
 import { FileField } from "@/components/forms/FileField";
 import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
@@ -19,7 +20,6 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import type { Property, PdfEntry } from "../types";
 
 function formatPrice(price: string | null) {
   if (!price) return null;

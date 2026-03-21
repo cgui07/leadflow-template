@@ -1,5 +1,5 @@
-import { error } from "./api";
 import { env } from "./env";
+import { error } from "./api";
 import { NextRequest, NextResponse } from "next/server";
 
 export function requireCronAuth(req: NextRequest): NextResponse | null {

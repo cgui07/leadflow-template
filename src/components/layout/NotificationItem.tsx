@@ -1,7 +1,7 @@
 "use client";
 
-import { memo } from "react";
 import Link from "next/link";
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { Bot, User } from "lucide-react";
 import type { AttentionQueueItem } from "@/lib/attention-queue";

@@ -3,22 +3,22 @@
 import type { Column } from "@/types";
 import { Tabs } from "@/components/ui/Tabs";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/forms";
+import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { CreateClientModal } from "./CreateClientModal";
+import { usePlatformClients } from "../hooks/usePlatformClients";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { ActivationSummaryModal } from "./ActivationSummaryModal";
 import { SectionContainer } from "@/components/layout/SectionContainer";
+import { RegenerateActivationLinkModal } from "./RegenerateActivationLinkModal";
 import { Building2, Copy, KeyRound, PauseCircle, PlayCircle, Plus, Search } from "lucide-react";
 import type {
   PlatformClientAccessState,
   PlatformClientRow,
   PlatformClientsResponse,
 } from "../contracts";
-import { usePlatformClients } from "../hooks/usePlatformClients";
-import { CreateClientModal } from "./CreateClientModal";
-import { RegenerateActivationLinkModal } from "./RegenerateActivationLinkModal";
-import { ActivationSummaryModal } from "./ActivationSummaryModal";
 
 interface PlatformClientsPageClientProps {
   initialData: PlatformClientsResponse;

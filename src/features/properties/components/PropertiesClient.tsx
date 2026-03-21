@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { Building2 } from "lucide-react";
-import type { Property, PdfEntry } from "../types";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 import { PropertyCard } from "./PropertyCard";
+import type { Property, PdfEntry } from "../types";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { PropertyImportForm } from "./PropertyImportForm";
 
 export function PropertiesClient({

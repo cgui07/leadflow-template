@@ -1,3 +1,4 @@
+import { lidToPnCache } from "./whatsapp-mapping";
 import {
   isNonEmptyString,
   isPhoneNumberJid,
@@ -7,7 +8,6 @@ import {
   PHONE_NUMBER_JID_SUFFIX,
   type MaybeJid,
 } from "./whatsapp-jid";
-import { lidToPnCache } from "./whatsapp-mapping";
 
 export function normalizePhoneNumberJid(value: MaybeJid): string | null {
   if (!isNonEmptyString(value)) {

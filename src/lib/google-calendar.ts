@@ -1,5 +1,5 @@
-import { prisma } from "./db";
 import { env } from "./env";
+import { prisma } from "./db";
 import { logger } from "./logger";
 
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";

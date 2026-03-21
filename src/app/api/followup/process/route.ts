@@ -1,8 +1,8 @@
+import { logger } from "@/lib/logger";
 import { json, error } from "@/lib/api";
 import { NextRequest } from "next/server";
 import { requireCronAuth } from "@/lib/cron";
 import { processFollowUps } from "@/lib/followup";
-import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   const authError = requireCronAuth(req);

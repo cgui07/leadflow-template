@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { error, handleError, json, withPublicHandler } from "@/lib/api";
 import { ResetPasswordSchema } from "@/lib/schemas";
+import { error, handleError, json, withPublicHandler } from "@/lib/api";
 import {
   assertValidPasswordResetToken,
   AuthFlowError,

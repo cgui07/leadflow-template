@@ -1,10 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/forms";
-import { SectionContainer } from "@/components/layout/SectionContainer";
+import type { LeadDetail } from "../contracts";
+import { Button } from "@/components/ui/Button";
 import { getPipelineColorSoftClass } from "@/lib/ui-colors";
+import { SectionContainer } from "@/components/layout/SectionContainer";
 import {
   Calendar,
   DollarSign,
@@ -12,7 +13,6 @@ import {
   MapPin,
   Target,
 } from "lucide-react";
-import type { LeadDetail } from "../contracts";
 
 interface LeadProfileTabProps {
   lead: LeadDetail;

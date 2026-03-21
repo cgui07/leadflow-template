@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/Button";
 import { WifiOff } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface WhatsAppDisconnectedPanelProps {
   onConnect: () => void;

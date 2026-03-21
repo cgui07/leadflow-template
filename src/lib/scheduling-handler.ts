@@ -1,4 +1,5 @@
 import { prisma } from "./db";
+import { logger } from "./logger";
 import type { AIConfig } from "./ai";
 import { extractSchedulingIntent } from "./scheduling-intent";
 import { getWhatsAppConfig, sendAndSaveMessage } from "./whatsapp";
@@ -10,7 +11,6 @@ import {
   ensureVisitAction,
   confirmAppointmentReply,
 } from "./appointments";
-import { logger } from "./logger";
 
 interface UserSettingsSnapshot {
   whatsappPhoneId: string | null | undefined;

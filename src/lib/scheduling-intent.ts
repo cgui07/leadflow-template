@@ -1,5 +1,5 @@
-import type { AIConfig } from "./ai";
 import { logger } from "./logger";
+import type { AIConfig } from "./ai";
 
 export interface SchedulingIntent {
   hasIntent: boolean;

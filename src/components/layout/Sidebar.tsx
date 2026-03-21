@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { FaWhatsapp } from "react-icons/fa";
+import { usePathname } from "next/navigation";
+import { SidebarNav } from "@/components/layout/SidebarNav";
 import { useBranding } from "@/components/providers/BrandingProvider";
+import { SidebarMobileMenu } from "@/components/layout/SidebarMobileMenu";
+import { SidebarMobileTabBar } from "@/components/layout/SidebarMobileTabBar";
+import { SidebarAccountModal } from "@/components/layout/SidebarAccountModal";
 import {
   getBrandActiveNavClass,
   getBrandChipClass,
@@ -17,10 +21,6 @@ import {
   Settings,
   Users,
 } from "lucide-react";
-import { SidebarNav } from "@/components/layout/SidebarNav";
-import { SidebarMobileTabBar } from "@/components/layout/SidebarMobileTabBar";
-import { SidebarMobileMenu } from "@/components/layout/SidebarMobileMenu";
-import { SidebarAccountModal } from "@/components/layout/SidebarAccountModal";
 
 interface NavItem {
   label: string;

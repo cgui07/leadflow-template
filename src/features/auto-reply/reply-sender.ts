@@ -3,17 +3,16 @@ import { logger } from "@/lib/logger";
 import { getPropertyPdfUrl } from "@/lib/storage";
 import { generateSpeechBase64 } from "@/lib/elevenlabs";
 import {
+  shouldUseVoiceReply,
+  getVoiceUsageThisMonth,
+  incrementVoiceUsage,
+} from "@/lib/voice-reply";
+import {
   getWhatsAppConfig,
   sendAndSaveMessage,
   sendAndSaveAudioPTT,
   sendPresenceUpdate,
 } from "@/lib/whatsapp";
-import {
-  shouldUseVoiceReply,
-  detectIntentSignals,
-  getVoiceUsageThisMonth,
-  incrementVoiceUsage,
-} from "@/lib/voice-reply";
 
 export function extractPdfTags(reply: string): {
   cleanReply: string;

@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { NextRequest } from "next/server";
 import { error, handleError, json, requireAuth } from "@/lib/api";
 import {
@@ -9,7 +10,6 @@ import {
   listPlatformClients,
   PlatformClientError,
 } from "@/features/platform-admin/server";
-import { env } from "@/lib/env";
 
 function getAppUrl(req: NextRequest): string {
   return env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;

@@ -1,5 +1,5 @@
-import { getEvolutionApiKey } from "./evolution";
 import { env } from "./env";
+import { getEvolutionApiKey } from "./evolution";
 import { resolveReplyJid, toEvolutionNumber } from "./whatsapp-resolve";
 
 export interface WhatsAppConfig {

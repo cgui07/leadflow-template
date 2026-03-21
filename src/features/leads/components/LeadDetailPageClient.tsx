@@ -3,19 +3,19 @@
 import { useFetch } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { Tabs } from "@/components/ui/Tabs";
+import { useEffect, useState } from "react";
 import type { LeadDetail } from "../contracts";
 import { Button } from "@/components/ui/Button";
-import { useEffect, useState } from "react";
+import { LeadProfileTab } from "./LeadProfileTab";
+import { getScoreTextClass } from "@/lib/ui-colors";
+import { LeadDetailHeader } from "./LeadDetailHeader";
+import { ErrorAlert } from "@/components/ui/ErrorAlert";
+import { LeadActivitiesTab } from "./LeadActivitiesTab";
+import { LeadConversationTab } from "./LeadConversationTab";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { useFeatureFlag } from "@/components/providers/BrandingProvider";
-import { getScoreTextClass } from "@/lib/ui-colors";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
-import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { LeadActionsSection } from "@/app/(dashboard)/leads/[id]/components/LeadActionsSection";
-import { LeadProfileTab } from "./LeadProfileTab";
-import { LeadConversationTab } from "./LeadConversationTab";
-import { LeadDetailHeader } from "./LeadDetailHeader";
-import { LeadActivitiesTab } from "./LeadActivitiesTab";
 
 const statusOptions = [
   { value: "new", label: "Novo" },

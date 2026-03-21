@@ -1,7 +1,7 @@
-import { Resend } from "resend";
-import { appColors } from "../../tailwind.config";
 import { env } from "./env";
+import { Resend } from "resend";
 import { logger } from "./logger";
+import { appColors } from "../../tailwind.config";
 
 const resend = new Resend(env.RESEND_API_KEY);
 

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
+import { UpdateLeadSchema } from "@/lib/schemas";
 import { handleError, json, requireAuth, error } from "@/lib/api";
 import { deleteLead, getLeadDetail, updateLead } from "@/features/leads/server";
-import { UpdateLeadSchema } from "@/lib/schemas";
 
 export async function GET(
   _req: NextRequest,

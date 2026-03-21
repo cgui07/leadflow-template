@@ -1,17 +1,17 @@
 import { prisma } from "@/lib/db";
 import { getDefaultPipelineStageId } from "@/lib/pipeline";
+import { resolveReplyJid, resolveSendTarget } from "@/lib/whatsapp-resolve";
+import {
+  getPhoneIdentity,
+  toPhoneDigits,
+  toInputJsonValue,
+} from "@/lib/whatsapp-jid";
 import {
   type WhatsAppConfig,
   sendWhatsAppMessage,
   sendWhatsAppMedia,
   sendWhatsAppAudioPTT,
 } from "@/lib/whatsapp-client";
-import {
-  getPhoneIdentity,
-  toPhoneDigits,
-  toInputJsonValue,
-} from "@/lib/whatsapp-jid";
-import { resolveReplyJid, resolveSendTarget } from "@/lib/whatsapp-resolve";
 
 export async function processIncomingMessage(userId: string, message: {
   from: string;

@@ -2,11 +2,11 @@
 
 import { Badge } from "@/components/ui/Badge";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
-import { SectionContainer } from "@/components/layout/SectionContainer";
 import { useWhatsAppConnection } from "./useWhatsAppConnection";
-import { WhatsAppDisconnectedPanel } from "./WhatsAppDisconnectedPanel";
-import { WhatsAppConnectingPanel } from "./WhatsAppConnectingPanel";
 import { WhatsAppConnectedPanel } from "./WhatsAppConnectedPanel";
+import { WhatsAppConnectingPanel } from "./WhatsAppConnectingPanel";
+import { SectionContainer } from "@/components/layout/SectionContainer";
+import { WhatsAppDisconnectedPanel } from "./WhatsAppDisconnectedPanel";
 
 export function WhatsAppConnection() {
   const {

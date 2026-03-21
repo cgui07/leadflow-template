@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
-import { EvolutionProvider } from "./evolution/provider";
 import { MetaProvider } from "./meta/provider";
+import { EvolutionProvider } from "./evolution/provider";
 import type { WhatsAppProvider, ProviderType } from "./types";
 
 // Singleton instances — stateless, safe to reuse

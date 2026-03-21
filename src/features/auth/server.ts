@@ -1,6 +1,7 @@
+import { env } from "@/lib/env";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { env } from "@/lib/env";
+import { AppError } from "@/lib/errors";
 import { buildBranding } from "@/lib/branding";
 import { validateInviteToken } from "@/lib/tenant";
 import { sendPasswordResetEmail } from "@/lib/email";
@@ -15,7 +16,6 @@ import {
   signToken,
   verifyPassword,
 } from "@/lib/auth";
-import { AppError } from "@/lib/errors";
 import type {
   AuthUserSummary,
   InviteRegistrationInfo,

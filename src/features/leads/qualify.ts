@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/db";
+import { extractLeadProfile } from "@/lib/ai";
+import type { AIConfig } from "@/lib/ai-client";
 import { checkHotLeadAlert } from "@/lib/alerts";
 import { upsertLeadActionFromAI } from "@/lib/lead-actions";
 import {
@@ -7,8 +9,6 @@ import {
   getLeadTemperatureLabel,
   normalizeExtractedLeadProfile,
 } from "@/lib/lead-scoring";
-import type { AIConfig } from "@/lib/ai-client";
-import { extractLeadProfile } from "@/lib/ai";
 
 export async function qualifyLead(leadId: string, config: AIConfig) {
   const lead = await prisma.lead.findUnique({

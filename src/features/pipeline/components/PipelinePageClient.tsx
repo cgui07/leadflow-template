@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
 import { Plus } from "lucide-react";
 import { useFetch } from "@/lib/hooks";
 import { Button } from "@/components/ui/Button";
+import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import type { PipelineStage, SelectedLead } from "../contracts";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -31,7 +31,7 @@ export function PipelinePageClient({
   const [editingStage, setEditingStage] = useState<PipelineStage | null>(null);
   const [deletingStage, setDeletingStage] = useState<PipelineStage | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const stages = data || [];
+  const stages = useMemo(() => data || [], [data]);
 
   const moveLead = useCallback(async (leadId: string, stageId: string) => {
     setMovingLeadId(leadId);

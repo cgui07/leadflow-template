@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { error, handleError, json, requireAuth } from "@/lib/api";
 import { SendMessageSchema } from "@/lib/schemas";
+import { error, handleError, json, requireAuth } from "@/lib/api";
 import {
   listConversationMessages,
   sendConversationMessage,

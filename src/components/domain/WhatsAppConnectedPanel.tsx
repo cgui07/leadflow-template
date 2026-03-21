@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/Button";
 import { RefreshCw, Wifi } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface WhatsAppConnectedPanelProps {
   onReconnect: () => void;

@@ -1,9 +1,9 @@
+import { UpdateSettingsSchema } from "@/lib/schemas";
 import { handleError, json, requireAuth, withApiHandler } from "@/lib/api";
 import {
   getUserSettings,
   updateUserSettings,
 } from "@/features/settings/server";
-import { UpdateSettingsSchema } from "@/lib/schemas";
 
 export async function GET() {
   try {

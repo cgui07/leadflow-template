@@ -1,8 +1,8 @@
+import type { AttentionQueueItem } from "@/lib/attention-queue";
 import {
   ACTION_TYPE_LABELS,
   type LeadActionType,
 } from "@/lib/lead-action-config";
-import type { AttentionQueueItem } from "@/lib/attention-queue";
 
 export function formatTimeAgo(dateStr: string | null) {
   if (!dateStr) return "";

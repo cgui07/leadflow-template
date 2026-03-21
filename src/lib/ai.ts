@@ -16,9 +16,9 @@ export { qualifyLead } from "@/features/leads/qualify";
 
 // ── Functions that use callAI + prompts (kept here to avoid circular deps) ──
 
-import type { AIConfig, MessageContent } from "./ai-client";
 import { callAI } from "./ai-client";
 import type { PropertyCatalogItem } from "./ai-prompts";
+import type { AIConfig, MessageContent } from "./ai-client";
 import {
   getQualificationPrompt,
   getFollowUpPrompt,

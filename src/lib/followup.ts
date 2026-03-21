@@ -1,7 +1,7 @@
 import { prisma } from "./db";
+import { logger } from "./logger";
 import { generateFollowUpMessage } from "./ai";
 import { getWhatsAppConfig, sendAndSaveMessage } from "./whatsapp";
-import { logger } from "./logger";
 
 const FOLLOW_UP_TEMPLATES = [
   "Olá! Tudo bem? Estou passando para saber se você ainda tem interesse em encontrar o imóvel ideal. Posso ajudar com alguma informação?",

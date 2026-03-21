@@ -1,7 +1,7 @@
+import { logger } from "@/lib/logger";
 import { json, error } from "@/lib/api";
 import { NextRequest } from "next/server";
 import { requireCronAuth } from "@/lib/cron";
-import { logger } from "@/lib/logger";
 import { processEscalations } from "@/lib/alerts";
 import { processFollowUps } from "@/lib/followup";
 import { processVisitConfirmations } from "@/lib/visit-confirmations";

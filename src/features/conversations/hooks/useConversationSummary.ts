@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import type { ConversationSummary } from "../contracts";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useConversationSummary(showSummary: boolean) {
   const [summary, setSummary] = useState<ConversationSummary | null>(null);

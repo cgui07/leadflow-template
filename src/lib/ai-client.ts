@@ -1,8 +1,8 @@
+import { logger } from "./logger";
 import {
   DEFAULT_AI_MODEL_BY_PROVIDER,
   isSupportedAIProvider,
 } from "./ai-models";
-import { logger } from "./logger";
 
 export interface AIConfig {
   provider: string;

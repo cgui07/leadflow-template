@@ -1,6 +1,6 @@
 import { prisma } from "./db";
-import { getWhatsAppConfig, sendAndSaveMessage } from "./whatsapp";
 import { logger } from "./logger";
+import { getWhatsAppConfig, sendAndSaveMessage } from "./whatsapp";
 
 export interface VisitConfirmationResult {
   appointmentId: string;

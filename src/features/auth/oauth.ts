@@ -1,6 +1,6 @@
+import { env } from "@/lib/env";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { env } from "@/lib/env";
 import { randomBytes } from "node:crypto";
 import { sanitizeAppRedirect } from "@/lib/redirect";
 import { normalizeEmail, setAuthCookie, signToken } from "@/lib/auth";

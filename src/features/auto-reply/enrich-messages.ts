@@ -1,5 +1,5 @@
-import { resolveMediaContent } from "@/lib/media";
 import { logger } from "@/lib/logger";
+import { resolveMediaContent } from "@/lib/media";
 import type { AIConfig, MessageContent } from "@/lib/ai";
 
 const MEDIA_TYPES = new Set(["image", "audio", "document"]);

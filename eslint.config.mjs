@@ -20,6 +20,10 @@ const eslintConfig = defineConfig([
     },
     rules: {
       "import-sort/order": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
     },
   },
 ]);

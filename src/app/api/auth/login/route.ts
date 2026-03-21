@@ -1,8 +1,8 @@
-import { withPublicHandler, json, error } from "@/lib/api";
 import { LoginSchema } from "@/lib/schemas";
-import { loginWithPassword } from "@/features/auth/server";
-import { checkRateLimit, getIp } from "@/lib/rate-limit";
 import type { NextRequest } from "next/server";
+import { checkRateLimit, getIp } from "@/lib/rate-limit";
+import { withPublicHandler, json, error } from "@/lib/api";
+import { loginWithPassword } from "@/features/auth/server";
 
 const handler = withPublicHandler(LoginSchema, async (data) => {
   const user = await loginWithPassword(data);

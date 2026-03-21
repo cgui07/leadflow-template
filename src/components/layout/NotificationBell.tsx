@@ -6,6 +6,8 @@ import { FaWhatsapp } from "react-icons/fa";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useEffect, useRef, useState } from "react";
+import { NotificationItem } from "./NotificationItem";
+import { getOverdueActionLabel } from "./notification-bell-utils";
 import {
   AlertTriangle,
   Bell,
@@ -19,8 +21,6 @@ import {
   type AttentionQueueItem,
   type AttentionQueueReason,
 } from "@/lib/attention-queue";
-import { getOverdueActionLabel } from "./notification-bell-utils";
-import { NotificationItem } from "./NotificationItem";
 
 const MAX_VISIBLE_NOTIFICATIONS = 5;
 

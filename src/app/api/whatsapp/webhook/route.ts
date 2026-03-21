@@ -2,9 +2,9 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { scheduleFollowUp } from "@/lib/followup";
+import { processIncomingMessage } from "@/lib/whatsapp";
 import { processScheduledAutoReply } from "@/lib/auto-reply";
 import { after, NextRequest, NextResponse } from "next/server";
-import { processIncomingMessage } from "@/lib/whatsapp";
 import { resolveProviderByInstance } from "@/providers/whatsapp/factory";
 
 const MAX_WEBHOOK_BODY_SIZE = 10 * 1024 * 1024;

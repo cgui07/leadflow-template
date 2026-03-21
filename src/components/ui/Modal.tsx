@@ -2,8 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
-import { useCallback, useEffect, useId, useRef } from "react";
 import { Button } from "./Button";
+import { useCallback, useEffect, useId, useRef } from "react";
 
 type ModalSize = "sm" | "md" | "lg" | "xl";
 

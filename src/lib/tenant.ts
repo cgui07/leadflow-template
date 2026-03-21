@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
-import { prisma } from "./db";
 import { env } from "./env";
+import { prisma } from "./db";
 import { normalizeTenantSlug } from "./tenant-slug";
 import {
   buildBranding,

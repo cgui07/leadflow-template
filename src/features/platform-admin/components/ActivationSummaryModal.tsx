@@ -1,7 +1,7 @@
-import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
-import { TextField } from "@/components/forms";
 import { Copy } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
+import { TextField } from "@/components/forms";
+import { Button } from "@/components/ui/Button";
 import type { ActivationLinkSummary } from "../contracts";
 
 function formatDate(dateValue: string | null): string {

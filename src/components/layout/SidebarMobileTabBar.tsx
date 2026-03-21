@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/Button";
 import { Grid2x2 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface NavItem {
   label: string;

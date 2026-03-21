@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { NextRequest } from "next/server";
 import { requireAuth, json, error, handleError } from "@/lib/api";
 import { uploadPropertyPdf, deletePropertyPdf } from "@/lib/storage";
-import { logger } from "@/lib/logger";
 
 const MAX_PDF_SIZE = 100 * 1024 * 1024;
 

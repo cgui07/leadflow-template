@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { scheduleFollowUp } from "@/lib/followup";
 import { getDefaultPipelineStageId } from "@/lib/pipeline";
 import { after, NextRequest, NextResponse } from "next/server";
@@ -11,7 +12,6 @@ import {
   getFacebookVerifyToken,
   verifyFacebookSignature,
 } from "@/lib/facebook";
-import { logger } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   const mode = req.nextUrl.searchParams.get("hub.mode");

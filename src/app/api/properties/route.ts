@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/db";
+import { CreatePropertySchema } from "@/lib/schemas";
 import { error, handleError, json, requireAuth, withApiHandler } from "@/lib/api";
 import {
   extractAndSaveProperty,
   listProperties,
 } from "@/features/properties/server";
-import { CreatePropertySchema } from "@/lib/schemas";
 
 export async function GET() {
   try {

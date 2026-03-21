@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthRedirectPath } from "@/features/auth/utils";
 import {
@@ -6,7 +7,6 @@ import {
   GOOGLE_OAUTH_REDIRECT_COOKIE,
   GOOGLE_OAUTH_STATE_COOKIE,
 } from "@/features/auth/oauth";
-import { logger } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");

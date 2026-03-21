@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Form, TextField } from "@/components/forms";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Send } from "lucide-react";
 
 interface Message {
   id: string;

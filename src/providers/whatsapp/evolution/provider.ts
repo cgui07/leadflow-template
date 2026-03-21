@@ -1,5 +1,6 @@
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
+import { parseEvolutionWebhook } from "./webhook-parser";
 import { resolveReplyJid, toEvolutionNumber } from "@/lib/whatsapp-resolve";
 import type {
   WhatsAppProvider,
@@ -14,7 +15,6 @@ import type {
   PresenceType,
   WhatsAppEvent,
 } from "../types";
-import { parseEvolutionWebhook } from "./webhook-parser";
 
 // ─── Evolution API HTTP client ───
 

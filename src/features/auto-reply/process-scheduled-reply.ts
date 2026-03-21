@@ -1,24 +1,18 @@
-import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
+import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import type { AIConfig, MessageContent } from "@/lib/ai";
 import { generateAutoReply, qualifyLead } from "@/lib/ai";
+import { enrichMessageWithMedia } from "./enrich-messages";
 import { normalizeAutoReplyDelaySeconds } from "@/lib/auto-reply-delay";
-import {
-  handleConfirmationReplyIfNeeded,
-  handleSchedulingIfNeeded,
-} from "@/lib/scheduling-handler";
 import {
   detectIntentSignals,
   getVoiceUsageThisMonth,
 } from "@/lib/voice-reply";
 import {
-  getWhatsAppConfig,
-  resolveSendTarget,
-  sendAndSaveMessage,
-  sendPresenceUpdate,
-} from "@/lib/whatsapp";
-import { enrichMessageWithMedia } from "./enrich-messages";
+  handleConfirmationReplyIfNeeded,
+  handleSchedulingIfNeeded,
+} from "@/lib/scheduling-handler";
 import {
   extractPdfTags,
   wait,
@@ -26,6 +20,12 @@ import {
   sendTextReply,
   sendPropertyPdfs,
 } from "./reply-sender";
+import {
+  getWhatsAppConfig,
+  resolveSendTarget,
+  sendAndSaveMessage,
+  sendPresenceUpdate,
+} from "@/lib/whatsapp";
 
 export interface ProcessScheduledAutoReplyInput {
   conversationId: string;
