@@ -299,7 +299,7 @@ export async function createPlatformClient(
       data: {
         tenantId: createdTenant.id,
         token: activationToken,
-        email: ownerEmail,
+        email: null,
         role: "admin",
         maxUses: 1,
         expiresAt,
