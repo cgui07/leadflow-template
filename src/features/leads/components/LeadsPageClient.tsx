@@ -14,6 +14,7 @@ import { getScoreBadgeClass } from "@/lib/ui-colors";
 import { DataTable } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { ChevronDown, Plus, Search } from "lucide-react";
 import type { LeadRow, LeadsResponse } from "../contracts";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -134,7 +135,7 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
     queryParams.set("search", deferredSearch);
   }
 
-  const { data, error, refetch } = useFetch<LeadsResponse>(
+  const { data, error, loading, refetch } = useFetch<LeadsResponse>(
     `/api/leads?${queryParams.toString()}`,
     {
       initialData,
@@ -239,7 +240,9 @@ export function LeadsPageClient({ initialData }: LeadsPageClientProps) {
       </div>
 
       <SectionContainer noPadding>
-        {data?.leads?.length ? (
+        {loading ? (
+          <LoadingState variant="table" />
+        ) : data?.leads?.length ? (
           <>
             <DataTable columns={columns} data={data.leads} rowKey="id" />
             {data.pages > 1 ? (

@@ -1,14 +1,14 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
 import { useSettingsForm } from "../hooks/useSettingsForm";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { GoogleCalendarSettings } from "./GoogleCalendarSettings";
 import { FacebookSettingsSection } from "./FacebookSettingsSection";
-import { Bot, Calendar, Megaphone, Palette, Save } from "lucide-react";
+import { Bot, Calendar, Loader2, Megaphone, Palette, Save } from "lucide-react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { AutomationSettingsSection } from "./AutomationSettingsSection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -47,6 +47,7 @@ export function SettingsPageClient({
   const searchParams = useSearchParams();
   const requestedSection = searchParams.get("section");
   const activeSection = resolveSection(requestedSection, canManageTenant);
+  const [transitioning, setTransitioning] = useState(false);
   const {
     form,
     modelHelpText,
@@ -98,10 +99,17 @@ export function SettingsPageClient({
   }, [activeSection, pathname, requestedSection, router, searchParams]);
 
   function handleSectionChange(section: string) {
+    setTransitioning(true);
     const params = new URLSearchParams(searchParams.toString());
     params.set("section", section);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
+
+  useEffect(() => {
+    if (transitioning) {
+      setTransitioning(false);
+    }
+  }, [activeSection, transitioning]);
 
   return (
     <PageContainer
@@ -155,7 +163,11 @@ export function SettingsPageClient({
           </div>
         </SectionContainer>
 
-        {activeSection === "automation" ? (
+        {transitioning ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-royal" />
+          </div>
+        ) : activeSection === "automation" ? (
           <AutomationSettingsSection
             form={form}
             modelHelpText={modelHelpText}
