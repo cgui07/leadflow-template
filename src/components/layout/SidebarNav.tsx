@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { NavLink } from "@/components/ui/NavLink";
 
 interface NavItem {
   label: string;
@@ -89,9 +89,10 @@ export function SidebarNav({
               : pathname.startsWith(item.href);
 
           return (
-            <Link
+            <NavLink
               key={item.href}
               href={item.href}
+              icon={item.icon}
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
@@ -101,7 +102,6 @@ export function SidebarNav({
               )}
               title={collapsed ? item.label : undefined}
             >
-              <div className="shrink-0">{item.icon}</div>
               {!collapsed && (
                 <>
                   <div className="flex-1 text-left">{item.label}</div>
@@ -112,7 +112,7 @@ export function SidebarNav({
                   )}
                 </>
               )}
-            </Link>
+            </NavLink>
           );
         })}
       </div>
