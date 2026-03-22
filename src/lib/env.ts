@@ -32,6 +32,9 @@ const envSchema = z.object({
 
   OPENAI_TRANSCRIPTION_KEY: z.string().optional().default(""),
 
+  UPSTASH_REDIS_REST_URL: z.string().optional().default(""),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional().default(""),
+
   FACEBOOK_APP_SECRET: z.string().optional().default(""),
   FACEBOOK_VERIFY_TOKEN: z.string().optional().default(""),
 

@@ -34,7 +34,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
   }
 
-  const body = JSON.parse(rawBody);
+  let body: Record<string, unknown>;
+  try {
+    body = JSON.parse(rawBody) as Record<string, unknown>;
+  } catch {
+    logger.warn("[facebook] Invalid JSON in webhook body");
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
 
   after(async () => {
     try {

@@ -7,7 +7,8 @@ type KpiCardIconVariant =
   | "purple"
   | "teal"
   | "green"
-  | "red";
+  | "red"
+  | "whatsapp";
 
 interface KpiCardProps {
   label: string;
@@ -28,6 +29,7 @@ const iconVariantStyles: Record<KpiCardIconVariant, string> = {
   teal: "bg-teal-pale text-teal-deep",
   green: "bg-green-pale text-green-forest",
   red: "bg-red-pale text-red-crimson",
+  whatsapp: "bg-green-mint-10 text-whatsapp",
 };
 
 export function KpiCard({

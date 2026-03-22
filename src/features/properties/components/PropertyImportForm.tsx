@@ -162,6 +162,21 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
             ))}
           </div>
         )}
+        {/* Mobile: mesmo visual do desktop mas sem texto de arrastar */}
+        <Button
+          variant="ghost"
+          type="button"
+          onClick={() => pdfInputRef.current?.click()}
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-border bg-neutral-surface px-4 pt-6 pb-6 text-neutral transition-colors hover:border-primary hover:text-primary md:hidden"
+        >
+          <FileUp size={16} className="text-neutral-muted" />
+          <div className="space-y-0">
+            <div className="text-sm font-medium">Toque para adicionar PDF</div>
+            <div className="text-xs text-neutral-muted">Opcional · Máximo 100MB</div>
+          </div>
+        </Button>
+
+        {/* Desktop: área de drag & drop maior */}
         <Button
           variant="ghost"
           type="button"
@@ -173,17 +188,17 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
           }}
           onDragLeave={() => setDragOver(false)}
           className={[
-            "flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-5 text-center transition-colors",
+            "hidden w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-4 pt-6 pb-8 text-center transition-colors md:flex",
             dragOver
               ? "border-primary bg-primary/5 text-primary"
               : "border-neutral-border bg-neutral-surface text-neutral hover:border-primary hover:text-primary",
           ].join(" ")}
         >
           <FileUp
-            size={20}
+            size={24}
             className={dragOver ? "text-primary" : "text-neutral-muted"}
           />
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             <div className="text-sm font-medium">
               {dragOver
                 ? "Solte o PDF aqui"

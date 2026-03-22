@@ -1,8 +1,8 @@
 import { Topbar } from "@/components/layout/Topbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { requireSession } from "@/features/auth/session";
-import { BrandingProvider } from "@/components/providers/BrandingProvider";
 import { TopProgressBar } from "@/components/ui/TopProgressBar";
+import { BrandingProvider } from "@/components/providers/BrandingProvider";
 
 export default async function DashboardLayout({
   children,

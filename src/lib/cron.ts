@@ -7,7 +7,7 @@ export function requireCronAuth(req: NextRequest): NextResponse | null {
 
   if (!cronSecret) {
     if (env.NODE_ENV === "production") {
-      return error("CRON_SECRET não configurado", 500);
+      return error("Não autorizado", 401);
     }
 
     return null;

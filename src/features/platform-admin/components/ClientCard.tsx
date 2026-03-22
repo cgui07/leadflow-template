@@ -1,8 +1,8 @@
 "use client";
 
+import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { Copy, KeyRound, PauseCircle, PlayCircle, Trash2 } from "lucide-react";
 import type { PlatformClientAccessState, PlatformClientRow } from "../contracts";
 

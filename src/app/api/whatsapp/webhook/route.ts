@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { timingSafeEqual } from "node:crypto";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { scheduleFollowUp } from "@/lib/followup";
 import { processIncomingMessage } from "@/lib/whatsapp";
@@ -50,11 +51,18 @@ export async function POST(req: NextRequest) {
 
     const { provider, userId, settings } = resolved;
 
-    if (settings.whatsappWebhookToken && settings.whatsappWebhookToken !== token) {
-      return NextResponse.json(
-        { error: "Invalid webhook token" },
-        { status: 401 },
-      );
+    if (settings.whatsappWebhookToken) {
+      const expected = Buffer.from(settings.whatsappWebhookToken);
+      const received = Buffer.from(token ?? "");
+      const valid =
+        expected.length === received.length &&
+        timingSafeEqual(expected, received);
+      if (!valid) {
+        return NextResponse.json(
+          { error: "Invalid webhook token" },
+          { status: 401 },
+        );
+      }
     }
 
     // Parse webhook payload via provider → normalized event

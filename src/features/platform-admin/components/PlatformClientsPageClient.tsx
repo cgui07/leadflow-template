@@ -1,6 +1,7 @@
 "use client";
 
 import type { Column } from "@/types";
+import { ClientCard } from "./ClientCard";
 import { Tabs } from "@/components/ui/Tabs";
 import { Badge } from "@/components/ui/Badge";
 import { TextField } from "@/components/forms";
@@ -14,7 +15,6 @@ import { ActivationSummaryModal } from "./ActivationSummaryModal";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { RegenerateActivationLinkModal } from "./RegenerateActivationLinkModal";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
-import { ClientCard } from "./ClientCard";
 import { Building2, Copy, KeyRound, PauseCircle, PlayCircle, Plus, Search, Trash2 } from "lucide-react";
 import type {
   PlatformClientAccessState,

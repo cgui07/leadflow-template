@@ -24,7 +24,7 @@ export default async function SettingsPage() {
   return (
     <SettingsPageClient
       canManageTenant={session.canManageTenant}
-      initialSettings={settings}
+initialSettings={settings}
       initialTenant={tenantSettings}
       subtitle={subtitle}
     />

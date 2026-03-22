@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import {
   useEffect,
@@ -9,8 +10,6 @@ import {
   type ComponentProps,
   type ReactNode,
 } from "react";
-import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface NavLinkProps extends ComponentProps<typeof Link> {
   /** Icon shown by default */
@@ -42,11 +41,10 @@ export function NavLink({
 
   // Reset loading when pathname changes (navigation completed)
   useEffect(() => {
-    if (isLoading) {
-      setIsLoading(false);
-      targetHref.current = "";
-    }
-  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoading(false);
+    targetHref.current = "";
+  }, [pathname]);
 
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
     const isAlreadyOnPage =

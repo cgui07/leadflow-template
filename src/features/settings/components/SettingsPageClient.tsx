@@ -1,18 +1,18 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useState } from "react";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
+import { useEffect, useMemo, useTransition } from "react";
 import { useSettingsForm } from "../hooks/useSettingsForm";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { GoogleCalendarSettings } from "./GoogleCalendarSettings";
 import { FacebookSettingsSection } from "./FacebookSettingsSection";
-import { Bot, Calendar, Loader2, Megaphone, Palette, Save } from "lucide-react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { AutomationSettingsSection } from "./AutomationSettingsSection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { TenantCustomizationSection } from "./TenantCustomizationSection";
+import { Bot, Calendar, Loader2, Megaphone, Palette, Save } from "lucide-react";
 import type {
   SettingsSection,
   TenantCustomizationSettings,
@@ -47,7 +47,7 @@ export function SettingsPageClient({
   const searchParams = useSearchParams();
   const requestedSection = searchParams.get("section");
   const activeSection = resolveSection(requestedSection, canManageTenant);
-  const [transitioning, setTransitioning] = useState(false);
+  const [transitioning, startTransition] = useTransition();
   const {
     form,
     modelHelpText,
@@ -99,17 +99,12 @@ export function SettingsPageClient({
   }, [activeSection, pathname, requestedSection, router, searchParams]);
 
   function handleSectionChange(section: string) {
-    setTransitioning(true);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("section", section);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("section", section);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   }
-
-  useEffect(() => {
-    if (transitioning) {
-      setTransitioning(false);
-    }
-  }, [activeSection, transitioning]);
 
   return (
     <PageContainer

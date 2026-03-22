@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/db";
+import type { PdfEntry } from "./types";
 import type { AIConfig } from "@/lib/ai";
 import { extractPropertyData } from "@/lib/ai";
+
+function parsePdfs(raw: unknown): PdfEntry[] {
+  if (Array.isArray(raw)) return raw as PdfEntry[];
+  return [];
+}
 
 export async function extractAndSaveProperty(
   userId: string,
@@ -30,14 +36,15 @@ export async function extractAndSaveProperty(
     },
   });
 
-  return property;
+  return { ...property, pdfs: parsePdfs(property.pdfs) };
 }
 
 export async function listProperties(userId: string) {
-  return prisma.properties.findMany({
+  const rows = await prisma.properties.findMany({
     where: { user_id: userId },
     orderBy: { created_at: "desc" },
   });
+  return rows.map((p) => ({ ...p, pdfs: parsePdfs(p.pdfs) }));
 }
 
 export async function deleteProperty(userId: string, propertyId: string) {

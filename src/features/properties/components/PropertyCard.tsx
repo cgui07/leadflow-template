@@ -160,19 +160,21 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
       </CardHeader>
 
       <div className="px-5 py-4 space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          {property.purpose && (
-            <Badge variant={purposeVariant(property.purpose)} dot>
-              {purposeLabel(property.purpose)}
-            </Badge>
-          )}
-          {property.type && (
-            <Badge variant="default">
-              {property.type.charAt(0).toUpperCase() + property.type.slice(1)}
-            </Badge>
-          )}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {property.purpose && (
+              <Badge variant={purposeVariant(property.purpose)} dot>
+                {purposeLabel(property.purpose)}
+              </Badge>
+            )}
+            {property.type && (
+              <Badge variant="default">
+                {property.type.charAt(0).toUpperCase() + property.type.slice(1)}
+              </Badge>
+            )}
+          </div>
           {price && (
-            <div className="ml-auto text-sm font-bold text-neutral-ink">
+            <div className="shrink-0 text-sm font-bold text-neutral-ink">
               {price}
             </div>
           )}
@@ -214,7 +216,7 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
         </div>
 
         {property.description && (
-          <div className="text-xs text-neutral leading-relaxed border-t border-neutral-pale pt-3">
+          <div className="wrap-break-word text-xs text-neutral leading-relaxed border-t border-neutral-pale pt-3">
             {property.description}
           </div>
         )}

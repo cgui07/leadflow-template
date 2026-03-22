@@ -7,10 +7,10 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { KpiCard } from "@/components/ui/KpiCard";
-import { Users, Plus, Flame } from "lucide-react";
 import { getScoreTextClass } from "@/lib/ui-colors";
 import { DataTable } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Users, Plus, Flame, Trophy } from "lucide-react";
 import { AttentionQueueSection } from "./AttentionQueueSection";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
@@ -97,7 +97,13 @@ export function DashboardPageContent({
           label="Conversas não lidas"
           value={String(data.kpis.unreadConversations)}
           icon={<FaWhatsapp className="h-5 w-5" />}
-          iconVariant="purple"
+          iconVariant="whatsapp"
+        />
+        <KpiCard
+          label="Leads Ganhos"
+          value={String(data.kpis.wonLeads)}
+          icon={<Trophy className="h-5 w-5" />}
+          iconVariant="teal"
         />
       </div>
 

@@ -1,9 +1,17 @@
+import { z } from "zod";
+import { env } from "@/lib/env";
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
+import { sendInviteEmail } from "@/lib/email";
 import { generateInviteToken } from "@/lib/tenant";
 import { json, error, requireAuth, handleError } from "@/lib/api";
-import { sendInviteEmail } from "@/lib/email";
-import { env } from "@/lib/env";
+
+const createInviteSchema = z.object({
+  email: z.string().email("Email inválido").optional().or(z.literal("")).transform(v => v || null),
+  role: z.enum(["admin", "agent"]).default("agent"),
+  maxUses: z.number().int().positive().default(1),
+  expiresInDays: z.number().int().positive().max(365).default(7),
+});
 
 export async function GET() {
   try {
@@ -41,7 +49,12 @@ export async function POST(req: NextRequest) {
       return error("Admin sem tenant vinculado", 400);
     }
 
-    const { email, role, maxUses, expiresInDays } = await req.json();
+    const body = await req.json().catch(() => null);
+    const parsed = createInviteSchema.safeParse(body);
+    if (!parsed.success) {
+      return error(parsed.error.issues[0]?.message ?? "Dados inválidos", 400);
+    }
+    const { email, role, maxUses, expiresInDays } = parsed.data;
     const [tenant, inviter] = await Promise.all([
       prisma.tenant.findUnique({
         where: { id: user.tenantId },
@@ -58,25 +71,16 @@ export async function POST(req: NextRequest) {
     }
 
     const token = generateInviteToken();
-    const parsedMaxUses = Number.isInteger(maxUses) && maxUses > 0 ? maxUses : 1;
-    const parsedExpiresInDays =
-      Number.isInteger(expiresInDays) && expiresInDays > 0 ? expiresInDays : 7;
-    const expiresAt = new Date(
-      Date.now() + parsedExpiresInDays * 24 * 60 * 60 * 1000,
-    );
-
-    const inviteEmail =
-      typeof email === "string" && email.trim()
-        ? email.trim().toLowerCase()
-        : null;
+    const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
+    const inviteEmail = email ? email.trim().toLowerCase() : null;
 
     const invite = await prisma.inviteToken.create({
       data: {
         tenantId: user.tenantId,
         token,
         email: inviteEmail,
-        role: role === "admin" ? "admin" : "agent",
-        maxUses: parsedMaxUses,
+        role,
+        maxUses,
         expiresAt,
       },
     });
@@ -91,7 +95,7 @@ export async function POST(req: NextRequest) {
         inviterName: inviter?.name || "Um administrador",
         inviteLink: `${appUrl}${inviteUrl}`,
         expiresAt: expiresAt.toISOString(),
-        role: role === "admin" ? "admin" : "agent",
+        role,
       });
     }
 
