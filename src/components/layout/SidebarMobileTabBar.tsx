@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Grid2x2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { NavLink } from "@/components/ui/NavLink";
 
 interface NavItem {
   label: string;
@@ -39,9 +39,10 @@ export function SidebarMobileTabBar({
               : pathname.startsWith(item.href);
 
           return (
-            <Link
+            <NavLink
               key={item.href}
               href={item.href}
+              icon={item.iconMobile}
               className={cn(
                 "flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-colors min-w-0",
                 isActive
@@ -49,7 +50,6 @@ export function SidebarMobileTabBar({
                   : "text-neutral-muted active:text-neutral-steel",
               )}
             >
-              <div className="shrink-0">{item.iconMobile}</div>
               <div
                 className={cn(
                   "text-[10px] font-medium leading-tight truncate",
@@ -58,7 +58,7 @@ export function SidebarMobileTabBar({
               >
                 {item.label}
               </div>
-            </Link>
+            </NavLink>
           );
         })}
 
