@@ -244,10 +244,15 @@ const config: Config = {
           from: { opacity: "0", transform: "translateY(6px)" },
           to:   { opacity: "1", transform: "translateY(0)" },
         },
+        "progress-bar": {
+          from: { width: "0%" },
+          to:   { width: "70%" },
+        },
       },
 
       animation: {
         "fade-in": "fade-in .3s ease-out both",
+        "progress-bar": "progress-bar 8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
       },
 
       maxWidth: {

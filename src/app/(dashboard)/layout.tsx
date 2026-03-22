@@ -2,6 +2,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { requireSession } from "@/features/auth/session";
 import { BrandingProvider } from "@/components/providers/BrandingProvider";
+import { TopProgressBar } from "@/components/ui/TopProgressBar";
 
 export default async function DashboardLayout({
   children,
@@ -12,6 +13,7 @@ export default async function DashboardLayout({
 
   return (
     <BrandingProvider branding={session.branding}>
+      <TopProgressBar />
       <div className="flex h-screen overflow-hidden bg-neutral-surface">
         <Sidebar
           canManagePlatform={session.canManagePlatform}
