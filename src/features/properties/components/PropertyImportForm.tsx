@@ -8,7 +8,7 @@ import { FileText, FileUp, Sparkles, X } from "lucide-react";
 import { TextareaField } from "@/components/forms/TextareaField";
 import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
 
-const MAX_PDF_SIZE = 100 * 1024 * 1024;
+const MAX_PDF_SIZE = 10 * 1024 * 1024;
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -34,7 +34,7 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
       return;
     }
     if (file.size > MAX_PDF_SIZE) {
-      setError("O arquivo excede o limite de 100MB.");
+      setError("O arquivo excede o limite de 10MB.");
       return;
     }
     setError(null);
@@ -172,7 +172,7 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
           <FileUp size={16} className="text-neutral-muted" />
           <div className="space-y-0">
             <div className="text-sm font-medium">Toque para adicionar PDF</div>
-            <div className="text-xs text-neutral-muted">Opcional · Máximo 100MB</div>
+            <div className="text-xs text-neutral-muted">Opcional · Máximo 10MB</div>
           </div>
         </Button>
 
@@ -205,7 +205,7 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
                 : "Arraste um PDF ou clique para adicionar"}
             </div>
             <div className="text-xs text-neutral-muted">
-              Opcional · Máximo 100MB por arquivo
+              Opcional · Máximo 10MB por arquivo
             </div>
           </div>
         </Button>

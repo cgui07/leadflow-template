@@ -86,8 +86,8 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
       alert("Apenas arquivos PDF são aceitos.");
       return;
     }
-    if (file.size > 100 * 1024 * 1024) {
-      alert("O arquivo excede o limite de 100MB.");
+    if (file.size > 10 * 1024 * 1024) {
+      alert("O arquivo excede o limite de 10MB.");
       return;
     }
     setUploadingPdf(true);

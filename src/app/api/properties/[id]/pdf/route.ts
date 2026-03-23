@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 import { requireAuth, json, error, handleError } from "@/lib/api";
 import { uploadPropertyPdf, deletePropertyPdf } from "@/lib/storage";
 
-const MAX_PDF_SIZE = 100 * 1024 * 1024;
+const MAX_PDF_SIZE = 10 * 1024 * 1024;
 
 type PdfEntry = { url: string; filename: string; size: number };
 
@@ -40,7 +40,7 @@ export async function POST(
       return error("Apenas arquivos PDF são aceitos.", 400);
     }
     if (file.size > MAX_PDF_SIZE) {
-      return error("O arquivo excede o limite de 100MB.", 400);
+      return error("O arquivo excede o limite de 10MB.", 400);
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
