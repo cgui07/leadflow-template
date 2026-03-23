@@ -39,6 +39,7 @@ export {
 
 export {
   processIncomingMessage,
+  pauseConversationOnOwnerMessage,
   sendAndSaveMessage,
   sendAndSaveAudioPTT,
 } from "@/features/conversations/incoming-message";

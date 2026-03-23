@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Bell, Bot, Mic2 } from "lucide-react";
 import type { UserSettings } from "../contracts";
-import { VoiceCloneRecorder } from "./VoiceCloneRecorder";
 import { AI_PROVIDER_OPTIONS } from "@/lib/ai-models";
+import { VoiceCloneRecorder } from "./VoiceCloneRecorder";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { WhatsAppConnection } from "@/components/domain/WhatsAppConnection";
 import {

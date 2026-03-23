@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import type { AIConfig } from "@/lib/ai";
 import { scheduleFollowUp } from "@/lib/followup";
 import { getDefaultPipelineStageId } from "@/lib/pipeline";
+import { generateFacebookOutreachMessage } from "@/lib/ai";
 import { after, NextRequest, NextResponse } from "next/server";
 import {
   getWhatsAppConfig,
@@ -12,8 +14,6 @@ import {
   getFacebookVerifyToken,
   verifyFacebookSignature,
 } from "@/lib/facebook";
-import { generateFacebookOutreachMessage } from "@/lib/ai";
-import type { AIConfig } from "@/lib/ai";
 
 export async function GET(req: NextRequest) {
   const mode = req.nextUrl.searchParams.get("hub.mode");

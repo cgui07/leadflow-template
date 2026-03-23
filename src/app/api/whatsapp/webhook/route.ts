@@ -3,10 +3,10 @@ import { logger } from "@/lib/logger";
 import { timingSafeEqual } from "node:crypto";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { scheduleFollowUp } from "@/lib/followup";
-import { processIncomingMessage } from "@/lib/whatsapp";
 import { processScheduledAutoReply } from "@/lib/auto-reply";
 import { after, NextRequest, NextResponse } from "next/server";
 import { resolveProviderByInstance } from "@/providers/whatsapp/factory";
+import { processIncomingMessage, pauseConversationOnOwnerMessage } from "@/lib/whatsapp";
 
 const MAX_WEBHOOK_BODY_SIZE = 10 * 1024 * 1024;
 
@@ -94,8 +94,28 @@ export async function POST(req: NextRequest) {
 
     // Handle incoming messages
     if (event.type === "incoming_message") {
-      // Skip own messages and group messages
-      if (event.isFromMe || event.isGroup) {
+      // Skip group messages
+      if (event.isGroup) {
+        return NextResponse.json({ ok: true });
+      }
+
+      // Owner sent a message from their phone → pause AI for this conversation
+      if (event.isFromMe) {
+        after(async () => {
+          try {
+            await pauseConversationOnOwnerMessage(
+              userId,
+              event.remoteJid,
+              event.messageId,
+              event.text || null,
+              event.mediaType,
+            );
+          } catch (err) {
+            logger.error("Owner message handling error", {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        });
         return NextResponse.json({ ok: true });
       }
 

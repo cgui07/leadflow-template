@@ -216,6 +216,65 @@ export async function sendAndSaveMessage(
   return msg;
 }
 
+export async function pauseConversationOnOwnerMessage(
+  userId: string,
+  remoteJid: string,
+  messageId: string | null,
+  text: string | null,
+  mediaType?: string,
+) {
+  const resolvedReplyJid = resolveReplyJid(remoteJid);
+  const phone = resolvedReplyJid
+    ? getPhoneIdentity(resolvedReplyJid)
+    : toPhoneDigits(remoteJid) || remoteJid;
+
+  let lead = await prisma.lead.findFirst({
+    where: { userId, conversation: { whatsappChatId: remoteJid } },
+    include: { conversation: true },
+  });
+
+  if (!lead && resolvedReplyJid) {
+    lead = await prisma.lead.findFirst({
+      where: { userId, phone },
+      include: { conversation: true },
+    });
+  }
+
+  if (!lead?.conversation) return;
+
+  const conversation = lead.conversation;
+
+  if (messageId) {
+    const existing = await prisma.message.findFirst({
+      where: { conversationId: conversation.id, whatsappMsgId: messageId },
+    });
+    if (!existing) {
+      await prisma.message.create({
+        data: {
+          conversationId: conversation.id,
+          direction: "outbound",
+          sender: "agent",
+          content: text || "",
+          type: mediaType || "text",
+          status: "sent",
+          whatsappMsgId: messageId,
+        },
+      });
+      await prisma.conversation.update({
+        where: { id: conversation.id },
+        data: { lastMessageAt: new Date() },
+      });
+    }
+  }
+
+  if (conversation.status !== "human") {
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { status: "human" },
+    });
+  }
+}
+
 export async function sendAndSaveAudioPTT(
   config: WhatsAppConfig,
   conversationId: string,

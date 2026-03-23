@@ -20,7 +20,6 @@ async function loadDueLeads(now: Date) {
     where: {
       nextFollowUpAt: { lte: now },
       status: { notIn: ["won", "lost"] },
-      conversation: { status: { not: "human" } },
       user: {
         settings: { followUpEnabled: true },
       },
