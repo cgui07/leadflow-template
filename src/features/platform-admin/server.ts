@@ -525,15 +525,43 @@ export async function deletePlatformClient(
     );
   }
 
-  try {
-    await prisma.tenant.delete({
-      where: { id: tenantId },
-    });
-  } catch {
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { id: true },
+  });
+
+  if (!tenant) {
     throw new PlatformClientError(
       "CLIENT_NOT_FOUND",
       404,
       "Cliente não encontrado.",
     );
   }
+
+  await prisma.$transaction(async (tx) => {
+    const userIds = (
+      await tx.user.findMany({
+        where: { tenantId },
+        select: { id: true },
+      })
+    ).map((u) => u.id);
+
+    if (userIds.length > 0) {
+      // Delete pipeline stages (no FK to User, so must be deleted manually)
+      await tx.pipelineStage.deleteMany({
+        where: { userId: { in: userIds } },
+      });
+
+      // Delete users — cascades to leads, conversations, messages,
+      // activities, settings, properties, appointments, etc.
+      await tx.user.deleteMany({
+        where: { tenantId },
+      });
+    }
+
+    // Delete tenant — cascades to invite_tokens
+    await tx.tenant.delete({
+      where: { id: tenantId },
+    });
+  });
 }
