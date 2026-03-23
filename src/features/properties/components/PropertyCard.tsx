@@ -60,7 +60,11 @@ interface PropertyCardProps {
   onPdfsChange: (id: string, pdfs: PdfEntry[]) => void;
 }
 
-export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardProps) {
+export function PropertyCard({
+  property,
+  onDelete,
+  onPdfsChange,
+}: PropertyCardProps) {
   const [deleting, setDeleting] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
@@ -256,7 +260,9 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
             <Button
               variant="unstyled"
               type="button"
-              onClick={() => property.pdfs.length > 1 ? setPdfModalOpen(true) : undefined}
+              onClick={() =>
+                property.pdfs.length > 1 ? setPdfModalOpen(true) : undefined
+              }
               className={`flex items-center gap-2 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5 min-w-0 flex-1 ${property.pdfs.length > 1 ? "cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-colors" : "cursor-default"}`}
             >
               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-primary/10">
@@ -298,7 +304,11 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
             className="flex items-center gap-1.5 text-xs text-neutral hover:text-primary transition-colors shrink-0"
           >
             <FileUp size={13} />
-            {uploadingPdf ? "Enviando..." : property.pdfs.length > 0 ? "Adicionar" : "Adicionar PDF"}
+            {uploadingPdf
+              ? "Enviando..."
+              : property.pdfs.length > 0
+                ? "Adicionar"
+                : "Adicionar PDF"}
           </Button>
         </div>
       </CardFooter>
@@ -314,7 +324,7 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
           {property.pdfs.map((pdf, index) => (
             <div
               key={pdf.url}
-              className="group flex items-center gap-3 rounded-xl border border-neutral-pale bg-neutral-surface p-3 transition-colors hover:border-primary/20 hover:bg-primary/[0.02]"
+              className="group flex items-center gap-3 rounded-xl border border-neutral-pale bg-neutral-surface p-3 transition-colors hover:border-primary/20 hover:bg-primary/2"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                 <FileText size={18} className="text-primary" />
