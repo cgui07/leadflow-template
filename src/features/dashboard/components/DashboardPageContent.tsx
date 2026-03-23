@@ -111,7 +111,7 @@ export function DashboardPageContent({
         <AttentionQueueSection items={attentionQueueItems} />
       ) : null}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
         <SectionContainer
           title="Leads Recentes"
           actions={
@@ -134,34 +134,36 @@ export function DashboardPageContent({
           )}
         </SectionContainer>
 
-        <SectionContainer title="Atividade Recente">
+        <SectionContainer title="Atividade Recente" noPadding>
           {data.recentActivities.length ? (
-            <div className="space-y-2">
-              {data.recentActivities.map((activity) => (
-                <Card key={activity.id} noPadding>
-                  <div className="flex gap-3 px-4 py-3 text-sm">
-                    <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                    <div className="min-w-0 flex-1">
-                      <div className="font-medium text-neutral-dark">
-                        {activity.title}
+            <div className="max-h-105 overflow-y-auto px-4 pb-4 lg:max-h-130">
+              <div className="space-y-2 pt-1">
+                {data.recentActivities.map((activity) => (
+                  <Card key={activity.id} noPadding>
+                    <div className="flex gap-3 px-4 py-3 text-sm">
+                      <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-neutral-dark">
+                          {activity.title}
+                        </div>
+                        {activity.description ? (
+                          <div className="mt-0.5 text-xs text-neutral-muted">
+                            {activity.description}
+                          </div>
+                        ) : null}
+                        {activity.lead ? (
+                          <div className="mt-0.5 text-xs text-neutral-muted">
+                            {activity.lead.name}
+                          </div>
+                        ) : null}
                       </div>
-                      {activity.description ? (
-                        <div className="mt-0.5 text-xs text-neutral-muted">
-                          {activity.description}
-                        </div>
-                      ) : null}
-                      {activity.lead ? (
-                        <div className="mt-0.5 text-xs text-neutral-muted">
-                          {activity.lead.name}
-                        </div>
-                      ) : null}
                     </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))}
+              </div>
             </div>
           ) : (
-            <div className="text-sm text-neutral-muted">
+            <div className="px-4 pb-4 text-sm text-neutral-muted">
               Nenhuma atividade recente
             </div>
           )}

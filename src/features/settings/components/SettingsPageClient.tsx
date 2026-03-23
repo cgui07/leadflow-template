@@ -50,7 +50,6 @@ export function SettingsPageClient({
   const [transitioning, startTransition] = useTransition();
   const {
     form,
-    modelHelpText,
     modelOptions,
     save,
     saveError,
@@ -165,7 +164,6 @@ export function SettingsPageClient({
         ) : activeSection === "automation" ? (
           <AutomationSettingsSection
             form={form}
-            modelHelpText={modelHelpText}
             modelOptions={modelOptions}
             saveError={saveError}
             update={update}

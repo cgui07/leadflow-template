@@ -12,7 +12,6 @@ import {
 
 interface UseSettingsFormResult {
   form: UserSettings;
-  modelHelpText: string;
   modelOptions: ReturnType<typeof getAIModelOptions>;
   saveError: string | null;
   saved: boolean;
@@ -71,11 +70,6 @@ export function useSettingsForm(
   const modelOptions = useMemo(() => {
     return getAIModelOptions(selectedProvider);
   }, [selectedProvider]);
-
-  const modelHelpText =
-    selectedProvider === "openai"
-      ? "Mostrando os modelos OpenAI suportados por esta integração."
-      : "Mostrando os modelos Anthropic suportados por esta integração.";
 
   function update<K extends keyof UserSettings>(
     key: K,
@@ -154,7 +148,6 @@ export function useSettingsForm(
 
   return {
     form,
-    modelHelpText,
     modelOptions,
     saveError,
     saved,

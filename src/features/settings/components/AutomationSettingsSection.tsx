@@ -17,7 +17,6 @@ import {
 
 interface AutomationSettingsSectionProps {
   form: UserSettings;
-  modelHelpText: string;
   modelOptions: typeof AI_PROVIDER_OPTIONS;
   saveError: string | null;
   update: <K extends keyof UserSettings>(
@@ -33,7 +32,6 @@ function parseInteger(value: string, fallback: number): number {
 
 export function AutomationSettingsSection({
   form,
-  modelHelpText,
   modelOptions,
   saveError,
   update,
@@ -72,12 +70,6 @@ export function AutomationSettingsSection({
                 searchable
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="text-xs text-neutral md:col-start-2">
-                {modelHelpText}
-              </div>
-            </div>
-
             <div className="space-y-1.5">
               <TextField
                 label="API key"
