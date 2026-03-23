@@ -14,15 +14,14 @@ export async function POST(req: NextRequest) {
   try {
     const contentLength = Number(req.headers.get("content-length") || "0");
     if (contentLength > MAX_WEBHOOK_BODY_SIZE) {
-      return NextResponse.json(
-        { error: "Payload too large" },
-        { status: 413 },
-      );
+      return NextResponse.json({ error: "Payload too large" }, { status: 413 });
     }
 
     const body = await req.json();
     const instanceName = body.instance || body.instanceName;
-    const token = req.headers.get("x-webhook-token");
+    const token =
+      req.headers.get("x-webhook-token") ??
+      req.nextUrl.searchParams.get("token");
 
     if (!instanceName) {
       return NextResponse.json(
@@ -37,7 +36,10 @@ export async function POST(req: NextRequest) {
       { windowMs: 60_000, maxRequests: 100 },
     );
     if (!webhookAllowed) {
-      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+      return NextResponse.json(
+        { error: "Rate limit exceeded" },
+        { status: 429 },
+      );
     }
 
     // Resolve provider + user for this instance
@@ -114,7 +116,10 @@ export async function POST(req: NextRequest) {
       const conv = result.conversation;
       const wasActiveConversation = conv.status === "active";
 
-      if (settings.autoReplyEnabled && (conv.status === "bot" || wasActiveConversation)) {
+      if (
+        settings.autoReplyEnabled &&
+        (conv.status === "bot" || wasActiveConversation)
+      ) {
         if (wasActiveConversation) {
           await prisma.conversation.update({
             where: { id: conv.id },
