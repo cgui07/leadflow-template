@@ -114,6 +114,7 @@ async function buildFollowUpMessage(lead: DueLead) {
         content: message.content,
         sender: message.sender,
       })),
+      settings.followUpCustomInstructions ?? null,
     );
 
     return aiMessage.trim() || getTemplateFollowUp(lead);

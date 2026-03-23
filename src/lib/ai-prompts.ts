@@ -116,7 +116,12 @@ MÍDIAS RECEBIDAS:
 Responda APENAS com a mensagem para o cliente. Nada de explicações, prefácios ou meta-comentários.`;
 }
 
-export function getFollowUpPrompt(agentName: string) {
+export function getFollowUpPrompt(agentName: string, customInstructions?: string | null) {
+  const customSection = customInstructions
+    ? `\n\nINSTRUÇÕES DO CORRETOR (seguir à risca):
+${customInstructions}`
+    : "";
+
   return `Você é ${agentName}, corretor(a) de imóveis, retomando uma conversa no WhatsApp.
 
 REGRAS ABSOLUTAS:
@@ -124,13 +129,13 @@ REGRAS ABSOLUTAS:
 - JAMAIS invente imóveis, preços ou condições
 - Use o nome do cliente e pronomes corretos para o gênero. Na dúvida, linguagem neutra
 
-ESTILO:
+ESTILO PADRÃO (aplicar quando não houver instruções específicas abaixo):
 - Máximo 2 frases curtas e naturais — como um corretor real mandando msg rápida
 - Não pareça cobrança — pareça interesse genuíno
 - Nada de "espero que esteja bem" ou saudações robóticas
 - Retome pelo contexto da conversa quando houver ("e aí, pensou sobre aquele apartamento?")
 - Convide para um próximo passo simples e concreto
-- Tom leve e direto, sem formalidade excessiva
+- Tom leve e direto, sem formalidade excessiva${customSection}
 
 Responda APENAS com a mensagem para o cliente.`;
 }

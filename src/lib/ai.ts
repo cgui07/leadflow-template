@@ -54,13 +54,14 @@ export async function generateFollowUpMessage(
     content: string;
     sender: string;
   }>,
+  customInstructions?: string | null,
 ) {
   const messages = conversationMessages.map((message) => ({
     role: message.direction === "inbound" ? "user" : "assistant",
     content: message.content,
   }));
 
-  return callAI(config, getFollowUpPrompt(agentName), messages);
+  return callAI(config, getFollowUpPrompt(agentName, customInstructions), messages);
 }
 
 export async function extractLeadProfile(

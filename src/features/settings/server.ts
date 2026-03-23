@@ -26,6 +26,7 @@ const USER_SETTINGS_SELECT = {
   followUpEnabled: true,
   followUpDelayHours: true,
   maxFollowUps: true,
+  followUpCustomInstructions: true,
   facebookPageAccessToken: true,
   facebookAutoOutreach: true,
   elevenlabsVoiceId: true,
@@ -57,6 +58,7 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   followUpEnabled: true,
   followUpDelayHours: 24,
   maxFollowUps: 3,
+  followUpCustomInstructions: null,
   facebookPageId: null,
   facebookPageAccessToken: null,
   facebookAutoOutreach: true,
@@ -76,6 +78,7 @@ type UserSettingsRecord = {
   followUpEnabled: boolean;
   followUpDelayHours: number;
   maxFollowUps: number;
+  followUpCustomInstructions: string | null;
   facebookPageAccessToken: string | null;
   facebookAutoOutreach: boolean;
   elevenlabsVoiceId: string | null;
@@ -138,6 +141,7 @@ async function mapUserSettings(
     followUpEnabled: settings.followUpEnabled,
     followUpDelayHours: settings.followUpDelayHours,
     maxFollowUps: settings.maxFollowUps,
+    followUpCustomInstructions: settings.followUpCustomInstructions ?? null,
     facebookPageId: facebookPage?.pageId ?? null,
     facebookPageAccessToken: maskApiKey
       ? maskSecret(settings.facebookPageAccessToken)
@@ -209,6 +213,17 @@ function pickAllowedSettings(
     Number.isFinite(input.maxFollowUps)
   ) {
     next.maxFollowUps = input.maxFollowUps;
+  }
+
+  if (
+    typeof input.followUpCustomInstructions === "string" ||
+    input.followUpCustomInstructions === null
+  ) {
+    next.followUpCustomInstructions =
+      typeof input.followUpCustomInstructions === "string" &&
+      input.followUpCustomInstructions.trim()
+        ? input.followUpCustomInstructions.trim()
+        : null;
   }
 
   if (

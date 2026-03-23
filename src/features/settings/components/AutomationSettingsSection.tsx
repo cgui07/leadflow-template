@@ -138,32 +138,79 @@ export function AutomationSettingsSection({
               checked={form.followUpEnabled}
               onChange={(checked) => update("followUpEnabled", checked)}
             />
-            <TextField
-              label="Intervalo entre follow-ups (horas)"
-              type="number"
-              value={String(form.followUpDelayHours)}
-              onChange={(event) =>
-                update(
-                  "followUpDelayHours",
-                  parseInteger(event.target.value, form.followUpDelayHours),
-                )
-              }
-              min={1}
-              max={168}
-            />
-            <TextField
-              label="Máximo de follow-ups por lead"
-              type="number"
-              value={String(form.maxFollowUps)}
-              onChange={(event) =>
-                update(
-                  "maxFollowUps",
-                  parseInteger(event.target.value, form.maxFollowUps),
-                )
-              }
-              min={1}
-              max={10}
-            />
+
+            {form.followUpEnabled && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <TextField
+                    label="Intervalo entre follow-ups"
+                    type="number"
+                    value={String(form.followUpDelayHours)}
+                    onChange={(event) =>
+                      update(
+                        "followUpDelayHours",
+                        parseInteger(event.target.value, form.followUpDelayHours),
+                      )
+                    }
+                    min={1}
+                    max={168}
+                    description="Em horas (ex: 24 = 1 dia)"
+                  />
+                  <TextField
+                    label="Máximo de follow-ups"
+                    type="number"
+                    value={String(form.maxFollowUps)}
+                    onChange={(event) =>
+                      update(
+                        "maxFollowUps",
+                        parseInteger(event.target.value, form.maxFollowUps),
+                      )
+                    }
+                    min={1}
+                    max={10}
+                    description="Por lead"
+                  />
+                </div>
+
+                <div className="space-y-3 rounded-xl border border-border bg-surface-raised p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Roteiro personalizado</p>
+                      <p className="mt-0.5 text-xs text-neutral">
+                        Descreva em texto livre como você quer que a IA faça os follow-ups. Ela vai seguir exatamente o que você escrever.
+                      </p>
+                    </div>
+                    <CheckboxField
+                      variant="switch"
+                      label=""
+                      checked={!!form.followUpCustomInstructions}
+                      onChange={(checked) =>
+                        update("followUpCustomInstructions", checked ? " " : null)
+                      }
+                    />
+                  </div>
+
+                  {!!form.followUpCustomInstructions && (
+                    <div className="space-y-2">
+                      <TextareaField
+                        label=""
+                        value={form.followUpCustomInstructions === " " ? "" : form.followUpCustomInstructions}
+                        onChange={(event) =>
+                          update("followUpCustomInstructions", event.target.value || null)
+                        }
+                        rows={5}
+                        placeholder={`Exemplos do que você pode escrever:
+
+"Faça no máximo 3 follow-ups. No primeiro, mencione o apartamento que o cliente viu e pergunte se ele ainda tem interesse. No segundo, ofereça agendar uma visita no fim de semana. No terceiro, informe que o imóvel está com alta procura."`}
+                      />
+                      <p className="text-xs text-neutral">
+                        A IA mantém o tom natural de WhatsApp e nunca se revela como robô — só o conteúdo muda.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </SectionContainer>
 

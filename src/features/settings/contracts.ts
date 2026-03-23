@@ -10,6 +10,7 @@ export interface UserSettings {
   followUpEnabled: boolean;
   followUpDelayHours: number;
   maxFollowUps: number;
+  followUpCustomInstructions: string | null;
   openaiTranscriptionKey: string | null;
   facebookPageId: string | null;
   facebookPageAccessToken: string | null;
