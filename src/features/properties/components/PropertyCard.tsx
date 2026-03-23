@@ -243,10 +243,11 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
         />
         <div className="flex items-center gap-2 w-full">
           {property.pdfs.length > 0 && (
-            <button
+            <Button
+              variant="unstyled"
               type="button"
-              onClick={() => property.pdfs.length === 1 ? undefined : setPdfModalOpen(true)}
-              className={`flex items-center gap-2 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5 min-w-0 flex-1 ${property.pdfs.length > 1 ? "cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-colors" : ""}`}
+              onClick={() => property.pdfs.length > 1 ? setPdfModalOpen(true) : undefined}
+              className={`flex items-center gap-2 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5 min-w-0 flex-1 ${property.pdfs.length > 1 ? "cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-colors" : "cursor-default"}`}
             >
               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-primary/10">
                 <FileText size={12} className="text-primary" />
@@ -274,11 +275,11 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
                 </Button>
               )}
               {property.pdfs.length > 1 && (
-                <div className="shrink-0 flex items-center justify-center h-6 min-w-[28px] rounded-full bg-primary/10 text-primary text-[11px] font-semibold px-1.5">
+                <Badge variant="info" size="sm">
                   +{property.pdfs.length - 1}
-                </div>
+                </Badge>
               )}
-            </button>
+            </Button>
           )}
           <Button
             variant="ghost"
