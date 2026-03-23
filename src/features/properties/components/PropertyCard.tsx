@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
 import type { Property, PdfEntry } from "../types";
 import { FileField } from "@/components/forms/FileField";
 import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
@@ -62,6 +63,7 @@ interface PropertyCardProps {
 export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardProps) {
   const [deleting, setDeleting] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [deletingPdfUrl, setDeletingPdfUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -239,49 +241,111 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
           hidden
           onChange={handlePdfUpload}
         />
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex items-center gap-2 w-full">
           {property.pdfs.length > 0 && (
-            <div className="flex flex-col gap-1.5">
-              {property.pdfs.map((pdf) => (
-                <div
-                  key={pdf.url}
-                  className="flex items-center gap-1.5 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5"
-                >
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-primary/10">
-                    <FileText size={12} className="text-primary" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-xs font-medium text-neutral-ink leading-tight">
-                      {pdf.filename}
-                    </div>
-                    <div className="text-[10px] text-neutral-muted leading-tight">
-                      {formatFileSize(pdf.size)}
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    onClick={() => handlePdfDelete(pdf.url)}
-                    disabled={deletingPdfUrl === pdf.url}
-                    className="shrink-0 rounded p-0.5 text-neutral-muted transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-50"
-                  >
-                    <X size={12} />
-                  </Button>
+            <button
+              type="button"
+              onClick={() => property.pdfs.length === 1 ? undefined : setPdfModalOpen(true)}
+              className={`flex items-center gap-2 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5 min-w-0 flex-1 ${property.pdfs.length > 1 ? "cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-colors" : ""}`}
+            >
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-primary/10">
+                <FileText size={12} className="text-primary" />
+              </div>
+              <div className="min-w-0 flex-1 text-left">
+                <div className="truncate text-xs font-medium text-neutral-ink leading-tight">
+                  {property.pdfs[0].filename}
                 </div>
-              ))}
-            </div>
+                <div className="text-[10px] text-neutral-muted leading-tight">
+                  {formatFileSize(property.pdfs[0].size)}
+                </div>
+              </div>
+              {property.pdfs.length === 1 && (
+                <Button
+                  variant="ghost"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePdfDelete(property.pdfs[0].url);
+                  }}
+                  disabled={deletingPdfUrl === property.pdfs[0].url}
+                  className="shrink-0 rounded p-0.5 text-neutral-muted transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-50"
+                >
+                  <X size={12} />
+                </Button>
+              )}
+              {property.pdfs.length > 1 && (
+                <div className="shrink-0 flex items-center justify-center h-6 min-w-[28px] rounded-full bg-primary/10 text-primary text-[11px] font-semibold px-1.5">
+                  +{property.pdfs.length - 1}
+                </div>
+              )}
+            </button>
           )}
           <Button
             variant="ghost"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingPdf}
-            className="flex items-center gap-1.5 text-xs text-neutral hover:text-primary transition-colors"
+            className="flex items-center gap-1.5 text-xs text-neutral hover:text-primary transition-colors shrink-0"
           >
             <FileUp size={13} />
-            {uploadingPdf ? "Enviando..." : "Adicionar PDF"}
+            {uploadingPdf ? "Enviando..." : property.pdfs.length > 0 ? "Adicionar" : "Adicionar PDF"}
           </Button>
         </div>
       </CardFooter>
+
+      <Modal
+        open={pdfModalOpen}
+        onClose={() => setPdfModalOpen(false)}
+        title="Documentos PDF"
+        description={`${property.pdfs.length} arquivo${property.pdfs.length !== 1 ? "s" : ""} anexado${property.pdfs.length !== 1 ? "s" : ""} a "${property.title ?? "este imóvel"}"`}
+        size="md"
+      >
+        <div className="flex flex-col gap-2">
+          {property.pdfs.map((pdf, index) => (
+            <div
+              key={pdf.url}
+              className="group flex items-center gap-3 rounded-xl border border-neutral-pale bg-neutral-surface p-3 transition-colors hover:border-primary/20 hover:bg-primary/[0.02]"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <FileText size={18} className="text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium text-neutral-ink">
+                  {pdf.filename}
+                </div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-xs text-neutral-muted">
+                    {formatFileSize(pdf.size)}
+                  </span>
+                  <span className="text-neutral-pale">·</span>
+                  <span className="text-xs text-neutral-muted">
+                    PDF {index + 1} de {property.pdfs.length}
+                  </span>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={() => handlePdfDelete(pdf.url)}
+                disabled={deletingPdfUrl === pdf.url}
+                className="shrink-0 rounded-lg p-1.5 text-neutral-muted opacity-0 group-hover:opacity-100 transition-all hover:bg-danger/10 hover:text-danger disabled:opacity-50"
+              >
+                <Trash2 size={14} />
+              </Button>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 pt-3 border-t border-neutral-pale">
+          <Button
+            variant="ghost"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingPdf}
+            className="flex items-center gap-2 text-sm text-neutral hover:text-primary transition-colors w-full justify-center py-2"
+          >
+            <FileUp size={15} />
+            {uploadingPdf ? "Enviando..." : "Adicionar mais PDFs"}
+          </Button>
+        </div>
+      </Modal>
 
       <DeleteConfirmationModal
         open={deleteModalOpen}
