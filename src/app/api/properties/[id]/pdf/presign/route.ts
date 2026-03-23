@@ -1,9 +1,9 @@
-import { requireAuth, json, error, handleError } from "@/lib/api";
 import { prisma } from "@/lib/db";
-import { buildPdfStorageKey, generatePresignedUploadUrl, MAX_PDF_SIZE } from "@/lib/storage";
 import { NextRequest } from "next/server";
+import { createPresignedUploadUrl } from "@/lib/storage";
+import { requireAuth, json, error, handleError } from "@/lib/api";
 
-export async function GET(
+export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
@@ -20,21 +20,22 @@ export async function GET(
       return error("Imóvel não encontrado.", 404);
     }
 
-    const { searchParams } = new URL(req.url);
-    const filename = searchParams.get("filename") ?? "document.pdf";
-    const size = parseInt(searchParams.get("size") ?? "0", 10);
+    const body = await req.json();
+    const filename = body.filename as string;
+    const size = body.size as number;
 
-    if (!filename.toLowerCase().endsWith(".pdf")) {
-      return error("Apenas arquivos PDF são aceitos.", 400);
-    }
-    if (size <= 0 || size > MAX_PDF_SIZE) {
-      return error("Tamanho de arquivo inválido ou excede 100MB.", 400);
+    if (!filename || typeof size !== "number") {
+      return error("Campos 'filename' e 'size' são obrigatórios.", 400);
     }
 
-    const key = buildPdfStorageKey(user.id, id);
-    const uploadUrl = await generatePresignedUploadUrl(key);
+    const MAX_PDF_SIZE = 100 * 1024 * 1024;
+    if (size > MAX_PDF_SIZE) {
+      return error("O arquivo excede o limite de 100MB.", 400);
+    }
 
-    return json({ uploadUrl, key, filename, size });
+    const { key, url } = await createPresignedUploadUrl(user.id, id, filename);
+
+    return json({ key, url, filename, size });
   } catch (err) {
     return handleError(err);
   }

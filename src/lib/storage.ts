@@ -1,9 +1,7 @@
 import { env } from "./env";
 import { logger } from "./logger";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-
-export const MAX_PDF_SIZE = 100 * 1024 * 1024; // 100MB
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 
 const BUCKET = env.R2_BUCKET;
 
@@ -23,27 +21,6 @@ function getR2Client() {
   });
 }
 
-export async function uploadPropertyPdf(
-  userId: string,
-  propertyId: string,
-  buffer: Buffer,
-  contentType: string,
-): Promise<string> {
-  const client = getR2Client();
-  const key = `${userId}/${propertyId}/${Date.now()}.pdf`;
-
-  await client.send(
-    new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-      Body: buffer,
-      ContentType: contentType,
-    }),
-  );
-
-  return key;
-}
-
 export async function deletePropertyPdf(storagePath: string): Promise<void> {
   const client = getR2Client();
 
@@ -56,23 +33,6 @@ export async function deletePropertyPdf(storagePath: string): Promise<void> {
   }
 }
 
-export function buildPdfStorageKey(userId: string, propertyId: string): string {
-  return `${userId}/${propertyId}/${Date.now()}.pdf`;
-}
-
-export async function generatePresignedUploadUrl(
-  key: string,
-  expiresInSeconds = 300,
-): Promise<string> {
-  const client = getR2Client();
-  const command = new PutObjectCommand({
-    Bucket: BUCKET,
-    Key: key,
-    ContentType: "application/pdf",
-  });
-  return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
-}
-
 export async function getPropertyPdfUrl(
   storagePath: string,
   expiresInSeconds = 3600,
@@ -81,4 +41,32 @@ export async function getPropertyPdfUrl(
 
   const command = new GetObjectCommand({ Bucket: BUCKET, Key: storagePath });
   return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
+}
+
+export async function createPresignedUploadUrl(
+  userId: string,
+  propertyId: string,
+  filename: string,
+): Promise<{ key: string; url: string }> {
+  const client = getR2Client();
+  const key = `${userId}/${propertyId}/${Date.now()}-${filename}`;
+
+  const command = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ContentType: "application/pdf",
+  });
+
+  const url = await getSignedUrl(client, command, { expiresIn: 600 });
+  return { key, url };
+}
+
+export async function verifyUploadExists(key: string): Promise<number> {
+  const client = getR2Client();
+
+  const head = await client.send(
+    new HeadObjectCommand({ Bucket: BUCKET, Key: key }),
+  );
+
+  return head.ContentLength ?? 0;
 }

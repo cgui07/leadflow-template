@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/Button";
+import { uploadPdfDirect } from "../upload-pdf";
 import type { Property, PdfEntry } from "../types";
 import { FileField } from "@/components/forms/FileField";
 import { FileText, FileUp, Sparkles, X } from "lucide-react";
@@ -79,33 +80,8 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
       let pdfError = false;
       for (const file of pendingPdfs) {
         try {
-          // Step 1: get a pre-signed upload URL (bypasses Vercel body size limit)
-          const presignRes = await fetch(
-            `/api/properties/${property.id}/pdf/presign?filename=${encodeURIComponent(file.name)}&size=${file.size}`,
-          );
-          if (!presignRes.ok) { pdfError = true; continue; }
-          const { uploadUrl, key } = await presignRes.json();
-
-          // Step 2: upload directly to R2
-          const putRes = await fetch(uploadUrl, {
-            method: "PUT",
-            headers: { "Content-Type": "application/pdf" },
-            body: file,
-          });
-          if (!putRes.ok) { pdfError = true; continue; }
-
-          // Step 3: confirm upload and save metadata
-          const confirmRes = await fetch(`/api/properties/${property.id}/pdf/confirm`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ key, filename: file.name, size: file.size }),
-          });
-          if (confirmRes.ok) {
-            const newEntry: PdfEntry = await confirmRes.json();
-            property.pdfs.push(newEntry);
-          } else {
-            pdfError = true;
-          }
+          const newEntry = await uploadPdfDirect(property.id, file);
+          property.pdfs.push(newEntry);
         } catch {
           pdfError = true;
         }

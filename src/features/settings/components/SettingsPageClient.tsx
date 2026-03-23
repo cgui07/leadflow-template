@@ -48,16 +48,8 @@ export function SettingsPageClient({
   const requestedSection = searchParams.get("section");
   const activeSection = resolveSection(requestedSection, canManageTenant);
   const [transitioning, startTransition] = useTransition();
-  const {
-    form,
-    modelOptions,
-    save,
-    saveError,
-    saved,
-    saving,
-    selectedProvider,
-    update,
-  } = useSettingsForm(initialSettings);
+  const { form, modelOptions, save, saveError, saved, saving, update } =
+    useSettingsForm(initialSettings);
   const tabs = useMemo(() => {
     return [
       {

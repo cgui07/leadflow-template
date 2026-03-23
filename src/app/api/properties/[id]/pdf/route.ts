@@ -2,9 +2,7 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { NextRequest } from "next/server";
 import { requireAuth, json, error, handleError } from "@/lib/api";
-import { uploadPropertyPdf, deletePropertyPdf } from "@/lib/storage";
-
-const MAX_PDF_SIZE = 100 * 1024 * 1024;
+import { deletePropertyPdf, verifyUploadExists } from "@/lib/storage";
 
 type PdfEntry = { url: string; filename: string; size: number };
 
@@ -30,26 +28,30 @@ export async function POST(
       return error("Imóvel não encontrado.", 404);
     }
 
-    const formData = await req.formData();
-    const file = formData.get("pdf") as File | null;
+    const body = await req.json();
+    const { key, filename, size } = body as {
+      key: string;
+      filename: string;
+      size: number;
+    };
 
-    if (!file) {
-      return error("Nenhum arquivo enviado.", 400);
-    }
-    if (file.type !== "application/pdf") {
-      return error("Apenas arquivos PDF são aceitos.", 400);
-    }
-    if (file.size > MAX_PDF_SIZE) {
-      return error("O arquivo excede o limite de 100MB.", 400);
+    if (!key || !filename || typeof size !== "number") {
+      return error("Campos 'key', 'filename' e 'size' são obrigatórios.", 400);
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const storagePath = await uploadPropertyPdf(user.id, id, buffer, file.type);
+    if (!key.startsWith(`${user.id}/`)) {
+      return error("Acesso negado.", 403);
+    }
+
+    const actualSize = await verifyUploadExists(key);
+    if (!actualSize) {
+      return error("Arquivo não encontrado no storage. Tente o upload novamente.", 400);
+    }
 
     const newEntry: PdfEntry = {
-      url: storagePath,
-      filename: file.name,
-      size: file.size,
+      url: key,
+      filename,
+      size: actualSize,
     };
 
     const pdfs = parsePdfs(property.pdfs);
