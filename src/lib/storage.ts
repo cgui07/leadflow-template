@@ -20,6 +20,9 @@ function getR2Client() {
     region: "auto",
     endpoint,
     credentials: { accessKeyId, secretAccessKey },
+    // Disable automatic CRC32 checksums — they break pre-signed URLs used by the browser
+    requestChecksumCalculation: "when_required",
+    responseChecksumValidation: "when_required",
   });
 }
 
