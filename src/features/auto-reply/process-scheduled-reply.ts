@@ -188,7 +188,7 @@ export async function processScheduledAutoReply(
         id: p.id,
         price: p.price?.toString() ?? null,
         area: p.area?.toString() ?? null,
-        hasPdf: Boolean(p.pdf_url),
+        hasPdf: Boolean(p.pdf_url) || (Array.isArray(p.pdfs) && (p.pdfs as unknown[]).length > 0),
       }));
     } catch (err) {
       logger.error("Failed to fetch properties", {
@@ -250,7 +250,11 @@ export async function processScheduledAutoReply(
       return;
     }
 
+    logger.info("AI raw reply", { reply });
+
     const { cleanReply, propertyIds: pdfPropertyIds } = extractPdfTags(reply);
+
+    logger.info("PDF extraction result", { pdfPropertyIds, cleanReply });
 
     const messageCount = orderedMessages.length + 1;
     let sentAsVoice = false;

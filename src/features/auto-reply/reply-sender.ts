@@ -134,31 +134,60 @@ export async function sendPropertyPdfs(
   if (propertyIds.length === 0) return;
 
   try {
+    logger.info("sendPropertyPdfs called", { propertyIds, userId });
+
     const propertiesWithPdf = await prisma.properties.findMany({
       where: {
         id: { in: propertyIds },
         user_id: userId,
-        pdf_url: { not: null },
       },
-      select: { id: true, title: true, pdf_url: true, pdf_filename: true },
+      select: { id: true, title: true, pdf_url: true, pdf_filename: true, pdfs: true },
+    });
+
+    logger.info("Properties found for PDF send", {
+      requested: propertyIds.length,
+      found: propertiesWithPdf.length,
     });
 
     for (const prop of propertiesWithPdf) {
-      const signedUrl = await getPropertyPdfUrl(prop.pdf_url!);
-      await sendAndSaveMessage(
-        getWhatsAppConfig(whatsappPhoneId),
-        conversationId,
-        replyJid,
-        `📋 ${prop.title ?? "Detalhes do imóvel"}`,
-        "bot",
-        {
-          type: "document",
-          url: signedUrl,
-          caption: `📋 ${prop.title ?? "Detalhes do imóvel"}`,
-          fileName: prop.pdf_filename ?? "imovel.pdf",
-          mimetype: "application/pdf",
-        },
-      );
+      // Coleta todos os PDFs: array novo (pdfs) + campo legado (pdf_url)
+      const pdfList: Array<{ storagePath: string; filename: string }> = [];
+
+      const pdfsArray = Array.isArray(prop.pdfs)
+        ? (prop.pdfs as Array<{ url: string; filename?: string }>)
+        : [];
+
+      for (const pdf of pdfsArray) {
+        if (pdf.url) {
+          pdfList.push({ storagePath: pdf.url, filename: pdf.filename ?? "imovel.pdf" });
+        }
+      }
+
+      // Fallback para campo legado se não houver pdfs no array
+      if (pdfList.length === 0 && prop.pdf_url) {
+        pdfList.push({ storagePath: prop.pdf_url, filename: prop.pdf_filename ?? "imovel.pdf" });
+      }
+
+      logger.info("PDFs to send for property", { propertyId: prop.id, count: pdfList.length });
+
+      for (const pdf of pdfList) {
+        const signedUrl = await getPropertyPdfUrl(pdf.storagePath);
+        logger.info("Sending PDF", { propertyId: prop.id, filename: pdf.filename });
+        await sendAndSaveMessage(
+          getWhatsAppConfig(whatsappPhoneId),
+          conversationId,
+          replyJid,
+          `📋 ${prop.title ?? "Detalhes do imóvel"}`,
+          "bot",
+          {
+            type: "document",
+            url: signedUrl,
+            caption: `📋 ${prop.title ?? "Detalhes do imóvel"}`,
+            fileName: pdf.filename,
+            mimetype: "application/pdf",
+          },
+        );
+      }
     }
   } catch (err) {
     logger.error("Failed to send property PDFs", {
