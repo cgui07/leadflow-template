@@ -36,14 +36,7 @@ export function CreateClientModal({
           placeholder="Ex: João Silva Imoveis"
           required
         />
-        <TextField
-          label="Slug do workspace"
-          value={form.slug}
-          onChange={(event) => onFieldChange("slug", event.target.value)}
-          placeholder="joão-silva-imoveis"
-          hint="Esse identificador ajuda a organizar sua operação."
-          required
-        />
+        <input type="hidden" name="slug" value={form.slug} />
         <TextField
           label="Email do corretor"
           type="email"
