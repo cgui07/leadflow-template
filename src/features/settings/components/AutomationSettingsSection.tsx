@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Bell, Bot, Mic2 } from "lucide-react";
 import type { UserSettings } from "../contracts";
 import { VoiceCloneRecorder } from "./VoiceCloneRecorder";
-import { AI_PROVIDER_OPTIONS, type AIProvider } from "@/lib/ai-models";
+import { AI_PROVIDER_OPTIONS } from "@/lib/ai-models";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { WhatsAppConnection } from "@/components/domain/WhatsAppConnection";
 import {
@@ -20,7 +20,6 @@ interface AutomationSettingsSectionProps {
   modelHelpText: string;
   modelOptions: typeof AI_PROVIDER_OPTIONS;
   saveError: string | null;
-  selectedProvider: AIProvider;
   update: <K extends keyof UserSettings>(
     key: K,
     value: UserSettings[K],
@@ -37,7 +36,6 @@ export function AutomationSettingsSection({
   modelHelpText,
   modelOptions,
   saveError,
-  selectedProvider,
   update,
 }: AutomationSettingsSectionProps) {
   const [hasVoiceId, setHasVoiceId] = useState(!!form.elevenlabsVoiceId);
@@ -59,12 +57,12 @@ export function AutomationSettingsSection({
         >
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <SelectField
-                label="Provedor"
-                options={AI_PROVIDER_OPTIONS}
-                value={selectedProvider}
-                onChange={(value) => update("aiProvider", value)}
-              />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-foreground">Provedor</label>
+                <div className="flex h-10 items-center rounded-lg border border-border bg-surface-raised px-3 text-sm text-neutral cursor-not-allowed select-none">
+                  OpenAI
+                </div>
+              </div>
               <SelectField
                 label="Modelo"
                 value={form.aiModel}
@@ -80,26 +78,23 @@ export function AutomationSettingsSection({
               </div>
             </div>
 
-            <TextField
-              label="API key"
-              type="password"
-              value={form.aiApiKey || ""}
-              onChange={(event) => update("aiApiKey", event.target.value)}
-              placeholder="Chave de API"
-            />
-
-            {selectedProvider !== "openai" && (
+            <div className="space-y-1.5">
               <TextField
-                label="OpenAI API key (transcrição de áudio)"
+                label="API key"
                 type="password"
-                value={form.openaiTranscriptionKey || ""}
-                onChange={(event) =>
-                  update("openaiTranscriptionKey", event.target.value)
-                }
-                placeholder="Chave OpenAI para transcrever áudios"
-                description="Necessária para transcrição de áudio ao usar Anthropic como provedor principal."
+                value={form.aiApiKey || ""}
+                onChange={(event) => update("aiApiKey", event.target.value)}
+                placeholder="sk-..."
               />
-            )}
+              <a
+                href="https://platform.openai.com/api-keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+              >
+                Gerar chave no painel da OpenAI →
+              </a>
+            </div>
 
             <CheckboxField
               variant="switch"
@@ -149,7 +144,10 @@ export function AutomationSettingsSection({
                     onChange={(event) =>
                       update(
                         "followUpDelayHours",
-                        parseInteger(event.target.value, form.followUpDelayHours),
+                        parseInteger(
+                          event.target.value,
+                          form.followUpDelayHours,
+                        ),
                       )
                     }
                     min={1}
@@ -172,20 +170,36 @@ export function AutomationSettingsSection({
                   />
                 </div>
 
+                {!!form.followUpCustomInstructions && (
+                  <div className="text-xs text-neutral">
+                    Os campos acima sempre prevalecem sobre o roteiro — o
+                    sistema controla <strong>quando</strong> e{" "}
+                    <strong>quantas vezes</strong> envia. O roteiro controla
+                    apenas o <strong>conteúdo</strong> de cada mensagem.
+                  </div>
+                )}
+
                 <div className="space-y-3 rounded-xl border border-border bg-surface-raised p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-medium text-foreground">Roteiro personalizado</p>
-                      <p className="mt-0.5 text-xs text-neutral">
-                        Descreva em texto livre como você quer que a IA faça os follow-ups. Ela vai seguir exatamente o que você escrever.
-                      </p>
+                      <div className="text-sm font-medium text-foreground">
+                        Roteiro personalizado
+                      </div>
+                      <div className="mt-0.5 text-xs text-neutral">
+                        Descreva em texto livre como você quer que a IA faça os
+                        follow-ups. Ela vai seguir exatamente o que você
+                        escrever.
+                      </div>
                     </div>
                     <CheckboxField
                       variant="switch"
                       label=""
                       checked={!!form.followUpCustomInstructions}
                       onChange={(checked) =>
-                        update("followUpCustomInstructions", checked ? " " : null)
+                        update(
+                          "followUpCustomInstructions",
+                          checked ? " " : null,
+                        )
                       }
                     />
                   </div>
@@ -194,18 +208,26 @@ export function AutomationSettingsSection({
                     <div className="space-y-2">
                       <TextareaField
                         label=""
-                        value={form.followUpCustomInstructions === " " ? "" : form.followUpCustomInstructions}
+                        value={
+                          form.followUpCustomInstructions === " "
+                            ? ""
+                            : form.followUpCustomInstructions
+                        }
                         onChange={(event) =>
-                          update("followUpCustomInstructions", event.target.value || null)
+                          update(
+                            "followUpCustomInstructions",
+                            event.target.value || null,
+                          )
                         }
                         rows={5}
                         placeholder={`Exemplos do que você pode escrever:
 
 "Faça no máximo 3 follow-ups. No primeiro, mencione o apartamento que o cliente viu e pergunte se ele ainda tem interesse. No segundo, ofereça agendar uma visita no fim de semana. No terceiro, informe que o imóvel está com alta procura."`}
                       />
-                      <p className="text-xs text-neutral">
-                        A IA mantém o tom natural de WhatsApp e nunca se revela como robô — só o conteúdo muda.
-                      </p>
+                      <div className="text-xs text-neutral">
+                        A IA mantém o tom natural de WhatsApp e nunca se revela
+                        como robô — só o conteúdo muda.
+                      </div>
                     </div>
                   )}
                 </div>
@@ -242,7 +264,9 @@ export function AutomationSettingsSection({
                   <TextField
                     label="Voice ID"
                     value={form.elevenlabsVoiceId || ""}
-                    onChange={(e) => update("elevenlabsVoiceId", e.target.value || null)}
+                    onChange={(e) =>
+                      update("elevenlabsVoiceId", e.target.value || null)
+                    }
                     placeholder="Ex: pNInz6obpgDQGcFmaJgB"
                     description="Cole o ID da voz do ElevenLabs."
                   />

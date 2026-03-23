@@ -168,7 +168,6 @@ export function SettingsPageClient({
             modelHelpText={modelHelpText}
             modelOptions={modelOptions}
             saveError={saveError}
-            selectedProvider={selectedProvider}
             update={update}
           />
         ) : activeSection === "facebook" ? (

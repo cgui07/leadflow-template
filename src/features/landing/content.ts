@@ -151,28 +151,26 @@ export interface LandingContent {
 }
 
 const contactHref =
-  "https://wa.me/5521981424040?text=Olá%2C%20quero%20entender%20como%20o%20LospeFlow%20funciona.";
+  "https://wa.me/5521981424040?text=Olá%2C%20quero%20entender%20como%20o%20LeadFlow%20funciona.";
 
 export const landingContent = {
   brand: {
-    name: "LospeFlow",
+    name: "LeadFlow",
     logoUrl: "/lead-logo.png",
-    description:
-      "Atendimento e qualificação de leads para corretores autônomos.",
+    description: "Agente de vendas imobiliárias com IA, voz e automação completa.",
   },
   header: {
     contactAction: {
-      label: "Pedir orçamento",
+      label: "Falar com a equipe",
       href: contactHref,
       external: true,
     },
   },
   hero: {
-    eyebrow:
-      "Responda em segundos. Organize sem esforço. Priorize com clareza.",
-    title: "Transforme o WhatsApp em um funil simples de vendas imobiliárias.",
+    eyebrow: "Responde, qualifica, envia PDF e agenda visita — tudo automático.",
+    title: "Seu agente de vendas imobiliárias trabalhando 24h no WhatsApp.",
     description:
-      "O LospeFlow atende o primeiro contato, coleta informações essenciais e entrega ao corretor apenas os leads com maior probabilidade de compra.",
+      "O LeadFlow atende cada lead com a sua voz clonada, apresenta imóveis do seu catálogo, envia fichas em PDF e agenda visitas — sem você precisar digitar uma palavra.",
     primaryAction: {
       label: "Entenda melhor com a nossa equipe",
       href: contactHref,
@@ -182,37 +180,37 @@ export const landingContent = {
     },
     signals: [
       {
-        label: "Entrada",
-        title: "Novo lead cai no funil certo",
+        label: "Resposta",
+        title: "Atende com a sua voz clonada",
         description:
-          "O primeiro contato entra organizado e recebe resposta sem espera.",
-        badge: "em segundos",
+          "A IA responde em áudio PTT usando a sua própria voz — o lead acha que é você.",
+        badge: "voz real",
         icon: "lead",
       },
       {
-        label: "Qualificação",
-        title: "IA coleta região e faixa",
+        label: "Catálogo",
+        title: "Apresenta imóveis e envia PDF",
         description:
-          "As informações mais importantes entram no contexto logo no início.",
-        badge: "dados certos",
+          "A IA conhece seu catálogo e manda a ficha em PDF do imóvel certo na hora certa.",
+        badge: "automático",
         icon: "qualify",
       },
       {
-        label: "Entrega",
-        title: "Corretor assume com clareza",
+        label: "Fechamento",
+        title: "Agenda visita e faz follow-up",
         description:
-          "Histórico, prioridade e próximo passo chegam prontos para seguir.",
-        badge: "mais foco",
+          "Detecta intenção de visita, cria o agendamento e retoma leads frios sozinho.",
+        badge: "sem esforço",
         icon: "handoff",
       },
     ],
     highlights: [
-      { label: "Resposta inicial", value: "instantânea" },
+      { label: "Resposta em áudio", value: "voz clonada" },
+      { label: "Catálogo de imóveis", value: "com PDF" },
       { label: "Qualificação", value: "automática" },
-      { label: "Operação", value: "simples" },
-      { label: "Priorização", value: "inteligente" },
-      { label: "Contexto", value: "completo" },
-      { label: "Follow-up", value: "ativo" },
+      { label: "Agendamento", value: "de visitas" },
+      { label: "Follow-up", value: "inteligente" },
+      { label: "Operação", value: "24h/7 dias" },
     ],
   },
   preview: {
@@ -224,39 +222,37 @@ export const landingContent = {
     priorityLeads: [
       {
         name: "Mariana Souza",
-        stage: "Pronta para visita",
-        detail: "Busca apartamento de 2 quartos na Zona Sul até R$ 780 mil.",
-        score: "92/100",
-        eta: "Responder agora",
+        stage: "Visita agendada pela IA",
+        detail: "Quer apartamento de 2 quartos na Zona Sul até R$ 780 mil. IA enviou PDF e agendou visita para sábado.",
+        score: "94/100",
+        eta: "Sábado, 10h",
       },
       {
         name: "Paulo Henrique",
-        stage: "Em qualificação",
-        detail: "Quer casa em condomínio e pretende comprar em até 90 dias.",
-        score: "81/100",
+        stage: "PDF enviado — aguardando",
+        detail: "Pediu opções de casa em condomínio. IA apresentou 3 imóveis e enviou as fichas em PDF.",
+        score: "82/100",
         eta: "Hoje, 14h",
       },
       {
         name: "Ana Beatriz",
         stage: "Follow-up automático",
-        detail: "Parou de responder após pedir opções na Barra da Tijuca.",
-        score: "63/100",
+        detail: "Parou de responder após ver opções na Barra da Tijuca. IA retomou o contato ontem.",
+        score: "65/100",
         eta: "Amanhã, 10h",
       },
       {
         name: "Lucas Martins",
-        stage: "Aguardando retorno",
-        detail:
-          "Visitou duas opções em Botafogo e quer comparar financiamento antes de decidir.",
+        stage: "Qualificando interesse",
+        detail: "Quer comparar financiamento antes de decidir. IA está coletando faixa e prazo.",
         score: "76/100",
         eta: "Hoje, 17h",
       },
       {
         name: "Juliana Costa",
         stage: "Interesse aquecido",
-        detail:
-          "Pediu opções de cobertura na Tijuca e quer entender disponibilidade para visita nesta semana.",
-        score: "84/100",
+        detail: "Pediu opções de cobertura na Tijuca. IA enviou áudio com os destaques do imóvel.",
+        score: "85/100",
         eta: "Amanhã, 9h",
       },
     ],
@@ -266,165 +262,171 @@ export const landingContent = {
       leadName: "Mariana Souza",
       messages: [
         {
-          role: "Assistente",
-          message:
-            "Olá, aqui e da equipe LospeFlow. Vi que você tem interesse em um imóvel. Posso te ajudar com algumas opções.",
-        },
-        {
           role: "Cliente",
-          message: "Estou procurando apartamento na Zona Oeste.",
+          message: "Oi, vi o anúncio do apartamento. Tem mais detalhes?",
         },
         {
           role: "Assistente",
           message:
-            "Perfeito. Você busca para morar ou investir? E qual faixa de valor faz mais sentido hoje?",
+            "Oi Mariana! Tenho sim — é um 2 quartos no Recreio com varanda, 78m² e lazer completo. Já te mando a ficha completa em PDF.",
         },
         {
           role: "Cliente",
+          message: "Que ótimo! E dá pra visitar esse fim de semana?",
+        },
+        {
+          role: "Assistente",
           message:
-            "Para morar. Até R$ 650 mil e quero comprar ainda este semestre.",
+            "Dá sim! Tenho sábado às 10h disponível. Posso confirmar pra você?",
         },
       ],
       profileLabel: "Perfil gerado pela IA",
       profileFields: [
-        { label: "Região", value: "Zona Sul" },
+        { label: "Região", value: "Recreio / Barra" },
         { label: "Faixa", value: "Até R$ 780 mil" },
-        { label: "Prazo", value: "Até 60 dias" },
-        { label: "Próximo passo", value: "Agendar visita" },
+        { label: "Prazo", value: "Imediato" },
+        { label: "Próximo passo", value: "Visita — sábado 10h" },
       ],
     },
     supportCards: [
       {
-        title: "Follow-up",
-        description: "Mensagens programadas para não perder leads frios.",
+        title: "Voz clonada",
+        description: "Responde em áudio PTT com a sua voz real — o lead não percebe que é IA.",
       },
       {
-        title: "Organização",
-        description:
-          "Histórico centralizado para o corretor retomar a conversa com contexto.",
+        title: "PDF automático",
+        description: "Envia a ficha do imóvel certo no momento em que o lead demonstra interesse.",
       },
     ],
   },
   process: {
     eyebrow: "Como funciona",
-    title: "Um fluxo direto para responder, qualificar e entregar contexto.",
+    title: "Um agente completo que vende, qualifica e agenda por você.",
     description:
-      "O sistema não substitui o corretor. Ele organiza a entrada, faz a triagem inicial e cria clareza sobre quem precisa de atenção imediata.",
-    journeyLabel: "Veja o fluxo acontecendo",
-    journeyTitle: 'Do primeiro "Oi" ao lead pronto para atendimento.',
+      "O LeadFlow não é só um chatbot. É um agente de vendas que conhece seu catálogo, fala com sua voz, manda documentos e agenda visitas — enquanto você foca em fechar negócio.",
+    journeyLabel: "Veja o fluxo completo",
+    journeyTitle: 'Do primeiro "Oi" à visita agendada — sem você tocar no celular.',
     journeyDescription:
-      "O cliente percebe uma conversa fluida. O corretor recebe prioridade, contexto e próximo passo sem precisar montar nada manualmente.",
-    journeyBadge: "processo visível e fácil de entender",
+      "O lead tem uma conversa natural e profissional. Você recebe o contexto completo, o imóvel já apresentado, o PDF já enviado e a visita já marcada.",
+    journeyBadge: "agente autônomo de ponta a ponta",
     customerPerspectiveEyebrow: "o que o cliente percebe",
-    customerPerspectiveTitle: "Atendimento rápido, natural e profissional.",
+    customerPerspectiveTitle: "Um corretor atencioso, disponível e rápido.",
     customerPerspectiveDescription:
-      "Em vez de esperar resposta ou preencher um processo pesado, o lead entra em uma conversa enxuta que já move a oportunidade para o ponto certo.",
+      "O lead recebe resposta em segundos, ouve áudios com voz real do corretor, recebe PDFs com detalhes do imóvel e sente que está sendo bem atendido desde o primeiro contato.",
     stages: [
       {
         label: "Entrada",
         title: "Lead chega pelo WhatsApp",
         description:
-          "O contato entra a partir do anúncio ou indicação e cai no fluxo certo imediatamente.",
+          "O contato entra a partir do anúncio ou indicação e é atendido em segundos, sem fila.",
         icon: "lead",
-        metric: "sem fila",
+        metric: "sem espera",
       },
       {
         label: "Resposta",
-        title: "Assistente abre a conversa",
+        title: "IA responde com sua voz",
         description:
-          "Uma primeira mensagem profissional responde em segundos e evita que o lead esfrie.",
+          "Áudio PTT com voz clonada do corretor ou texto — natural como se fosse você mesmo digitando.",
         icon: "reply",
-        metric: "em segundos",
+        metric: "voz real",
+      },
+      {
+        label: "Catálogo",
+        title: "Apresenta imóvel e envia PDF",
+        description:
+          "A IA conhece seu catálogo e manda a ficha em PDF do imóvel mais adequado automaticamente.",
+        icon: "qualify",
+        metric: "PDF na hora",
       },
       {
         label: "Qualificação",
-        title: "IA coleta o que importa",
+        title: "Coleta região, faixa e prazo",
         description:
-          "Região, faixa, prazo e intenção de compra entram no contexto sem conversa arrastada.",
-        icon: "qualify",
-        metric: "dados certos",
-      },
-      {
-        label: "Prioridade",
-        title: "Sistema ordena o atendimento",
-        description:
-          "Quem está mais pronto para avançar sobe na frente com score e próximo passo definidos.",
+          "Score de interesse calculado em tempo real para você saber quem merece atenção imediata.",
         icon: "prioritize",
-        metric: "foco real",
+        metric: "score real",
       },
       {
-        label: "Entrega",
-        title: "Corretor assume com clareza",
+        label: "Agenda",
+        title: "Visita marcada automaticamente",
         description:
-          "A passagem acontece com histórico, resumo e contexto suficiente para seguir vendendo.",
+          "Detecta intenção de visita, agenda no calendário e envia confirmação — sem intervenção manual.",
         icon: "handoff",
-        metric: "handoff limpo",
+        metric: "zero esforço",
       },
     ],
     outcomes: [
       {
         label: "Cliente vê",
-        value: "Conversa natural",
+        value: "Atendimento humano",
         description:
-          "Uma troca objetiva, profissional e sem parecer formulário engessado.",
+          "Uma conversa fluida, com voz real e respostas contextuais — sem parecer robô.",
       },
       {
         label: "IA entrega",
-        value: "Contexto pronto",
+        value: "Imóvel + PDF certos",
         description:
-          "Região, faixa, prazo e interesse chegam organizados para a equipe.",
+          "O imóvel mais adequado apresentado com ficha completa no momento certo.",
       },
       {
         label: "Corretor ganha",
-        value: "Prioridade clara",
+        value: "Visita agendada",
         description:
-          "Fica evidente quem precisa de resposta imediata e qual deve ser o próximo movimento.",
+          "Recebe o lead qualificado com contexto completo, PDF já enviado e visita já marcada.",
       },
     ],
     steps: [
       {
-        title: "Resposta imediata no WhatsApp",
+        title: "Resposta em áudio com sua voz",
         description:
-          "Todo novo contato recebe uma resposta profissional em segundos, mesmo quando o corretor está em visita ou dirigindo.",
+          "Grave 30 segundos de áudio e o sistema clona sua voz. A partir daí, cada resposta soa como você — mesmo quando você está em uma visita ou dirigindo.",
       },
       {
-        title: "Conversa curta e objetiva",
+        title: "Catálogo inteligente com envio de PDF",
         description:
-          "O assistente faz poucas perguntas, mas captura o que importa: região, faixa de valor, prazo e intenção de compra.",
+          "Cadastre seus imóveis e faça upload das fichas em PDF. A IA apresenta o imóvel certo para cada cliente e envia o documento automaticamente quando há interesse.",
       },
       {
-        title: "Entrega do lead pronto",
+        title: "Agendamento e follow-up automáticos",
         description:
-          "Quando o lead demonstra intenção real, o corretor assume a conversa com histórico, contexto e prioridade definidos.",
+          "Quando o lead aceita uma visita, o sistema agenda no calendário. Leads que somem recebem follow-ups personalizados com roteiro que você mesmo define.",
       },
     ],
   },
   benefits: {
     eyebrow: "O que o corretor ganha",
-    title: "Menos perda de lead. Mais foco em quem realmente quer comprar.",
+    title: "Um agente trabalhando por você — de dia, de noite, nos fins de semana.",
     description:
-      "O valor do produto está na capacidade de aumentar a taxa de resposta e reduzir o abandono causado por demora, desorganização e ausência de follow-up.",
+      "Enquanto você está em visita, o LeadFlow atende, qualifica, envia PDF e agenda. Você só entra em cena quando o lead já está pronto para fechar.",
     items: [
       {
         description:
-          "Mini CRM com histórico completo de mensagens e ficha automática do lead.",
+          "Respostas em áudio PTT com voz clonada do corretor — o lead não percebe que é IA.",
       },
       {
         description:
-          "Classificação de interesse para destacar quem merece atendimento imediato.",
+          "Catálogo de imóveis com envio automático de PDF quando o lead demonstra interesse.",
       },
       {
         description:
-          "Follow-ups programados para leads frios ou que deixaram de responder.",
+          "Agendamento automático de visitas integrado ao Google Calendar.",
       },
       {
         description:
-          "Interface simples para corretores autônomos que não querem aprender um CRM pesado.",
+          "Score de qualificação em tempo real para priorizar quem está mais próximo de comprar.",
+      },
+      {
+        description:
+          "Follow-up com roteiro personalizado pelo corretor para reativar leads frios.",
+      },
+      {
+        description:
+          "Mini CRM com histórico completo, resumo gerado por IA e pipeline visual por etapa.",
       },
     ],
   },
   footer: {
-    label: "LospeFlow - WhatsApp + IA + CRM leve",
+    label: "LeadFlow — IA, voz, catálogo e CRM para corretores de imóveis",
     action: {
       label: "Falar com a equipe",
       href: contactHref,
