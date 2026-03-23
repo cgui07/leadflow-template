@@ -242,17 +242,12 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
           onChange={handlePdfUpload}
         />
         <div className="flex items-center gap-2 w-full">
-          {property.pdfs.length > 0 && (
-            <Button
-              variant="unstyled"
-              type="button"
-              onClick={() => property.pdfs.length > 1 ? setPdfModalOpen(true) : undefined}
-              className={`flex items-center gap-2 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5 min-w-0 flex-1 ${property.pdfs.length > 1 ? "cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-colors" : "cursor-default"}`}
-            >
+          {property.pdfs.length === 1 && (
+            <div className="flex items-center gap-2 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5 min-w-0 flex-1">
               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-primary/10">
                 <FileText size={12} className="text-primary" />
               </div>
-              <div className="min-w-0 flex-1 text-left">
+              <div className="min-w-0 flex-1">
                 <div className="truncate text-xs font-medium text-neutral-ink leading-tight">
                   {property.pdfs[0].filename}
                 </div>
@@ -260,34 +255,50 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
                   {formatFileSize(property.pdfs[0].size)}
                 </div>
               </div>
-              {property.pdfs.length === 1 && (
-                <Button
-                  variant="ghost"
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePdfDelete(property.pdfs[0].url);
-                  }}
-                  disabled={deletingPdfUrl === property.pdfs[0].url}
-                  className="shrink-0 rounded p-0.5 text-neutral-muted transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-50"
-                >
-                  <X size={12} />
-                </Button>
-              )}
-              {property.pdfs.length > 1 && (
-                <Badge variant="info" size="sm">
-                  +{property.pdfs.length - 1}
-                </Badge>
-              )}
-            </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                type="button"
+                onClick={() => handlePdfDelete(property.pdfs[0].url)}
+                disabled={deletingPdfUrl === property.pdfs[0].url}
+                className="shrink-0 !p-0.5 text-neutral-muted hover:bg-danger/10 hover:text-danger"
+              >
+                <X size={12} />
+              </Button>
+            </div>
+          )}
+          {property.pdfs.length > 1 && (
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setPdfModalOpen(true)}
+              onKeyDown={(e) => e.key === "Enter" && setPdfModalOpen(true)}
+              className="flex items-center gap-2 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5 min-w-0 flex-1 cursor-pointer transition-colors hover:border-primary/30 hover:bg-primary/5"
+            >
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-primary/10">
+                <FileText size={12} className="text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-xs font-medium text-neutral-ink leading-tight">
+                  {property.pdfs[0].filename}
+                </div>
+                <div className="text-[10px] text-neutral-muted leading-tight">
+                  {formatFileSize(property.pdfs[0].size)}
+                </div>
+              </div>
+              <Badge variant="info" size="sm">
+                +{property.pdfs.length - 1}
+              </Badge>
+            </div>
           )}
           <Button
             variant="ghost"
+            size="sm"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingPdf}
-            className="flex items-center gap-1.5 text-xs text-neutral hover:text-primary transition-colors shrink-0"
+            icon={<FileUp size={13} />}
+            className="text-neutral hover:text-primary shrink-0"
           >
-            <FileUp size={13} />
             {uploadingPdf ? "Enviando..." : property.pdfs.length > 0 ? "Adicionar" : "Adicionar PDF"}
           </Button>
         </div>
