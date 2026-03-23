@@ -88,28 +88,50 @@ export function PropertyCard({
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.type !== "application/pdf") {
-      alert("Apenas arquivos PDF são aceitos.");
+      setUploadError("Apenas arquivos PDF são aceitos.");
       return;
     }
     if (file.size > 100 * 1024 * 1024) {
-      alert("O arquivo excede o limite de 100MB.");
+      setUploadError("O arquivo excede o limite de 100MB.");
       return;
     }
     setUploadingPdf(true);
     setUploadError(null);
     try {
-      const formData = new FormData();
-      formData.append("pdf", file);
-      const res = await fetch(`/api/properties/${property.id}/pdf`, {
-        method: "POST",
-        body: formData,
+      // Step 1: get a pre-signed upload URL (bypasses Vercel body size limit)
+      const presignRes = await fetch(
+        `/api/properties/${property.id}/pdf/presign?filename=${encodeURIComponent(file.name)}&size=${file.size}`,
+      );
+      if (!presignRes.ok) {
+        const data = await presignRes.json().catch(() => ({}));
+        setUploadError(data.error ?? "Erro ao iniciar upload.");
+        return;
+      }
+      const { uploadUrl, key } = await presignRes.json();
+
+      // Step 2: upload directly to R2 (no Vercel size limit)
+      const putRes = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": "application/pdf" },
+        body: file,
       });
-      if (res.ok) {
-        const newEntry: PdfEntry = await res.json();
+      if (!putRes.ok) {
+        setUploadError("Erro ao enviar arquivo. Tente novamente.");
+        return;
+      }
+
+      // Step 3: confirm the upload and save metadata
+      const confirmRes = await fetch(`/api/properties/${property.id}/pdf/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key, filename: file.name, size: file.size }),
+      });
+      if (confirmRes.ok) {
+        const newEntry: PdfEntry = await confirmRes.json();
         onPdfsChange(property.id, [...property.pdfs, newEntry]);
       } else {
-        const data = await res.json().catch(() => ({}));
-        setUploadError(data.error ?? "Erro ao fazer upload do PDF.");
+        const data = await confirmRes.json().catch(() => ({}));
+        setUploadError(data.error ?? "Erro ao finalizar upload.");
       }
     } catch {
       setUploadError("Erro de conexão. Tente novamente.");

@@ -3,6 +3,8 @@ import { logger } from "./logger";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
+export const MAX_PDF_SIZE = 100 * 1024 * 1024; // 100MB
+
 const BUCKET = env.R2_BUCKET;
 
 function getR2Client() {
@@ -52,6 +54,23 @@ export async function deletePropertyPdf(storagePath: string): Promise<void> {
   } catch (err) {
     logger.error("Delete failed", { error: err instanceof Error ? err.message : String(err) });
   }
+}
+
+export function buildPdfStorageKey(userId: string, propertyId: string): string {
+  return `${userId}/${propertyId}/${Date.now()}.pdf`;
+}
+
+export async function generatePresignedUploadUrl(
+  key: string,
+  expiresInSeconds = 300,
+): Promise<string> {
+  const client = getR2Client();
+  const command = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ContentType: "application/pdf",
+  });
+  return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
 }
 
 export async function getPropertyPdfUrl(
