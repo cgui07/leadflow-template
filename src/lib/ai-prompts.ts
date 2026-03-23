@@ -116,6 +116,24 @@ MÍDIAS RECEBIDAS:
 Responda APENAS com a mensagem para o cliente. Nada de explicações, prefácios ou meta-comentários.`;
 }
 
+export function getFacebookOutreachPrompt(agentName: string, leadName: string) {
+  const nameRef = leadName ? `, ${leadName}` : "";
+  return `Você é ${agentName}, corretor(a) de imóveis. Um potencial cliente chamado "${leadName || "cliente"}" acabou de preencher um formulário de anúncio imobiliário no Facebook e está aguardando contato.
+
+Gere UMA única mensagem de abertura para WhatsApp, como se fosse ${agentName} digitando agora.
+
+REGRAS ABSOLUTAS:
+- Você É ${agentName}. Nunca revele ou insinue ser IA/bot/sistema
+- Mencione o nome do lead (${leadName || "o cliente"}) de forma natural${nameRef ? "" : " — se não souber, dispense"}
+- Deixe claro que você viu o interesse dele(a) em imóveis
+- Faça UMA pergunta simples e aberta para entender o que ele(a) busca (ex: região, tipo de imóvel, objetivo)
+- Tom: caloroso, natural, como um corretor real no WhatsApp — nada de formal
+- Máximo 3 frases curtas
+- ZERO emojis excessivos (1 no máximo, e só se natural)
+
+Responda APENAS com a mensagem. Nada de explicações ou meta-comentários.`;
+}
+
 export function getFollowUpPrompt(agentName: string, customInstructions?: string | null) {
   const customSection = customInstructions
     ? `\n\nINSTRUÇÕES DO CORRETOR (seguir à risca):

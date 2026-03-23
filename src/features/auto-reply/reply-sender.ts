@@ -141,7 +141,13 @@ export async function sendPropertyPdfs(
         id: { in: propertyIds },
         user_id: userId,
       },
-      select: { id: true, title: true, pdf_url: true, pdf_filename: true, pdfs: true },
+      select: {
+        id: true,
+        title: true,
+        pdf_url: true,
+        pdf_filename: true,
+        pdfs: true,
+      },
     });
 
     logger.info("Properties found for PDF send", {
@@ -159,20 +165,32 @@ export async function sendPropertyPdfs(
 
       for (const pdf of pdfsArray) {
         if (pdf.url) {
-          pdfList.push({ storagePath: pdf.url, filename: pdf.filename ?? "imovel.pdf" });
+          pdfList.push({
+            storagePath: pdf.url,
+            filename: pdf.filename ?? "imovel.pdf",
+          });
         }
       }
 
       // Fallback para campo legado se não houver pdfs no array
       if (pdfList.length === 0 && prop.pdf_url) {
-        pdfList.push({ storagePath: prop.pdf_url, filename: prop.pdf_filename ?? "imovel.pdf" });
+        pdfList.push({
+          storagePath: prop.pdf_url,
+          filename: prop.pdf_filename ?? "imovel.pdf",
+        });
       }
 
-      logger.info("PDFs to send for property", { propertyId: prop.id, count: pdfList.length });
+      logger.info("PDFs to send for property", {
+        propertyId: prop.id,
+        count: pdfList.length,
+      });
 
       for (const pdf of pdfList) {
         const signedUrl = await getPropertyPdfUrl(pdf.storagePath);
-        logger.info("Sending PDF", { propertyId: prop.id, filename: pdf.filename });
+        logger.info("Sending PDF", {
+          propertyId: prop.id,
+          filename: pdf.filename,
+        });
         await sendAndSaveMessage(
           getWhatsAppConfig(whatsappPhoneId),
           conversationId,

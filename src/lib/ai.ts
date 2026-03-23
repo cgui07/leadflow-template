@@ -8,6 +8,7 @@ export {
   formatPropertyForPrompt,
   getQualificationPrompt,
   getFollowUpPrompt,
+  getFacebookOutreachPrompt,
   getExtractionPrompt,
   getSummaryPrompt,
   getPropertyExtractionPrompt,
@@ -22,6 +23,7 @@ import type { AIConfig, MessageContent } from "./ai-client";
 import {
   getQualificationPrompt,
   getFollowUpPrompt,
+  getFacebookOutreachPrompt,
   getExtractionPrompt,
   getSummaryPrompt,
   getPropertyExtractionPrompt,
@@ -44,6 +46,16 @@ export async function generateAutoReply(
   }));
 
   return callAI(config, getQualificationPrompt(agentName, properties, isVoiceReply), messages);
+}
+
+export async function generateFacebookOutreachMessage(
+  config: AIConfig,
+  agentName: string,
+  leadName: string,
+) {
+  return callAI(config, getFacebookOutreachPrompt(agentName, leadName), [
+    { role: "user", content: "inicie a conversa" },
+  ]);
 }
 
 export async function generateFollowUpMessage(

@@ -12,6 +12,8 @@ import {
   getFacebookVerifyToken,
   verifyFacebookSignature,
 } from "@/lib/facebook";
+import { generateFacebookOutreachMessage } from "@/lib/ai";
+import type { AIConfig } from "@/lib/ai";
 
 export async function GET(req: NextRequest) {
   const mode = req.nextUrl.searchParams.get("hub.mode");
@@ -164,21 +166,38 @@ async function processLeadgen(pageId: string, leadgenId: string) {
     return;
   }
 
-  const conversation = lead.conversation!;
-  const greetingMessage = settings.greetingMessage;
-
-  if (!greetingMessage) {
+  if (!settings.aiApiKey) {
+    logger.warn("[facebook] No AI API key configured, skipping outreach", { userId: user.id });
     return;
   }
 
+  const conversation = lead.conversation!;
+  const agentName = user.name || "Corretor";
+
   try {
     const config = getWhatsAppConfig(settings.whatsappPhoneId);
+    const aiConfig: AIConfig = {
+      provider: settings.aiProvider,
+      apiKey: settings.aiApiKey,
+      model: settings.aiModel,
+    };
+
+    const outreachMessage = await generateFacebookOutreachMessage(
+      aiConfig,
+      agentName,
+      contactName,
+    );
+
+    if (!outreachMessage) {
+      logger.warn("[facebook] AI returned empty outreach message", { leadId: lead.id });
+      return;
+    }
 
     await sendAndSaveMessage(
       config,
       conversation.id,
       whatsappChatId,
-      greetingMessage,
+      outreachMessage,
       "bot",
     );
 

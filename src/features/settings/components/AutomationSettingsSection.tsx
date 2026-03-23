@@ -67,7 +67,6 @@ export function AutomationSettingsSection({
                 options={modelOptions}
                 onChange={(value) => update("aiModel", value)}
                 placeholder="Selecione um modelo"
-                searchable
               />
             </div>
             <div className="space-y-1.5">

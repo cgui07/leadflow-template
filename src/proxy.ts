@@ -12,6 +12,7 @@ const PUBLIC_PATHS = new Set([
 const PUBLIC_PREFIXES = [
   "/api/auth",
   "/api/whatsapp",
+  "/api/facebook",
   "/api/followup",
   "/api/cron",
 ];
