@@ -65,6 +65,7 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [deletingPdfUrl, setDeletingPdfUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -91,6 +92,7 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
       return;
     }
     setUploadingPdf(true);
+    setUploadError(null);
     try {
       const formData = new FormData();
       formData.append("pdf", file);
@@ -101,7 +103,12 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
       if (res.ok) {
         const newEntry: PdfEntry = await res.json();
         onPdfsChange(property.id, [...property.pdfs, newEntry]);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setUploadError(data.error ?? "Erro ao fazer upload do PDF.");
       }
+    } catch {
+      setUploadError("Erro de conexão. Tente novamente.");
     } finally {
       setUploadingPdf(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -241,6 +248,9 @@ export function PropertyCard({ property, onDelete, onPdfsChange }: PropertyCardP
           hidden
           onChange={handlePdfUpload}
         />
+        {uploadError && (
+          <div className="mb-2 text-xs text-danger">{uploadError}</div>
+        )}
         <div className="flex items-center gap-2 w-full">
           {property.pdfs.length > 0 && (
             <Button

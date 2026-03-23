@@ -76,6 +76,7 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
 
       const property = { ...(data as Property), pdfs: [] as PdfEntry[] };
 
+      let pdfError = false;
       for (const file of pendingPdfs) {
         const formData = new FormData();
         formData.append("pdf", file);
@@ -86,7 +87,12 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
         if (pdfRes.ok) {
           const newEntry: PdfEntry = await pdfRes.json();
           property.pdfs.push(newEntry);
+        } else {
+          pdfError = true;
         }
+      }
+      if (pdfError) {
+        setError("Imóvel salvo, mas houve erro ao fazer upload de um ou mais PDFs.");
       }
       setPendingPdfs([]);
 
