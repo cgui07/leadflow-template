@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const state = searchParams.get("state");
   const errorParam = searchParams.get("error");
 
-  const settingsUrl = `${env.NEXT_PUBLIC_APP_URL}/settings?section=calendar`;
+  const settingsUrl = `${env.NEXT_PUBLIC_APP_URL}/settings?section=automation`;
 
   if (errorParam || !code || !state) {
     const reason = errorParam ?? "missing_params";

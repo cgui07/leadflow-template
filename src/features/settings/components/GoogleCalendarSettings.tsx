@@ -75,7 +75,7 @@ export function GoogleCalendarSettings() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <>
       <SectionContainer
         title="Google Agenda"
         icon={<Calendar className="h-5 w-5 text-secondary" />}
@@ -147,37 +147,7 @@ export function GoogleCalendarSettings() {
         </div>
       </SectionContainer>
 
-      <SectionContainer title="Como funciona">
-        <div className="space-y-3 text-sm text-neutral">
-          <p>
-            1. Clique em <strong>Conectar Google Agenda</strong> e autorize o
-            acesso via conta Google.
-          </p>
-          <p>
-            2. Quando um cliente propuser uma data de visita no WhatsApp, a IA
-            verificará automaticamente sua agenda.
-          </p>
-          <p>
-            3. Se o horário estiver livre, o evento é criado com lembrete — e
-            o cliente recebe uma confirmação.
-          </p>
-          <p>
-            4. Se estiver ocupado, o sistema sugere horários alternativos
-            disponíveis.
-          </p>
-          <p>
-            5. 1 dia antes da visita, o sistema envia uma mensagem de
-            confirmação ao cliente. Basta responder <strong>SIM</strong> ou{" "}
-            <strong>NÃO</strong>.
-          </p>
-          <p className="text-xs">
-            Os tokens de acesso são armazenados com segurança e renovados
-            automaticamente.
-          </p>
-        </div>
-      </SectionContainer>
-
-      <DeleteConfirmationModal
+<DeleteConfirmationModal
         open={disconnectModalOpen}
         onClose={() => setDisconnectModalOpen(false)}
         onConfirm={handleDisconnectConfirm}
@@ -186,6 +156,6 @@ export function GoogleCalendarSettings() {
         confirmText="Desconectar"
         loading={disconnecting}
       />
-    </div>
+    </>
   );
 }

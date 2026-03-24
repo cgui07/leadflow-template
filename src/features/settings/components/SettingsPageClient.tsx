@@ -6,13 +6,12 @@ import { Button } from "@/components/ui/Button";
 import { useEffect, useMemo, useTransition } from "react";
 import { useSettingsForm } from "../hooks/useSettingsForm";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { GoogleCalendarSettings } from "./GoogleCalendarSettings";
 import { FacebookSettingsSection } from "./FacebookSettingsSection";
+import { Bot, Loader2, Megaphone, Palette, Save } from "lucide-react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { AutomationSettingsSection } from "./AutomationSettingsSection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { TenantCustomizationSection } from "./TenantCustomizationSection";
-import { Bot, Calendar, Loader2, Megaphone, Palette, Save } from "lucide-react";
 import type {
   SettingsSection,
   TenantCustomizationSettings,
@@ -31,7 +30,6 @@ function resolveSection(
   canManageTenant: boolean,
 ): SettingsSection {
   if (requestedSection === "facebook") return "facebook";
-  if (requestedSection === "calendar") return "calendar";
   if (canManageTenant && requestedSection === "design") return "design";
   return "automation";
 }
@@ -62,12 +60,7 @@ export function SettingsPageClient({
         label: "Facebook Ads",
         icon: <Megaphone className="h-4 w-4" />,
       },
-      {
-        id: "calendar",
-        label: "Google Agenda",
-        icon: <Calendar className="h-4 w-4" />,
-      },
-      ...(canManageTenant
+...(canManageTenant
         ? [
             {
               id: "design",
@@ -102,7 +95,7 @@ export function SettingsPageClient({
       title="Configurações"
       subtitle={subtitle}
       actions={
-        activeSection === "automation" || activeSection === "facebook" ? (
+        activeSection !== "design" ? (
           <Button
             icon={<Save className="h-4 w-4" />}
             onClick={save}
@@ -166,8 +159,6 @@ export function SettingsPageClient({
             saveError={saveError}
             update={update}
           />
-        ) : activeSection === "calendar" ? (
-          <GoogleCalendarSettings />
         ) : initialTenant ? (
           <TenantCustomizationSection initialTenant={initialTenant} />
         ) : null}

@@ -33,7 +33,7 @@ export function PipelineColumn({
 
   return (
     <div
-      className={`flex w-full flex-col rounded-xl border bg-gray-ghost md:w-72 md:shrink-0 transition-colors ${
+      className={`flex w-full flex-col rounded-xl border bg-gray-ghost md:w-72 md:shrink-0 md:self-start transition-colors ${
         isDragOver || isColumnDragOver
           ? "border-primary/50 bg-primary/5"
           : "border-neutral-border"

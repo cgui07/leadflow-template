@@ -7,3 +7,5 @@ export { TextareaField } from "./TextareaField";
 export { CheckboxField } from "./CheckboxField";
 export { DateField } from "./DateField";
 export { DurationField } from "./DurationField";
+export { RadioGroupField } from "./RadioGroupField";
+export type { RadioOption } from "./RadioGroupField";

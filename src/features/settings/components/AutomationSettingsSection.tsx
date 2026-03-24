@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Bot, Mic2 } from "lucide-react";
+import { Bot, Mic2 } from "lucide-react";
 import type { UserSettings } from "../contracts";
 import { AI_PROVIDER_OPTIONS } from "@/lib/ai-models";
 import { VoiceCloneRecorder } from "./VoiceCloneRecorder";
+import { GoogleCalendarSettings } from "./GoogleCalendarSettings";
+import { FollowUpSettingsSection } from "./FollowUpSettingsSection";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { WhatsAppConnection } from "@/components/domain/WhatsAppConnection";
 import {
@@ -23,11 +25,6 @@ interface AutomationSettingsSectionProps {
     key: K,
     value: UserSettings[K],
   ) => void;
-}
-
-function parseInteger(value: string, fallback: number): number {
-  const nextValue = Number.parseInt(value, 10);
-  return Number.isFinite(nextValue) ? nextValue : fallback;
 }
 
 export function AutomationSettingsSection({
@@ -52,6 +49,13 @@ export function AutomationSettingsSection({
         <SectionContainer
           title="Inteligência artificial"
           icon={<Bot className="h-5 w-5 text-secondary" />}
+          actions={
+            <CheckboxField
+              variant="switch"
+              checked={form.autoReplyEnabled}
+              onChange={(checked) => update("autoReplyEnabled", checked)}
+            />
+          }
         >
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -87,13 +91,6 @@ export function AutomationSettingsSection({
               </a>
             </div>
 
-            <CheckboxField
-              variant="switch"
-              label="Resposta automática"
-              checked={form.autoReplyEnabled}
-              onChange={(checked) => update("autoReplyEnabled", checked)}
-            />
-
             <DurationField
               label="Tempo para responder"
               description="Defina quanto tempo a IA espera antes de responder uma nova mensagem do cliente."
@@ -113,133 +110,20 @@ export function AutomationSettingsSection({
           />
         </SectionContainer>
 
-        <SectionContainer
-          title="Follow-up automático"
-          icon={<Bell className="h-5 w-5 text-accent" />}
-        >
-          <div className="space-y-4">
-            <CheckboxField
-              variant="switch"
-              label="Ativar follow-ups automáticos"
-              checked={form.followUpEnabled}
-              onChange={(checked) => update("followUpEnabled", checked)}
-            />
-
-            {form.followUpEnabled && (
-              <>
-                <div className="grid grid-cols-2 gap-4">
-                  <TextField
-                    label="Intervalo entre follow-ups"
-                    type="number"
-                    value={String(form.followUpDelayHours)}
-                    onChange={(event) =>
-                      update(
-                        "followUpDelayHours",
-                        parseInteger(
-                          event.target.value,
-                          form.followUpDelayHours,
-                        ),
-                      )
-                    }
-                    min={1}
-                    max={168}
-                    description="Em horas (ex: 24 = 1 dia)"
-                  />
-                  <TextField
-                    label="Máximo de follow-ups"
-                    type="number"
-                    value={String(form.maxFollowUps)}
-                    onChange={(event) =>
-                      update(
-                        "maxFollowUps",
-                        parseInteger(event.target.value, form.maxFollowUps),
-                      )
-                    }
-                    min={1}
-                    max={10}
-                    description="Por lead"
-                  />
-                </div>
-
-                {!!form.followUpCustomInstructions && (
-                  <div className="text-xs text-neutral">
-                    Os campos acima sempre prevalecem sobre o roteiro — o
-                    sistema controla <strong>quando</strong> e{" "}
-                    <strong>quantas vezes</strong> envia. O roteiro controla
-                    apenas o <strong>conteúdo</strong> de cada mensagem.
-                  </div>
-                )}
-
-                <div className="space-y-3 rounded-xl border border-border bg-surface-raised p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-medium text-foreground">
-                        Roteiro personalizado
-                      </div>
-                      <div className="mt-0.5 text-xs text-neutral">
-                        Descreva em texto livre como você quer que a IA faça os
-                        follow-ups. Ela vai seguir exatamente o que você
-                        escrever.
-                      </div>
-                    </div>
-                    <CheckboxField
-                      variant="switch"
-                      label=""
-                      checked={!!form.followUpCustomInstructions}
-                      onChange={(checked) =>
-                        update(
-                          "followUpCustomInstructions",
-                          checked ? " " : null,
-                        )
-                      }
-                    />
-                  </div>
-
-                  {!!form.followUpCustomInstructions && (
-                    <div className="space-y-2">
-                      <TextareaField
-                        label=""
-                        value={
-                          form.followUpCustomInstructions === " "
-                            ? ""
-                            : form.followUpCustomInstructions
-                        }
-                        onChange={(event) =>
-                          update(
-                            "followUpCustomInstructions",
-                            event.target.value || null,
-                          )
-                        }
-                        rows={5}
-                        placeholder={`Exemplos do que você pode escrever:
-
-"Faça no máximo 3 follow-ups. No primeiro, mencione o apartamento que o cliente viu e pergunte se ele ainda tem interesse. No segundo, ofereça agendar uma visita no fim de semana. No terceiro, informe que o imóvel está com alta procura."`}
-                      />
-                      <div className="text-xs text-neutral">
-                        A IA mantém o tom natural de WhatsApp e nunca se revela
-                        como robô — só o conteúdo muda.
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        </SectionContainer>
+        <FollowUpSettingsSection form={form} update={update} />
 
         <SectionContainer
           title="Resposta em áudio"
           icon={<Mic2 className="h-5 w-5 text-primary" />}
-        >
-          <div className="space-y-4">
+          actions={
             <CheckboxField
               variant="switch"
-              label="Ativar respostas em áudio"
               checked={form.voiceReplyEnabled}
               onChange={(checked) => update("voiceReplyEnabled", checked)}
             />
-
-            {form.voiceReplyEnabled && (
+          }
+        >
+          {form.voiceReplyEnabled && (
               <div className="space-y-3">
                 <CheckboxField
                   variant="switch"
@@ -272,8 +156,9 @@ export function AutomationSettingsSection({
                 )}
               </div>
             )}
-          </div>
         </SectionContainer>
+
+        <GoogleCalendarSettings />
       </div>
     </>
   );

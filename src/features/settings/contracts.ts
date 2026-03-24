@@ -43,4 +43,4 @@ export type TenantCustomizationUpdateInput = Pick<
   | "featureFlags"
 >;
 
-export type SettingsSection = "automation" | "facebook" | "calendar" | "design";
+export type SettingsSection = "automation" | "facebook" | "design";

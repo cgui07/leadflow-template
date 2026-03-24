@@ -266,7 +266,7 @@ export function VoiceCloneRecorder({
               variant="ghost"
               type="button"
               onClick={uploadVoice}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-royal"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg whitespace-nowrap bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-royal"
             >
               <Send className="h-4 w-4" />
               Clonar minha voz
