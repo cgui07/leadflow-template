@@ -1,8 +1,9 @@
-import type { PdfEntry } from "./types";
+import type { PdfCategory, PdfEntry } from "./types";
 
 export async function uploadPdfDirect(
   propertyId: string,
   file: File,
+  category: PdfCategory,
 ): Promise<PdfEntry> {
   const presignRes = await fetch(`/api/properties/${propertyId}/pdf/presign`, {
     method: "POST",
@@ -30,7 +31,7 @@ export async function uploadPdfDirect(
   const confirmRes = await fetch(`/api/properties/${propertyId}/pdf`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key, filename, size }),
+    body: JSON.stringify({ key, filename, size, category }),
   });
 
   if (!confirmRes.ok) {

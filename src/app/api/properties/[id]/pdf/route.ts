@@ -3,13 +3,8 @@ import { logger } from "@/lib/logger";
 import { NextRequest } from "next/server";
 import { requireAuth, json, error, handleError } from "@/lib/api";
 import { deletePropertyPdf, verifyUploadExists } from "@/lib/storage";
-
-type PdfEntry = { url: string; filename: string; size: number };
-
-function parsePdfs(raw: unknown): PdfEntry[] {
-  if (Array.isArray(raw)) return raw as PdfEntry[];
-  return [];
-}
+import type { PdfCategory, PdfEntry } from "@/features/properties/types";
+import { isValidPdfCategory, parsePdfEntries } from "@/features/properties/types";
 
 export async function POST(
   req: NextRequest,
@@ -29,14 +24,19 @@ export async function POST(
     }
 
     const body = await req.json();
-    const { key, filename, size } = body as {
+    const { key, filename, size, category } = body as {
       key: string;
       filename: string;
       size: number;
+      category: string;
     };
 
     if (!key || !filename || typeof size !== "number") {
       return error("Campos 'key', 'filename' e 'size' são obrigatórios.", 400);
+    }
+
+    if (!isValidPdfCategory(category)) {
+      return error("Campo 'category' é obrigatório. Valores: BOOK, FLUXO, RENTABILIDADE, PRODUTO_PRONTO.", 400);
     }
 
     if (!key.startsWith(`${user.id}/`)) {
@@ -52,14 +52,15 @@ export async function POST(
       url: key,
       filename,
       size: actualSize,
+      category: category as PdfCategory,
     };
 
-    const pdfs = parsePdfs(property.pdfs);
+    const pdfs = parsePdfEntries(property.pdfs);
     pdfs.push(newEntry);
 
     await prisma.properties.update({
       where: { id },
-      data: { pdfs, updated_at: new Date() },
+      data: { pdfs: JSON.parse(JSON.stringify(pdfs)), updated_at: new Date() },
     });
 
     return json(newEntry);
@@ -92,7 +93,7 @@ export async function DELETE(
       return error("Imóvel não encontrado.", 404);
     }
 
-    const pdfs = parsePdfs(property.pdfs);
+    const pdfs = parsePdfEntries(property.pdfs);
     const exists = pdfs.some((p) => p.url === pdfUrl);
 
     if (!exists) {
@@ -107,7 +108,7 @@ export async function DELETE(
 
     await prisma.properties.update({
       where: { id },
-      data: { pdfs: updated, updated_at: new Date() },
+      data: { pdfs: JSON.parse(JSON.stringify(updated)), updated_at: new Date() },
     });
 
     return json({ ok: true });

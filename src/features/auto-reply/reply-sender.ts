@@ -14,18 +14,28 @@ import {
   sendPresenceUpdate,
 } from "@/lib/whatsapp";
 
+export interface PdfRequest {
+  propertyId: string;
+  category?: string;
+}
+
 export function extractPdfTags(reply: string): {
   cleanReply: string;
   propertyIds: string[];
+  pdfRequests: PdfRequest[];
 } {
-  const regex = /\[ENVIAR_PDF:([a-f0-9-]+)\]/gi;
+  const regex = /\[ENVIAR_PDF:([a-f0-9-]+)(?::([A-Z_]+))?\]/gi;
   const propertyIds: string[] = [];
+  const pdfRequests: PdfRequest[] = [];
   let match;
   while ((match = regex.exec(reply)) !== null) {
-    propertyIds.push(match[1]);
+    const propertyId = match[1];
+    const category = match[2] || undefined;
+    if (!propertyIds.includes(propertyId)) propertyIds.push(propertyId);
+    pdfRequests.push({ propertyId, category });
   }
   const cleanReply = reply.replace(regex, "").trim();
-  return { cleanReply, propertyIds };
+  return { cleanReply, propertyIds, pdfRequests };
 }
 
 export function wait(ms: number) {
@@ -125,16 +135,18 @@ export async function sendTextReply(
 }
 
 export async function sendPropertyPdfs(
-  propertyIds: string[],
+  pdfRequests: PdfRequest[],
   userId: string,
   whatsappPhoneId: string,
   conversationId: string,
   replyJid: string,
 ) {
-  if (propertyIds.length === 0) return;
+  if (pdfRequests.length === 0) return;
+
+  const propertyIds = [...new Set(pdfRequests.map((r) => r.propertyId))];
 
   try {
-    logger.info("sendPropertyPdfs called", { propertyIds, userId });
+    logger.info("sendPropertyPdfs called", { pdfRequests, userId });
 
     const propertiesWithPdf = await prisma.properties.findMany({
       where: {
@@ -156,15 +168,27 @@ export async function sendPropertyPdfs(
     });
 
     for (const prop of propertiesWithPdf) {
-      // Coleta todos os PDFs: array novo (pdfs) + campo legado (pdf_url)
-      const pdfList: Array<{ storagePath: string; filename: string }> = [];
+      const requestedCategories = pdfRequests
+        .filter((r) => r.propertyId === prop.id)
+        .map((r) => r.category);
 
       const pdfsArray = Array.isArray(prop.pdfs)
-        ? (prop.pdfs as Array<{ url: string; filename?: string }>)
+        ? (prop.pdfs as Array<{ url: string; filename?: string; category?: string }>)
         : [];
 
+      const pdfList: Array<{ storagePath: string; filename: string }> = [];
+
       for (const pdf of pdfsArray) {
-        if (pdf.url) {
+        if (!pdf.url) continue;
+        const hasCategory = requestedCategories.some((c) => c != null);
+        if (hasCategory) {
+          if (requestedCategories.includes(pdf.category)) {
+            pdfList.push({
+              storagePath: pdf.url,
+              filename: pdf.filename ?? "imovel.pdf",
+            });
+          }
+        } else {
           pdfList.push({
             storagePath: pdf.url,
             filename: pdf.filename ?? "imovel.pdf",
@@ -183,6 +207,7 @@ export async function sendPropertyPdfs(
       logger.info("PDFs to send for property", {
         propertyId: prop.id,
         count: pdfList.length,
+        requestedCategories,
       });
 
       for (const pdf of pdfList) {

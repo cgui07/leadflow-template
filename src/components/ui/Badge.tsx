@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-type BadgeVariant = "default" | "success" | "warning" | "error" | "info" | "purple";
+type BadgeVariant = "default" | "success" | "warning" | "error" | "info" | "purple" | "teal" | "orange";
 type BadgeSize = "sm" | "md";
 
 interface BadgeProps {
@@ -8,6 +8,7 @@ interface BadgeProps {
   variant?: BadgeVariant;
   size?: BadgeSize;
   dot?: boolean;
+  icon?: React.ReactNode;
   className?: string;
 }
 
@@ -18,6 +19,8 @@ const variantStyles: Record<BadgeVariant, string> = {
   error: "bg-red-pale text-red-dark",
   info: "bg-blue-pale text-blue-navy",
   purple: "bg-purple-pale text-purple-grape",
+  teal: "bg-teal-pale text-teal-dark",
+  orange: "bg-orange-pale text-orange-dark",
 };
 
 const dotColors: Record<BadgeVariant, string> = {
@@ -27,6 +30,8 @@ const dotColors: Record<BadgeVariant, string> = {
   error: "bg-danger",
   info: "bg-blue",
   purple: "bg-purple",
+  teal: "bg-teal",
+  orange: "bg-orange",
 };
 
 const sizeStyles: Record<BadgeSize, string> = {
@@ -39,6 +44,7 @@ export function Badge({
   variant = "default",
   size = "md",
   dot,
+  icon,
   className,
 }: BadgeProps) {
   return (
@@ -53,6 +59,7 @@ export function Badge({
       {dot && (
         <div className={cn("h-1.5 w-1.5 rounded-full", dotColors[variant])} />
       )}
+      {icon}
       {children}
     </div>
   );

@@ -5,23 +5,32 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { uploadPdfDirect } from "../upload-pdf";
-import type { Property, PdfEntry } from "../types";
+import { SelectField } from "@/components/forms/SelectField";
 import { FileField } from "@/components/forms/FileField";
 import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
+import type { Property, PdfEntry, PdfCategory } from "../types";
+import { PDF_CATEGORY_LABELS, PDF_CATEGORY_OPTIONS } from "../types";
 import {
+  BadgeDollarSign,
   Bath,
   BedDouble,
+  BookOpen,
   Building2,
   Car,
   FileText,
   FileUp,
   Home,
+  Key,
+  LayoutList,
   MapPin,
   Maximize2,
+  PackageCheck,
+  TrendingUp,
   Trash2,
   X,
 } from "lucide-react";
+
 
 function formatPrice(price: string | null) {
   if (!price) return null;
@@ -49,6 +58,24 @@ function typeIcon(type: string | null) {
   return <Building2 size={14} />;
 }
 
+function pdfCategoryVariant(category: PdfCategory): "purple" | "orange" | "success" | "info" {
+  switch (category) {
+    case "BOOK": return "purple";
+    case "FLUXO": return "orange";
+    case "RENTABILIDADE": return "success";
+    case "PRODUTO_PRONTO": return "info";
+  }
+}
+
+function pdfCategoryIcon(category: PdfCategory) {
+  switch (category) {
+    case "BOOK": return <BookOpen size={10} />;
+    case "FLUXO": return <LayoutList size={10} />;
+    case "RENTABILIDADE": return <TrendingUp size={10} />;
+    case "PRODUTO_PRONTO": return <PackageCheck size={10} />;
+  }
+}
+
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
@@ -72,6 +99,8 @@ export function PropertyCard({
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deletingPdfUrl, setDeletingPdfUrl] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingCategory, setPendingCategory] = useState<PdfCategory | "">("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleDeleteConfirm() {
@@ -85,7 +114,7 @@ export function PropertyCard({
     }
   }
 
-  async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  function handlePdfSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.type !== "application/pdf") {
@@ -96,16 +125,31 @@ export function PropertyCard({
       setUploadError("O arquivo excede o limite de 100MB.");
       return;
     }
+    setUploadError(null);
+    setPendingFile(file);
+    setPendingCategory("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  async function handleConfirmUpload() {
+    if (!pendingFile || !pendingCategory) return;
     setUploadingPdf(true);
     setUploadError(null);
     try {
-      const newEntry = await uploadPdfDirect(property.id, file);
+      const newEntry = await uploadPdfDirect(
+        property.id,
+        pendingFile,
+        pendingCategory,
+      );
       onPdfsChange(property.id, [...property.pdfs, newEntry]);
+      setPendingFile(null);
+      setPendingCategory("");
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Erro ao fazer upload do PDF.");
+      setUploadError(
+        err instanceof Error ? err.message : "Erro ao fazer upload do PDF.",
+      );
     } finally {
       setUploadingPdf(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
@@ -166,12 +210,15 @@ export function PropertyCard({
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             {property.purpose && (
-              <Badge variant={purposeVariant(property.purpose)} dot>
+              <Badge
+                variant={purposeVariant(property.purpose)}
+                icon={property.purpose === "venda" ? <BadgeDollarSign size={11} /> : <Key size={11} />}
+              >
                 {purposeLabel(property.purpose)}
               </Badge>
             )}
             {property.type && (
-              <Badge variant="default">
+              <Badge variant="purple" icon={typeIcon(property.type)}>
                 {property.type.charAt(0).toUpperCase() + property.type.slice(1)}
               </Badge>
             )}
@@ -228,7 +275,7 @@ export function PropertyCard({
       {property.amenities.length > 0 && (
         <div className="px-5 py-3 border-t border-neutral-pale flex flex-wrap gap-1.5">
           {property.amenities.map((a) => (
-            <Badge key={a} variant="default" size="sm">
+            <Badge key={a} variant="teal" size="sm">
               {a}
             </Badge>
           ))}
@@ -240,20 +287,64 @@ export function PropertyCard({
           ref={fileInputRef}
           accept=".pdf"
           hidden
-          onChange={handlePdfUpload}
+          onChange={handlePdfSelect}
         />
         {uploadError && (
           <div className="mb-2 text-xs text-danger">{uploadError}</div>
         )}
+        {pendingFile && (
+          <div className="mb-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 space-y-2">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <FileText size={13} className="text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium text-neutral-ink">
+                  {pendingFile.name}
+                </div>
+                <div className="text-xs text-neutral-muted">
+                  {formatFileSize(pendingFile.size)}
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={() => {
+                  setPendingFile(null);
+                  setPendingCategory("");
+                }}
+                className="shrink-0 rounded-md p-1 text-neutral-muted transition-colors hover:bg-danger/10 hover:text-danger"
+              >
+                <X size={14} />
+              </Button>
+            </div>
+            <SelectField
+              placeholder="Tipo do material"
+              options={PDF_CATEGORY_OPTIONS}
+              value={pendingCategory}
+              onChange={(val) => setPendingCategory(val as PdfCategory)}
+              fieldSize="sm"
+            />
+            <Button
+              size="sm"
+              onClick={handleConfirmUpload}
+              disabled={!pendingCategory}
+              loading={uploadingPdf}
+              fullWidth
+            >
+              Enviar PDF
+            </Button>
+          </div>
+        )}
         <div className="flex items-center gap-2 w-full">
           {property.pdfs.length > 0 && (
-            <Button
-              variant="unstyled"
-              type="button"
+            <div
+              role={property.pdfs.length > 1 ? "button" : undefined}
+              tabIndex={property.pdfs.length > 1 ? 0 : undefined}
               onClick={() =>
                 property.pdfs.length > 1 ? setPdfModalOpen(true) : undefined
               }
-              className={`flex items-center gap-2 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5 min-w-0 flex-1 ${property.pdfs.length > 1 ? "cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-colors" : "cursor-default"}`}
+              className={`flex items-center gap-2 rounded-lg border border-neutral-pale bg-neutral-surface px-2.5 py-1.5 min-w-0 flex-1 ${property.pdfs.length > 1 ? "cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-colors" : ""}`}
             >
               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-primary/10">
                 <FileText size={12} className="text-primary" />
@@ -262,8 +353,19 @@ export function PropertyCard({
                 <div className="truncate text-xs font-medium text-neutral-ink leading-tight">
                   {property.pdfs[0].filename}
                 </div>
-                <div className="text-[10px] text-neutral-muted leading-tight">
-                  {formatFileSize(property.pdfs[0].size)}
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  {property.pdfs[0].category && (
+                    <Badge
+                      variant={pdfCategoryVariant(property.pdfs[0].category)}
+                      size="sm"
+                      icon={pdfCategoryIcon(property.pdfs[0].category)}
+                    >
+                      {PDF_CATEGORY_LABELS[property.pdfs[0].category] ?? property.pdfs[0].category}
+                    </Badge>
+                  )}
+                  <span className="text-[10px] text-neutral-muted leading-tight">
+                    {formatFileSize(property.pdfs[0].size)}
+                  </span>
                 </div>
               </div>
               {property.pdfs.length === 1 && (
@@ -281,24 +383,20 @@ export function PropertyCard({
                 </Button>
               )}
               {property.pdfs.length > 1 && (
-                <Badge variant="info" size="sm">
+                <Badge variant="default" size="sm">
                   +{property.pdfs.length - 1}
                 </Badge>
               )}
-            </Button>
+            </div>
           )}
           <Button
             variant="ghost"
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploadingPdf}
+            disabled={uploadingPdf || !!pendingFile}
             className="flex items-center gap-1.5 text-xs text-neutral hover:text-primary transition-colors shrink-0"
           >
             <FileUp size={13} />
-            {uploadingPdf
-              ? "Enviando..."
-              : property.pdfs.length > 0
-                ? "Adicionar"
-                : "Adicionar PDF"}
+            {property.pdfs.length > 0 ? "Adicionar" : "Adicionar PDF"}
           </Button>
         </div>
       </CardFooter>
@@ -314,46 +412,80 @@ export function PropertyCard({
           {property.pdfs.map((pdf, index) => (
             <div
               key={pdf.url}
-              className="group flex items-center gap-3 rounded-xl border border-neutral-pale bg-neutral-surface p-3 transition-colors hover:border-primary/20 hover:bg-primary/2"
+              className="group rounded-xl border border-neutral-pale bg-neutral-surface p-3 transition-colors hover:border-primary/20 space-y-2"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <FileText size={18} className="text-primary" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium text-neutral-ink">
-                  {pdf.filename}
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <FileText size={18} className="text-primary" />
                 </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-neutral-muted">
-                    {formatFileSize(pdf.size)}
-                  </span>
-                  <span className="text-neutral-pale">·</span>
-                  <span className="text-xs text-neutral-muted">
-                    PDF {index + 1} de {property.pdfs.length}
-                  </span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium text-neutral-ink">
+                    {pdf.filename}
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-xs text-neutral-muted">
+                      {formatFileSize(pdf.size)}
+                    </span>
+                    <span className="text-neutral-pale">·</span>
+                    <span className="text-xs text-neutral-muted">
+                      PDF {index + 1} de {property.pdfs.length}
+                    </span>
+                  </div>
                 </div>
+                <Button
+                  variant="ghost"
+                  type="button"
+                  onClick={() => handlePdfDelete(pdf.url)}
+                  disabled={deletingPdfUrl === pdf.url}
+                  className="shrink-0 rounded-lg p-1.5 text-neutral-muted opacity-0 group-hover:opacity-100 transition-all hover:bg-danger/10 hover:text-danger disabled:opacity-50"
+                >
+                  <Trash2 size={14} />
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                type="button"
-                onClick={() => handlePdfDelete(pdf.url)}
-                disabled={deletingPdfUrl === pdf.url}
-                className="shrink-0 rounded-lg p-1.5 text-neutral-muted opacity-0 group-hover:opacity-100 transition-all hover:bg-danger/10 hover:text-danger disabled:opacity-50"
-              >
-                <Trash2 size={14} />
-              </Button>
+              <SelectField
+                placeholder="Tipo do material"
+                options={PDF_CATEGORY_OPTIONS}
+                value={pdf.category ?? ""}
+                onChange={async (val) => {
+                  const previous = property.pdfs;
+                  const updated = property.pdfs.map((p) =>
+                    p.url === pdf.url
+                      ? { ...p, category: val as PdfCategory }
+                      : p,
+                  );
+                  onPdfsChange(property.id, updated);
+                  try {
+                    const res = await fetch(`/api/properties/${property.id}/pdf/category`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ url: pdf.url, category: val }),
+                    });
+                    if (!res.ok) {
+                      onPdfsChange(property.id, previous);
+                      setUploadError("Erro ao atualizar categoria.");
+                    }
+                  } catch {
+                    onPdfsChange(property.id, previous);
+                    setUploadError("Erro ao atualizar categoria.");
+                  }
+                }}
+                fieldSize="sm"
+              />
             </div>
           ))}
         </div>
         <div className="mt-4 pt-3 border-t border-neutral-pale">
           <Button
             variant="ghost"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => {
+              setPdfModalOpen(false);
+              fileInputRef.current?.click();
+            }}
             disabled={uploadingPdf}
             className="flex items-center gap-2 text-sm text-neutral hover:text-primary transition-colors w-full justify-center py-2"
           >
             <FileUp size={15} />
-            {uploadingPdf ? "Enviando..." : "Adicionar mais PDFs"}
+            Adicionar mais PDFs
           </Button>
         </div>
       </Modal>

@@ -171,6 +171,7 @@ export async function processScheduledAutoReply(
       amenities: string[];
       description: string | null;
       hasPdf?: boolean;
+      pdfCategories?: string[];
     }> = [];
 
     try {
@@ -183,13 +184,22 @@ export async function processScheduledAutoReply(
         count: userProperties.length,
         userId: conversation.lead.userId,
       });
-      propertiesCatalog = userProperties.map((p) => ({
-        ...p,
-        id: p.id,
-        price: p.price?.toString() ?? null,
-        area: p.area?.toString() ?? null,
-        hasPdf: Boolean(p.pdf_url) || (Array.isArray(p.pdfs) && (p.pdfs as unknown[]).length > 0),
-      }));
+      propertiesCatalog = userProperties.map((p) => {
+        const pdfsArr = Array.isArray(p.pdfs)
+          ? (p.pdfs as Array<{ category?: string }>)
+          : [];
+        const pdfCategories = pdfsArr
+          .map((pdf) => pdf.category)
+          .filter((c): c is string => Boolean(c));
+        return {
+          ...p,
+          id: p.id,
+          price: p.price?.toString() ?? null,
+          area: p.area?.toString() ?? null,
+          hasPdf: Boolean(p.pdf_url) || pdfsArr.length > 0,
+          pdfCategories: pdfCategories.length > 0 ? pdfCategories : undefined,
+        };
+      });
     } catch (err) {
       logger.error("Failed to fetch properties", {
         error: err instanceof Error ? err.message : String(err),
@@ -252,9 +262,9 @@ export async function processScheduledAutoReply(
 
     logger.info("AI raw reply", { reply });
 
-    const { cleanReply, propertyIds: pdfPropertyIds } = extractPdfTags(reply);
+    const { cleanReply, pdfRequests } = extractPdfTags(reply);
 
-    logger.info("PDF extraction result", { pdfPropertyIds, cleanReply });
+    logger.info("PDF extraction result", { pdfRequests, cleanReply });
 
     const messageCount = orderedMessages.length + 1;
     let sentAsVoice = false;
@@ -286,7 +296,7 @@ export async function processScheduledAutoReply(
     }
 
     await sendPropertyPdfs(
-      pdfPropertyIds,
+      pdfRequests,
       conversation.lead.userId,
       settings.whatsappPhoneId!,
       conversation.id,

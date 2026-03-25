@@ -3,11 +3,18 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/Button";
 import { uploadPdfDirect } from "../upload-pdf";
-import type { Property, PdfEntry } from "../types";
+import { SelectField } from "@/components/forms/SelectField";
 import { FileField } from "@/components/forms/FileField";
 import { FileText, FileUp, Sparkles, X } from "lucide-react";
 import { TextareaField } from "@/components/forms/TextareaField";
 import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
+import type { Property, PdfEntry, PdfCategory } from "../types";
+import { PDF_CATEGORY_OPTIONS } from "../types";
+
+interface PendingPdf {
+  file: File;
+  category: PdfCategory | "";
+}
 
 const MAX_PDF_SIZE = 100 * 1024 * 1024;
 
@@ -25,7 +32,7 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
   const [rawText, setRawText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pendingPdfs, setPendingPdfs] = useState<File[]>([]);
+  const [pendingPdfs, setPendingPdfs] = useState<PendingPdf[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const pdfInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,7 +46,7 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
       return;
     }
     setError(null);
-    setPendingPdfs((prev) => [...prev, file]);
+    setPendingPdfs((prev) => [...prev, { file, category: "" }]);
   }
 
   function handlePdfSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -78,9 +85,13 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
       const property = { ...(data as Property), pdfs: [] as PdfEntry[] };
 
       let pdfError = false;
-      for (const file of pendingPdfs) {
+      for (const pending of pendingPdfs) {
         try {
-          const newEntry = await uploadPdfDirect(property.id, file);
+          const newEntry = await uploadPdfDirect(
+            property.id,
+            pending.file,
+            pending.category as PdfCategory,
+          );
           property.pdfs.push(newEntry);
         } catch {
           pdfError = true;
@@ -132,33 +143,48 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
           onChange={handlePdfSelect}
         />
         {pendingPdfs.length > 0 && (
-          <div className="flex flex-col gap-1.5">
-            {pendingPdfs.map((file, i) => (
+          <div className="flex flex-col gap-2.5">
+            {pendingPdfs.map((pending, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5"
+                className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 space-y-2"
               >
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <FileText size={13} className="text-primary" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium text-neutral-ink">
-                    {file.name}
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <FileText size={13} className="text-primary" />
                   </div>
-                  <div className="text-xs text-neutral-muted">
-                    {formatFileSize(file.size)}
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium text-neutral-ink">
+                      {pending.file.name}
+                    </div>
+                    <div className="text-xs text-neutral-muted">
+                      {formatFileSize(pending.file.size)}
+                    </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    onClick={() =>
+                      setPendingPdfs((prev) => prev.filter((_, j) => j !== i))
+                    }
+                    className="shrink-0 rounded-md p-1 text-neutral-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                  >
+                    <X size={14} />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  onClick={() =>
-                    setPendingPdfs((prev) => prev.filter((_, j) => j !== i))
+                <SelectField
+                  placeholder="Tipo do material"
+                  options={PDF_CATEGORY_OPTIONS}
+                  value={pending.category}
+                  onChange={(val) =>
+                    setPendingPdfs((prev) =>
+                      prev.map((p, j) =>
+                        j === i ? { ...p, category: val as PdfCategory } : p,
+                      ),
+                    )
                   }
-                  className="shrink-0 rounded-md p-1 text-neutral-muted transition-colors hover:bg-danger/10 hover:text-danger"
-                >
-                  <X size={14} />
-                </Button>
+                  fieldSize="sm"
+                />
               </div>
             ))}
           </div>
@@ -217,7 +243,10 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
         <Button
           onClick={handleExtract}
           loading={loading}
-          disabled={rawText.trim().length < 10}
+          disabled={
+            rawText.trim().length < 10 ||
+            pendingPdfs.some((p) => !p.category)
+          }
           icon={<Sparkles size={14} />}
         >
           {loading ? "Extraindo..." : "Extrair com IA"}
