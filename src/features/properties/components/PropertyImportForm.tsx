@@ -3,13 +3,13 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/Button";
 import { uploadPdfDirect } from "../upload-pdf";
-import { SelectField } from "@/components/forms/SelectField";
+import { PDF_CATEGORY_OPTIONS } from "../types";
 import { FileField } from "@/components/forms/FileField";
+import { SelectField } from "@/components/forms/SelectField";
 import { FileText, FileUp, Sparkles, X } from "lucide-react";
+import type { Property, PdfEntry, PdfCategory } from "../types";
 import { TextareaField } from "@/components/forms/TextareaField";
 import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
-import type { Property, PdfEntry, PdfCategory } from "../types";
-import { PDF_CATEGORY_OPTIONS } from "../types";
 
 interface PendingPdf {
   file: File;

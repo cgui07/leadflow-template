@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
+import type { PdfCategory } from "@/features/properties/types";
 import { requireAuth, json, error, handleError } from "@/lib/api";
 import { isValidPdfCategory, parsePdfEntries } from "@/features/properties/types";
-import type { PdfCategory } from "@/features/properties/types";
 
 export async function PATCH(
   req: NextRequest,

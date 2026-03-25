@@ -5,12 +5,12 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { uploadPdfDirect } from "../upload-pdf";
-import { SelectField } from "@/components/forms/SelectField";
 import { FileField } from "@/components/forms/FileField";
-import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
-import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
+import { SelectField } from "@/components/forms/SelectField";
 import type { Property, PdfEntry, PdfCategory } from "../types";
+import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
 import { PDF_CATEGORY_LABELS, PDF_CATEGORY_OPTIONS } from "../types";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import {
   BadgeDollarSign,
   Bath,
