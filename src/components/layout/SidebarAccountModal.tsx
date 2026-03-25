@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { Building2, LogOut, Settings } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 
 interface SidebarAccountModalProps {
   open: boolean;
@@ -11,7 +11,6 @@ interface SidebarAccountModalProps {
   userName: string;
   userEmail: string;
   userInitial: string;
-  canManagePlatform: boolean;
   loggingOut: boolean;
   onLogout: () => void;
 }
@@ -23,7 +22,6 @@ export function SidebarAccountModal({
   userName,
   userEmail,
   userInitial,
-  canManagePlatform,
   loggingOut,
   onLogout,
 }: SidebarAccountModalProps) {
@@ -60,16 +58,7 @@ export function SidebarAccountModal({
           <Settings size={18} />
           Configurações
         </Link>
-        {canManagePlatform ? (
-          <Link
-            href="/clients"
-            onClick={onClose}
-            className="flex w-full items-center gap-3 rounded-xl border border-neutral-border px-4 py-3 text-sm font-medium text-neutral-dark transition-colors hover:bg-neutral-surface"
-          >
-            <Building2 size={18} />
-            Clientes
-          </Link>
-        ) : null}
+
         <Button
           variant="danger"
           fullWidth

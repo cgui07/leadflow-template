@@ -1,10 +1,9 @@
 "use client";
-
-import { cn } from "@/lib/utils";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
 import { useEffect, useMemo, useTransition } from "react";
 import { useSettingsForm } from "../hooks/useSettingsForm";
+import { SelectField } from "@/components/forms/SelectField";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { FacebookSettingsSection } from "./FacebookSettingsSection";
 import { Bot, Loader2, Megaphone, Palette, Save } from "lucide-react";
@@ -60,7 +59,7 @@ export function SettingsPageClient({
         label: "Facebook Ads",
         icon: <Megaphone className="h-4 w-4" />,
       },
-...(canManageTenant
+      ...(canManageTenant
         ? [
             {
               id: "design",
@@ -71,6 +70,11 @@ export function SettingsPageClient({
         : []),
     ];
   }, [canManageTenant]);
+
+  const selectOptions = useMemo(
+    () => tabs.map((t) => ({ value: t.id, label: t.label })),
+    [tabs],
+  );
 
   useEffect(() => {
     if (requestedSection === activeSection) {
@@ -112,7 +116,6 @@ export function SettingsPageClient({
           description="Escolha se quer ajustar automações do workspace ou a identidade visual do cliente."
           noPadding
         >
-          {/* Desktop: Tabs */}
           <div className="hidden md:block px-6 pt-2">
             <Tabs
               tabs={tabs}
@@ -121,27 +124,15 @@ export function SettingsPageClient({
             />
           </div>
 
-          <div className="flex flex-wrap gap-2 px-4 pt-2 pb-1 md:hidden">
-            {tabs.map((tab) => (
-              <Button
-                key={tab.id}
-                type="button"
-                variant="ghost"
-                icon={tab.icon}
-                onClick={() => handleSectionChange(tab.id)}
-                className={cn(
-                  "h-auto rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors",
-                  activeSection === tab.id
-                    ? "bg-primary text-white hover:bg-blue-royal"
-                    : "border border-neutral-border bg-neutral-surface text-neutral-dark hover:bg-neutral-pale",
-                )}
-              >
-                {tab.label}
-              </Button>
-            ))}
+          <div className="px-4 py-3 md:hidden">
+            <SelectField
+              options={selectOptions}
+              value={activeSection}
+              onChange={handleSectionChange}
+              fieldSize="lg"
+            />
           </div>
         </SectionContainer>
-
         {transitioning ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-blue-royal" />

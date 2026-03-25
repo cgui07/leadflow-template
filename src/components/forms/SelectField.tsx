@@ -150,7 +150,7 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
               variant="outline"
               className={cn(
                 "w-full justify-between items-center text-left gap-2 h-auto",
-                error ? "border-red-blush" : "",
+                error ? "border-red-blush" : "border-neutral-line",
                 sizeStyles[fieldSize],
                 className
               )}
@@ -183,7 +183,7 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
             </Button>
           </div>
           {open && (
-            <div className="absolute z-50 mt-1 w-full bg-white border border-neutral-border rounded-lg shadow-lg max-h-60 overflow-auto">
+            <div className="absolute z-50 mt-1 w-full bg-white border border-neutral-line rounded-lg shadow-lg max-h-60 overflow-auto">
               {searchable && (
                 <div className="p-2 border-b border-neutral-pale">
                   <input
@@ -191,7 +191,7 @@ export const SelectField = forwardRef<HTMLDivElement, SelectFieldProps>(
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Buscar..."
-                    className="w-full px-2 py-1.5 text-sm border border-neutral-border rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full px-2 py-1.5 text-sm border border-neutral-line rounded focus:outline-none focus:ring-1 focus:ring-primary"
                     autoFocus
                   />
                 </div>

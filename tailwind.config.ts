@@ -248,11 +248,16 @@ const config: Config = {
           from: { width: "0%" },
           to:   { width: "70%" },
         },
+        "tab-blink": {
+          "0%, 100%": { color: "#2563eb" },
+          "50%":      { color: "#64748b" },
+        },
       },
 
       animation: {
         "fade-in": "fade-in .3s ease-out both",
         "progress-bar": "progress-bar 8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
+        "tab-blink": "tab-blink 1s ease-in-out infinite",
       },
 
       maxWidth: {

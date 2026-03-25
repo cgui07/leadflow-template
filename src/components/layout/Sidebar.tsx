@@ -66,7 +66,7 @@ function getNavItems(canManagePlatform: boolean): NavItem[] {
       href: "/properties",
       icon: <Home size={20} />,
       iconMobile: <Home size={22} />,
-      mobileTab: false,
+      mobileTab: true,
     },
     ...(canManagePlatform
       ? [
@@ -184,7 +184,6 @@ export function Sidebar({
         userName={userName}
         userEmail={userEmail}
         userInitial={userInitial}
-        canManagePlatform={canManagePlatform}
         loggingOut={loggingOut}
         onLogout={handleLogout}
       />

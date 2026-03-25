@@ -54,6 +54,7 @@ export function PropertiesClient({
         <TabButton
           active={activeTab === "list"}
           onClick={() => handleTabChange("list")}
+          blink={hasNew && activeTab !== "list"}
         >
           <div className="flex items-center gap-2">
             <span>Meus imóveis</span>
@@ -68,9 +69,6 @@ export function PropertiesClient({
               >
                 {properties.length}
               </div>
-            )}
-            {hasNew && (
-              <div className="h-2 w-2 rounded-full bg-green-DEFAULT" />
             )}
           </div>
         </TabButton>
@@ -114,10 +112,12 @@ function TabButton({
   active,
   onClick,
   children,
+  blink,
 }: {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
+  blink?: boolean;
 }) {
   return (
     <Button
@@ -129,6 +129,7 @@ function TabButton({
         active
           ? "border-blue-royal text-blue-royal"
           : "border-transparent text-neutral hover:border-neutral-line hover:text-neutral-dark",
+        blink && "animate-tab-blink",
       )}
     >
       {children}

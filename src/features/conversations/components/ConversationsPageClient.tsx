@@ -195,7 +195,7 @@ export function ConversationsPageClient({
   }, [selected, readErrorMessage, refetchMessages, refetch]);
 
   const toggleBotMode = useCallback(async (conversationId: string, currentStatus: string) => {
-    const nextStatus = currentStatus === "bot" ? "human" : "bot";
+    const nextStatus = currentStatus === "bot" || currentStatus === "active" ? "human" : "bot";
     setSwitching(true);
     setConversationError(null);
 

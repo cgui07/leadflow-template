@@ -24,7 +24,7 @@ export function ConversationHeader({
   onToggleMode,
   onGenerateSummary,
 }: ConversationHeaderProps) {
-  const isBot = conversation.status === "bot";
+  const isBot = conversation.status === "bot" || conversation.status === "active";
 
   return (
     <div className="flex items-center justify-between gap-2 bg-teal-dark px-3 py-2.5 sm:px-4">

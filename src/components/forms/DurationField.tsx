@@ -78,7 +78,9 @@ export function DurationField({
     onChange(Number.parseInt(nextPreset, 10) || 0);
   }
 
-  function handleCustomAmountChange(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleCustomAmountChange(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
     const nextAmount = event.target.value.replace(/[^\d]/g, "");
     setDraftAmount(nextAmount);
     onChange(parseAutoReplyDelayInput(nextAmount, resolvedUnit));
@@ -120,7 +122,7 @@ export function DurationField({
       >
         <div
           className={cn(
-            selectValue !== AUTO_REPLY_DELAY_CUSTOM_VALUE && "md:max-w-[280px]",
+            selectValue !== AUTO_REPLY_DELAY_CUSTOM_VALUE && "md:max-w-70",
           )}
         >
           <SelectField
