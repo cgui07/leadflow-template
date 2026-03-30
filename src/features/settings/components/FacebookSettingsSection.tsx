@@ -36,11 +36,12 @@ export function FacebookSettingsSection({
             />
 
             <TextField
-              label="Page Access Token"
+              label="Token de acesso da Meta"
               type="password"
               value={form.facebookPageAccessToken || ""}
               onChange={(event) => update("facebookPageAccessToken", event.target.value)}
-              placeholder="Token de acesso da página"
+              placeholder="Cole o token da Página ou do Usuário"
+              description="Use o token da Página que publicou o formulário ou de um usuário com acesso à Página e à conta de anúncios. Esse campo não recebe o campaign_id."
             />
 
             <CheckboxField
@@ -59,15 +60,24 @@ export function FacebookSettingsSection({
         <SectionContainer title="Como configurar">
           <div className="space-y-3 text-sm text-neutral">
             <p>1. Crie um App em developers.facebook.com (tipo Business)</p>
-            <p>2. Adicione o produto Webhooks &rarr; objeto page &rarr; campo leadgen</p>
+            <p>2. Adicione o produto Webhooks, assine o objeto page e o campo leadgen</p>
             <p>
               3. URL do webhook:{" "}
               <code className="rounded bg-surface-alt px-1.5 py-0.5 text-xs">
                 https://seu-dominio/api/facebook/webhook
               </code>
             </p>
-            <p>4. Gere o Page Access Token com permissões pages_manage_ads + leads_retrieval</p>
-            <p>5. Cole o Page ID e Access Token nos campos ao lado</p>
+            <p>4. Use a Página que publicou o formulário e copie o Page ID dela</p>
+            <p>
+              5. Gere um token com <code>ads_management</code>,{" "}
+              <code>leads_retrieval</code>, <code>pages_show_list</code>,{" "}
+              <code>pages_read_engagement</code> e <code>pages_manage_ads</code>
+            </p>
+            <p>
+              6. Se usar webhook, inclua também a permissão{" "}
+              <code>pages_manage_metadata</code>
+            </p>
+            <p>7. Cole o Page ID e o token nos campos ao lado</p>
           </div>
         </SectionContainer>
       </div>
