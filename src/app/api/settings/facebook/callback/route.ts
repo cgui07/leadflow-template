@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeGoogleCalendarCode } from "@/lib/google-calendar";
+import { exchangeFacebookCode } from "@/lib/facebook";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -13,20 +13,20 @@ export async function GET(req: NextRequest) {
 
   if (errorParam || !code || !state) {
     const reason = errorParam ?? "missing_params";
-    logger.error("[google-calendar/callback] OAuth error", { reason });
+    logger.error("[facebook/callback] OAuth error", { reason });
     return NextResponse.redirect(
-      `${settingsUrl}&calendar_error=${encodeURIComponent(reason)}`,
+      `${settingsUrl}&facebook_error=${encodeURIComponent(reason)}`,
     );
   }
 
   try {
-    await exchangeGoogleCalendarCode(code, state);
-    return NextResponse.redirect(`${settingsUrl}&calendar_connected=1`);
+    await exchangeFacebookCode(code, state);
+    return NextResponse.redirect(`${settingsUrl}&facebook_connected=1`);
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown_error";
-    logger.error("[google-calendar/callback] Exchange failed", { message });
+    logger.error("[facebook/callback] Exchange failed", { message });
     return NextResponse.redirect(
-      `${settingsUrl}&calendar_error=${encodeURIComponent(message)}`,
+      `${settingsUrl}&facebook_error=${encodeURIComponent(message)}`,
     );
   }
 }

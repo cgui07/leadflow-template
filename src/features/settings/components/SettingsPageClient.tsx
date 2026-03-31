@@ -5,8 +5,8 @@ import { useEffect, useMemo, useTransition } from "react";
 import { useSettingsForm } from "../hooks/useSettingsForm";
 import { SelectField } from "@/components/forms/SelectField";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { FacebookSettingsSection } from "./FacebookSettingsSection";
-import { Bot, Loader2, Megaphone, Palette, Save } from "lucide-react";
+import { ConnectorsSection } from "./ConnectorsSection";
+import { Bot, Link2, Loader2, Palette, Save } from "lucide-react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { AutomationSettingsSection } from "./AutomationSettingsSection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -28,7 +28,7 @@ function resolveSection(
   requestedSection: string | null,
   canManageTenant: boolean,
 ): SettingsSection {
-  if (requestedSection === "facebook") return "facebook";
+  if (requestedSection === "conectores") return "conectores";
   if (canManageTenant && requestedSection === "design") return "design";
   return "automation";
 }
@@ -47,6 +47,7 @@ export function SettingsPageClient({
   const [transitioning, startTransition] = useTransition();
   const { form, modelOptions, save, saveError, saved, saving, update } =
     useSettingsForm(initialSettings);
+
   const tabs = useMemo(() => {
     return [
       {
@@ -55,9 +56,9 @@ export function SettingsPageClient({
         icon: <Bot className="h-4 w-4" />,
       },
       {
-        id: "facebook",
-        label: "Facebook Ads",
-        icon: <Megaphone className="h-4 w-4" />,
+        id: "conectores",
+        label: "Conectores",
+        icon: <Link2 className="h-4 w-4" />,
       },
       ...(canManageTenant
         ? [
@@ -94,12 +95,14 @@ export function SettingsPageClient({
     });
   }
 
+  const showSave = activeSection === "automation";
+
   return (
     <PageContainer
       title="Configurações"
       subtitle={subtitle}
       actions={
-        activeSection !== "design" ? (
+        showSave ? (
           <Button
             icon={<Save className="h-4 w-4" />}
             onClick={save}
@@ -133,6 +136,7 @@ export function SettingsPageClient({
             />
           </div>
         </SectionContainer>
+
         {transitioning ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-blue-royal" />
@@ -144,12 +148,8 @@ export function SettingsPageClient({
             saveError={saveError}
             update={update}
           />
-        ) : activeSection === "facebook" ? (
-          <FacebookSettingsSection
-            form={form}
-            saveError={saveError}
-            update={update}
-          />
+        ) : activeSection === "conectores" ? (
+          <ConnectorsSection form={form} update={update} />
         ) : initialTenant ? (
           <TenantCustomizationSection initialTenant={initialTenant} />
         ) : null}

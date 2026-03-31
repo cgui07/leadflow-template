@@ -1,7 +1,23 @@
-import { Megaphone } from "lucide-react";
+"use client";
+
+import { useEffect, useState } from "react";
+import { CheckCircle, ExternalLink, Loader, Megaphone, Unlink } from "lucide-react";
 import type { UserSettings } from "../contracts";
-import { CheckboxField, TextField } from "@/components/forms";
+import { CheckboxField } from "@/components/forms";
 import { SectionContainer } from "@/components/layout/SectionContainer";
+import { Button } from "@/components/ui/Button";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
+
+interface FacebookPage {
+  pageId: string;
+  pageName: string | null;
+  createdAt: string;
+}
+
+interface FacebookStatus {
+  connected: boolean;
+  pages: FacebookPage[];
+}
 
 interface FacebookSettingsSectionProps {
   form: UserSettings;
@@ -14,6 +30,60 @@ export function FacebookSettingsSection({
   saveError,
   update,
 }: FacebookSettingsSectionProps) {
+  const [status, setStatus] = useState<FacebookStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [disconnectModalOpen, setDisconnectModalOpen] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  useEffect(() => {
+    fetchStatus();
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("facebook_connected")) {
+      setMessage({ type: "success", text: "Facebook conectado com sucesso!" });
+    } else if (params.get("facebook_error")) {
+      setMessage({
+        type: "error",
+        text: `Erro ao conectar: ${params.get("facebook_error")}`,
+      });
+    }
+  }, []);
+
+  async function fetchStatus() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/settings/facebook");
+      if (res.ok) {
+        const data = (await res.json()) as FacebookStatus;
+        setStatus(data);
+      }
+    } catch {
+      // silent
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDisconnectConfirm() {
+    setDisconnecting(true);
+    try {
+      const res = await fetch("/api/settings/facebook", { method: "DELETE" });
+      if (res.ok) {
+        setStatus({ connected: false, pages: [] });
+        setMessage({ type: "success", text: "Facebook desconectado." });
+      }
+    } catch {
+      setMessage({ type: "error", text: "Erro ao desconectar." });
+    } finally {
+      setDisconnecting(false);
+      setDisconnectModalOpen(false);
+    }
+  }
+
   return (
     <>
       {saveError && (
@@ -28,59 +98,107 @@ export function FacebookSettingsSection({
           icon={<Megaphone className="h-5 w-5 text-secondary" />}
         >
           <div className="space-y-4">
-            <TextField
-              label="Page ID"
-              value={form.facebookPageId || ""}
-              onChange={(event) => update("facebookPageId", event.target.value || null)}
-              placeholder="Ex: 123456789012345"
-            />
+            {message && (
+              <div
+                className={`rounded-xl border px-4 py-3 text-sm ${
+                  message.type === "success"
+                    ? "border-green-200 bg-green-50 text-green-800"
+                    : "border-red-blush bg-red-pale text-red-dark"
+                }`}
+              >
+                {message.text}
+              </div>
+            )}
 
-            <TextField
-              label="Token de acesso da Meta"
-              type="password"
-              value={form.facebookPageAccessToken || ""}
-              onChange={(event) => update("facebookPageAccessToken", event.target.value)}
-              placeholder="Cole o token da Página ou do Usuário"
-              description="Use o token da Página que publicou o formulário ou de um usuário com acesso à Página e à conta de anúncios. Esse campo não recebe o campaign_id."
-            />
+            {loading ? (
+              <div className="flex items-center gap-2 text-sm text-neutral">
+                <Loader className="h-4 w-4 animate-spin" />
+                Verificando conexão...
+              </div>
+            ) : status?.connected ? (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4">
+                  <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-green-800">
+                      Facebook conectado
+                    </p>
+                    {status.pages.map((page) => (
+                      <p key={page.pageId} className="text-xs text-green-700">
+                        {page.pageName ?? page.pageId}
+                      </p>
+                    ))}
+                  </div>
+                </div>
 
-            <CheckboxField
-              variant="switch"
-              label="Envio automático via WhatsApp"
-              checked={form.facebookAutoOutreach}
-              onChange={(checked) => update("facebookAutoOutreach", checked)}
-            />
+                <CheckboxField
+                  variant="switch"
+                  label="Envio automático via WhatsApp"
+                  checked={form.facebookAutoOutreach}
+                  onChange={(checked) => update("facebookAutoOutreach", checked)}
+                />
 
-            <p className="text-xs text-neutral">
-              Quando ativado, novos leads de campanhas recebem automaticamente a mensagem de saudação via WhatsApp.
-            </p>
+                <p className="text-xs text-neutral">
+                  Quando ativado, novos leads de campanhas recebem automaticamente a mensagem de saudação via WhatsApp.
+                </p>
+
+                <Button
+                  variant="secondary"
+                  icon={<Unlink className="h-4 w-4" />}
+                  onClick={() => setDisconnectModalOpen(true)}
+                  loading={disconnecting}
+                >
+                  Desconectar
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-sm text-neutral">
+                  Conecte sua conta Facebook para receber leads automaticamente
+                  das suas campanhas de anúncios no Facebook e Instagram.
+                </p>
+
+                <a href="/api/settings/facebook/connect">
+                  <Button icon={<ExternalLink className="h-4 w-4" />}>
+                    Conectar Facebook
+                  </Button>
+                </a>
+              </div>
+            )}
           </div>
         </SectionContainer>
 
-        <SectionContainer title="Como configurar">
+        <SectionContainer title="Como funciona">
           <div className="space-y-3 text-sm text-neutral">
-            <p>1. Crie um App em developers.facebook.com (tipo Business)</p>
-            <p>2. Adicione o produto Webhooks, assine o objeto page e o campo leadgen</p>
             <p>
-              3. URL do webhook:{" "}
-              <code className="rounded bg-surface-alt px-1.5 py-0.5 text-xs">
-                https://seu-dominio/api/facebook/webhook
-              </code>
-            </p>
-            <p>4. Use a Página que publicou o formulário e copie o Page ID dela</p>
-            <p>
-              5. Gere um token com <code>ads_management</code>,{" "}
-              <code>leads_retrieval</code>, <code>pages_show_list</code>,{" "}
-              <code>pages_read_engagement</code> e <code>pages_manage_ads</code>
+              1. Clique em <strong>Conectar Facebook</strong> e autorize o acesso
+              às suas Páginas
             </p>
             <p>
-              6. Se usar webhook, inclua também a permissão{" "}
-              <code>pages_manage_metadata</code>
+              2. O sistema configura automaticamente o webhook para receber leads
+              das campanhas
             </p>
-            <p>7. Cole o Page ID e o token nos campos ao lado</p>
+            <p>
+              3. Novos leads de formulários de anúncios aparecem automaticamente
+              no seu CRM
+            </p>
+            <p>
+              4. Se o envio automático estiver ativo, o lead recebe uma saudação
+              via WhatsApp
+            </p>
           </div>
         </SectionContainer>
       </div>
+
+      <DeleteConfirmationModal
+        open={disconnectModalOpen}
+        onClose={() => setDisconnectModalOpen(false)}
+        onConfirm={handleDisconnectConfirm}
+        title="Desconectar Facebook"
+        description="Deseja desconectar o Facebook? Você deixará de receber leads de campanhas automaticamente."
+        confirmText="Desconectar"
+        loading={disconnecting}
+      />
     </>
   );
 }

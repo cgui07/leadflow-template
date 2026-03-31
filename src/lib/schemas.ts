@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-// ── Auth ────────────────────────────────────────────────────────────────
-
 export const LoginSchema = z.object({
   email: z.string().min(1, "Email é obrigatório"),
   password: z.string().min(1, "Senha é obrigatória"),
@@ -26,8 +24,6 @@ export const ResetPasswordSchema = z.object({
   confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
 });
 
-// ── Leads ───────────────────────────────────────────────────────────────
-
 export const CreateLeadSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   phone: z.string().min(1, "Telefone é obrigatório"),
@@ -40,25 +36,25 @@ export const CreateLeadSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const UpdateLeadSchema = z.object({
-  name: z.string().optional(),
-  phone: z.string().optional(),
-  email: z.string().nullable().optional(),
-  status: z.string().optional(),
-  score: z.number().optional(),
-  value: z.number().nullable().optional(),
-  region: z.string().nullable().optional(),
-  priceMin: z.number().nullable().optional(),
-  priceMax: z.number().nullable().optional(),
-  propertyType: z.string().nullable().optional(),
-  purpose: z.string().nullable().optional(),
-  timeline: z.string().nullable().optional(),
-  bedrooms: z.number().nullable().optional(),
-  notes: z.string().nullable().optional(),
-  pipelineStageId: z.string().nullable().optional(),
-}).passthrough();
-
-// ── Conversations ───────────────────────────────────────────────────────
+export const UpdateLeadSchema = z
+  .object({
+    name: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().nullable().optional(),
+    status: z.string().optional(),
+    score: z.number().optional(),
+    value: z.number().nullable().optional(),
+    region: z.string().nullable().optional(),
+    priceMin: z.number().nullable().optional(),
+    priceMax: z.number().nullable().optional(),
+    propertyType: z.string().nullable().optional(),
+    purpose: z.string().nullable().optional(),
+    timeline: z.string().nullable().optional(),
+    bedrooms: z.number().nullable().optional(),
+    notes: z.string().nullable().optional(),
+    pipelineStageId: z.string().nullable().optional(),
+  })
+  .passthrough();
 
 export const SendMessageSchema = z.object({
   content: z.string().min(1, "Conteúdo da mensagem é obrigatório"),
@@ -70,19 +66,19 @@ export const UpdateConversationStatusSchema = z.object({
   }),
 });
 
-// ── Pipeline ────────────────────────────────────────────────────────────
-
 export const CreateStageSchema = z.object({
   name: z.string().min(1, "Nome da etapa é obrigatório"),
   color: z.string().optional(),
 });
 
-export const UpdateStageSchema = z.object({
-  name: z.string().optional(),
-  color: z.string().optional(),
-}).refine((data) => data.name || data.color, {
-  message: "Pelo menos um campo deve ser informado",
-});
+export const UpdateStageSchema = z
+  .object({
+    name: z.string().optional(),
+    color: z.string().optional(),
+  })
+  .refine((data) => data.name || data.color, {
+    message: "Pelo menos um campo deve ser informado",
+  });
 
 export const MoveLeadSchema = z.object({
   leadId: z.string().min(1, "ID do lead é obrigatório"),
@@ -93,34 +89,28 @@ export const ReorderStagesSchema = z.object({
   stageIds: z.array(z.string()).min(1, "Lista de etapas é obrigatória"),
 });
 
-// ── Settings ────────────────────────────────────────────────────────────
-
-export const UpdateSettingsSchema = z.object({
-  aiProvider: z.string().optional(),
-  aiApiKey: z.string().nullable().optional(),
-  openaiTranscriptionKey: z.string().nullable().optional(),
-  aiModel: z.string().optional(),
-  greetingMessage: z.string().nullable().optional(),
-  autoReplyEnabled: z.boolean().optional(),
-  autoReplyDelaySeconds: z.number().optional(),
-  followUpEnabled: z.boolean().optional(),
-  followUpDelayHours: z.number().optional(),
-  maxFollowUps: z.number().optional(),
-  facebookPageId: z.string().nullable().optional(),
-  facebookPageAccessToken: z.string().nullable().optional(),
-  facebookAutoOutreach: z.boolean().optional(),
-  elevenlabsVoiceId: z.string().nullable().optional(),
-  voiceReplyEnabled: z.boolean().optional(),
-  voiceReplyMonthlyLimit: z.number().optional(),
-}).passthrough();
-
-// ── Properties ──────────────────────────────────────────────────────────
+export const UpdateSettingsSchema = z
+  .object({
+    aiProvider: z.string().optional(),
+    aiApiKey: z.string().nullable().optional(),
+    openaiTranscriptionKey: z.string().nullable().optional(),
+    aiModel: z.string().optional(),
+    greetingMessage: z.string().nullable().optional(),
+    autoReplyEnabled: z.boolean().optional(),
+    autoReplyDelaySeconds: z.number().optional(),
+    followUpEnabled: z.boolean().optional(),
+    followUpDelayHours: z.number().optional(),
+    maxFollowUps: z.number().optional(),
+    facebookAutoOutreach: z.boolean().optional(),
+    elevenlabsVoiceId: z.string().nullable().optional(),
+    voiceReplyEnabled: z.boolean().optional(),
+    voiceReplyMonthlyLimit: z.number().optional(),
+  })
+  .passthrough();
 
 export const CreatePropertySchema = z.object({
   rawText: z.string().min(10, "Texto deve ter pelo menos 10 caracteres"),
 });
-
-// ── Appointments ────────────────────────────────────────────────────────
 
 export const CreateAppointmentSchema = z.object({
   leadId: z.string().min(1, "ID do lead é obrigatório"),

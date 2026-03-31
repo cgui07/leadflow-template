@@ -99,13 +99,6 @@ export function useSettingsForm(
             : form.openaiTranscriptionKey?.trim()
               ? form.openaiTranscriptionKey
               : null,
-        facebookPageAccessToken:
-          form.facebookPageAccessToken ===
-          serverSnapshot.facebookPageAccessToken
-            ? undefined
-            : form.facebookPageAccessToken?.trim()
-              ? form.facebookPageAccessToken
-              : null,
         elevenlabsVoiceId:
           form.elevenlabsVoiceId === serverSnapshot.elevenlabsVoiceId
             ? undefined

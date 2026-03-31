@@ -12,9 +12,8 @@ export interface UserSettings {
   maxFollowUps: number;
   followUpCustomInstructions: string | null;
   openaiTranscriptionKey: string | null;
-  facebookPageId: string | null;
-  facebookPageAccessToken: string | null;
   facebookAutoOutreach: boolean;
+  facebookConnected: boolean;
   // ElevenLabs voice reply
   elevenlabsVoiceId: string | null;
   voiceReplyEnabled: boolean;
@@ -43,4 +42,4 @@ export type TenantCustomizationUpdateInput = Pick<
   | "featureFlags"
 >;
 
-export type SettingsSection = "automation" | "facebook" | "design";
+export type SettingsSection = "automation" | "conectores" | "design";

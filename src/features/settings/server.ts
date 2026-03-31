@@ -27,7 +27,6 @@ const USER_SETTINGS_SELECT = {
   followUpDelayHours: true,
   maxFollowUps: true,
   followUpCustomInstructions: true,
-  facebookPageAccessToken: true,
   facebookAutoOutreach: true,
   elevenlabsVoiceId: true,
   voiceReplyEnabled: true,
@@ -59,9 +58,8 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   followUpDelayHours: 24,
   maxFollowUps: 3,
   followUpCustomInstructions: null,
-  facebookPageId: null,
-  facebookPageAccessToken: null,
   facebookAutoOutreach: true,
+  facebookConnected: false,
   elevenlabsVoiceId: null,
   voiceReplyEnabled: false,
   voiceReplyMonthlyLimit: 50,
@@ -79,7 +77,6 @@ type UserSettingsRecord = {
   followUpDelayHours: number;
   maxFollowUps: number;
   followUpCustomInstructions: string | null;
-  facebookPageAccessToken: string | null;
   facebookAutoOutreach: boolean;
   elevenlabsVoiceId: string | null;
   voiceReplyEnabled: boolean;
@@ -95,7 +92,7 @@ type TenantAccessContext = {
 type UserSettingsPayload = Partial<UserSettings>;
 type PrismaUserSettingsPayload = Omit<
   UserSettingsPayload,
-  "autoReplyDelaySeconds" | "facebookPageId"
+  "autoReplyDelaySeconds" | "facebookConnected"
 > & {
   auto_reply_delay_seconds?: number;
 };
@@ -142,11 +139,8 @@ async function mapUserSettings(
     followUpDelayHours: settings.followUpDelayHours,
     maxFollowUps: settings.maxFollowUps,
     followUpCustomInstructions: settings.followUpCustomInstructions ?? null,
-    facebookPageId: facebookPage?.pageId ?? null,
-    facebookPageAccessToken: maskApiKey
-      ? maskSecret(settings.facebookPageAccessToken)
-      : settings.facebookPageAccessToken,
     facebookAutoOutreach: settings.facebookAutoOutreach,
+    facebookConnected: !!facebookPage,
     elevenlabsVoiceId: settings.elevenlabsVoiceId,
     voiceReplyEnabled: settings.voiceReplyEnabled,
     voiceReplyMonthlyLimit: settings.voiceReplyMonthlyLimit,
@@ -226,20 +220,6 @@ function pickAllowedSettings(
         : null;
   }
 
-  if (
-    typeof input.facebookPageId === "string" ||
-    input.facebookPageId === null
-  ) {
-    next.facebookPageId = input.facebookPageId;
-  }
-
-  if (
-    typeof input.facebookPageAccessToken === "string" ||
-    input.facebookPageAccessToken === null
-  ) {
-    next.facebookPageAccessToken = input.facebookPageAccessToken;
-  }
-
   if (typeof input.facebookAutoOutreach === "boolean") {
     next.facebookAutoOutreach = input.facebookAutoOutreach;
   }
@@ -315,7 +295,7 @@ export async function updateUserSettings(
     currentSettings?.aiProvider,
   );
   const rawData = pickAllowedSettings(input);
-  const { autoReplyDelaySeconds, facebookPageId, ...restData } = rawData;
+  const { autoReplyDelaySeconds, facebookConnected, ...restData } = rawData;
   const nextProvider = normalizeSettingsProvider(
     rawData.aiProvider,
     currentProvider,
@@ -335,20 +315,6 @@ export async function updateUserSettings(
       : DEFAULT_AI_MODEL_BY_PROVIDER[nextProvider];
   } else if (rawData.aiProvider) {
     data.aiModel = DEFAULT_AI_MODEL_BY_PROVIDER[nextProvider];
-  }
-
-  if (facebookPageId !== undefined) {
-    if (facebookPageId) {
-      await prisma.facebookPageMapping.upsert({
-        where: { pageId: facebookPageId },
-        create: { pageId: facebookPageId, userId },
-        update: { userId },
-      });
-    } else {
-      await prisma.facebookPageMapping.deleteMany({
-        where: { userId },
-      });
-    }
   }
 
   const settings = await prisma.userSettings.upsert({
