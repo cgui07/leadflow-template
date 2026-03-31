@@ -9,9 +9,6 @@ const GRAPH_API_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
 const FB_OAUTH_SCOPES = [
   "pages_show_list",
   "pages_read_engagement",
-  "pages_manage_metadata",
-  "pages_manage_ads",
-  "leads_retrieval",
   "ads_management",
 ].join(",");
 
