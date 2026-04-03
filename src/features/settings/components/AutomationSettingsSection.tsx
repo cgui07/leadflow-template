@@ -5,7 +5,6 @@ import { Bot, Mic2 } from "lucide-react";
 import type { UserSettings } from "../contracts";
 import { AI_PROVIDER_OPTIONS } from "@/lib/ai-models";
 import { VoiceCloneRecorder } from "./VoiceCloneRecorder";
-import { GoogleCalendarSettings } from "./GoogleCalendarSettings";
 import { FollowUpSettingsSection } from "./FollowUpSettingsSection";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { WhatsAppConnection } from "@/components/domain/WhatsAppConnection";
@@ -157,8 +156,6 @@ export function AutomationSettingsSection({
               </div>
             )}
         </SectionContainer>
-
-        <GoogleCalendarSettings />
       </div>
     </>
   );
