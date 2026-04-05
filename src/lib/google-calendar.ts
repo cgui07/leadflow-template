@@ -6,7 +6,7 @@ const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_CALENDAR_BASE = "https://www.googleapis.com/calendar/v3";
 const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 
-export function getGoogleCalendarAuthUrl(userId: string): string {
+export function getGoogleCalendarAuthUrl(csrfState: string): string {
   const clientId = env.GOOGLE_CLIENT_ID;
   const redirectUri = `${env.NEXT_PUBLIC_APP_URL}/api/settings/google-calendar/callback`;
 
@@ -17,7 +17,7 @@ export function getGoogleCalendarAuthUrl(userId: string): string {
     scope: CALENDAR_SCOPE,
     access_type: "offline",
     prompt: "consent",
-    state: userId,
+    state: csrfState,
   });
 
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;

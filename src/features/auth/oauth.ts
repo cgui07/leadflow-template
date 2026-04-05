@@ -134,6 +134,7 @@ export async function authenticateWithGoogleAuthorizationCode({
       googleId: true,
       avatarUrl: true,
       status: true,
+      token_version: true,
       tenant: {
         select: {
           status: true,
@@ -160,5 +161,5 @@ export async function authenticateWithGoogleAuthorizationCode({
     });
   }
 
-  await setAuthCookie(signToken(user.id));
+  await setAuthCookie(signToken(user.id, user.token_version));
 }

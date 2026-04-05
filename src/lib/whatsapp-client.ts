@@ -1,6 +1,56 @@
 import { env } from "./env";
+import { logger } from "./logger";
 import { getEvolutionApiKey } from "./evolution";
 import { resolveReplyJid, toEvolutionNumber } from "./whatsapp-resolve";
+
+/**
+ * Validates that a media URL is safe to forward to the Evolution API.
+ * Blocks internal/private IPs and non-HTTPS URLs (except data: URIs).
+ */
+function assertSafeMediaUrl(mediaUrl: string): void {
+  // Allow data: URIs (base64 inline media)
+  if (mediaUrl.startsWith("data:")) {
+    return;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(mediaUrl);
+  } catch {
+    throw new Error(`Invalid media URL: ${mediaUrl}`);
+  }
+
+  if (parsed.protocol !== "https:") {
+    throw new Error(`Media URL must use HTTPS: ${mediaUrl}`);
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+
+  // Block private/internal hostnames
+  const blockedPatterns = [
+    /^localhost$/,
+    /^127\./,
+    /^10\./,
+    /^172\.(1[6-9]|2\d|3[01])\./,
+    /^192\.168\./,
+    /^169\.254\./,
+    /^0\./,
+    /^\[::1\]$/,
+    /^\[fe80:/,
+    /^\[fc/,
+    /^\[fd/,
+    /\.internal$/,
+    /\.local$/,
+    /\.localhost$/,
+  ];
+
+  for (const pattern of blockedPatterns) {
+    if (pattern.test(hostname)) {
+      logger.warn("Blocked SSRF attempt in media URL", { mediaUrl });
+      throw new Error(`Media URL points to a blocked host: ${hostname}`);
+    }
+  }
+}
 
 export interface WhatsAppConfig {
   phoneId: string;
@@ -101,6 +151,8 @@ export async function sendWhatsAppMedia(
   mediaUrl: string,
   options?: { caption?: string; fileName?: string; mimetype?: string }
 ) {
+  assertSafeMediaUrl(mediaUrl);
+
   const resolvedTo = resolveReplyJid(to);
   if (!resolvedTo) {
     throw new Error(`Cannot resolve WhatsApp recipient JID: ${to}`);

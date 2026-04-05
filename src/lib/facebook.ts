@@ -1,7 +1,7 @@
 import { env } from "./env";
 import { prisma } from "./db";
 import { logger } from "./logger";
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 
 const GRAPH_API_VERSION = "v21.0";
 const GRAPH_API_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
@@ -12,13 +12,13 @@ const FB_OAUTH_SCOPES = [
   "ads_management",
 ].join(",");
 
-export function getFacebookOAuthUrl(userId: string): string {
+export function getFacebookOAuthUrl(csrfState: string): string {
   const params = new URLSearchParams({
     client_id: env.FACEBOOK_APP_ID,
     redirect_uri: `${env.NEXT_PUBLIC_APP_URL}/api/settings/facebook/callback`,
     scope: FB_OAUTH_SCOPES,
     response_type: "code",
-    state: userId,
+    state: csrfState,
   });
 
   return `https://www.facebook.com/${GRAPH_API_VERSION}/dialog/oauth?${params.toString()}`;
@@ -173,7 +173,14 @@ export function verifyFacebookSignature(
     .update(rawBody, "utf8")
     .digest("hex");
 
-  return expected === signature;
+  const expectedBuf = Buffer.from(expected, "hex");
+  const signatureBuf = Buffer.from(signature, "hex");
+
+  if (expectedBuf.length !== signatureBuf.length) {
+    return false;
+  }
+
+  return timingSafeEqual(expectedBuf, signatureBuf);
 }
 
 export function getFacebookVerifyToken(): string {

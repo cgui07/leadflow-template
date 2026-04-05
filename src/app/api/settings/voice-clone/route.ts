@@ -1,12 +1,35 @@
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { cloneVoice, deleteVoice } from "@/lib/elevenlabs";
 import { error, handleError, json, requireAuth } from "@/lib/api";
+
+const ALLOWED_AUDIO_MIMES = new Set([
+  "audio/wav",
+  "audio/x-wav",
+  "audio/mpeg",
+  "audio/mp3",
+  "audio/mp4",
+  "audio/ogg",
+  "audio/webm",
+  "audio/flac",
+  "audio/x-m4a",
+  "audio/aac",
+]);
 
 export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth();
+
+    // Rate limit: 3 clones per hour per user
+    const { allowed } = checkRateLimit(`voice-clone:${user.id}`, {
+      windowMs: 60 * 60 * 1000,
+      maxRequests: 3,
+    });
+    if (!allowed) {
+      return error("Limite de clonagem atingido. Tente novamente em 1 hora.", 429);
+    }
 
     const apiKey = env.ELEVENLABS_API_KEY;
     if (!apiKey) {
@@ -23,6 +46,10 @@ export async function POST(req: NextRequest) {
 
     if (audioFile.size > 10 * 1024 * 1024) {
       return error("Áudio muito grande (máximo 10MB)");
+    }
+
+    if (!ALLOWED_AUDIO_MIMES.has(audioFile.type)) {
+      return error("Tipo de arquivo não permitido. Envie um arquivo de áudio válido.");
     }
 
     const audioBlob = new Blob([await audioFile.arrayBuffer()], { type: audioFile.type });

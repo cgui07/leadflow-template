@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
+import { CreateTenantSchema } from "@/lib/schemas";
 import { isPlatformAdminEmail } from "@/lib/tenant";
 import { json, error, requireAuth, handleError } from "@/lib/api";
 import {
@@ -39,21 +40,10 @@ export async function POST(req: NextRequest) {
     const user = await requireAuth();
     requirePlatformAdmin(user);
 
-    const { name, slug, logoUrl, colorPrimary, colorSecondary, featureFlags, customTexts } =
-      await req.json();
-
-    if (!name || !slug) {
-      return error("Nome e slug são obrigatórios");
-    }
-
-    if (!/^[a-z0-9-]+$/.test(slug)) {
-      return error(
-        "Slug deve conter apenas letras minúsculas, números e hífens",
-      );
-    }
+    const input = CreateTenantSchema.parse(await req.json());
 
     const existing = await prisma.tenant.findUnique({
-      where: { slug: slug.trim().toLowerCase() },
+      where: { slug: input.slug.trim().toLowerCase() },
       select: { id: true },
     });
 
@@ -62,24 +52,24 @@ export async function POST(req: NextRequest) {
     }
 
     const branding = buildBranding({
-      name,
-      logoUrl,
+      name: input.name,
+      logoUrl: input.logoUrl ?? null,
       colorPrimary: normalizeBrandColor(
-        typeof colorPrimary === "string" ? colorPrimary : null,
+        input.colorPrimary ?? null,
         "blue" satisfies BrandColorKey,
       ),
       colorSecondary: normalizeBrandColor(
-        typeof colorSecondary === "string" ? colorSecondary : null,
+        input.colorSecondary ?? null,
         "purple" satisfies BrandColorKey,
       ),
-      customTexts,
-      featureFlags,
+      customTexts: input.customTexts ?? null,
+      featureFlags: input.featureFlags ?? null,
     });
 
     const tenant = await prisma.tenant.create({
       data: {
         name: branding.name,
-        slug: slug.trim().toLowerCase(),
+        slug: input.slug.trim().toLowerCase(),
         logoUrl: branding.logoUrl,
         colorPrimary: branding.colorPrimary,
         colorSecondary: branding.colorSecondary,

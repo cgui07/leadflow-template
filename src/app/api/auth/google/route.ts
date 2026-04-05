@@ -14,7 +14,8 @@ export async function GET(req: NextRequest) {
         redirect: req.nextUrl.searchParams.get("redirect"),
       });
     const response = NextResponse.redirect(authorizationUrl);
-    const secure = process.env.NODE_ENV === "production";
+    const { env } = await import("@/lib/env");
+    const secure = env.NODE_ENV === "production";
 
     response.cookies.set(GOOGLE_OAUTH_STATE_COOKIE, state, {
       httpOnly: true,

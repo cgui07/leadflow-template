@@ -108,8 +108,39 @@ export const UpdateSettingsSchema = z
   })
   .passthrough();
 
+export const CreateTenantSchema = z.object({
+  name: z.string().min(1, "Nome é obrigatório"),
+  slug: z
+    .string()
+    .min(1, "Slug é obrigatório")
+    .regex(/^[a-z0-9-]+$/, "Slug deve conter apenas letras minúsculas, números e hífens"),
+  logoUrl: z.string().nullable().optional(),
+  colorPrimary: z.string().nullable().optional(),
+  colorSecondary: z.string().nullable().optional(),
+  featureFlags: z.record(z.string(), z.unknown()).nullable().optional(),
+  customTexts: z.record(z.string(), z.unknown()).nullable().optional(),
+});
+
+export const UpdateTenantCustomizationSchema = z.object({
+  name: z.string().min(1, "Nome da marca é obrigatório"),
+  logoUrl: z.string().nullable().optional(),
+  colorPrimary: z.string().nullable().optional(),
+  colorSecondary: z.string().nullable().optional(),
+  featureFlags: z.record(z.string(), z.unknown()).nullable().optional(),
+  customTexts: z.record(z.string(), z.unknown()).nullable().optional(),
+});
+
 export const CreatePropertySchema = z.object({
   rawText: z.string().min(10, "Texto deve ter pelo menos 10 caracteres"),
+});
+
+export const CreateLeadActionSchema = z.object({
+  type: z.enum(["visit", "proposal", "financing"]),
+  status: z.enum(["pending", "awaiting_schedule", "scheduled", "done", "completed", "cancelled"]).optional(),
+  title: z.string().max(500).optional(),
+  notes: z.string().max(5000).nullable().optional(),
+  scheduledAt: z.string().nullable().optional(),
+  reminderAt: z.string().nullable().optional(),
 });
 
 export const CreateAppointmentSchema = z.object({

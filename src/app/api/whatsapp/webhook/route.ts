@@ -53,7 +53,18 @@ export async function POST(req: NextRequest) {
 
     const { provider, userId, settings } = resolved;
 
-    if (settings.whatsappWebhookToken) {
+    if (!settings.whatsappWebhookToken) {
+      logger.error("Webhook rejected: no token configured for instance", {
+        instance: instanceName,
+        userId,
+      });
+      return NextResponse.json(
+        { error: "Webhook token not configured" },
+        { status: 401 },
+      );
+    }
+
+    {
       const expected = Buffer.from(settings.whatsappWebhookToken);
       const received = Buffer.from(token ?? "");
       const valid =

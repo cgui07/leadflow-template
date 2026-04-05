@@ -22,6 +22,7 @@ model User {
   googleId               String?                @unique @map("google_id")
   tenantId               String?                @map("tenant_id") @db.Uuid
   status                 String                 @default("active") @db.VarChar(20)
+  token_version          Int                    @default(0)
   activities             Activity[]
   appointments           appointments[]
   calendar_connections   calendar_connections[]

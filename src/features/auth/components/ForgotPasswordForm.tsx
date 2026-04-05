@@ -11,14 +11,12 @@ export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setMessage("");
-    setPreviewUrl("");
     setLoading(true);
 
     try {
@@ -40,14 +38,12 @@ export function ForgotPasswordForm() {
 
       const data = (await response.json()) as {
         message?: string;
-        previewUrl?: string;
       };
 
       setMessage(
         data.message ||
           "Se o email existir, enviamos um link para redefinir a senha.",
       );
-      setPreviewUrl(data.previewUrl || "");
     } catch {
       setError("Erro de conexão.");
     } finally {
@@ -62,15 +58,6 @@ export function ForgotPasswordForm() {
       {message ? (
         <div className="space-y-4 text-center">
           <AuthAlert tone="success">{message}</AuthAlert>
-          {previewUrl ? (
-            <a
-              href={previewUrl}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-blue-royal"
-            >
-              <Mail className="h-4 w-4" />
-              Abrir link de redefinição
-            </a>
-          ) : null}
         </div>
       ) : (
         <Form onSubmit={handleSubmit} className="space-y-5">

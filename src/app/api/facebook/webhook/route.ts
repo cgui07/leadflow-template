@@ -27,7 +27,14 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 }
 
+const MAX_WEBHOOK_BODY_SIZE = 1024 * 1024; // 1 MB
+
 export async function POST(req: NextRequest) {
+  const contentLength = Number(req.headers.get("content-length") || "0");
+  if (contentLength > MAX_WEBHOOK_BODY_SIZE) {
+    return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+  }
+
   const rawBody = await req.text();
   const signature = req.headers.get("x-hub-signature-256");
 

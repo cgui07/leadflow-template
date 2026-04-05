@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { UpdateTenantCustomizationSchema } from "@/lib/schemas";
 import { error, handleError, json, requireAuth } from "@/lib/api";
 import {
   TenantAccessError,
@@ -35,8 +36,11 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   try {
     const user = await requireAuth();
-    const body = (await req.json()) as Record<string, unknown>;
-    const tenant = await updateTenantCustomization(getTenantContext(user), body);
+    const body = UpdateTenantCustomizationSchema.parse(await req.json());
+    const tenant = await updateTenantCustomization(
+      getTenantContext(user),
+      body as Record<string, unknown>,
+    );
 
     if (!tenant) {
       return error("Tenant não encontrado", 404);
