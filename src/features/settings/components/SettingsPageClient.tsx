@@ -1,11 +1,11 @@
 "use client";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
+import { ConnectorsSection } from "./ConnectorsSection";
 import { useEffect, useMemo, useTransition } from "react";
 import { useSettingsForm } from "../hooks/useSettingsForm";
 import { SelectField } from "@/components/forms/SelectField";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { ConnectorsSection } from "./ConnectorsSection";
 import { Bot, Link2, Loader2, Palette, Save } from "lucide-react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { AutomationSettingsSection } from "./AutomationSettingsSection";

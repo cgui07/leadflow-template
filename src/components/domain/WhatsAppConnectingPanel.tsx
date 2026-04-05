@@ -30,9 +30,9 @@ export function WhatsAppConnectingPanel({
     <div className="space-y-4 py-4 text-center">
       {qrCode ? (
         <>
-          <p className="text-sm font-medium text-neutral-dark">
+          <div className="text-sm font-medium text-neutral-dark">
             Escaneie o QR Code com o WhatsApp do seu celular
-          </p>
+          </div>
           <div className="flex justify-center">
             <div className="rounded-xl border border-neutral-border bg-white p-3">
               <Image
@@ -114,7 +114,7 @@ export function WhatsAppConnectingPanel({
       ) : (
         <div className="flex flex-col items-center gap-3 py-4">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-line border-t-primary" />
-          <p className="text-sm text-neutral-muted">Gerando QR Code...</p>
+          <div className="text-sm text-neutral-muted">Gerando QR Code...</div>
         </div>
       )}
     </div>

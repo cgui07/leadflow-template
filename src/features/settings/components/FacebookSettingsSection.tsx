@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle, ExternalLink, Loader, Megaphone, Unlink } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import type { UserSettings } from "../contracts";
 import { CheckboxField } from "@/components/forms";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Button } from "@/components/ui/Button";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
+import { CheckCircle, ExternalLink, Loader, Megaphone, Unlink } from "lucide-react";
 
 interface FacebookPage {
   pageId: string;
@@ -120,13 +120,13 @@ export function FacebookSettingsSection({
                 <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4">
                   <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-green-800">
+                    <div className="text-sm font-medium text-green-800">
                       Facebook conectado
-                    </p>
+                    </div>
                     {status.pages.map((page) => (
-                      <p key={page.pageId} className="text-xs text-green-700">
+                      <div key={page.pageId} className="text-xs text-green-700">
                         {page.pageName ?? page.pageId}
-                      </p>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -138,9 +138,9 @@ export function FacebookSettingsSection({
                   onChange={(checked) => update("facebookAutoOutreach", checked)}
                 />
 
-                <p className="text-xs text-neutral">
+                <div className="text-xs text-neutral">
                   Quando ativado, novos leads de campanhas recebem automaticamente a mensagem de saudação via WhatsApp.
-                </p>
+                </div>
 
                 <Button
                   variant="secondary"
@@ -153,10 +153,10 @@ export function FacebookSettingsSection({
               </div>
             ) : (
               <div className="space-y-4">
-                <p className="text-sm text-neutral">
+                <div className="text-sm text-neutral">
                   Conecte sua conta Facebook para receber leads automaticamente
                   das suas campanhas de anúncios no Facebook e Instagram.
-                </p>
+                </div>
 
                 <a href="/api/settings/facebook/connect">
                   <Button icon={<ExternalLink className="h-4 w-4" />}>
@@ -170,22 +170,22 @@ export function FacebookSettingsSection({
 
         <SectionContainer title="Como funciona">
           <div className="space-y-3 text-sm text-neutral">
-            <p>
+            <div>
               1. Clique em <strong>Conectar Facebook</strong> e autorize o acesso
               às suas Páginas
-            </p>
-            <p>
+            </div>
+            <div>
               2. O sistema configura automaticamente o webhook para receber leads
               das campanhas
-            </p>
-            <p>
+            </div>
+            <div>
               3. Novos leads de formulários de anúncios aparecem automaticamente
               no seu CRM
-            </p>
-            <p>
+            </div>
+            <div>
               4. Se o envio automático estiver ativo, o lead recebe uma saudação
               via WhatsApp
-            </p>
+            </div>
           </div>
         </SectionContainer>
       </div>

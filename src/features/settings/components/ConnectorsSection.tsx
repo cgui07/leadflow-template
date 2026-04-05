@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import type { UserSettings } from "../contracts";
+import { CheckboxField } from "@/components/forms";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import {
   Calendar,
   CheckCircle,
@@ -9,10 +13,6 @@ import {
   Megaphone,
   Unlink,
 } from "lucide-react";
-import type { UserSettings } from "../contracts";
-import { CheckboxField } from "@/components/forms";
-import { Button } from "@/components/ui/Button";
-import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 
 interface CalendarStatus {
   connected: boolean;
@@ -257,8 +257,8 @@ function ConnectorCard({
           {icon}
         </div>
         <div>
-          <p className="text-sm font-medium text-foreground">{title}</p>
-          <p className="text-xs text-neutral">{description}</p>
+          <div className="text-sm font-medium text-foreground">{title}</div>
+          <div className="text-xs text-neutral">{description}</div>
         </div>
       </div>
 

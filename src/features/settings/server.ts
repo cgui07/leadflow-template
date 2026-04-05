@@ -295,7 +295,7 @@ export async function updateUserSettings(
     currentSettings?.aiProvider,
   );
   const rawData = pickAllowedSettings(input);
-  const { autoReplyDelaySeconds, facebookConnected, ...restData } = rawData;
+  const { autoReplyDelaySeconds, facebookConnected: _facebookConnected, ...restData } = rawData;
   const nextProvider = normalizeSettingsProvider(
     rawData.aiProvider,
     currentProvider,

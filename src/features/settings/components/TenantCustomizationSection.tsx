@@ -68,13 +68,13 @@ export function TenantCustomizationSection({
               </div>
               <div className="hidden md:grid md:grid-cols-2 md:gap-4">
                 <div />
-                <p className="text-sm text-neutral">
+                <div className="text-sm text-neutral">
                   Slug interno usado para identificar este cliente.
-                </p>
+                </div>
               </div>
-              <p className="text-sm text-neutral md:hidden">
+              <div className="text-sm text-neutral md:hidden">
                 Slug interno usado para identificar este cliente.
-              </p>
+              </div>
             </div>
 
             <TextField
