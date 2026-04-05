@@ -107,6 +107,52 @@ function getOpenAIKeyForTranscription(aiConfig: {
   return null;
 }
 
+const MAGIC_BYTES: [string, number[], number?][] = [
+  // Images
+  ["image/jpeg", [0xff, 0xd8, 0xff]],
+  ["image/png", [0x89, 0x50, 0x4e, 0x47]],
+  ["image/gif", [0x47, 0x49, 0x46]],
+  ["image/webp", [0x52, 0x49, 0x46, 0x46]],
+  // Audio
+  ["audio/ogg", [0x4f, 0x67, 0x67, 0x53]],
+  ["audio/flac", [0x66, 0x4c, 0x61, 0x43]],
+  ["audio/mpeg", [0xff, 0xfb]],
+  ["audio/mpeg", [0xff, 0xf3]],
+  ["audio/mpeg", [0xff, 0xf2]],
+  ["audio/mpeg", [0x49, 0x44, 0x33]], // ID3 tag
+  // Documents
+  ["application/pdf", [0x25, 0x50, 0x44, 0x46]],
+];
+
+function detectMimeFromBytes(buffer: Buffer): string | null {
+  for (const [mime, sig, offset] of MAGIC_BYTES) {
+    const start = offset ?? 0;
+    if (buffer.length < start + sig.length) continue;
+    if (sig.every((b, i) => buffer[start + i] === b)) return mime;
+  }
+  // MP4/M4A (ftyp box at offset 4)
+  if (buffer.length >= 8 && buffer.subarray(4, 8).toString("ascii") === "ftyp") {
+    return "video/mp4"; // covers audio/mp4 and video/mp4
+  }
+  return null;
+}
+
+function isMimeCompatible(declared: string, detected: string): boolean {
+  // Normalize broad categories
+  const d = declared.split(";")[0].trim().toLowerCase();
+  const det = detected.toLowerCase();
+  if (d === det) return true;
+  // Allow audio/mp4 vs video/mp4 (same container)
+  if ((d === "audio/mp4" || d === "video/mp4") && (det === "audio/mp4" || det === "video/mp4")) return true;
+  // Allow audio/mpeg vs audio/mp3
+  if ((d === "audio/mpeg" || d === "audio/mp3") && (det === "audio/mpeg" || det === "audio/mp3")) return true;
+  // Same broad type (image/*, audio/*)
+  const [dType] = d.split("/");
+  const [detType] = det.split("/");
+  if (dType === detType) return true;
+  return false;
+}
+
 export async function resolveMediaContent(params: {
   mediaType: string;
   base64Data?: string | null;
@@ -141,6 +187,13 @@ export async function resolveMediaContent(params: {
   base64 = base64.replace(/^data:[^;]+;base64,/, "");
 
   const buffer = Buffer.from(base64, "base64");
+
+  // Validate MIME type against magic bytes
+  const detectedMime = detectMimeFromBytes(buffer);
+  if (detectedMime && !isMimeCompatible(mimeType, detectedMime)) {
+    logger.warn("MIME type mismatch", { declared: mimeType, detected: detectedMime });
+    return null;
+  }
 
   if (mediaType === "image") {
     if (buffer.length > MAX_IMAGE_SIZE) {

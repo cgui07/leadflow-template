@@ -21,12 +21,22 @@ export async function POST(
     }
 
     const body = await req.json();
-    const filename = body.filename as string;
+    const rawFilename = body.filename as string;
     const size = body.size as number;
 
-    if (!filename || typeof size !== "number") {
+    if (!rawFilename || typeof size !== "number") {
       return error("Campos 'filename' e 'size' são obrigatórios.", 400);
     }
+
+    // Sanitize filename: strip path traversal, null bytes, allow only safe chars
+    const basename = rawFilename.split(/[/\\]/).pop() || "";
+    const sanitized = basename.replace(/\0/g, "").replace(/[^a-zA-Z0-9._\-\s()]/g, "_").trim();
+
+    if (!sanitized || !sanitized.toLowerCase().endsWith(".pdf")) {
+      return error("Apenas arquivos .pdf são permitidos.", 400);
+    }
+
+    const filename = sanitized;
 
     const MAX_PDF_SIZE = 100 * 1024 * 1024;
     if (size > MAX_PDF_SIZE) {

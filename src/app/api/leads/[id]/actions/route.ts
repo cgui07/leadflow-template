@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server";
+import { CreateLeadActionSchema } from "@/lib/schemas";
 import { json, error, requireAuth, handleError } from "@/lib/api";
 import {
-  LEAD_ACTION_TYPES,
-  LEAD_ACTION_STATUSES,
   OPEN_ACTION_STATUSES,
   ACTION_TYPE_LABELS,
   type LeadActionType,
@@ -40,26 +39,17 @@ export async function POST(
   try {
     const user = await requireAuth();
     const { id } = await params;
-    const data = await req.json();
+    const raw = await req.json();
+    const parsed = CreateLeadActionSchema.safeParse(raw);
+    if (!parsed.success) {
+      return error(parsed.error.issues[0]?.message || "Dados inválidos", 400);
+    }
+    const data = parsed.data;
 
     const lead = await prisma.lead.findFirst({
       where: { id, userId: user.id },
     });
     if (!lead) return error("Lead não encontrado", 404);
-
-    if (!data.type || !LEAD_ACTION_TYPES.includes(data.type)) {
-      return error(
-        `Tipo inválido. Use: ${LEAD_ACTION_TYPES.join(", ")}`,
-        400,
-      );
-    }
-
-    if (data.status && !LEAD_ACTION_STATUSES.includes(data.status)) {
-      return error(
-        `Status inválido. Use: ${LEAD_ACTION_STATUSES.join(", ")}`,
-        400,
-      );
-    }
 
     // Check for existing open action of same type
     const existing = await prisma.leadAction.findFirst({

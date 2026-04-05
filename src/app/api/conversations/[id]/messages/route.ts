@@ -14,7 +14,10 @@ export async function GET(
     const user = await requireAuth();
     const { id } = await params;
     const cursor = req.nextUrl.searchParams.get("cursor");
-    const limit = Number.parseInt(req.nextUrl.searchParams.get("limit") || "50", 10);
+    const limit = Math.min(
+      Math.max(1, Number.parseInt(req.nextUrl.searchParams.get("limit") || "50", 10) || 50),
+      200,
+    );
     const messages = await listConversationMessages(user.id, id, {
       cursor,
       limit,

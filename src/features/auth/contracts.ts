@@ -28,7 +28,6 @@ export interface RegisterFormInput {
 
 export interface PasswordResetRequestResult {
   message: string;
-  previewUrl?: string;
 }
 
 export interface ResetPasswordInput {

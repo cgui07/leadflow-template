@@ -40,13 +40,13 @@ export function createPasswordResetToken() {
   };
 }
 
-export function signToken(userId: string) {
-  return jwt.sign({ userId }, env.JWT_SECRET, { expiresIn: JWT_EXPIRY });
+export function signToken(userId: string, token_version = 0) {
+  return jwt.sign({ userId, v: token_version }, env.JWT_SECRET, { algorithm: "HS256", expiresIn: JWT_EXPIRY });
 }
 
-export function verifyToken(token: string): { userId: string } | null {
+export function verifyToken(token: string): { userId: string; v?: number } | null {
   try {
-    return jwt.verify(token, env.JWT_SECRET) as { userId: string };
+    return jwt.verify(token, env.JWT_SECRET, { algorithms: ["HS256"] }) as { userId: string; v?: number };
   } catch {
     return null;
   }
@@ -66,10 +66,16 @@ export async function getCurrentUser() {
       id: true,
       status: true,
       tenantId: true,
+      token_version: true,
     },
   });
 
   if (!sessionUser || sessionUser.status !== "active") {
+    return null;
+  }
+
+  // Reject tokens issued before a password reset or manual revocation
+  if ((payload.v ?? 0) < sessionUser.token_version) {
     return null;
   }
 

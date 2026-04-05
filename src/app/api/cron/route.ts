@@ -21,12 +21,9 @@ export async function POST(req: NextRequest) {
       ]);
 
     return json({
-      followUps: { processed: followUpResults.length, results: followUpResults },
-      escalations: { processed: escalationResults.length, results: escalationResults },
-      visitConfirmations: {
-        processed: visitConfirmationResults.length,
-        results: visitConfirmationResults,
-      },
+      followUps: { processed: followUpResults.length },
+      escalations: { processed: escalationResults.length },
+      visitConfirmations: { processed: visitConfirmationResults.length },
       timestamp: new Date().toISOString(),
     });
   } catch (err) {
@@ -35,6 +32,3 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
-  return POST(req);
-}

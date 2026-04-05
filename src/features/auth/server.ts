@@ -81,6 +81,7 @@ export async function loginWithPassword(
       email: true,
       passwordHash: true,
       status: true,
+      token_version: true,
       tenant: {
         select: {
           status: true,
@@ -89,27 +90,29 @@ export async function loginWithPassword(
     },
   });
 
+  const GENERIC_LOGIN_ERROR = "Email ou senha incorretos";
+
   if (!user) {
     throw new AuthFlowError(
       "LOGIN_INVALID_CREDENTIALS",
       401,
-      "Credenciais inválidas",
+      GENERIC_LOGIN_ERROR,
     );
   }
 
   if (user.status !== "active" || user.tenant?.status === "inactive") {
     throw new AuthFlowError(
-      "LOGIN_ACCOUNT_SUSPENDED",
-      403,
-      "Conta suspensa. Entre em contato com o administrador.",
+      "LOGIN_INVALID_CREDENTIALS",
+      401,
+      GENERIC_LOGIN_ERROR,
     );
   }
 
   if (!user.passwordHash) {
     throw new AuthFlowError(
-      "LOGIN_GOOGLE_ONLY",
+      "LOGIN_INVALID_CREDENTIALS",
       401,
-      "Esta conta usa login com Google. Clique em 'Continuar com Google'.",
+      GENERIC_LOGIN_ERROR,
     );
   }
 
@@ -118,11 +121,11 @@ export async function loginWithPassword(
     throw new AuthFlowError(
       "LOGIN_INVALID_CREDENTIALS",
       401,
-      "Credenciais inválidas",
+      GENERIC_LOGIN_ERROR,
     );
   }
 
-  const token = signToken(user.id);
+  const token = signToken(user.id, user.token_version);
   await setAuthCookie(token);
 
   return mapUserSummary(user);
@@ -310,8 +313,6 @@ export async function requestPasswordReset(
     select: { id: true, email: true },
   });
 
-  let previewUrl: string | undefined;
-
   if (user) {
     if (env.NODE_ENV === "production" && !env.RESEND_API_KEY) {
       throw new AuthFlowError(
@@ -355,15 +356,11 @@ export async function requestPasswordReset(
       }
     }
 
-    if (env.NODE_ENV !== "production") {
-      previewUrl = resetUrl;
-      logger.info("Password reset link generated", { email: user.email, resetUrl });
-    }
+    logger.info("Password reset email sent", { email: user.email });
   }
 
   return {
     message: "Se o email existir, enviamos um link para redefinir a senha.",
-    previewUrl: env.NODE_ENV === "production" ? undefined : previewUrl,
   };
 }
 
@@ -453,15 +450,17 @@ export async function resetPasswordWithToken(
       passwordHash,
       passwordResetTokenHash: null,
       passwordResetExpiresAt: null,
+      token_version: { increment: 1 },
     },
     select: {
       id: true,
       email: true,
       name: true,
+      token_version: true,
     },
   });
 
-  const authToken = signToken(updatedUser.id);
+  const authToken = signToken(updatedUser.id, updatedUser.token_version);
   await setAuthCookie(authToken);
 
   return mapUserSummary(updatedUser);

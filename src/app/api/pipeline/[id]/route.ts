@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { UpdateStageSchema } from "@/lib/schemas";
 import { error, handleError, json, requireAuth } from "@/lib/api";
 import {
   updatePipelineStage,
@@ -12,7 +13,7 @@ export async function PATCH(
   try {
     const user = await requireAuth();
     const { id } = await params;
-    const body = (await req.json()) as Record<string, unknown>;
+    const body = UpdateStageSchema.parse(await req.json());
 
     const stage = await updatePipelineStage(user.id, id, body);
     return json(stage);

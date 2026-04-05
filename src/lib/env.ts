@@ -4,7 +4,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatório"),
   DIRECT_URL: z.string().optional(),
 
-  JWT_SECRET: z.string().min(1, "JWT_SECRET é obrigatório"),
+  JWT_SECRET: z.string().min(32, "JWT_SECRET deve ter pelo menos 32 caracteres"),
   CRON_SECRET: z.string().optional(),
 
   NEXT_PUBLIC_APP_URL: z.string().min(1, "NEXT_PUBLIC_APP_URL é obrigatório"),
