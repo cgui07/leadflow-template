@@ -118,6 +118,7 @@ export const appColors = {
     mint:    "#86efac",
     sage:    "#bbf7d0",
     pale:    "#f0fdf4",
+    medium:  "#16a34a",
     dark:    "#15803d",
     forest:  "#14532d",
   },

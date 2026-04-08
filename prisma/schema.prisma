@@ -61,6 +61,8 @@ model UserSettings {
   voiceReplyMonthlyLimit     Int     @default(50) @map("voice_reply_monthly_limit")
   whatsapp_provider          String  @default("evolution") @db.VarChar(30)
   followUpCustomInstructions String? @map("follow_up_custom_instructions")
+  canalProWebhookToken       String? @unique @map("canal_pro_webhook_token") @db.VarChar
+  canalProAutoOutreach       Boolean @default(true) @map("canal_pro_auto_outreach")
   user                       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")

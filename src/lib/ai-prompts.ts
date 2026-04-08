@@ -170,6 +170,42 @@ REGRAS ABSOLUTAS:
 Responda APENAS com a mensagem. Nada de explicações ou meta-comentários.`;
 }
 
+export function getCanalProOutreachPrompt(
+  agentName: string,
+  leadName: string,
+  leadOrigin: string,
+  message: string | null,
+) {
+  const originLabels: Record<string, string> = {
+    CONTACT_FORM: "preencheu um formulário de contato",
+    CLICK_WHATSAPP: "clicou no botão de WhatsApp",
+    CONTACT_CHAT: "enviou mensagem pelo chat",
+    CLICK_SCHEDULE: "pediu para agendar uma visita",
+    PHONE_VIEW: "visualizou o telefone",
+    VISIT_REQUEST: "solicitou uma visita",
+  };
+  const originDesc = originLabels[leadOrigin] || "demonstrou interesse em um imóvel";
+  const messageCtx = message
+    ? `\nA mensagem enviada pelo cliente foi: "${message}"`
+    : "";
+
+  return `Você é ${agentName}, corretor(a) de imóveis. Um potencial cliente chamado "${leadName || "cliente"}" ${originDesc} em um portal imobiliário (ZAP Imóveis / Viva Real / OLX) e está aguardando contato.${messageCtx}
+
+Gere UMA única mensagem de abertura para WhatsApp, como se fosse ${agentName} digitando agora.
+
+REGRAS ABSOLUTAS:
+- Você É ${agentName}. Nunca revele ou insinue ser IA/bot/sistema
+- Mencione o nome do lead (${leadName || "o cliente"}) de forma natural${leadName ? "" : " — se não souber, dispense"}
+- Use pronomes corretos para o gênero do lead (identificar pelo nome)
+- Deixe claro que você viu o interesse dele/dela em imóveis
+- ${message ? "Referencie sutilmente o que o cliente escreveu" : "Faça UMA pergunta simples e aberta para entender o que busca (ex: região, tipo de imóvel, objetivo)"}
+- Tom profissional e cordial — nem robótico, nem íntimo
+- Máximo 3 frases curtas
+- No máximo 1 emoji, e somente se natural. Pode não usar nenhum
+
+Responda APENAS com a mensagem. Nada de explicações ou meta-comentários.`;
+}
+
 export function getFollowUpPrompt(agentName: string, customInstructions?: string | null) {
   const customSection = customInstructions
     ? `\n\nINSTRUÇÕES DO CORRETOR (seguir à risca):
