@@ -88,7 +88,9 @@ export function parseCanalProPayload(body: unknown): CanalProLead | null {
 
   const ddd = stripNonDigits(String(data.ddd ?? ""));
   const phone = stripNonDigits(String(data.phone ?? ""));
-  const fullPhone = ddd + phone;
+  const combined = ddd + phone;
+  const fullPhone =
+    combined && !combined.startsWith("55") ? "55" + combined : combined;
 
   if (!fullPhone) {
     logger.warn("[canal-pro] Lead sem telefone, ignorando");

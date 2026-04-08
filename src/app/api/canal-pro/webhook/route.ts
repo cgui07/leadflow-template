@@ -176,6 +176,8 @@ async function processWebhook(token: string, body: unknown) {
   } catch (err) {
     logger.error("[canal-pro] WhatsApp outreach failed", {
       error: err instanceof Error ? err.message : String(err),
+      whatsappPhoneId: settings.whatsappPhoneId,
+      whatsappChatId,
     });
 
     await prisma.activity.create({
