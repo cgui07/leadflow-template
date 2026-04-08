@@ -290,7 +290,6 @@ export async function createPlatformClient(
         colorPrimary: branding.colorPrimary,
         colorSecondary: branding.colorSecondary,
         featureFlags: branding.featureFlags,
-        customTexts: branding.customTexts,
       },
       select: { id: true, name: true, slug: true },
     });

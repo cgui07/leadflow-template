@@ -18,8 +18,7 @@ export default async function SettingsPage() {
         })
       : Promise.resolve(null),
   ]);
-  const subtitle =
-    session.branding.customTexts.settingsSubtitle || DEFAULT_SUBTITLE;
+  const subtitle = DEFAULT_SUBTITLE;
 
   return (
     <SettingsPageClient

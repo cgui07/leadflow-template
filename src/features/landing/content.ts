@@ -151,11 +151,11 @@ export interface LandingContent {
 }
 
 const contactHref =
-  "https://wa.me/5521981424040?text=Olá%2C%20quero%20entender%20como%20o%20LeadFlow%20funciona.";
+  "https://wa.me/5521981424040?text=Olá%2C%20quero%20entender%20como%20o%20LospeFlow%20funciona.";
 
 export const landingContent = {
   brand: {
-    name: "LeadFlow",
+    name: "LospeFlow",
     logoUrl: "/lead-logo.png",
     description: "Agente de vendas imobiliárias com IA, voz e automação completa.",
   },
@@ -170,7 +170,7 @@ export const landingContent = {
     eyebrow: "Responde, qualifica, envia PDF e agenda visita — tudo automático.",
     title: "Seu agente de vendas imobiliárias trabalhando 24h no WhatsApp.",
     description:
-      "O LeadFlow atende cada lead com a sua voz clonada, apresenta imóveis do seu catálogo, envia fichas em PDF e agenda visitas — sem você precisar digitar uma palavra.",
+      "O LospeFlow atende cada lead com a sua voz clonada, apresenta imóveis do seu catálogo, envia fichas em PDF e agenda visitas — sem você precisar digitar uma palavra.",
     primaryAction: {
       label: "Entenda melhor com a nossa equipe",
       href: contactHref,
@@ -303,7 +303,7 @@ export const landingContent = {
     eyebrow: "Como funciona",
     title: "Um agente completo que vende, qualifica e agenda por você.",
     description:
-      "O LeadFlow não é só um chatbot. É um agente de vendas que conhece seu catálogo, fala com sua voz, manda documentos e agenda visitas — enquanto você foca em fechar negócio.",
+      "O LospeFlow não é só um chatbot. É um agente de vendas que conhece seu catálogo, fala com sua voz, manda documentos e agenda visitas — enquanto você foca em fechar negócio.",
     journeyLabel: "Veja o fluxo completo",
     journeyTitle: 'Do primeiro "Oi" à visita agendada — sem você tocar no celular.',
     journeyDescription:
@@ -397,7 +397,7 @@ export const landingContent = {
     eyebrow: "O que o corretor ganha",
     title: "Um agente trabalhando por você — de dia, de noite, nos fins de semana.",
     description:
-      "Enquanto você está em visita, o LeadFlow atende, qualifica, envia PDF e agenda. Você só entra em cena quando o lead já está pronto para fechar.",
+      "Enquanto você está em visita, o LospeFlow atende, qualifica, envia PDF e agenda. Você só entra em cena quando o lead já está pronto para fechar.",
     items: [
       {
         description:
@@ -426,7 +426,7 @@ export const landingContent = {
     ],
   },
   footer: {
-    label: "LeadFlow — IA, voz, catálogo e CRM para corretores de imóveis",
+    label: "LospeFlow — IA, voz, catálogo e CRM para corretores de imóveis",
     action: {
       label: "Falar com a equipe",
       href: contactHref,

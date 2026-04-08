@@ -121,14 +121,14 @@ export async function sendInviteEmail(params: {
   const { error } = await resend.emails.send({
     from: getFromEmail(),
     to: params.to,
-    subject: `Você foi convidado para o ${params.tenantName} no LeadFlow`,
+    subject: `Você foi convidado para o ${params.tenantName} no LospeFlow`,
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff;">
 
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3366ff 60%, #7c3aed 100%); padding: 40px 32px; border-radius: 16px 16px 0 0;">
           <div style="font-size: 22px; font-weight: 700; color: #ffffff; margin: 0 0 6px;">
-            LeadFlow
+            LospeFlow
           </div>
           <div style="font-size: 14px; color: rgba(255,255,255,0.75);">
             Plataforma de CRM para corretores

@@ -229,7 +229,6 @@ model Tenant {
   colorSecondary String        @default("purple") @map("color_secondary") @db.VarChar(7)
   status         String        @default("active") @db.VarChar(20)
   featureFlags   Json          @default("{}") @map("feature_flags")
-  customTexts    Json          @default("{}") @map("custom_texts")
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @default(now()) @map("updated_at")
   inviteTokens   InviteToken[]

@@ -62,7 +62,6 @@ export async function POST(req: NextRequest) {
         input.colorSecondary ?? null,
         "purple" satisfies BrandColorKey,
       ),
-      customTexts: input.customTexts ?? null,
       featureFlags: input.featureFlags ?? null,
     });
 
@@ -74,7 +73,6 @@ export async function POST(req: NextRequest) {
         colorPrimary: branding.colorPrimary,
         colorSecondary: branding.colorSecondary,
         featureFlags: branding.featureFlags,
-        customTexts: branding.customTexts,
       },
     });
 

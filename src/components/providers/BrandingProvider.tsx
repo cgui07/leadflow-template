@@ -5,7 +5,6 @@ import {
   createDefaultBranding,
   type TenantFeatureFlagKey,
   type TenantBranding,
-  type TenantTextKey,
 } from "@/lib/branding";
 
 const BrandingContext = createContext<TenantBranding>(createDefaultBranding());
@@ -28,12 +27,6 @@ export function BrandingProvider({
 
 export function useBranding(): TenantBranding {
   return useContext(BrandingContext);
-}
-
-export function useBrandText(key: TenantTextKey, fallback: string): string {
-  const branding = useBranding();
-
-  return branding.customTexts[key] || fallback;
 }
 
 export function useFeatureFlag(flag: TenantFeatureFlagKey): boolean {

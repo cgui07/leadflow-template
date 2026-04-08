@@ -21,36 +21,6 @@ export const BRAND_COLOR_LABELS: Record<BrandColorKey, string> = {
   pink: "Rosa",
   indigo: "Indigo",
 };
-export const TENANT_TEXT_FIELDS = [
-  {
-    key: "dashboardTitle",
-    label: "Título do dashboard",
-    description: "Aparece no topo da página inicial do cliente.",
-    placeholder: "Dashboard",
-    multiline: false,
-  },
-  {
-    key: "dashboardSubtitle",
-    label: "Subtítulo do dashboard",
-    description: "Texto de apoio logo abaixo do título do dashboard.",
-    placeholder: "Visão geral dos seus leads e atendimentos",
-    multiline: true,
-  },
-  {
-    key: "conversationsSubtitle",
-    label: "Subtítulo de conversas",
-    description: "Ajuda a ajustar o tom operacional da caixa de entrada.",
-    placeholder: "Gerencie suas conversas do WhatsApp",
-    multiline: true,
-  },
-  {
-    key: "settingsSubtitle",
-    label: "Subtítulo de configurações",
-    description: "Texto de apoio na tela de configurações.",
-    placeholder: "Configure suas integrações e preferências",
-    multiline: true,
-  },
-] as const;
 export const TENANT_FEATURE_FLAGS = [
   {
     key: "attentionQueue",
@@ -68,7 +38,6 @@ export const TENANT_FEATURE_FLAGS = [
     description: "Mantém a aba com visitas, propostas e simulações no detalhe do lead.",
   },
 ] as const;
-export type TenantTextKey = (typeof TENANT_TEXT_FIELDS)[number]["key"];
 export type TenantFeatureFlagKey = (typeof TENANT_FEATURE_FLAGS)[number]["key"];
 
 export type TenantBranding = {
@@ -76,7 +45,6 @@ export type TenantBranding = {
   logoUrl: string | null;
   colorPrimary: BrandColorKey;
   colorSecondary: BrandColorKey;
-  customTexts: Record<TenantTextKey, string>;
   featureFlags: Record<TenantFeatureFlagKey, boolean>;
 };
 
@@ -85,7 +53,6 @@ type BrandingInput = {
   logoUrl?: unknown;
   colorPrimary?: string | null;
   colorSecondary?: string | null;
-  customTexts?: unknown;
   featureFlags?: unknown;
 };
 
@@ -144,26 +111,18 @@ export const DEFAULT_FEATURE_FLAGS: Record<TenantFeatureFlagKey, boolean> = {
   conversationSummary: true,
   leadActions: true,
 };
-export const DEFAULT_CUSTOM_TEXTS: Record<TenantTextKey, string> = {
-  dashboardTitle: "",
-  dashboardSubtitle: "",
-  conversationsSubtitle: "",
-  settingsSubtitle: "",
-};
 
 export const DEFAULT_BRANDING: TenantBranding = {
   name: DEFAULT_BRAND_NAME,
   logoUrl: DEFAULT_BRAND_LOGO_URL,
   colorPrimary: "blue",
   colorSecondary: "purple",
-  customTexts: { ...DEFAULT_CUSTOM_TEXTS },
   featureFlags: { ...DEFAULT_FEATURE_FLAGS },
 };
 
 export function createDefaultBranding(): TenantBranding {
   return {
     ...DEFAULT_BRANDING,
-    customTexts: { ...DEFAULT_CUSTOM_TEXTS },
     featureFlags: { ...DEFAULT_FEATURE_FLAGS },
   };
 }
@@ -177,24 +136,6 @@ export function normalizeBrandColor(
   fallback: BrandColorKey,
 ): BrandColorKey {
   return value && isBrandColorKey(value) ? value : fallback;
-}
-
-export function sanitizeTenantCustomTexts(
-  value: unknown,
-): Record<TenantTextKey, string> {
-  const input =
-    value && typeof value === "object" && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {};
-  const next = { ...DEFAULT_CUSTOM_TEXTS };
-
-  for (const field of TENANT_TEXT_FIELDS) {
-    const currentValue = input[field.key];
-    next[field.key] =
-      typeof currentValue === "string" ? currentValue.trim() : "";
-  }
-
-  return next;
 }
 
 export function sanitizeTenantFeatureFlags(
@@ -237,7 +178,6 @@ export function buildBranding(input?: BrandingInput | null): TenantBranding {
       typeof input.colorSecondary === "string" ? input.colorSecondary : null,
       DEFAULT_BRANDING.colorSecondary,
     ),
-    customTexts: sanitizeTenantCustomTexts(input.customTexts),
     featureFlags: sanitizeTenantFeatureFlags(input.featureFlags),
   };
 }

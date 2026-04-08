@@ -10,7 +10,6 @@ import {
 import {
   buildBranding,
   normalizeBrandColor,
-  sanitizeTenantCustomTexts,
   sanitizeTenantFeatureFlags,
   type BrandColorKey,
 } from "@/lib/branding";
@@ -44,7 +43,6 @@ const TENANT_CUSTOMIZATION_SELECT = {
   logoUrl: true,
   colorPrimary: true,
   colorSecondary: true,
-  customTexts: true,
   featureFlags: true,
 } as const;
 
@@ -271,7 +269,6 @@ function mapTenantCustomization(tenant: {
   logoUrl: string | null;
   colorPrimary: string;
   colorSecondary: string;
-  customTexts: unknown;
   featureFlags: unknown;
 }): TenantCustomizationSettings {
   return {
@@ -373,7 +370,6 @@ export async function updateTenantCustomization(
       typeof input.colorSecondary === "string" ? input.colorSecondary : null,
       "purple" satisfies BrandColorKey,
     ),
-    customTexts: sanitizeTenantCustomTexts(input.customTexts),
     featureFlags: sanitizeTenantFeatureFlags(input.featureFlags),
   });
 
@@ -384,7 +380,6 @@ export async function updateTenantCustomization(
       logoUrl: branding.logoUrl,
       colorPrimary: branding.colorPrimary,
       colorSecondary: branding.colorSecondary,
-      customTexts: branding.customTexts,
       featureFlags: branding.featureFlags,
     },
     select: TENANT_CUSTOMIZATION_SELECT,

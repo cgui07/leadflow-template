@@ -22,8 +22,8 @@ export default async function DashboardPage() {
       attentionQueueItems={attentionQueueItems}
       data={data}
       showAttentionQueue={session.branding.featureFlags.attentionQueue}
-      subtitle={session.branding.customTexts.dashboardSubtitle || DEFAULT_SUBTITLE}
-      title={session.branding.customTexts.dashboardTitle || DEFAULT_TITLE}
+      subtitle={DEFAULT_SUBTITLE}
+      title={DEFAULT_TITLE}
     />
   );
 }

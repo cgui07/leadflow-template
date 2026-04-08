@@ -14,11 +14,6 @@ interface UseTenantCustomizationFormResult {
   saveError: string | null;
   saved: boolean;
   saving: boolean;
-  updateCustomText: (key: keyof TenantBranding["customTexts"], value: string) => void;
-  updateFeatureFlag: (
-    key: keyof TenantBranding["featureFlags"],
-    value: boolean,
-  ) => void;
   updateField: <K extends keyof TenantCustomizationSettings>(
     key: K,
     value: TenantCustomizationSettings[K],
@@ -52,33 +47,6 @@ export function useTenantCustomizationForm(
     setSaveError(null);
   }
 
-  function updateCustomText(key: keyof TenantBranding["customTexts"], value: string) {
-    setForm((current) => ({
-      ...current,
-      customTexts: {
-        ...current.customTexts,
-        [key]: value,
-      },
-    }));
-    setSaved(false);
-    setSaveError(null);
-  }
-
-  function updateFeatureFlag(
-    key: keyof TenantBranding["featureFlags"],
-    value: boolean,
-  ) {
-    setForm((current) => ({
-      ...current,
-      featureFlags: {
-        ...current.featureFlags,
-        [key]: value,
-      },
-    }));
-    setSaved(false);
-    setSaveError(null);
-  }
-
   async function save() {
     setSaving(true);
     setSaveError(null);
@@ -92,7 +60,6 @@ export function useTenantCustomizationForm(
           logoUrl: form.logoUrl,
           colorPrimary: form.colorPrimary,
           colorSecondary: form.colorSecondary,
-          customTexts: form.customTexts,
           featureFlags: form.featureFlags,
         }),
       });
@@ -129,8 +96,6 @@ export function useTenantCustomizationForm(
     saveError,
     saved,
     saving,
-    updateCustomText,
-    updateFeatureFlag,
     updateField,
     save,
   };

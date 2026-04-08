@@ -118,7 +118,6 @@ export const CreateTenantSchema = z.object({
   colorPrimary: z.string().nullable().optional(),
   colorSecondary: z.string().nullable().optional(),
   featureFlags: z.record(z.string(), z.unknown()).nullable().optional(),
-  customTexts: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 
 export const UpdateTenantCustomizationSchema = z.object({
@@ -127,7 +126,6 @@ export const UpdateTenantCustomizationSchema = z.object({
   colorPrimary: z.string().nullable().optional(),
   colorSecondary: z.string().nullable().optional(),
   featureFlags: z.record(z.string(), z.unknown()).nullable().optional(),
-  customTexts: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 
 export const CreatePropertySchema = z.object({

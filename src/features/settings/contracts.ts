@@ -39,7 +39,6 @@ export type TenantCustomizationUpdateInput = Pick<
   | "logoUrl"
   | "colorPrimary"
   | "colorSecondary"
-  | "customTexts"
   | "featureFlags"
 >;
 

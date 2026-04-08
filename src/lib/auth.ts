@@ -104,7 +104,6 @@ export async function getCurrentUser() {
           colorSecondary: true,
           status: true,
           featureFlags: true,
-          customTexts: true,
         },
       },
     },

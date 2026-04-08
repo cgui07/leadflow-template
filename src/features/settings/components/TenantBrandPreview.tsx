@@ -3,7 +3,6 @@ import {
   BRAND_COLOR_LABELS,
   TENANT_FEATURE_FLAGS,
   getBrandActiveNavClass,
-  getBrandChipClass,
   getBrandHeroGradientClass,
   getBrandSoftSurfaceClass,
   type TenantBranding,
@@ -14,19 +13,9 @@ interface TenantBrandPreviewProps {
 }
 
 export function TenantBrandPreview({ branding }: TenantBrandPreviewProps) {
-  const dashboardTitle = branding.customTexts.dashboardTitle || "Dashboard";
-  const dashboardSubtitle =
-    branding.customTexts.dashboardSubtitle ||
-    "Visão geral dos seus leads e atendimentos";
-  const conversationsSubtitle =
-    branding.customTexts.conversationsSubtitle ||
-    "Gerencie suas conversas do WhatsApp";
-  const settingsSubtitle =
-    branding.customTexts.settingsSubtitle ||
-    "Configure suas integrações e preferências";
-  const enabledFeatures = TENANT_FEATURE_FLAGS.filter((feature) => {
-    return branding.featureFlags[feature.key];
-  });
+  const enabledFeatures = TENANT_FEATURE_FLAGS.filter(
+    (feature) => branding.featureFlags[feature.key],
+  );
 
   return (
     <div className="overflow-hidden rounded-2xl border border-neutral-border bg-white shadow-card">
@@ -91,29 +80,6 @@ export function TenantBrandPreview({ branding }: TenantBrandPreviewProps) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-neutral-border p-4">
-          <div className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-muted">
-            Textos ativos
-          </div>
-          <div className="space-y-3">
-            <PreviewCopy
-              title={dashboardTitle}
-              subtitle={dashboardSubtitle}
-              badgeClass={getBrandChipClass(branding.colorPrimary)}
-            />
-            <PreviewCopy
-              title="Conversas"
-              subtitle={conversationsSubtitle}
-              badgeClass={getBrandChipClass(branding.colorSecondary)}
-            />
-            <PreviewCopy
-              title="Configurações"
-              subtitle={settingsSubtitle}
-              badgeClass={getBrandChipClass(branding.colorPrimary)}
-            />
-          </div>
-        </div>
-
         <div>
           <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-muted">
             Recursos liberados
@@ -127,26 +93,6 @@ export function TenantBrandPreview({ branding }: TenantBrandPreviewProps) {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function PreviewCopy({
-  title,
-  subtitle,
-  badgeClass,
-}: {
-  title: string;
-  subtitle: string;
-  badgeClass: string;
-}) {
-  return (
-    <div className="rounded-xl bg-neutral-surface p-3">
-      <div className="flex items-center gap-2">
-        <div className={`h-2.5 w-2.5 rounded-full ${badgeClass}`} />
-        <div className="text-sm font-semibold text-neutral-ink">{title}</div>
-      </div>
-      <div className="mt-1 text-xs leading-5 text-neutral">{subtitle}</div>
     </div>
   );
 }

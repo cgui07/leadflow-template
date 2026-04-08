@@ -29,7 +29,7 @@ export default async function ConversationsPage({
       initialSearch={search || ""}
       initialSelectedConversationId={conversationId}
       showSummary={session.branding.featureFlags.conversationSummary}
-      subtitle={session.branding.customTexts.conversationsSubtitle || DEFAULT_SUBTITLE}
+      subtitle={DEFAULT_SUBTITLE}
     />
   );
 }

@@ -23,7 +23,7 @@ const envSchema = z.object({
   EMAIL_FROM_DEV: z
     .string()
     .optional()
-    .default("LeadFlow <onboarding@resend.dev>"),
+    .default("LospeFlow <onboarding@resend.dev>"),
 
   GOOGLE_CLIENT_ID: z.string().optional().default(""),
   GOOGLE_CLIENT_SECRET: z.string().optional().default(""),
