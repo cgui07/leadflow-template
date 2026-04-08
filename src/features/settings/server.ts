@@ -28,6 +28,8 @@ const USER_SETTINGS_SELECT = {
   maxFollowUps: true,
   followUpCustomInstructions: true,
   facebookAutoOutreach: true,
+  canalProAutoOutreach: true,
+  canalProWebhookToken: true,
   elevenlabsVoiceId: true,
   voiceReplyEnabled: true,
   voiceReplyMonthlyLimit: true,
@@ -60,6 +62,8 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   followUpCustomInstructions: null,
   facebookAutoOutreach: true,
   facebookConnected: false,
+  canalProAutoOutreach: true,
+  canalProConnected: false,
   elevenlabsVoiceId: null,
   voiceReplyEnabled: false,
   voiceReplyMonthlyLimit: 50,
@@ -78,6 +82,8 @@ type UserSettingsRecord = {
   maxFollowUps: number;
   followUpCustomInstructions: string | null;
   facebookAutoOutreach: boolean;
+  canalProAutoOutreach: boolean;
+  canalProWebhookToken: string | null;
   elevenlabsVoiceId: string | null;
   voiceReplyEnabled: boolean;
   voiceReplyMonthlyLimit: number;
@@ -92,7 +98,7 @@ type TenantAccessContext = {
 type UserSettingsPayload = Partial<UserSettings>;
 type PrismaUserSettingsPayload = Omit<
   UserSettingsPayload,
-  "autoReplyDelaySeconds" | "facebookConnected"
+  "autoReplyDelaySeconds" | "facebookConnected" | "canalProConnected"
 > & {
   auto_reply_delay_seconds?: number;
 };
@@ -141,6 +147,8 @@ async function mapUserSettings(
     followUpCustomInstructions: settings.followUpCustomInstructions ?? null,
     facebookAutoOutreach: settings.facebookAutoOutreach,
     facebookConnected: !!facebookPage,
+    canalProAutoOutreach: settings.canalProAutoOutreach,
+    canalProConnected: !!settings.canalProWebhookToken,
     elevenlabsVoiceId: settings.elevenlabsVoiceId,
     voiceReplyEnabled: settings.voiceReplyEnabled,
     voiceReplyMonthlyLimit: settings.voiceReplyMonthlyLimit,
@@ -224,6 +232,10 @@ function pickAllowedSettings(
     next.facebookAutoOutreach = input.facebookAutoOutreach;
   }
 
+  if (typeof input.canalProAutoOutreach === "boolean") {
+    next.canalProAutoOutreach = input.canalProAutoOutreach;
+  }
+
   if (typeof input.elevenlabsVoiceId === "string" || input.elevenlabsVoiceId === null) {
     next.elevenlabsVoiceId = input.elevenlabsVoiceId;
   }
@@ -295,7 +307,7 @@ export async function updateUserSettings(
     currentSettings?.aiProvider,
   );
   const rawData = pickAllowedSettings(input);
-  const { autoReplyDelaySeconds, facebookConnected: _facebookConnected, ...restData } = rawData;
+  const { autoReplyDelaySeconds, facebookConnected: _fc, canalProConnected: _cpc, ...restData } = rawData;
   const nextProvider = normalizeSettingsProvider(
     rawData.aiProvider,
     currentProvider,

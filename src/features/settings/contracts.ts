@@ -14,7 +14,8 @@ export interface UserSettings {
   openaiTranscriptionKey: string | null;
   facebookAutoOutreach: boolean;
   facebookConnected: boolean;
-  // ElevenLabs voice reply
+  canalProAutoOutreach: boolean;
+  canalProConnected: boolean;
   elevenlabsVoiceId: string | null;
   voiceReplyEnabled: boolean;
   voiceReplyMonthlyLimit: number;

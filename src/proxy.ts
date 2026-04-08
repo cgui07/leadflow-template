@@ -13,6 +13,7 @@ const PUBLIC_PREFIXES = [
   "/api/auth",
   "/api/whatsapp",
   "/api/facebook",
+  "/api/canal-pro",
   "/api/followup",
   "/api/cron",
 ];
@@ -21,7 +22,6 @@ export function proxy(request: NextRequest) {
   const { pathname, origin } = request.nextUrl;
   const token = request.cookies.get("lospeflow_token")?.value;
 
-  // --- CORS for API routes ---
   if (pathname.startsWith("/api/")) {
     const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || origin;
 
@@ -30,14 +30,18 @@ export function proxy(request: NextRequest) {
         status: 204,
         headers: {
           "Access-Control-Allow-Origin": allowedOrigin,
-          "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization, x-webhook-token",
+          "Access-Control-Allow-Methods":
+            "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers":
+            "Content-Type, Authorization, x-webhook-token",
           "Access-Control-Max-Age": "86400",
         },
       });
     }
 
-    const isPublic = PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+    const isPublic = PUBLIC_PREFIXES.some((prefix) =>
+      pathname.startsWith(prefix),
+    );
 
     if (!isPublic && !token) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });

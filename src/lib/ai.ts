@@ -9,13 +9,12 @@ export {
   getQualificationPrompt,
   getFollowUpPrompt,
   getFacebookOutreachPrompt,
+  getCanalProOutreachPrompt,
   getExtractionPrompt,
   getSummaryPrompt,
   getPropertyExtractionPrompt,
 } from "./ai-prompts";
 export { qualifyLead } from "@/features/leads/qualify";
-
-// ── Functions that use callAI + prompts (kept here to avoid circular deps) ──
 
 import { callAI } from "./ai-client";
 import type { PropertyCatalogItem } from "./ai-prompts";
@@ -24,6 +23,7 @@ import {
   getQualificationPrompt,
   getFollowUpPrompt,
   getFacebookOutreachPrompt,
+  getCanalProOutreachPrompt,
   getExtractionPrompt,
   getSummaryPrompt,
   getPropertyExtractionPrompt,
@@ -45,7 +45,11 @@ export async function generateAutoReply(
     content: message.content,
   }));
 
-  return callAI(config, getQualificationPrompt(agentName, properties, isVoiceReply), messages);
+  return callAI(
+    config,
+    getQualificationPrompt(agentName, properties, isVoiceReply),
+    messages,
+  );
 }
 
 export async function generateFacebookOutreachMessage(
@@ -56,6 +60,20 @@ export async function generateFacebookOutreachMessage(
   return callAI(config, getFacebookOutreachPrompt(agentName, leadName), [
     { role: "user", content: "inicie a conversa" },
   ]);
+}
+
+export async function generateCanalProOutreachMessage(
+  config: AIConfig,
+  agentName: string,
+  leadName: string,
+  leadOrigin: string,
+  message: string | null,
+) {
+  return callAI(
+    config,
+    getCanalProOutreachPrompt(agentName, leadName, leadOrigin, message),
+    [{ role: "user", content: "inicie a conversa" }],
+  );
 }
 
 export async function generateFollowUpMessage(
@@ -73,7 +91,11 @@ export async function generateFollowUpMessage(
     content: message.content,
   }));
 
-  return callAI(config, getFollowUpPrompt(agentName, customInstructions), messages);
+  return callAI(
+    config,
+    getFollowUpPrompt(agentName, customInstructions),
+    messages,
+  );
 }
 
 export async function extractLeadProfile(
@@ -183,7 +205,9 @@ export async function extractPropertyData(
       description: parsed.description ?? null,
     };
   } catch (err) {
-    logger.error("extractPropertyData failed", { error: err instanceof Error ? err.message : String(err) });
+    logger.error("extractPropertyData failed", {
+      error: err instanceof Error ? err.message : String(err),
+    });
     return null;
   }
 }

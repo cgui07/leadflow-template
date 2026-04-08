@@ -6,11 +6,14 @@ import type { UserSettings } from "../contracts";
 import { CheckboxField } from "@/components/forms";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import {
+  Building2,
   Calendar,
   CheckCircle,
+  ClipboardCopy,
   ExternalLink,
   Loader,
   Megaphone,
+  RefreshCw,
   Unlink,
 } from "lucide-react";
 
@@ -266,7 +269,7 @@ function ConnectorCard({
         <div
           className={`rounded-xl border px-3 py-2 text-xs ${
             message.type === "success"
-              ? "border-green-200 bg-green-50 text-green-800"
+              ? "border-green-sage bg-green-pale text-green-dark"
               : "border-red-blush bg-red-pale text-red-dark"
           }`}
         >
@@ -281,11 +284,11 @@ function ConnectorCard({
         </div>
       ) : connected ? (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs text-green-700">
-            <CheckCircle className="h-3.5 w-3.5 shrink-0 text-green-600" />
+          <div className="flex items-center gap-2 text-xs text-green-dark">
+            <CheckCircle className="h-3.5 w-3.5 shrink-0 text-green-medium" />
             <span className="font-medium">{connectedLabel}</span>
             {connectedSince && (
-              <span className="text-green-600">
+              <span className="text-green-medium">
                 · desde {new Date(connectedSince).toLocaleDateString("pt-BR")}
               </span>
             )}
@@ -312,11 +315,243 @@ function ConnectorCard({
   );
 }
 
+interface CanalProStatus {
+  connected: boolean;
+  webhookUrl: string | null;
+}
+
+function CanalProCard({
+  form,
+  update,
+}: {
+  form: UserSettings;
+  update: <K extends keyof UserSettings>(
+    key: K,
+    value: UserSettings[K],
+  ) => void;
+}) {
+  const [status, setStatus] = useState<CanalProStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activating, setActivating] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [disconnectModalOpen, setDisconnectModalOpen] = useState(false);
+  const [regenerateModalOpen, setRegenerateModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  useEffect(() => {
+    fetchStatus();
+  }, []);
+
+  async function fetchStatus() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/settings/canal-pro");
+      if (res.ok) setStatus((await res.json()) as CanalProStatus);
+    } catch {
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function activate() {
+    setActivating(true);
+    try {
+      const res = await fetch("/api/settings/canal-pro/activate", {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { token: string; webhookUrl: string };
+        setStatus({ connected: true, webhookUrl: data.webhookUrl });
+        setMessage({ type: "success", text: "Canal Pro ativado!" });
+      } else {
+        setMessage({ type: "error", text: "Erro ao ativar Canal Pro." });
+      }
+    } catch {
+      setMessage({ type: "error", text: "Erro ao ativar Canal Pro." });
+    } finally {
+      setActivating(false);
+    }
+  }
+
+  async function regenerate() {
+    setRegenerating(true);
+    try {
+      const res = await fetch("/api/settings/canal-pro/activate", {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { token: string; webhookUrl: string };
+        setStatus({ connected: true, webhookUrl: data.webhookUrl });
+        setMessage({ type: "success", text: "Nova URL gerada!" });
+      }
+    } catch {
+      setMessage({ type: "error", text: "Erro ao gerar nova URL." });
+    } finally {
+      setRegenerating(false);
+      setRegenerateModalOpen(false);
+    }
+  }
+
+  async function disconnect() {
+    setDisconnecting(true);
+    try {
+      const res = await fetch("/api/settings/canal-pro", { method: "DELETE" });
+      if (res.ok) {
+        setStatus({ connected: false, webhookUrl: null });
+        setMessage({ type: "success", text: "Canal Pro desconectado." });
+      }
+    } catch {
+      setMessage({ type: "error", text: "Erro ao desconectar." });
+    } finally {
+      setDisconnecting(false);
+      setDisconnectModalOpen(false);
+    }
+  }
+
+  function copyUrl() {
+    if (!status?.webhookUrl) return;
+    navigator.clipboard.writeText(status.webhookUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <>
+      <div className="rounded-2xl border border-border bg-surface p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface-alt text-neutral">
+            <Building2 className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="text-sm font-medium text-foreground">
+              Canal Pro (ZAP / Viva Real / OLX)
+            </div>
+            <div className="text-xs text-neutral">
+              Receba leads dos maiores portais imobiliários do Brasil.
+            </div>
+          </div>
+        </div>
+
+        {message && (
+          <div
+            className={`rounded-xl border px-3 py-2 text-xs ${
+              message.type === "success"
+                ? "border-green-sage bg-green-pale text-green-dark"
+                : "border-red-blush bg-red-pale text-red-dark"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex items-center gap-2 text-xs text-neutral">
+            <Loader className="h-3.5 w-3.5 animate-spin" />
+            Verificando...
+          </div>
+        ) : status?.connected ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-xs text-green-dark">
+              <CheckCircle className="h-3.5 w-3.5 shrink-0 text-green-medium" />
+              <span className="font-medium">Ativo</span>
+            </div>
+
+            <div className="space-y-1">
+              <div className="text-xs text-neutral">URL do webhook:</div>
+              <div className="flex items-center gap-2">
+                <input
+                  readOnly
+                  value={status.webhookUrl ?? ""}
+                  className="flex-1 rounded-lg border border-border bg-surface-alt px-2.5 py-1.5 text-xs text-foreground font-mono select-all"
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<ClipboardCopy className="h-3.5 w-3.5" />}
+                  onClick={copyUrl}
+                >
+                  {copied ? "Copiado!" : "Copiar"}
+                </Button>
+              </div>
+              <div className="text-xs text-neutral mt-1">
+                Cole esta URL na aba &quot;Recebimento de Leads&quot; do seu
+                Canal Pro.
+              </div>
+            </div>
+
+            <CheckboxField
+              variant="switch"
+              label="Envio automático via WhatsApp"
+              checked={form.canalProAutoOutreach}
+              onChange={(checked) => update("canalProAutoOutreach", checked)}
+            />
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<RefreshCw className="h-3.5 w-3.5" />}
+                onClick={() => setRegenerateModalOpen(true)}
+                loading={regenerating}
+              >
+                Gerar nova URL
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Unlink className="h-3.5 w-3.5" />}
+                onClick={() => setDisconnectModalOpen(true)}
+                loading={disconnecting}
+              >
+                Desconectar
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            icon={<ExternalLink className="h-3.5 w-3.5" />}
+            onClick={activate}
+            loading={activating}
+          >
+            Ativar Canal Pro
+          </Button>
+        )}
+      </div>
+
+      <DeleteConfirmationModal
+        open={regenerateModalOpen}
+        onClose={() => setRegenerateModalOpen(false)}
+        onConfirm={regenerate}
+        title="Gerar nova URL"
+        description="A URL anterior deixará de funcionar. Você precisará atualizar no Canal Pro."
+        confirmText="Gerar nova URL"
+        loading={regenerating}
+      />
+      <DeleteConfirmationModal
+        open={disconnectModalOpen}
+        onClose={() => setDisconnectModalOpen(false)}
+        onConfirm={disconnect}
+        title="Desconectar Canal Pro"
+        description="Você deixará de receber leads dos portais automaticamente."
+        confirmText="Desconectar"
+        loading={disconnecting}
+      />
+    </>
+  );
+}
+
 export function ConnectorsSection({ form, update }: ConnectorsSectionProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <GoogleCalendarCard />
       <FacebookCard form={form} update={update} />
+      <CanalProCard form={form} update={update} />
     </div>
   );
 }
