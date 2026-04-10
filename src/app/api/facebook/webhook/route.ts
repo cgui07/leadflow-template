@@ -1,3 +1,10 @@
+// =============================================================================
+// INTEGRAÇÃO DIRETA COM META (requer app verificado + empresa verificada)
+// Quando tiver a verificação da empresa na Meta, ativar este webhook
+// e desativar o /api/facebook/make-webhook.
+// Para ativar: basta apontar o webhook do Facebook para esta rota.
+// =============================================================================
+
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import type { AIConfig } from "@/lib/ai";

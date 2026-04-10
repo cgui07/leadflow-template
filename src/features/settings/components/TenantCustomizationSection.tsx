@@ -1,12 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Palette, Save } from "lucide-react";
+import { TextField } from "@/components/forms";
 import { Button } from "@/components/ui/Button";
 import { TenantBrandPreview } from "./TenantBrandPreview";
 import type { TenantCustomizationSettings } from "../contracts";
-import { Palette, Save } from "lucide-react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { TextField } from "@/components/forms";
 import { useTenantCustomizationForm } from "../hooks/useTenantCustomizationForm";
 import {
   BRAND_COLOR_KEYS,
