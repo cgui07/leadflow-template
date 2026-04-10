@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { getScoreBadgeClass } from "@/lib/ui-colors";
 import type { PipelineLead, SelectedLead } from "../types";
@@ -18,17 +18,12 @@ export function PipelineLeadCard({
   movingLeadId,
   onSelectLead,
 }: PipelineLeadCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   function handleDragStart(e: React.DragEvent<HTMLDivElement>) {
+    e.stopPropagation();
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("leadId", lead.id);
-
-    if (cardRef.current) {
-      e.dataTransfer.setDragImage(cardRef.current, 24, 24);
-    }
-
     setIsDragging(true);
   }
 
@@ -38,13 +33,12 @@ export function PipelineLeadCard({
 
   return (
     <div
-      ref={cardRef}
       draggable
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      className={`rounded-lg border border-neutral-border bg-white p-3 shadow-sm transition ${
+      className={`select-none rounded-lg border border-neutral-border bg-white p-3 shadow-sm transition ${
         isDragging
-          ? "scale-[0.99] select-none shadow-card ring-2 ring-blue-ice"
+          ? "scale-[0.99] shadow-card ring-2 ring-blue-ice"
           : "hover:shadow-md md:cursor-grab"
       }`}
     >

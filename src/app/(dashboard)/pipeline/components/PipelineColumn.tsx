@@ -40,6 +40,9 @@ export function PipelineColumn({
       }`}
       draggable={!stage.isDefault}
       onDragStart={(e) => {
+        if (e.target !== e.currentTarget) {
+          return;
+        }
         if (stage.isDefault) {
           e.preventDefault();
           return;
