@@ -144,5 +144,17 @@ export function useFetch<T>(
     return runFetch();
   }, [runFetch]);
 
-  return { data, loading, error, refetch };
+  const mutate = useCallback(
+    (updater: T | ((current: T | null) => T | null) | null) => {
+      setData((current) => {
+        if (typeof updater === "function") {
+          return (updater as (current: T | null) => T | null)(current);
+        }
+        return updater;
+      });
+    },
+    [],
+  );
+
+  return { data, loading, error, refetch, mutate };
 }

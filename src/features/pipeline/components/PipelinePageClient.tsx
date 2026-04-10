@@ -20,7 +20,7 @@ interface PipelinePageClientProps {
 export function PipelinePageClient({
   initialStages,
 }: PipelinePageClientProps) {
-  const { data, error, refetch } = useFetch<PipelineStage[]>("/api/pipeline", {
+  const { data, error, refetch, mutate } = useFetch<PipelineStage[]>("/api/pipeline", {
     initialData: initialStages,
     revalidateOnMount: false,
   });
@@ -37,6 +37,35 @@ export function PipelinePageClient({
     setMovingLeadId(leadId);
     setMoveError(null);
 
+    let snapshot: PipelineStage[] | null = null;
+
+    mutate((current) => {
+      if (!current) return current;
+      snapshot = current;
+
+      let movingLead: PipelineStage["leads"][number] | null = null;
+      for (const stage of current) {
+        const found = stage.leads.find((l) => l.id === leadId);
+        if (found) {
+          movingLead = found;
+          break;
+        }
+      }
+      if (!movingLead) return current;
+
+      return current.map((stage) => {
+        if (stage.leads.some((l) => l.id === leadId)) {
+          return { ...stage, leads: stage.leads.filter((l) => l.id !== leadId) };
+        }
+        if (stage.id === stageId) {
+          return { ...stage, leads: [movingLead!, ...stage.leads] };
+        }
+        return stage;
+      });
+    });
+
+    setSelectedLead(null);
+
     try {
       const response = await fetch("/api/pipeline/move", {
         method: "POST",
@@ -48,16 +77,19 @@ export function PipelinePageClient({
         | null;
 
       if (!response.ok) {
+        if (snapshot) mutate(snapshot);
         setMoveError(payload?.error || "Nao foi possivel mover o lead.");
         return;
       }
 
-      setSelectedLead(null);
       await refetch();
+    } catch (err) {
+      if (snapshot) mutate(snapshot);
+      setMoveError(err instanceof Error ? err.message : "Nao foi possivel mover o lead.");
     } finally {
       setMovingLeadId(null);
     }
-  }, [refetch]);
+  }, [mutate, refetch]);
 
   const handleAddStage = useCallback(async (name: string, color: string) => {
     const response = await fetch("/api/pipeline", {
