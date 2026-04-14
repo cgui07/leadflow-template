@@ -5,6 +5,7 @@ import { requireCronAuth } from "@/lib/cron";
 import { processEscalations } from "@/lib/alerts";
 import { processFollowUps } from "@/lib/followup";
 import { processVisitConfirmations } from "@/lib/visit-confirmations";
+import { processAllGmailLeads } from "@/lib/gmail";
 
 export async function POST(req: NextRequest) {
   const authError = requireCronAuth(req);
@@ -13,17 +14,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const [followUpResults, escalationResults, visitConfirmationResults] =
+    const [followUpResults, escalationResults, visitConfirmationResults, gmailResults] =
       await Promise.all([
         processFollowUps(),
         processEscalations(),
         processVisitConfirmations(),
+        processAllGmailLeads(),
       ]);
 
     return json({
       followUps: { processed: followUpResults.length },
       escalations: { processed: escalationResults.length },
       visitConfirmations: { processed: visitConfirmationResults.length },
+      gmailLeads: { processed: gmailResults.reduce((acc, r) => acc + r.processed, 0) },
       timestamp: new Date().toISOString(),
     });
   } catch (err) {

@@ -318,6 +318,8 @@ function ConnectorCard({
 interface CanalProStatus {
   connected: boolean;
   webhookUrl: string | null;
+  accountType: "own" | "company";
+  gmailConnected: boolean;
 }
 
 function CanalProCard({
@@ -335,6 +337,7 @@ function CanalProCard({
   const [activating, setActivating] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [savingType, setSavingType] = useState(false);
   const [disconnectModalOpen, setDisconnectModalOpen] = useState(false);
   const [regenerateModalOpen, setRegenerateModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -345,6 +348,12 @@ function CanalProCard({
 
   useEffect(() => {
     fetchStatus();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("gmail_connected")) {
+      setMessage({ type: "success", text: "Gmail conectado com sucesso!" });
+    } else if (params.get("gmail_error")) {
+      setMessage({ type: "error", text: `Erro ao conectar Gmail: ${params.get("gmail_error")}` });
+    }
   }, []);
 
   async function fetchStatus() {
@@ -366,7 +375,7 @@ function CanalProCard({
       });
       if (res.ok) {
         const data = (await res.json()) as { token: string; webhookUrl: string };
-        setStatus({ connected: true, webhookUrl: data.webhookUrl });
+        setStatus((prev) => ({ ...prev!, connected: true, webhookUrl: data.webhookUrl }));
         setMessage({ type: "success", text: "Canal Pro ativado!" });
       } else {
         setMessage({ type: "error", text: "Erro ao ativar Canal Pro." });
@@ -378,6 +387,32 @@ function CanalProCard({
     }
   }
 
+  async function saveAccountType(type: "own" | "company") {
+    setSavingType(true);
+    try {
+      await fetch("/api/settings/canal-pro/account-type", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accountType: type }),
+      });
+      update("canalProAccountType", type);
+      setStatus((prev) => prev ? { ...prev, accountType: type } : prev);
+    } catch {
+    } finally {
+      setSavingType(false);
+    }
+  }
+
+  async function disconnectGmail() {
+    try {
+      await fetch("/api/settings/gmail", { method: "DELETE" });
+      setStatus((prev) => prev ? { ...prev, gmailConnected: false } : prev);
+      setMessage({ type: "success", text: "Gmail desconectado." });
+    } catch {
+      setMessage({ type: "error", text: "Erro ao desconectar Gmail." });
+    }
+  }
+
   async function regenerate() {
     setRegenerating(true);
     try {
@@ -386,7 +421,7 @@ function CanalProCard({
       });
       if (res.ok) {
         const data = (await res.json()) as { token: string; webhookUrl: string };
-        setStatus({ connected: true, webhookUrl: data.webhookUrl });
+        setStatus((prev) => ({ ...prev!, connected: true, webhookUrl: data.webhookUrl }));
         setMessage({ type: "success", text: "Nova URL gerada!" });
       }
     } catch {
@@ -402,7 +437,7 @@ function CanalProCard({
     try {
       const res = await fetch("/api/settings/canal-pro", { method: "DELETE" });
       if (res.ok) {
-        setStatus({ connected: false, webhookUrl: null });
+        setStatus((prev) => ({ ...prev!, connected: false, webhookUrl: null }));
         setMessage({ type: "success", text: "Canal Pro desconectado." });
       }
     } catch {
@@ -419,6 +454,8 @@ function CanalProCard({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
+
+  const accountType = status?.accountType ?? form.canalProAccountType ?? "own";
 
   return (
     <>
@@ -454,73 +491,138 @@ function CanalProCard({
             <Loader className="h-3.5 w-3.5 animate-spin" />
             Verificando...
           </div>
-        ) : status?.connected ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs text-green-dark">
-              <CheckCircle className="h-3.5 w-3.5 shrink-0 text-green-medium" />
-              <span className="font-medium">Ativo</span>
-            </div>
-
-            <div className="space-y-1">
-              <div className="text-xs text-neutral">URL do webhook:</div>
-              <div className="flex items-center gap-2">
-                <input
-                  readOnly
-                  value={status.webhookUrl ?? ""}
-                  className="flex-1 rounded-lg border border-border bg-surface-alt px-2.5 py-1.5 text-xs text-foreground font-mono select-all"
-                />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<ClipboardCopy className="h-3.5 w-3.5" />}
-                  onClick={copyUrl}
-                >
-                  {copied ? "Copiado!" : "Copiar"}
-                </Button>
-              </div>
-              <div className="text-xs text-neutral mt-1">
-                Cole esta URL na aba &quot;Recebimento de Leads&quot; do seu
-                Canal Pro.
-              </div>
-            </div>
-
-            <CheckboxField
-              variant="switch"
-              label="Envio automático via WhatsApp"
-              checked={form.canalProAutoOutreach}
-              onChange={(checked) => update("canalProAutoOutreach", checked)}
-            />
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<RefreshCw className="h-3.5 w-3.5" />}
-                onClick={() => setRegenerateModalOpen(true)}
-                loading={regenerating}
-              >
-                Gerar nova URL
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<Unlink className="h-3.5 w-3.5" />}
-                onClick={() => setDisconnectModalOpen(true)}
-                loading={disconnecting}
-              >
-                Desconectar
-              </Button>
-            </div>
-          </div>
         ) : (
-          <Button
-            size="sm"
-            icon={<ExternalLink className="h-3.5 w-3.5" />}
-            onClick={activate}
-            loading={activating}
-          >
-            Ativar Canal Pro
-          </Button>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-foreground">Tipo de conta</div>
+              <div className="flex flex-col gap-2">
+                {(["own", "company"] as const).map((type) => (
+                  <label key={type} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="canalProAccountType"
+                      value={type}
+                      checked={accountType === type}
+                      onChange={() => saveAccountType(type)}
+                      disabled={savingType}
+                      className="accent-primary"
+                    />
+                    <span className="text-xs text-foreground">
+                      {type === "own"
+                        ? "Conta própria (tenho acesso ao painel Canal Pro)"
+                        : "Conta empresa (recebo leads por email)"}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {accountType === "own" && (
+              status?.connected ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs text-green-dark">
+                    <CheckCircle className="h-3.5 w-3.5 shrink-0 text-green-medium" />
+                    <span className="font-medium">Ativo</span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="text-xs text-neutral">URL do webhook:</div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        readOnly
+                        value={status.webhookUrl ?? ""}
+                        className="flex-1 rounded-lg border border-border bg-surface-alt px-2.5 py-1.5 text-xs text-foreground font-mono select-all"
+                      />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<ClipboardCopy className="h-3.5 w-3.5" />}
+                        onClick={copyUrl}
+                      >
+                        {copied ? "Copiado!" : "Copiar"}
+                      </Button>
+                    </div>
+                    <div className="text-xs text-neutral mt-1">
+                      Cole esta URL na aba &quot;Recebimento de Leads&quot; do seu Canal Pro.
+                    </div>
+                  </div>
+
+                  <CheckboxField
+                    variant="switch"
+                    label="Envio automático via WhatsApp"
+                    checked={form.canalProAutoOutreach}
+                    onChange={(checked) => update("canalProAutoOutreach", checked)}
+                  />
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<RefreshCw className="h-3.5 w-3.5" />}
+                      onClick={() => setRegenerateModalOpen(true)}
+                      loading={regenerating}
+                    >
+                      Gerar nova URL
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<Unlink className="h-3.5 w-3.5" />}
+                      onClick={() => setDisconnectModalOpen(true)}
+                      loading={disconnecting}
+                    >
+                      Desconectar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  icon={<ExternalLink className="h-3.5 w-3.5" />}
+                  onClick={activate}
+                  loading={activating}
+                >
+                  Ativar Canal Pro
+                </Button>
+              )
+            )}
+
+            {accountType === "company" && (
+              <div className="space-y-3">
+                <div className="text-xs text-neutral">
+                  Conecte seu Gmail para capturar leads recebidos por email do Canal Pro.
+                </div>
+                {status?.gmailConnected ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-xs text-green-dark">
+                      <CheckCircle className="h-3.5 w-3.5 shrink-0 text-green-medium" />
+                      <span className="font-medium">Gmail conectado</span>
+                    </div>
+                    <CheckboxField
+                      variant="switch"
+                      label="Envio automático via WhatsApp"
+                      checked={form.canalProAutoOutreach}
+                      onChange={(checked) => update("canalProAutoOutreach", checked)}
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<Unlink className="h-3.5 w-3.5" />}
+                      onClick={disconnectGmail}
+                    >
+                      Desconectar Gmail
+                    </Button>
+                  </div>
+                ) : (
+                  <a href="/api/settings/gmail/connect">
+                    <Button size="sm" icon={<ExternalLink className="h-3.5 w-3.5" />}>
+                      Conectar Gmail
+                    </Button>
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 

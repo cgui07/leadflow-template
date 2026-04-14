@@ -16,6 +16,8 @@ export interface UserSettings {
   facebookConnected: boolean;
   canalProAutoOutreach: boolean;
   canalProConnected: boolean;
+  canalProAccountType: "own" | "company";
+  gmailConnected: boolean;
   elevenlabsVoiceId: string | null;
   voiceReplyEnabled: boolean;
   voiceReplyMonthlyLimit: number;

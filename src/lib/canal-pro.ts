@@ -17,6 +17,8 @@ export interface CanalProLead {
 export interface CanalProStatus {
   connected: boolean;
   webhookUrl: string | null;
+  accountType: "own" | "company";
+  gmailConnected: boolean;
 }
 
 export function generateCanalProToken(): string {
@@ -47,14 +49,21 @@ export async function getCanalProConnectionStatus(
 ): Promise<CanalProStatus> {
   const settings = await prisma.userSettings.findUnique({
     where: { userId },
-    select: { canalProWebhookToken: true },
+    select: {
+      canalProWebhookToken: true,
+      canalProAccountType: true,
+      gmailAccessToken: true,
+    },
   });
 
   const token = settings?.canalProWebhookToken ?? null;
+  const accountType = (settings?.canalProAccountType ?? "own") as "own" | "company";
 
   return {
     connected: !!token,
     webhookUrl: token ? getCanalProWebhookUrl(token) : null,
+    accountType,
+    gmailConnected: !!settings?.gmailAccessToken,
   };
 }
 

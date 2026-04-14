@@ -29,6 +29,8 @@ const USER_SETTINGS_SELECT = {
   facebookAutoOutreach: true,
   canalProAutoOutreach: true,
   canalProWebhookToken: true,
+  canalProAccountType: true,
+  gmailAccessToken: true,
   elevenlabsVoiceId: true,
   voiceReplyEnabled: true,
   voiceReplyMonthlyLimit: true,
@@ -62,6 +64,8 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   facebookConnected: false,
   canalProAutoOutreach: true,
   canalProConnected: false,
+  canalProAccountType: "own",
+  gmailConnected: false,
   elevenlabsVoiceId: null,
   voiceReplyEnabled: false,
   voiceReplyMonthlyLimit: 50,
@@ -82,6 +86,8 @@ type UserSettingsRecord = {
   facebookAutoOutreach: boolean;
   canalProAutoOutreach: boolean;
   canalProWebhookToken: string | null;
+  canalProAccountType: string;
+  gmailAccessToken: string | null;
   elevenlabsVoiceId: string | null;
   voiceReplyEnabled: boolean;
   voiceReplyMonthlyLimit: number;
@@ -147,6 +153,8 @@ async function mapUserSettings(
     facebookConnected: !!facebookPage,
     canalProAutoOutreach: settings.canalProAutoOutreach,
     canalProConnected: !!settings.canalProWebhookToken,
+    canalProAccountType: (settings.canalProAccountType ?? "own") as "own" | "company",
+    gmailConnected: !!settings.gmailAccessToken,
     elevenlabsVoiceId: settings.elevenlabsVoiceId,
     voiceReplyEnabled: settings.voiceReplyEnabled,
     voiceReplyMonthlyLimit: settings.voiceReplyMonthlyLimit,
