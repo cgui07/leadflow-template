@@ -1,10 +1,9 @@
 import { prisma } from "./db";
 import { logger } from "./logger";
-import { getDefaultPipelineStageId } from "./pipeline";
-import { generateFacebookOutreachMessage } from "./ai";
 import type { AIConfig } from "./ai";
-import { getWhatsAppConfig, sendAndSaveMessage } from "./whatsapp";
 import { scheduleFollowUp } from "./followup";
+import { getDefaultPipelineStageId } from "./pipeline";
+import { sendCampaignOutreach } from "./campaign-outreach";
 
 const GMAIL_API_BASE = "https://gmail.googleapis.com/gmail/v1";
 
@@ -313,38 +312,30 @@ export async function processGmailLeads(userId: string): Promise<number> {
 
       // Dispara WhatsApp se configurado
       const settings = user.settings;
-      if (settings.canalProAutoOutreach && settings.whatsappPhoneId && settings.aiApiKey) {
+      const hasCampaignMessage = !!settings.campaignOutreachMessage?.trim();
+      if (settings.canalProAutoOutreach && settings.whatsappPhoneId && (hasCampaignMessage || settings.aiApiKey)) {
         try {
-          const config = getWhatsAppConfig(settings.whatsappPhoneId);
           const aiConfig: AIConfig = {
             provider: settings.aiProvider,
-            apiKey: settings.aiApiKey,
+            apiKey: settings.aiApiKey ?? "",
             model: settings.aiModel,
           };
 
-          const message = await generateFacebookOutreachMessage(
-            aiConfig,
-            user.name || "Corretor",
+          await sendCampaignOutreach({
+            userId,
+            conversationId: newLead.conversation!.id,
+            whatsappChatId,
             contactName,
-          );
+            agentName: user.name || "Corretor",
+            aiConfig,
+            campaignOutreachMessage: settings.campaignOutreachMessage,
+            campaignOutreachImageUrl: settings.campaignOutreachImageUrl,
+            hasCampaignSecondMessage: !!settings.campaignSecondMessage?.trim(),
+            whatsappPhoneId: settings.whatsappPhoneId,
+          });
 
-          if (message) {
-            await sendAndSaveMessage(
-              config,
-              newLead.conversation!.id,
-              whatsappChatId,
-              message,
-              "bot",
-            );
-
-            await prisma.conversation.update({
-              where: { id: newLead.conversation!.id },
-              data: { status: "bot" },
-            });
-
-            if (settings.followUpEnabled) {
-              await scheduleFollowUp(newLead.id, settings.followUpDelayHours);
-            }
+          if (settings.followUpEnabled) {
+            await scheduleFollowUp(newLead.id, settings.followUpDelayHours);
           }
         } catch (err) {
           logger.error("[gmail] WhatsApp outreach failed", {

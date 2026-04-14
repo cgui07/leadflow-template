@@ -10,12 +10,8 @@ import { logger } from "@/lib/logger";
 import type { AIConfig } from "@/lib/ai";
 import { scheduleFollowUp } from "@/lib/followup";
 import { getDefaultPipelineStageId } from "@/lib/pipeline";
-import { generateFacebookOutreachMessage } from "@/lib/ai";
+import { sendCampaignOutreach } from "@/lib/campaign-outreach";
 import { after, NextRequest, NextResponse } from "next/server";
-import {
-  getWhatsAppConfig,
-  sendAndSaveMessage,
-} from "@/lib/whatsapp";
 import {
   fetchLeadData,
   getFacebookVerifyToken,
@@ -180,7 +176,9 @@ async function processLeadgen(pageId: string, leadgenId: string) {
     return;
   }
 
-  if (!settings.aiApiKey) {
+  const hasCampaignMessage = !!settings.campaignOutreachMessage?.trim();
+
+  if (!hasCampaignMessage && !settings.aiApiKey) {
     logger.warn("[facebook] No AI API key configured, skipping outreach", { userId: user.id });
     return;
   }
@@ -189,35 +187,23 @@ async function processLeadgen(pageId: string, leadgenId: string) {
   const agentName = user.name || "Corretor";
 
   try {
-    const config = getWhatsAppConfig(settings.whatsappPhoneId);
     const aiConfig: AIConfig = {
       provider: settings.aiProvider,
-      apiKey: settings.aiApiKey,
+      apiKey: settings.aiApiKey ?? "",
       model: settings.aiModel,
     };
 
-    const outreachMessage = await generateFacebookOutreachMessage(
-      aiConfig,
-      agentName,
-      contactName,
-    );
-
-    if (!outreachMessage) {
-      logger.warn("[facebook] AI returned empty outreach message", { leadId: lead.id });
-      return;
-    }
-
-    await sendAndSaveMessage(
-      config,
-      conversation.id,
+    await sendCampaignOutreach({
+      userId: user.id,
+      conversationId: conversation.id,
       whatsappChatId,
-      outreachMessage,
-      "bot",
-    );
-
-    await prisma.conversation.update({
-      where: { id: conversation.id },
-      data: { status: "bot" },
+      contactName,
+      agentName,
+      aiConfig,
+      campaignOutreachMessage: settings.campaignOutreachMessage,
+      campaignOutreachImageUrl: settings.campaignOutreachImageUrl,
+      hasCampaignSecondMessage: !!settings.campaignSecondMessage?.trim(),
+      whatsappPhoneId: settings.whatsappPhoneId,
     });
 
     if (settings.followUpEnabled) {

@@ -99,14 +99,44 @@ export function AutomationSettingsSection({
           </div>
         </SectionContainer>
 
-        <SectionContainer title="Mensagem de saudação">
-          <TextareaField
-            label="Mensagem padrão para novos contatos quando a IA não estiver configurada"
-            value={form.greetingMessage || ""}
-            onChange={(event) => update("greetingMessage", event.target.value)}
-            rows={4}
-            placeholder="Olá! Obrigado pelo contato. Em breve um corretor especializado vai te atender."
-          />
+        <SectionContainer title="Mensagem de campanha">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-foreground">Primeira mensagem</div>
+              <div className="text-xs text-neutral">Enviada automaticamente quando um lead chega via Facebook ou Canal Pro. Use [NOME] para incluir o nome do lead.</div>
+              <TextareaField
+                label=""
+                value={form.campaignOutreachMessage || ""}
+                onChange={(event) => update("campaignOutreachMessage", event.target.value)}
+                rows={5}
+                placeholder={"Olá, [NOME], tudo bem?\n\nEstou retornando seu contato. 😉\n\n1- Quer receber por aqui mesmo ou\n2- Prefere que eu te ligue?"}
+              />
+              <TextField
+                label="URL da imagem (opcional)"
+                value={form.campaignOutreachImageUrl || ""}
+                onChange={(e) => update("campaignOutreachImageUrl", e.target.value || null)}
+                placeholder="https://... (imagem enviada junto com a primeira mensagem)"
+              />
+            </div>
+
+            <div className="border-t border-border pt-4 space-y-2">
+              <div className="text-xs font-medium text-foreground">Segunda mensagem</div>
+              <div className="text-xs text-neutral">Enviada automaticamente se o lead responder &quot;1&quot; (quer receber por WhatsApp). Se vazio, a IA assume direto.</div>
+              <TextareaField
+                label=""
+                value={form.campaignSecondMessage || ""}
+                onChange={(event) => update("campaignSecondMessage", event.target.value)}
+                rows={4}
+                placeholder={"Ótimo! Aqui estão as informações que você pediu..."}
+              />
+              <TextField
+                label="URL da imagem (opcional)"
+                value={form.campaignSecondImageUrl || ""}
+                onChange={(e) => update("campaignSecondImageUrl", e.target.value || null)}
+                placeholder="https://... (imagem enviada junto com a segunda mensagem)"
+              />
+            </div>
+          </div>
         </SectionContainer>
 
         <FollowUpSettingsSection form={form} update={update} />

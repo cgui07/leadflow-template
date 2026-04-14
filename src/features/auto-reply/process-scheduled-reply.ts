@@ -4,11 +4,14 @@ import { logger } from "@/lib/logger";
 import type { AIConfig, MessageContent } from "@/lib/ai";
 import { generateAutoReply, qualifyLead } from "@/lib/ai";
 import { enrichMessageWithMedia } from "./enrich-messages";
+import { handleCampaignReply } from "@/lib/campaign-reply";
 import { normalizeAutoReplyDelaySeconds } from "@/lib/auto-reply-delay";
+import { detectIntentSignals, getVoiceUsageThisMonth } from "@/lib/voice-reply";
 import {
-  detectIntentSignals,
-  getVoiceUsageThisMonth,
-} from "@/lib/voice-reply";
+  getWhatsAppConfig,
+  resolveSendTarget,
+  sendPresenceUpdate,
+} from "@/lib/whatsapp";
 import {
   handleConfirmationReplyIfNeeded,
   handleSchedulingIfNeeded,
@@ -20,12 +23,6 @@ import {
   sendTextReply,
   sendPropertyPdfs,
 } from "./reply-sender";
-import {
-  getWhatsAppConfig,
-  resolveSendTarget,
-  sendAndSaveMessage,
-  sendPresenceUpdate,
-} from "@/lib/whatsapp";
 
 export interface ProcessScheduledAutoReplyInput {
   conversationId: string;
@@ -84,6 +81,21 @@ export async function processScheduledAutoReply(
 
   if (!latestInbound || latestInbound.id !== input.triggerMessageId) {
     return;
+  }
+
+  // ── Campaign reply short-circuit ─────────────────────────────────────────
+  if (conversation.awaitingCampaignResponse) {
+    const messageText =
+      typeof latestInbound.content === "string" ? latestInbound.content : "";
+    const handled = await handleCampaignReply(
+      conversation.id,
+      messageText,
+      conversation.lead.user.id,
+      conversation.lead.id,
+      conversation.whatsappChatId ??
+        `${conversation.lead.phone}@s.whatsapp.net`,
+    );
+    if (handled) return;
   }
 
   // ── Appointment confirmation short-circuit ────────────────────────────────
@@ -337,16 +349,4 @@ export async function processScheduledAutoReply(
 
     return;
   }
-
-  if (!input.wasActiveConversation || !settings.greetingMessage) {
-    return;
-  }
-
-  await sendAndSaveMessage(
-    getWhatsAppConfig(settings.whatsappPhoneId),
-    conversation.id,
-    replyJid,
-    settings.greetingMessage,
-    "bot",
-  );
 }

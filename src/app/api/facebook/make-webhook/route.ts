@@ -17,8 +17,7 @@ import type { AIConfig } from "@/lib/ai";
 import { after, NextRequest } from "next/server";
 import { scheduleFollowUp } from "@/lib/followup";
 import { getDefaultPipelineStageId } from "@/lib/pipeline";
-import { generateFacebookOutreachMessage } from "@/lib/ai";
-import { getWhatsAppConfig, sendAndSaveMessage } from "@/lib/whatsapp";
+import { sendCampaignOutreach } from "@/lib/campaign-outreach";
 
 const payloadSchema = z.object({
   // Identificação do corretor no CRM
@@ -124,41 +123,28 @@ export async function POST(req: NextRequest) {
   // Envia WhatsApp em background (com delay configurável no futuro)
   const settings = user.settings;
 
-  if (settings?.facebookAutoOutreach && settings.whatsappPhoneId && settings.aiApiKey) {
+  const hasCampaignMessage = !!settings?.campaignOutreachMessage?.trim();
+
+  if (settings?.facebookAutoOutreach && settings.whatsappPhoneId && (hasCampaignMessage || settings.aiApiKey)) {
     after(async () => {
       try {
-        const config = getWhatsAppConfig(settings.whatsappPhoneId!);
         const aiConfig: AIConfig = {
           provider: settings.aiProvider,
-          apiKey: settings.aiApiKey!,
+          apiKey: settings.aiApiKey ?? "",
           model: settings.aiModel,
         };
 
-        const agentName = user.name || "Corretor";
-        const conversation = lead.conversation!;
-
-        const outreachMessage = await generateFacebookOutreachMessage(
-          aiConfig,
-          agentName,
-          contactName,
-        );
-
-        if (!outreachMessage) {
-          logger.warn("[make-webhook] AI returned empty outreach message", { leadId: lead.id });
-          return;
-        }
-
-        await sendAndSaveMessage(
-          config,
-          conversation.id,
+        await sendCampaignOutreach({
+          userId: user.id,
+          conversationId: lead.conversation!.id,
           whatsappChatId,
-          outreachMessage,
-          "bot",
-        );
-
-        await prisma.conversation.update({
-          where: { id: conversation.id },
-          data: { status: "bot" },
+          contactName,
+          agentName: user.name || "Corretor",
+          aiConfig,
+          campaignOutreachMessage: settings.campaignOutreachMessage,
+          campaignOutreachImageUrl: settings.campaignOutreachImageUrl,
+          hasCampaignSecondMessage: !!settings.campaignSecondMessage?.trim(),
+          whatsappPhoneId: settings.whatsappPhoneId!,
         });
 
         if (settings.followUpEnabled) {

@@ -4,8 +4,8 @@ import { NextRequest } from "next/server";
 import { requireCronAuth } from "@/lib/cron";
 import { processEscalations } from "@/lib/alerts";
 import { processFollowUps } from "@/lib/followup";
-import { processVisitConfirmations } from "@/lib/visit-confirmations";
 import { processAllGmailLeads } from "@/lib/gmail";
+import { processVisitConfirmations } from "@/lib/visit-confirmations";
 
 export async function POST(req: NextRequest) {
   const authError = requireCronAuth(req);

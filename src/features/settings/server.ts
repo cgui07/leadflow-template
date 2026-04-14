@@ -19,7 +19,10 @@ const USER_SETTINGS_SELECT = {
   aiProvider: true,
   aiModel: true,
   openaiTranscriptionKey: true,
-  greetingMessage: true,
+  campaignOutreachMessage: true,
+  campaignOutreachImageUrl: true,
+  campaignSecondMessage: true,
+  campaignSecondImageUrl: true,
   autoReplyEnabled: true,
   auto_reply_delay_seconds: true,
   followUpEnabled: true,
@@ -53,7 +56,10 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   aiApiKey: null,
   aiModel: DEFAULT_AI_MODEL_BY_PROVIDER.openai,
   openaiTranscriptionKey: null,
-  greetingMessage: null,
+  campaignOutreachMessage: null,
+  campaignOutreachImageUrl: null,
+  campaignSecondMessage: null,
+  campaignSecondImageUrl: null,
   autoReplyEnabled: true,
   autoReplyDelaySeconds: 0,
   followUpEnabled: true,
@@ -76,7 +82,10 @@ type UserSettingsRecord = {
   aiProvider: string;
   aiModel: string;
   openaiTranscriptionKey: string | null;
-  greetingMessage: string | null;
+  campaignOutreachMessage: string | null;
+  campaignOutreachImageUrl: string | null;
+  campaignSecondMessage: string | null;
+  campaignSecondImageUrl: string | null;
   autoReplyEnabled: boolean;
   auto_reply_delay_seconds: number;
   followUpEnabled: boolean;
@@ -140,7 +149,10 @@ async function mapUserSettings(
     openaiTranscriptionKey: maskApiKey
       ? maskSecret(settings.openaiTranscriptionKey)
       : settings.openaiTranscriptionKey,
-    greetingMessage: settings.greetingMessage ?? null,
+    campaignOutreachMessage: settings.campaignOutreachMessage ?? null,
+    campaignOutreachImageUrl: settings.campaignOutreachImageUrl ?? null,
+    campaignSecondMessage: settings.campaignSecondMessage ?? null,
+    campaignSecondImageUrl: settings.campaignSecondImageUrl ?? null,
     autoReplyEnabled: settings.autoReplyEnabled,
     autoReplyDelaySeconds: normalizeAutoReplyDelaySeconds(
       settings.auto_reply_delay_seconds,
@@ -186,10 +198,31 @@ function pickAllowedSettings(
   }
 
   if (
-    typeof input.greetingMessage === "string" ||
-    input.greetingMessage === null
+    typeof input.campaignOutreachMessage === "string" ||
+    input.campaignOutreachMessage === null
   ) {
-    next.greetingMessage = input.greetingMessage;
+    next.campaignOutreachMessage = input.campaignOutreachMessage;
+  }
+
+  if (
+    typeof input.campaignOutreachImageUrl === "string" ||
+    input.campaignOutreachImageUrl === null
+  ) {
+    next.campaignOutreachImageUrl = input.campaignOutreachImageUrl;
+  }
+
+  if (
+    typeof input.campaignSecondMessage === "string" ||
+    input.campaignSecondMessage === null
+  ) {
+    next.campaignSecondMessage = input.campaignSecondMessage;
+  }
+
+  if (
+    typeof input.campaignSecondImageUrl === "string" ||
+    input.campaignSecondImageUrl === null
+  ) {
+    next.campaignSecondImageUrl = input.campaignSecondImageUrl;
   }
 
   if (typeof input.autoReplyEnabled === "boolean") {

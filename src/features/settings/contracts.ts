@@ -4,7 +4,10 @@ export interface UserSettings {
   aiProvider: string;
   aiApiKey: string | null;
   aiModel: string;
-  greetingMessage: string | null;
+  campaignOutreachMessage: string | null;
+  campaignOutreachImageUrl: string | null;
+  campaignSecondMessage: string | null;
+  campaignSecondImageUrl: string | null;
   autoReplyEnabled: boolean;
   autoReplyDelaySeconds: number;
   followUpEnabled: boolean;

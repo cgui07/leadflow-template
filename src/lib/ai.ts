@@ -62,6 +62,23 @@ export async function generateFacebookOutreachMessage(
   ]);
 }
 
+/**
+ * Resolve a mensagem de outreach de campanha.
+ * Se o corretor configurou uma mensagem customizada, usa ela substituindo [NOME].
+ * Senão, gera via IA.
+ */
+export async function resolveOutreachMessage(
+  config: AIConfig,
+  agentName: string,
+  leadName: string,
+  campaignOutreachMessage: string | null | undefined,
+): Promise<string | null> {
+  if (campaignOutreachMessage?.trim()) {
+    return campaignOutreachMessage.replace(/\[NOME\]/gi, leadName || "");
+  }
+  return generateFacebookOutreachMessage(config, agentName, leadName);
+}
+
 export async function generateCanalProOutreachMessage(
   config: AIConfig,
   agentName: string,
