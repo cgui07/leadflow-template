@@ -5,6 +5,7 @@ import { Bot, Mic2 } from "lucide-react";
 import type { UserSettings } from "../contracts";
 import { AI_PROVIDER_OPTIONS } from "@/lib/ai-models";
 import { VoiceCloneRecorder } from "./VoiceCloneRecorder";
+import { CampaignImageUpload } from "./CampaignImageUpload";
 import { FollowUpSettingsSection } from "./FollowUpSettingsSection";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { WhatsAppConnection } from "@/components/domain/WhatsAppConnection";
@@ -107,15 +108,15 @@ export function AutomationSettingsSection({
               <TextareaField
                 label=""
                 value={form.campaignOutreachMessage || ""}
-                onChange={(event) => update("campaignOutreachMessage", event.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => update("campaignOutreachMessage", e.target.value)}
                 rows={5}
                 placeholder={"Olá, [NOME], tudo bem?\n\nEstou retornando seu contato. 😉\n\n1- Quer receber por aqui mesmo ou\n2- Prefere que eu te ligue?"}
               />
-              <TextField
-                label="URL da imagem (opcional)"
-                value={form.campaignOutreachImageUrl || ""}
-                onChange={(e) => update("campaignOutreachImageUrl", e.target.value || null)}
-                placeholder="https://... (imagem enviada junto com a primeira mensagem)"
+              <CampaignImageUpload
+                slot="outreach"
+                value={form.campaignOutreachImageUrl}
+                onChange={(url) => update("campaignOutreachImageUrl", url)}
+                label="Imagem opcional (enviada junto com a primeira mensagem)"
               />
             </div>
 
@@ -125,15 +126,15 @@ export function AutomationSettingsSection({
               <TextareaField
                 label=""
                 value={form.campaignSecondMessage || ""}
-                onChange={(event) => update("campaignSecondMessage", event.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => update("campaignSecondMessage", e.target.value)}
                 rows={4}
                 placeholder={"Ótimo! Aqui estão as informações que você pediu..."}
               />
-              <TextField
-                label="URL da imagem (opcional)"
-                value={form.campaignSecondImageUrl || ""}
-                onChange={(e) => update("campaignSecondImageUrl", e.target.value || null)}
-                placeholder="https://... (imagem enviada junto com a segunda mensagem)"
+              <CampaignImageUpload
+                slot="second"
+                value={form.campaignSecondImageUrl}
+                onChange={(url) => update("campaignSecondImageUrl", url)}
+                label="Imagem opcional (enviada junto com a segunda mensagem)"
               />
             </div>
           </div>

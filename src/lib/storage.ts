@@ -61,6 +61,35 @@ export async function createPresignedUploadUrl(
   return { key, url };
 }
 
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+export async function createPresignedImageUploadUrl(
+  userId: string,
+  folder: string,
+  filename: string,
+  contentType: string,
+): Promise<{ key: string; url: string; publicUrl: string }> {
+  if (!ALLOWED_IMAGE_TYPES.includes(contentType)) {
+    throw new Error("Tipo de arquivo não permitido. Use JPG, PNG, WEBP ou GIF.");
+  }
+
+  const client = getR2Client();
+  const ext = filename.split(".").pop() ?? "jpg";
+  const key = `${userId}/${folder}/${Date.now()}.${ext}`;
+
+  const command = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ContentType: contentType,
+  });
+
+  const url = await getSignedUrl(client, command, { expiresIn: 600 });
+
+  const publicUrl = `${env.R2_PUBLIC_URL}/${key}`;
+
+  return { key, url, publicUrl };
+}
+
 export async function verifyUploadExists(key: string): Promise<number> {
   const client = getR2Client();
 
