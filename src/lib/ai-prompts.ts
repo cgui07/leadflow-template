@@ -40,6 +40,7 @@ export function formatPropertyForPrompt(p: PropertyCatalogItem, index: number) {
       FLUXO: "Fluxo de Pagamento",
       RENTABILIDADE: "Rentabilidade",
       PRODUTO_PRONTO: "Produto Pronto",
+      TABELA: "Tabela de Preços",
     };
     const named = p.pdfCategories.map((c) => labels[c] ?? c);
     parts.push(`   📎 PDFs disponíveis: ${named.join(", ")}`);
@@ -123,11 +124,12 @@ QUANDO APRESENTAR IMÓVEL:
 
 ENVIO DE PDF — REGRA OBRIGATÓRIA:
 - Use [ENVIAR_PDF:ID:CATEGORIA] para enviar o PDF específico da categoria
-- Categorias disponíveis: BOOK, FLUXO, RENTABILIDADE, PRODUTO_PRONTO
+- Categorias disponíveis: BOOK, FLUXO, RENTABILIDADE, PRODUTO_PRONTO, TABELA
 - BOOK: enviar quando o cliente quiser conhecer o imóvel, ver fotos, saber mais — é a apresentação geral
 - FLUXO: enviar quando perguntar sobre preço, valor, entrada, parcelas ou condições de pagamento
 - RENTABILIDADE: enviar quando perguntar sobre investimento, retorno, renda, Airbnb, lucro ou valorização
 - PRODUTO_PRONTO: enviar quando houver interesse no imóvel já construído/pronto
+- TABELA: enviar SOMENTE quando o cliente pedir especificamente o preço de unidades ou solicitar a tabela ("quanto custa", "qual o preço", "me manda a tabela", "tem tabela?") — não enviar proativamente
 - Sempre que mencionar ou recomendar um imóvel, envie o BOOK: [ENVIAR_PDF:ID:BOOK]
 - Se o cliente pedir material, detalhes ou fichas, envie o BOOK: [ENVIAR_PDF:ID:BOOK]
 - Nunca diga "vou enviar o material" sem incluir a tag — a tag É o envio

@@ -26,6 +26,7 @@ import {
   MapPin,
   Maximize2,
   PackageCheck,
+  Table2,
   TrendingUp,
   Trash2,
   X,
@@ -58,12 +59,13 @@ function typeIcon(type: string | null) {
   return <Building2 size={14} />;
 }
 
-function pdfCategoryVariant(category: PdfCategory): "purple" | "orange" | "success" | "info" {
+function pdfCategoryVariant(category: PdfCategory): "purple" | "orange" | "success" | "info" | "default" {
   switch (category) {
     case "BOOK": return "purple";
     case "FLUXO": return "orange";
     case "RENTABILIDADE": return "success";
     case "PRODUTO_PRONTO": return "info";
+    case "TABELA": return "default";
   }
 }
 
@@ -73,6 +75,7 @@ function pdfCategoryIcon(category: PdfCategory) {
     case "FLUXO": return <LayoutList size={10} />;
     case "RENTABILIDADE": return <TrendingUp size={10} />;
     case "PRODUTO_PRONTO": return <PackageCheck size={10} />;
+    case "TABELA": return <Table2 size={10} />;
   }
 }
 

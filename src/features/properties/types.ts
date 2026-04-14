@@ -1,10 +1,11 @@
-export type PdfCategory = "BOOK" | "FLUXO" | "RENTABILIDADE" | "PRODUTO_PRONTO";
+export type PdfCategory = "BOOK" | "FLUXO" | "RENTABILIDADE" | "PRODUTO_PRONTO" | "TABELA";
 
 export const PDF_CATEGORIES: PdfCategory[] = [
   "BOOK",
   "FLUXO",
   "RENTABILIDADE",
   "PRODUTO_PRONTO",
+  "TABELA",
 ];
 
 export const PDF_CATEGORY_LABELS: Record<PdfCategory, string> = {
@@ -12,6 +13,7 @@ export const PDF_CATEGORY_LABELS: Record<PdfCategory, string> = {
   FLUXO: "Fluxo de Pagamento",
   RENTABILIDADE: "Rentabilidade",
   PRODUTO_PRONTO: "Produto Pronto",
+  TABELA: "Tabela de Preços",
 };
 
 export const PDF_CATEGORY_OPTIONS = PDF_CATEGORIES.map((c) => ({
