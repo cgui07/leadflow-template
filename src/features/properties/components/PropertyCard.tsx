@@ -8,8 +8,8 @@ import { uploadPdfDirect } from "../upload-pdf";
 import { FileField } from "@/components/forms/FileField";
 import { TextField } from "@/components/forms/TextField";
 import { SelectField } from "@/components/forms/SelectField";
-import { TextareaField } from "@/components/forms/TextareaField";
 import type { Property, PdfEntry, PdfCategory } from "../types";
+import { TextareaField } from "@/components/forms/TextareaField";
 import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
 import { PDF_CATEGORY_LABELS, PDF_CATEGORY_OPTIONS } from "../types";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
@@ -88,18 +88,6 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-const PURPOSE_OPTIONS = [
-  { value: "venda", label: "Venda" },
-  { value: "aluguel", label: "Aluguel" },
-];
-
-const TYPE_OPTIONS = [
-  { value: "apartamento", label: "Apartamento" },
-  { value: "casa", label: "Casa" },
-  { value: "comercial", label: "Comercial" },
-  { value: "terreno", label: "Terreno" },
-  { value: "sala", label: "Sala" },
-];
 
 interface PropertyCardProps {
   property: Property;
@@ -121,44 +109,18 @@ export function PropertyCard({
   const [editError, setEditError] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     title: property.title ?? "",
-    type: property.type ?? "",
-    purpose: property.purpose ?? "",
-    price: property.price ?? "",
-    area: property.area ?? "",
-    bedrooms: property.bedrooms?.toString() ?? "",
-    bathrooms: property.bathrooms?.toString() ?? "",
-    parking_spots: property.parking_spots?.toString() ?? "",
-    address: property.address ?? "",
-    neighborhood: property.neighborhood ?? "",
-    city: property.city ?? "",
-    state: property.state ?? "",
-    description: property.description ?? "",
-    amenities: property.amenities.join(", "),
+    description: "",
   });
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
 
   function openEditModal() {
-    setEditForm({
-      title: property.title ?? "",
-      type: property.type ?? "",
-      purpose: property.purpose ?? "",
-      price: property.price ?? "",
-      area: property.area ?? "",
-      bedrooms: property.bedrooms?.toString() ?? "",
-      bathrooms: property.bathrooms?.toString() ?? "",
-      parking_spots: property.parking_spots?.toString() ?? "",
-      address: property.address ?? "",
-      neighborhood: property.neighborhood ?? "",
-      city: property.city ?? "",
-      state: property.state ?? "",
-      description: property.description ?? "",
-      amenities: property.amenities.join(", "),
-    });
+    setEditForm({ title: property.title ?? "", description: "" });
     setEditError(null);
     setEditModalOpen(true);
   }
 
   async function handleSaveEdit() {
+    if (!editForm.title.trim()) return;
     setSaving(true);
     setEditError(null);
     try {
@@ -166,23 +128,8 @@ export function PropertyCard({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: editForm.title.trim() || null,
-          type: editForm.type || null,
-          purpose: editForm.purpose || null,
-          price: editForm.price.trim() || null,
-          area: editForm.area.trim() || null,
-          bedrooms: editForm.bedrooms.trim() ? Number(editForm.bedrooms) : null,
-          bathrooms: editForm.bathrooms.trim() ? Number(editForm.bathrooms) : null,
-          parking_spots: editForm.parking_spots.trim() ? Number(editForm.parking_spots) : null,
-          address: editForm.address.trim() || null,
-          neighborhood: editForm.neighborhood.trim() || null,
-          city: editForm.city.trim() || null,
-          state: editForm.state.trim() || null,
-          description: editForm.description.trim() || null,
-          amenities: editForm.amenities
-            .split(",")
-            .map((a) => a.trim())
-            .filter(Boolean),
+          name: editForm.title.trim(),
+          rawText: editForm.description.trim() || undefined,
         }),
       });
       if (!res.ok) {
@@ -624,92 +571,10 @@ export function PropertyCard({
             value={editForm.title}
             onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
           />
-          <div className="grid grid-cols-2 gap-3">
-            <SelectField
-              label="Tipo"
-              placeholder="Tipo"
-              options={TYPE_OPTIONS}
-              value={editForm.type}
-              onChange={(v) => setEditForm((f) => ({ ...f, type: v }))}
-            />
-            <SelectField
-              label="Finalidade"
-              placeholder="Finalidade"
-              options={PURPOSE_OPTIONS}
-              value={editForm.purpose}
-              onChange={(v) => setEditForm((f) => ({ ...f, purpose: v }))}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <TextField
-              label="Preço (R$)"
-              placeholder="Ex: 650000"
-              value={editForm.price}
-              onChange={(e) => setEditForm((f) => ({ ...f, price: e.target.value }))}
-            />
-            <TextField
-              label="Área (m²)"
-              placeholder="Ex: 90"
-              value={editForm.area}
-              onChange={(e) => setEditForm((f) => ({ ...f, area: e.target.value }))}
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <TextField
-              label="Quartos"
-              placeholder="Ex: 3"
-              value={editForm.bedrooms}
-              onChange={(e) => setEditForm((f) => ({ ...f, bedrooms: e.target.value }))}
-            />
-            <TextField
-              label="Banheiros"
-              placeholder="Ex: 2"
-              value={editForm.bathrooms}
-              onChange={(e) => setEditForm((f) => ({ ...f, bathrooms: e.target.value }))}
-            />
-            <TextField
-              label="Vagas"
-              placeholder="Ex: 1"
-              value={editForm.parking_spots}
-              onChange={(e) => setEditForm((f) => ({ ...f, parking_spots: e.target.value }))}
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <TextField
-              label="Bairro"
-              placeholder="Ex: Moema"
-              value={editForm.neighborhood}
-              onChange={(e) => setEditForm((f) => ({ ...f, neighborhood: e.target.value }))}
-            />
-            <TextField
-              label="Cidade"
-              placeholder="Ex: São Paulo"
-              value={editForm.city}
-              onChange={(e) => setEditForm((f) => ({ ...f, city: e.target.value }))}
-            />
-            <TextField
-              label="Estado"
-              placeholder="Ex: SP"
-              value={editForm.state}
-              onChange={(e) => setEditForm((f) => ({ ...f, state: e.target.value }))}
-            />
-          </div>
-          <TextField
-            label="Endereço"
-            placeholder="Ex: Rua das Flores, 123"
-            value={editForm.address}
-            onChange={(e) => setEditForm((f) => ({ ...f, address: e.target.value }))}
-          />
-          <TextField
-            label="Comodidades (separadas por vírgula)"
-            placeholder="Ex: piscina, academia, varanda gourmet"
-            value={editForm.amenities}
-            onChange={(e) => setEditForm((f) => ({ ...f, amenities: e.target.value }))}
-          />
           <TextareaField
-            label="Descrição"
-            placeholder="Descrição livre do imóvel..."
-            rows={3}
+            label="Descrição (opcional)"
+            placeholder="Cole uma descrição completa para a IA extrair os dados (tipo, preço, área, localização...)"
+            rows={4}
             value={editForm.description}
             onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
           />

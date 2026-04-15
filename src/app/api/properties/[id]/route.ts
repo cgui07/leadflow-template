@@ -1,5 +1,5 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
+import { NextRequest } from "next/server";
 import { deleteProperty } from "@/features/properties/server";
 import { requireAuth, json, error, handleError } from "@/lib/api";
 
@@ -34,28 +34,52 @@ export async function PATCH(
     if (!property) return error("Imóvel não encontrado.", 404);
 
     const body = await req.json();
+    const { name, rawText } = body as { name: string; rawText?: string };
 
+    if (!name?.trim()) return error("Nome é obrigatório.", 400);
+
+    // Se tem descrição, extrai dados com IA
+    if (rawText && rawText.trim().length >= 10) {
+      const settings = await prisma.userSettings.findUnique({
+        where: { userId: user.id },
+      });
+      if (!settings?.aiApiKey) {
+        return error("Configure uma chave de IA nas configurações.", 400);
+      }
+      const { extractPropertyData } = await import("@/lib/ai");
+      const extracted = await extractPropertyData(
+        { provider: settings.aiProvider, apiKey: settings.aiApiKey, model: settings.aiModel },
+        rawText,
+      );
+      const updated = await prisma.properties.update({
+        where: { id },
+        data: {
+          raw_text: rawText,
+          title: extracted?.title ?? name.trim(),
+          type: extracted?.type ?? null,
+          purpose: extracted?.purpose ?? null,
+          price: extracted?.price ?? null,
+          area: extracted?.area ?? null,
+          bedrooms: extracted?.bedrooms ?? null,
+          bathrooms: extracted?.bathrooms ?? null,
+          parking_spots: extracted?.parkingSpots ?? null,
+          address: extracted?.address ?? null,
+          neighborhood: extracted?.neighborhood ?? null,
+          city: extracted?.city ?? null,
+          state: extracted?.state ?? null,
+          amenities: extracted?.amenities ?? [],
+          description: extracted?.description ?? null,
+          updated_at: new Date(),
+        },
+      });
+      return json(updated);
+    }
+
+    // Sem descrição — só atualiza o nome
     const updated = await prisma.properties.update({
       where: { id },
-      data: {
-        title: body.title ?? null,
-        type: body.type ?? null,
-        purpose: body.purpose ?? null,
-        price: body.price ? body.price : null,
-        area: body.area ? body.area : null,
-        bedrooms: body.bedrooms != null ? Number(body.bedrooms) : null,
-        bathrooms: body.bathrooms != null ? Number(body.bathrooms) : null,
-        parking_spots: body.parking_spots != null ? Number(body.parking_spots) : null,
-        address: body.address ?? null,
-        neighborhood: body.neighborhood ?? null,
-        city: body.city ?? null,
-        state: body.state ?? null,
-        amenities: Array.isArray(body.amenities) ? body.amenities : [],
-        description: body.description ?? null,
-        updated_at: new Date(),
-      },
+      data: { title: name.trim(), updated_at: new Date() },
     });
-
     return json(updated);
   } catch (err) {
     return handleError(err);

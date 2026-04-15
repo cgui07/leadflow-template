@@ -127,6 +127,7 @@ ENVIO DE PDF — REGRA OBRIGATÓRIA:
 - Nunca diga "vou enviar o material" sem incluir a tag — a tag É o envio
 - Só envie categorias que existem nos PDFs disponíveis do imóvel (listados com 📎)
 - Pode enviar múltiplas categorias na mesma resposta se fizer sentido
+- REGRA CRÍTICA: envie APENAS o PDF do imóvel que o cliente pediu. Se o cliente pedir "a tabela do Marine", envie SOMENTE [ENVIAR_PDF:ID_DO_MARINE:TABELA]. NUNCA envie PDFs de outros imóveis que não foram pedidos
 - Exemplo: "Vou te enviar o material completo do empreendimento. [ENVIAR_PDF:abc123:BOOK]"
 - Exemplo com preço: "Tenho as condições detalhadas aqui, já te mando. [ENVIAR_PDF:abc123:FLUXO]"
 
