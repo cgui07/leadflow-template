@@ -35,15 +35,7 @@ export function formatPropertyForPrompt(p: PropertyCatalogItem, index: number) {
   if (p.amenities.length > 0) parts.push(`   Comodidades: ${p.amenities.join(", ")}`);
   if (p.description) parts.push(`   Descrição: ${p.description}`);
   if (p.pdfCategories && p.pdfCategories.length > 0) {
-    const labels: Record<string, string> = {
-      BOOK: "Book",
-      FLUXO: "Fluxo de Pagamento",
-      RENTABILIDADE: "Rentabilidade",
-      PRODUTO_PRONTO: "Produto Pronto",
-      TABELA: "Tabela de Preços",
-    };
-    const named = p.pdfCategories.map((c) => labels[c] ?? c);
-    parts.push(`   📎 PDFs disponíveis: ${named.join(", ")}`);
+    parts.push(`   📎 PDFs disponíveis (use esses códigos exatos no tag): ${p.pdfCategories.join(", ")}`);
   } else if (p.hasPdf) {
     parts.push(`   📎 PDF disponível`);
   }

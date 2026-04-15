@@ -17,6 +17,18 @@ export async function GET() {
 }
 
 export const POST = withApiHandler(CreatePropertySchema, async (user, data) => {
+  // Se só o nome foi fornecido (sem descrição), cria o imóvel diretamente sem chamar a IA
+  if (!data.rawText || data.rawText.trim().length < 10) {
+    const property = await prisma.properties.create({
+      data: {
+        user_id: user.id,
+        raw_text: data.name,
+        title: data.name,
+      },
+    });
+    return json({ ...property, pdfs: [] }, 201);
+  }
+
   const settings = await prisma.userSettings.findUnique({
     where: { userId: user.id },
   });
@@ -34,6 +46,6 @@ export const POST = withApiHandler(CreatePropertySchema, async (user, data) => {
     model: settings.aiModel,
   };
 
-  const property = await extractAndSaveProperty(user.id, data.rawText, aiConfig);
+  const property = await extractAndSaveProperty(user.id, data.name, data.rawText, aiConfig);
   return json(property, 201);
 });

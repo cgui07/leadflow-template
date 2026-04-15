@@ -10,6 +10,7 @@ function parsePdfs(raw: unknown): PdfEntry[] {
 
 export async function extractAndSaveProperty(
   userId: string,
+  name: string,
   rawText: string,
   aiConfig: AIConfig,
 ) {
@@ -19,7 +20,7 @@ export async function extractAndSaveProperty(
     data: {
       user_id: userId,
       raw_text: rawText,
-      title: extracted?.title ?? null,
+      title: extracted?.title ?? name,
       type: extracted?.type ?? null,
       purpose: extracted?.purpose ?? null,
       price: extracted?.price ?? null,

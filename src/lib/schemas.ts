@@ -132,7 +132,8 @@ export const UpdateTenantCustomizationSchema = z.object({
 });
 
 export const CreatePropertySchema = z.object({
-  rawText: z.string().min(10, "Texto deve ter pelo menos 10 caracteres"),
+  name: z.string().min(1, "Nome é obrigatório"),
+  rawText: z.string().optional(),
 });
 
 export const CreateLeadActionSchema = z.object({

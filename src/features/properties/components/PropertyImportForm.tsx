@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { uploadPdfDirect } from "../upload-pdf";
 import { PDF_CATEGORY_OPTIONS } from "../types";
 import { FileField } from "@/components/forms/FileField";
+import { TextField } from "@/components/forms/TextField";
 import { SelectField } from "@/components/forms/SelectField";
 import { FileText, FileUp, Sparkles, X } from "lucide-react";
 import type { Property, PdfEntry, PdfCategory } from "../types";
@@ -29,6 +30,7 @@ interface PropertyImportFormProps {
 }
 
 export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProps) {
+  const [name, setName] = useState("");
   const [rawText, setRawText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +74,7 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
       const res = await fetch("/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rawText }),
+        body: JSON.stringify({ name, rawText: rawText.trim() || undefined }),
       });
 
       const data = await res.json();
@@ -103,6 +105,7 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
       setPendingPdfs([]);
 
       onPropertyCreated(property);
+      setName("");
       setRawText("");
     } catch {
       setError("Erro de conexão. Tente novamente.");
@@ -120,21 +123,28 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
           </div>
           <div>
             <div className="font-semibold text-neutral-ink text-sm">
-              Cadastrar imóvel por texto
+              Cadastrar imóvel
             </div>
             <div className="text-xs text-neutral mt-0.5">
-              Cole qualquer descrição — a IA extrai os dados automaticamente.
+              Dê um nome para identificar o imóvel — a descrição é opcional (a IA extrai os dados automaticamente).
             </div>
           </div>
         </div>
       </CardHeader>
 
       <div className="px-6 py-4 space-y-3">
+        <TextField
+          placeholder="Ex: Marine - Tabela de Preços, Residencial Parque Sul, Apto Moema 3Q..."
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          label="Nome do imóvel"
+        />
         <TextareaField
-          placeholder="Ex: Apartamento 3 quartos, 2 banheiros, 1 vaga, 90m², R$ 650.000, Moema - SP. Varanda gourmet, piscina, academia..."
-          rows={5}
+          placeholder="Opcional: cole uma descrição completa para a IA extrair os dados (tipo, preço, área, localização...)"
+          rows={4}
           value={rawText}
           onChange={(e) => setRawText(e.target.value)}
+          label="Descrição (opcional)"
         />
         <FileField
           ref={pdfInputRef}
@@ -244,12 +254,12 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
           onClick={handleExtract}
           loading={loading}
           disabled={
-            rawText.trim().length < 10 ||
+            name.trim().length === 0 ||
             pendingPdfs.some((p) => !p.category)
           }
           icon={<Sparkles size={14} />}
         >
-          {loading ? "Extraindo..." : "Extrair com IA"}
+          {loading ? "Salvando..." : rawText.trim().length >= 10 ? "Extrair com IA" : "Salvar imóvel"}
         </Button>
       </CardFooter>
     </Card>
