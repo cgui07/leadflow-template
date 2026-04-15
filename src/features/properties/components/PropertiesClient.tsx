@@ -41,6 +41,12 @@ export function PropertiesClient({
     );
   }
 
+  function handlePropertyChange(updated: Property) {
+    setProperties((prev) =>
+      prev.map((p) => (p.id === updated.id ? updated : p)),
+    );
+  }
+
   return (
     <div className="space-y-0">
       <div className="flex border-b border-neutral-border">
@@ -89,6 +95,7 @@ export function PropertiesClient({
                     property={p}
                     onDelete={handleDelete}
                     onPdfsChange={handlePdfsChange}
+                    onPropertyChange={handlePropertyChange}
                   />
                 ))}
               </div>

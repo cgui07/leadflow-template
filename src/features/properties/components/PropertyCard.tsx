@@ -6,7 +6,9 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { uploadPdfDirect } from "../upload-pdf";
 import { FileField } from "@/components/forms/FileField";
+import { TextField } from "@/components/forms/TextField";
 import { SelectField } from "@/components/forms/SelectField";
+import { TextareaField } from "@/components/forms/TextareaField";
 import type { Property, PdfEntry, PdfCategory } from "../types";
 import { Card, CardHeader, CardFooter } from "@/components/ui/Card";
 import { PDF_CATEGORY_LABELS, PDF_CATEGORY_OPTIONS } from "../types";
@@ -26,6 +28,7 @@ import {
   MapPin,
   Maximize2,
   PackageCheck,
+  Pencil,
   Table2,
   TrendingUp,
   Trash2,
@@ -85,20 +88,116 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+const PURPOSE_OPTIONS = [
+  { value: "venda", label: "Venda" },
+  { value: "aluguel", label: "Aluguel" },
+];
+
+const TYPE_OPTIONS = [
+  { value: "apartamento", label: "Apartamento" },
+  { value: "casa", label: "Casa" },
+  { value: "comercial", label: "Comercial" },
+  { value: "terreno", label: "Terreno" },
+  { value: "sala", label: "Sala" },
+];
+
 interface PropertyCardProps {
   property: Property;
   onDelete: (id: string) => void;
   onPdfsChange: (id: string, pdfs: PdfEntry[]) => void;
+  onPropertyChange: (updated: Property) => void;
 }
 
 export function PropertyCard({
   property,
   onDelete,
   onPdfsChange,
+  onPropertyChange,
 }: PropertyCardProps) {
   const [deleting, setDeleting] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: property.title ?? "",
+    type: property.type ?? "",
+    purpose: property.purpose ?? "",
+    price: property.price ?? "",
+    area: property.area ?? "",
+    bedrooms: property.bedrooms?.toString() ?? "",
+    bathrooms: property.bathrooms?.toString() ?? "",
+    parking_spots: property.parking_spots?.toString() ?? "",
+    address: property.address ?? "",
+    neighborhood: property.neighborhood ?? "",
+    city: property.city ?? "",
+    state: property.state ?? "",
+    description: property.description ?? "",
+    amenities: property.amenities.join(", "),
+  });
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
+
+  function openEditModal() {
+    setEditForm({
+      title: property.title ?? "",
+      type: property.type ?? "",
+      purpose: property.purpose ?? "",
+      price: property.price ?? "",
+      area: property.area ?? "",
+      bedrooms: property.bedrooms?.toString() ?? "",
+      bathrooms: property.bathrooms?.toString() ?? "",
+      parking_spots: property.parking_spots?.toString() ?? "",
+      address: property.address ?? "",
+      neighborhood: property.neighborhood ?? "",
+      city: property.city ?? "",
+      state: property.state ?? "",
+      description: property.description ?? "",
+      amenities: property.amenities.join(", "),
+    });
+    setEditError(null);
+    setEditModalOpen(true);
+  }
+
+  async function handleSaveEdit() {
+    setSaving(true);
+    setEditError(null);
+    try {
+      const res = await fetch(`/api/properties/${property.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editForm.title.trim() || null,
+          type: editForm.type || null,
+          purpose: editForm.purpose || null,
+          price: editForm.price.trim() || null,
+          area: editForm.area.trim() || null,
+          bedrooms: editForm.bedrooms.trim() ? Number(editForm.bedrooms) : null,
+          bathrooms: editForm.bathrooms.trim() ? Number(editForm.bathrooms) : null,
+          parking_spots: editForm.parking_spots.trim() ? Number(editForm.parking_spots) : null,
+          address: editForm.address.trim() || null,
+          neighborhood: editForm.neighborhood.trim() || null,
+          city: editForm.city.trim() || null,
+          state: editForm.state.trim() || null,
+          description: editForm.description.trim() || null,
+          amenities: editForm.amenities
+            .split(",")
+            .map((a) => a.trim())
+            .filter(Boolean),
+        }),
+      });
+      if (!res.ok) {
+        setEditError("Erro ao salvar. Tente novamente.");
+        return;
+      }
+      const updated = await res.json();
+      onPropertyChange({ ...property, ...updated, pdfs: property.pdfs });
+      setEditModalOpen(false);
+    } catch {
+      setEditError("Erro de conexão. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
+  }
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deletingPdfUrl, setDeletingPdfUrl] = useState<string | null>(null);
@@ -199,14 +298,23 @@ export function PropertyCard({
             )}
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<Trash2 size={14} />}
-          loading={deleting}
-          onClick={() => setDeleteModalOpen(true)}
-          className="text-neutral-muted hover:text-danger shrink-0 -mr-1"
-        />
+        <div className="flex items-center gap-1 shrink-0 -mr-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<Pencil size={14} />}
+            onClick={openEditModal}
+            className="text-neutral-muted hover:text-primary"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<Trash2 size={14} />}
+            loading={deleting}
+            onClick={() => setDeleteModalOpen(true)}
+            className="text-neutral-muted hover:text-danger"
+          />
+        </div>
       </CardHeader>
 
       <div className="px-5 py-4 space-y-4">
@@ -490,6 +598,122 @@ export function PropertyCard({
             <FileUp size={15} />
             Adicionar mais PDFs
           </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title="Editar imóvel"
+        size="md"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setEditModalOpen(false)} disabled={saving}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveEdit} loading={saving}>
+              Salvar
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <TextField
+            label="Nome / identificação"
+            placeholder="Ex: Marine, Oceanside Tabela, Parque Sul Book..."
+            value={editForm.title}
+            onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <SelectField
+              label="Tipo"
+              placeholder="Tipo"
+              options={TYPE_OPTIONS}
+              value={editForm.type}
+              onChange={(v) => setEditForm((f) => ({ ...f, type: v }))}
+            />
+            <SelectField
+              label="Finalidade"
+              placeholder="Finalidade"
+              options={PURPOSE_OPTIONS}
+              value={editForm.purpose}
+              onChange={(v) => setEditForm((f) => ({ ...f, purpose: v }))}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <TextField
+              label="Preço (R$)"
+              placeholder="Ex: 650000"
+              value={editForm.price}
+              onChange={(e) => setEditForm((f) => ({ ...f, price: e.target.value }))}
+            />
+            <TextField
+              label="Área (m²)"
+              placeholder="Ex: 90"
+              value={editForm.area}
+              onChange={(e) => setEditForm((f) => ({ ...f, area: e.target.value }))}
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <TextField
+              label="Quartos"
+              placeholder="Ex: 3"
+              value={editForm.bedrooms}
+              onChange={(e) => setEditForm((f) => ({ ...f, bedrooms: e.target.value }))}
+            />
+            <TextField
+              label="Banheiros"
+              placeholder="Ex: 2"
+              value={editForm.bathrooms}
+              onChange={(e) => setEditForm((f) => ({ ...f, bathrooms: e.target.value }))}
+            />
+            <TextField
+              label="Vagas"
+              placeholder="Ex: 1"
+              value={editForm.parking_spots}
+              onChange={(e) => setEditForm((f) => ({ ...f, parking_spots: e.target.value }))}
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <TextField
+              label="Bairro"
+              placeholder="Ex: Moema"
+              value={editForm.neighborhood}
+              onChange={(e) => setEditForm((f) => ({ ...f, neighborhood: e.target.value }))}
+            />
+            <TextField
+              label="Cidade"
+              placeholder="Ex: São Paulo"
+              value={editForm.city}
+              onChange={(e) => setEditForm((f) => ({ ...f, city: e.target.value }))}
+            />
+            <TextField
+              label="Estado"
+              placeholder="Ex: SP"
+              value={editForm.state}
+              onChange={(e) => setEditForm((f) => ({ ...f, state: e.target.value }))}
+            />
+          </div>
+          <TextField
+            label="Endereço"
+            placeholder="Ex: Rua das Flores, 123"
+            value={editForm.address}
+            onChange={(e) => setEditForm((f) => ({ ...f, address: e.target.value }))}
+          />
+          <TextField
+            label="Comodidades (separadas por vírgula)"
+            placeholder="Ex: piscina, academia, varanda gourmet"
+            value={editForm.amenities}
+            onChange={(e) => setEditForm((f) => ({ ...f, amenities: e.target.value }))}
+          />
+          <TextareaField
+            label="Descrição"
+            placeholder="Descrição livre do imóvel..."
+            rows={3}
+            value={editForm.description}
+            onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
+          />
+          {editError && <div className="text-xs text-danger">{editError}</div>}
         </div>
       </Modal>
 

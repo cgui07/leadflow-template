@@ -43,7 +43,6 @@ export function extractPdfTags(reply: string): {
   propertyIds: string[];
   pdfRequests: PdfRequest[];
 } {
-  // Accept any non-bracket characters as the category (not just [A-Z_]+)
   const regex = /\[ENVIAR_PDF:([a-f0-9-]+)(?::([^\]]+))?\]/gi;
   const propertyIds: string[] = [];
   const pdfRequests: PdfRequest[] = [];
