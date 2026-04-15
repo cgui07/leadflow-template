@@ -273,9 +273,19 @@ export async function processScheduledAutoReply(
     }
 
     logger.info("AI raw reply", { reply });
+    logger.error("[DEBUG] AI reply + catalog", {
+      reply,
+      propertiesCount: propertiesCatalog.length,
+      properties: propertiesCatalog.map((p) => ({
+        id: p.id,
+        title: p.title,
+        pdfCategories: p.pdfCategories,
+      })),
+    });
 
     const { cleanReply, pdfRequests } = extractPdfTags(reply);
 
+    logger.error("[DEBUG] PDF extraction", { pdfRequests, cleanReply });
     logger.info("PDF extraction result", { pdfRequests, cleanReply });
 
     const messageCount = orderedMessages.length + 1;
