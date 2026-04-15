@@ -66,7 +66,7 @@ export function PropertyImportForm({ onPropertyCreated }: PropertyImportFormProp
   }
 
   async function handleExtract() {
-    if (!rawText.trim()) return;
+    if (!name.trim()) return;
     setLoading(true);
     setError(null);
 

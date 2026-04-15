@@ -19,18 +19,38 @@ export interface PdfRequest {
   category?: string;
 }
 
+const CATEGORY_NORMALIZE_MAP: Record<string, string> = {
+  BOOK: "BOOK",
+  FLUXO: "FLUXO",
+  RENTABILIDADE: "RENTABILIDADE",
+  PRODUTO_PRONTO: "PRODUTO_PRONTO",
+  TABELA: "TABELA",
+  "TABELA DE PREÇOS": "TABELA",
+  "TABELA DE PRECOS": "TABELA",
+  "FLUXO DE PAGAMENTO": "FLUXO",
+  "PRODUTO PRONTO": "PRODUTO_PRONTO",
+  "PRODUTO-PRONTO": "PRODUTO_PRONTO",
+};
+
+function normalizeCategory(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const upper = raw.toUpperCase().trim();
+  return CATEGORY_NORMALIZE_MAP[upper] ?? upper;
+}
+
 export function extractPdfTags(reply: string): {
   cleanReply: string;
   propertyIds: string[];
   pdfRequests: PdfRequest[];
 } {
-  const regex = /\[ENVIAR_PDF:([a-f0-9-]+)(?::([A-Z_]+))?\]/gi;
+  // Accept any non-bracket characters as the category (not just [A-Z_]+)
+  const regex = /\[ENVIAR_PDF:([a-f0-9-]+)(?::([^\]]+))?\]/gi;
   const propertyIds: string[] = [];
   const pdfRequests: PdfRequest[] = [];
   let match;
   while ((match = regex.exec(reply)) !== null) {
     const propertyId = match[1];
-    const category = match[2] || undefined;
+    const category = normalizeCategory(match[2]);
     if (!propertyIds.includes(propertyId)) propertyIds.push(propertyId);
     pdfRequests.push({ propertyId, category });
   }
@@ -173,7 +193,11 @@ export async function sendPropertyPdfs(
         .map((r) => r.category);
 
       const pdfsArray = Array.isArray(prop.pdfs)
-        ? (prop.pdfs as Array<{ url: string; filename?: string; category?: string }>)
+        ? (prop.pdfs as Array<{
+            url: string;
+            filename?: string;
+            category?: string;
+          }>)
         : [];
 
       const pdfList: Array<{ storagePath: string; filename: string }> = [];
