@@ -35,9 +35,9 @@ export function formatPropertyForPrompt(p: PropertyCatalogItem, index: number) {
   if (p.amenities.length > 0) parts.push(`   Comodidades: ${p.amenities.join(", ")}`);
   if (p.description) parts.push(`   Descrição: ${p.description}`);
   if (p.pdfCategories && p.pdfCategories.length > 0) {
-    parts.push(`   📎 PDFs disponíveis (use esses códigos exatos no tag): ${p.pdfCategories.join(", ")}`);
+    parts.push(`   PDFs disponíveis (use esses códigos exatos no tag [ENVIAR_PDF:ID:CATEGORIA]): ${p.pdfCategories.join(", ")}`);
   } else if (p.hasPdf) {
-    parts.push(`   📎 PDF disponível`);
+    parts.push(`   PDF disponível (sem categoria definida)`);
   }
   return parts.join("\n");
 }
@@ -112,10 +112,12 @@ QUANDO APRESENTAR IMÓVEL:
 - Destaque o diferencial: localização, preço, espaço, lazer
 - Convide para ação concreta: "quer agendar uma visita?", "posso te enviar o material completo?"
 - Se o imóvel não está no catálogo: "vou verificar e te retorno"
-- Se o imóvel tem PDFs (📎): use [ENVIAR_PDF:ID:CATEGORIA] para enviar o material certo no momento certo
+- Se o imóvel tem PDFs disponíveis: use [ENVIAR_PDF:ID:CATEGORIA] para enviar o material certo no momento certo
 
-ENVIO DE PDF — REGRA OBRIGATÓRIA:
-- Use [ENVIAR_PDF:ID:CATEGORIA] para enviar o PDF específico da categoria
+ENVIO DE PDF — REGRA ABSOLUTA:
+- O tag [ENVIAR_PDF:ID:CATEGORIA] é o único mecanismo de envio de PDF — sem o tag, NENHUM arquivo é enviado
+- NUNCA use emojis (📎, 📄, 📋) como substituto do tag — emoji não envia nada
+- NUNCA diga "aqui está", "vou te enviar", "segue o material" SEM incluir o tag na mesma mensagem
 - Categorias disponíveis: BOOK, FLUXO, RENTABILIDADE, PRODUTO_PRONTO, TABELA
 - BOOK: enviar quando o cliente quiser conhecer o imóvel, ver fotos, saber mais — é a apresentação geral
 - FLUXO: enviar quando perguntar sobre preço, valor, entrada, parcelas ou condições de pagamento
@@ -124,12 +126,11 @@ ENVIO DE PDF — REGRA OBRIGATÓRIA:
 - TABELA: enviar SOMENTE quando o cliente pedir especificamente o preço de unidades ou solicitar a tabela ("quanto custa", "qual o preço", "me manda a tabela", "tem tabela?") — não enviar proativamente
 - Sempre que mencionar ou recomendar um imóvel, envie o BOOK: [ENVIAR_PDF:ID:BOOK]
 - Se o cliente pedir material, detalhes ou fichas, envie o BOOK: [ENVIAR_PDF:ID:BOOK]
-- Nunca diga "vou enviar o material" sem incluir a tag — a tag É o envio
-- Só envie categorias que existem nos PDFs disponíveis do imóvel (listados com 📎)
-- Pode enviar múltiplas categorias na mesma resposta se fizer sentido
-- REGRA CRÍTICA: envie APENAS o PDF do imóvel que o cliente pediu. Se o cliente pedir "a tabela do Marine", envie SOMENTE [ENVIAR_PDF:ID_DO_MARINE:TABELA]. NUNCA envie PDFs de outros imóveis que não foram pedidos
-- Exemplo: "Vou te enviar o material completo do empreendimento. [ENVIAR_PDF:abc123:BOOK]"
-- Exemplo com preço: "Tenho as condições detalhadas aqui, já te mando. [ENVIAR_PDF:abc123:FLUXO]"
+- Só envie categorias que existem nos PDFs disponíveis do imóvel (listados no catálogo)
+- Envie APENAS o PDF do imóvel que o cliente pediu — NUNCA envie PDFs de outros imóveis
+- Exemplo correto — tabela: "Aqui está a tabela de preços. [ENVIAR_PDF:4b8e6b3c-1ac0-4280-b354-6bb1c19dc5fe:TABELA]"
+- Exemplo correto — book: "Vou te enviar o material completo. [ENVIAR_PDF:abc123:BOOK]"
+- Exemplo ERRADO: "Aqui está a tabela do Ilha Mar. 📎" ← sem o tag, NADA é enviado
 
 AGENDAMENTO DE VISITAS — REGRA IMPORTANTE:
 - Quando o cliente propor ou aceitar uma data/hora de visita, NÃO confirme o agendamento você mesmo
