@@ -149,7 +149,8 @@ export async function POST(req: NextRequest) {
 
       if (
         settings.autoReplyEnabled &&
-        (conv.status === "bot" || wasActiveConversation)
+        (conv.status === "bot" || wasActiveConversation) &&
+        event.mediaType !== "sticker"
       ) {
         if (wasActiveConversation) {
           await prisma.conversation.update({
