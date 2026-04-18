@@ -136,6 +136,7 @@ model Conversation {
   createdAt                DateTime  @default(now()) @map("created_at")
   updatedAt                DateTime  @updatedAt @map("updated_at")
   awaitingCampaignResponse Boolean   @default(false) @map("awaiting_campaign_response")
+  lastRepliedMessageId     String?   @map("last_replied_message_id")
   lead                     Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
   messages                 Message[]
 

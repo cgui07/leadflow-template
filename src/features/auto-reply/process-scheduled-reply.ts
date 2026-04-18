@@ -83,7 +83,17 @@ export async function processScheduledAutoReply(
     return;
   }
 
-  // ── Campaign reply short-circuit ─────────────────────────────────────────
+  const claimed = await prisma.conversation.updateMany({
+    where: {
+      id: input.conversationId,
+      NOT: { lastRepliedMessageId: input.triggerMessageId },
+    },
+    data: { lastRepliedMessageId: input.triggerMessageId },
+  });
+  if (claimed.count === 0) {
+    return;
+  }
+
   if (conversation.awaitingCampaignResponse) {
     const messageText =
       typeof latestInbound.content === "string" ? latestInbound.content : "";
