@@ -17,6 +17,15 @@ const CANAL_PRO_SENDERS = [
   "leads@vivareal.com.br",
 ];
 
+const SENDER_TO_PORTAL: Record<string, string> = {
+  "noreply@comunica.zapimoveis.com.br": "ZAP Imóveis",
+  "leads@zapimoveis.com.br": "ZAP Imóveis",
+  "noreply@comunica.vivareal.com.br": "Viva Real",
+  "leads@vivareal.com.br": "Viva Real",
+  "noreply@olx.com.br": "OLX",
+  "noreply@canalpro.grupozap.com": "Canal Pro",
+};
+
 interface GmailMessage {
   id: string;
   threadId: string;
@@ -36,6 +45,7 @@ interface ParsedLead {
   name: string;
   phone: string;
   email: string | null;
+  portal: string | null;
 }
 
 async function refreshGmailToken(userId: string, refreshToken: string): Promise<string | null> {
@@ -213,6 +223,15 @@ function extractEmailFromText(text: string): string | null {
   return match?.[0] ?? null;
 }
 
+function getSenderFromHeaders(msg: GmailMessageDetail): string | null {
+  const fromHeader = msg.payload.headers.find(
+    (h) => h.name.toLowerCase() === "from",
+  );
+  if (!fromHeader?.value) return null;
+  const match = fromHeader.value.match(/<([^>]+)>/);
+  return match?.[1]?.toLowerCase() ?? fromHeader.value.toLowerCase().trim();
+}
+
 function parseLeadFromEmail(msg: GmailMessageDetail): ParsedLead | null {
   const body = getEmailBody(msg);
   const phone = extractPhoneFromText(body);
@@ -221,8 +240,10 @@ function parseLeadFromEmail(msg: GmailMessageDetail): ParsedLead | null {
 
   const name = extractNameFromText(body);
   const email = extractEmailFromText(body);
+  const sender = getSenderFromHeaders(msg);
+  const portal = sender ? (SENDER_TO_PORTAL[sender] ?? null) : null;
 
-  return { name, phone, email };
+  return { name, phone, email, portal };
 }
 
 export async function processGmailLeads(userId: string): Promise<number> {
@@ -331,7 +352,8 @@ export async function processGmailLeads(userId: string): Promise<number> {
             campaignOutreachMessage: settings.campaignOutreachMessage,
             campaignOutreachImageUrl: settings.campaignOutreachImageUrl,
             hasCampaignSecondMessage: !!settings.campaignSecondMessage?.trim(),
-            whatsappPhoneId: settings.whatsappPhoneId,
+            whatsappPhoneId: settings.whatsappPhoneId!,
+            leadOrigin: lead.portal ?? "portal imobiliário",
           });
 
           if (settings.followUpEnabled) {

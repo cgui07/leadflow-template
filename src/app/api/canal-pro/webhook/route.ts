@@ -151,6 +151,8 @@ async function processWebhook(token: string, body: unknown) {
       campaignOutreachImageUrl: settings.campaignOutreachImageUrl,
       hasCampaignSecondMessage: !!settings.campaignSecondMessage?.trim(),
       whatsappPhoneId: settings.whatsappPhoneId!,
+      leadOrigin: leadData.leadOrigin,
+      leadMessage: leadData.message,
     });
 
     if (settings.followUpEnabled) {

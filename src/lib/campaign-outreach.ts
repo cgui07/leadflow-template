@@ -5,7 +5,7 @@
 import { prisma } from "./db";
 import { logger } from "./logger";
 import type { AIConfig } from "./ai";
-import { resolveOutreachMessage } from "./ai";
+import { resolveOutreachMessage, generateCanalProOutreachMessage } from "./ai";
 import { getWhatsAppConfig, sendAndSaveMessage, sendWhatsAppMedia } from "./whatsapp";
 
 interface CampaignOutreachOptions {
@@ -19,6 +19,8 @@ interface CampaignOutreachOptions {
   campaignOutreachImageUrl: string | null | undefined;
   hasCampaignSecondMessage: boolean;
   whatsappPhoneId: string;
+  leadOrigin?: string;
+  leadMessage?: string | null;
 }
 
 export async function sendCampaignOutreach(opts: CampaignOutreachOptions): Promise<boolean> {
@@ -32,14 +34,18 @@ export async function sendCampaignOutreach(opts: CampaignOutreachOptions): Promi
     campaignOutreachImageUrl,
     hasCampaignSecondMessage,
     whatsappPhoneId,
+    leadOrigin,
+    leadMessage,
   } = opts;
 
-  const message = await resolveOutreachMessage(
-    aiConfig,
-    agentName,
-    contactName,
-    campaignOutreachMessage,
-  );
+  let message: string | null;
+  if (campaignOutreachMessage?.trim()) {
+    message = campaignOutreachMessage.replace(/\[NOME\]/gi, contactName || "");
+  } else if (leadOrigin) {
+    message = await generateCanalProOutreachMessage(aiConfig, agentName, contactName, leadOrigin, leadMessage ?? null);
+  } else {
+    message = await resolveOutreachMessage(aiConfig, agentName, contactName, campaignOutreachMessage);
+  }
 
   if (!message) {
     logger.warn("[campaign-outreach] Empty outreach message", { conversationId });
