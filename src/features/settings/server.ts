@@ -37,6 +37,7 @@ const USER_SETTINGS_SELECT = {
   elevenlabsVoiceId: true,
   voiceReplyEnabled: true,
   voiceReplyMonthlyLimit: true,
+  audioTranscriptionEnabled: true,
   userId: true,
 } as const;
 
@@ -75,6 +76,7 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   elevenlabsVoiceId: null,
   voiceReplyEnabled: false,
   voiceReplyMonthlyLimit: 50,
+  audioTranscriptionEnabled: false,
 };
 
 type UserSettingsRecord = {
@@ -100,6 +102,7 @@ type UserSettingsRecord = {
   elevenlabsVoiceId: string | null;
   voiceReplyEnabled: boolean;
   voiceReplyMonthlyLimit: number;
+  audioTranscriptionEnabled: boolean;
   userId: string;
 };
 
@@ -170,6 +173,7 @@ async function mapUserSettings(
     elevenlabsVoiceId: settings.elevenlabsVoiceId,
     voiceReplyEnabled: settings.voiceReplyEnabled,
     voiceReplyMonthlyLimit: settings.voiceReplyMonthlyLimit,
+    audioTranscriptionEnabled: settings.audioTranscriptionEnabled,
   };
 }
 
@@ -281,6 +285,10 @@ function pickAllowedSettings(
 
   if (typeof input.voiceReplyEnabled === "boolean") {
     next.voiceReplyEnabled = input.voiceReplyEnabled;
+  }
+
+  if (typeof input.audioTranscriptionEnabled === "boolean") {
+    next.audioTranscriptionEnabled = input.audioTranscriptionEnabled;
   }
 
   if (

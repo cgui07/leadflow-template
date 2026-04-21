@@ -58,6 +58,9 @@ export async function resolveProviderByInstance(instanceId: string): Promise<{
     auto_reply_delay_seconds: number;
     followUpEnabled: boolean;
     followUpDelayHours: number;
+    audioTranscriptionEnabled: boolean;
+    aiApiKey: string | null;
+    openaiTranscriptionKey: string | null;
   };
 } | null> {
   const settings = await prisma.userSettings.findFirst({
@@ -78,6 +81,9 @@ export async function resolveProviderByInstance(instanceId: string): Promise<{
       auto_reply_delay_seconds: settings.auto_reply_delay_seconds,
       followUpEnabled: settings.followUpEnabled,
       followUpDelayHours: settings.followUpDelayHours,
+      audioTranscriptionEnabled: settings.audioTranscriptionEnabled,
+      aiApiKey: settings.aiApiKey,
+      openaiTranscriptionKey: settings.openaiTranscriptionKey,
     },
   };
 }

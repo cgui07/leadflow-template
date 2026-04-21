@@ -6,6 +6,7 @@ import { scheduleFollowUp } from "@/lib/followup";
 import { processScheduledAutoReply } from "@/lib/auto-reply";
 import { after, NextRequest, NextResponse } from "next/server";
 import { resolveProviderByInstance } from "@/providers/whatsapp/factory";
+import { notifyAudioTranscription } from "@/lib/audio-transcription-notifier";
 import { processIncomingMessage, pauseConversationOnOwnerMessage } from "@/lib/whatsapp";
 
 export const maxDuration = 60;
@@ -148,6 +149,24 @@ export async function POST(req: NextRequest) {
 
       const conv = result.conversation;
       const wasActiveConversation = conv.status === "active";
+
+      if (
+        event.mediaType === "audio" &&
+        settings.audioTranscriptionEnabled &&
+        settings.aiApiKey &&
+        event.messageId
+      ) {
+        const mimeType = (event.mediaMetadata as Record<string, unknown> | undefined)?.mimetype as string | undefined ?? "audio/ogg";
+        after(async () => {
+          await notifyAudioTranscription({
+            instanceName,
+            messageId: event.messageId,
+            mimeType,
+            leadName: result.lead.name,
+            openaiApiKey: settings.openaiTranscriptionKey ?? settings.aiApiKey!,
+          });
+        });
+      }
 
       const autoReplyGatePasses =
         settings.autoReplyEnabled &&

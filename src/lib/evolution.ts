@@ -144,6 +144,16 @@ export async function getConnectionStatus(instanceName: string): Promise<WhatsAp
   }
 }
 
+export async function getInstanceOwnerJid(instanceName: string): Promise<string | null> {
+  try {
+    const data = await evolutionFetch<Array<{ name: string; ownerJid?: string }>>(`/instance/fetchInstances?instanceName=${instanceName}`);
+    const instance = Array.isArray(data) ? data.find((i) => i.name === instanceName) : null;
+    return instance?.ownerJid ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function logoutInstance(instanceName: string) {
   return evolutionFetch(`/instance/logout/${instanceName}`, { method: "DELETE" });
 }

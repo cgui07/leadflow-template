@@ -94,6 +94,18 @@ export function AutomationSettingsSection({
               valueSeconds={form.autoReplyDelaySeconds}
               onChange={(seconds) => update("autoReplyDelaySeconds", seconds)}
             />
+
+            <div className="flex items-start justify-between gap-4 rounded-lg border border-neutral-border bg-neutral-surface px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Transcrição de áudios (privada)</p>
+                <p className="text-xs text-neutral mt-0.5">Quando ativado, você recebe no seu próprio WhatsApp a transcrição de cada áudio enviado pelo lead.</p>
+              </div>
+              <CheckboxField
+                variant="switch"
+                checked={form.audioTranscriptionEnabled}
+                onChange={(checked) => update("audioTranscriptionEnabled", checked)}
+              />
+            </div>
           </div>
         </SectionContainer>
 

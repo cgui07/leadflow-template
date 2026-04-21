@@ -65,6 +65,7 @@ model UserSettings {
   canalProWebhookToken       String?   @unique @map("canal_pro_webhook_token") @db.VarChar
   canalProAutoOutreach       Boolean   @default(true) @map("canal_pro_auto_outreach")
   canalProAccountType        String    @default("own") @map("canal_pro_account_type") @db.VarChar(20)
+  audioTranscriptionEnabled  Boolean   @default(false) @map("audio_transcription_enabled")
   gmailAccessToken           String?   @map("gmail_access_token")
   gmailRefreshToken          String?   @map("gmail_refresh_token")
   gmailTokenExpiresAt        DateTime? @map("gmail_token_expires_at") @db.Timestamptz(6)
