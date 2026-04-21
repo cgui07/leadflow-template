@@ -86,7 +86,10 @@ export async function processScheduledAutoReply(
   const claimed = await prisma.conversation.updateMany({
     where: {
       id: input.conversationId,
-      NOT: { lastRepliedMessageId: input.triggerMessageId },
+      OR: [
+        { lastRepliedMessageId: null },
+        { lastRepliedMessageId: { not: input.triggerMessageId } },
+      ],
     },
     data: { lastRepliedMessageId: input.triggerMessageId },
   });
