@@ -16,12 +16,14 @@ interface UseSettingsFormResult {
   saveError: string | null;
   saved: boolean;
   saving: boolean;
+  isDirty: boolean;
   selectedProvider: AIProvider;
   update: <K extends keyof UserSettings>(
     key: K,
     value: UserSettings[K],
   ) => void;
   save: () => Promise<void>;
+  discard: () => void;
 }
 
 function isUserSettings(value: unknown): value is UserSettings {
@@ -45,6 +47,7 @@ export function useSettingsForm(
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const selectedProvider = normalizeSettingsProvider(form.aiProvider);
+  const isDirty = JSON.stringify(form) !== JSON.stringify(serverSnapshot);
 
   useEffect(() => {
     setForm(initialSettings);
@@ -76,6 +79,12 @@ export function useSettingsForm(
     value: UserSettings[K],
   ) {
     setForm((current) => ({ ...current, [key]: value }));
+    setSaved(false);
+    setSaveError(null);
+  }
+
+  function discard() {
+    setForm(serverSnapshot);
     setSaved(false);
     setSaveError(null);
   }
@@ -145,8 +154,10 @@ export function useSettingsForm(
     saveError,
     saved,
     saving,
+    isDirty,
     selectedProvider,
     update,
     save,
+    discard,
   };
 }

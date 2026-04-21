@@ -1,12 +1,12 @@
 "use client";
 import { Tabs } from "@/components/ui/Tabs";
-import { Button } from "@/components/ui/Button";
 import { ConnectorsSection } from "./ConnectorsSection";
 import { useEffect, useMemo, useTransition } from "react";
 import { useSettingsForm } from "../hooks/useSettingsForm";
+import { Bot, Link2, Loader2, Palette } from "lucide-react";
 import { SelectField } from "@/components/forms/SelectField";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { Bot, Link2, Loader2, Palette, Save } from "lucide-react";
+import { UnsavedChangesBar } from "@/components/ui/UnsavedChangesBar";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { AutomationSettingsSection } from "./AutomationSettingsSection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -45,7 +45,7 @@ export function SettingsPageClient({
   const requestedSection = searchParams.get("section");
   const activeSection = resolveSection(requestedSection, canManageTenant);
   const [transitioning, startTransition] = useTransition();
-  const { form, modelOptions, save, saveError, saved, saving, update } =
+  const { form, modelOptions, save, saveError, saving, isDirty, discard, update } =
     useSettingsForm(initialSettings);
 
   const tabs = useMemo(() => {
@@ -95,23 +95,10 @@ export function SettingsPageClient({
     });
   }
 
-  const showSave = activeSection === "automation";
-
   return (
     <PageContainer
       title="Configurações"
       subtitle={subtitle}
-      actions={
-        showSave ? (
-          <Button
-            icon={<Save className="h-4 w-4" />}
-            onClick={save}
-            loading={saving}
-          >
-            {saved ? "Salvo!" : "Salvar"}
-          </Button>
-        ) : undefined
-      }
     >
       <div className="space-y-6">
         <SectionContainer
@@ -154,6 +141,13 @@ export function SettingsPageClient({
           <TenantCustomizationSection initialTenant={initialTenant} />
         ) : null}
       </div>
+
+      <UnsavedChangesBar
+        visible={activeSection === "automation" && isDirty}
+        saving={saving}
+        onSave={save}
+        onDiscard={discard}
+      />
     </PageContainer>
   );
 }
