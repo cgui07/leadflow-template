@@ -8,6 +8,8 @@ import { after, NextRequest, NextResponse } from "next/server";
 import { resolveProviderByInstance } from "@/providers/whatsapp/factory";
 import { processIncomingMessage, pauseConversationOnOwnerMessage } from "@/lib/whatsapp";
 
+export const maxDuration = 60;
+
 const MAX_WEBHOOK_BODY_SIZE = 10 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
