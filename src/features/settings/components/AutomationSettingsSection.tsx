@@ -138,6 +138,16 @@ export function AutomationSettingsSection({
 
         <FollowUpSettingsSection form={form} update={update} />
 
+        <SectionContainer title="Acessibilidade">
+          <CheckboxField
+            variant="switch"
+            label="Transcrição de áudio no WhatsApp"
+            description="Quando ativado, você receberá uma mensagem no seu próprio WhatsApp com a transcrição de cada áudio enviado por um lead. Seu número de telefone precisa estar cadastrado no perfil."
+            checked={form.audioTranscriptionNotifyEnabled}
+            onChange={(checked) => update("audioTranscriptionNotifyEnabled", checked)}
+          />
+        </SectionContainer>
+
         {/* Voice reply section hidden temporarily */}
       </div>
     </>

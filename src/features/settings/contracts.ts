@@ -24,6 +24,7 @@ export interface UserSettings {
   elevenlabsVoiceId: string | null;
   voiceReplyEnabled: boolean;
   voiceReplyMonthlyLimit: number;
+  audioTranscriptionNotifyEnabled: boolean;
 }
 
 export type UserSettingsUpdateInput = Partial<UserSettings>;
