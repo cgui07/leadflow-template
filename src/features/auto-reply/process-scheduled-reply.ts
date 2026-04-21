@@ -36,6 +36,12 @@ export interface ProcessScheduledAutoReplyInput {
 export async function processScheduledAutoReply(
   input: ProcessScheduledAutoReplyInput,
 ) {
+  logger.info("[auto-reply] start", {
+    conversationId: input.conversationId,
+    triggerMessageId: input.triggerMessageId,
+    delaySeconds: input.delaySeconds,
+  });
+
   const delaySeconds = normalizeAutoReplyDelaySeconds(input.delaySeconds);
 
   if (delaySeconds > 0) {
@@ -62,16 +68,26 @@ export async function processScheduledAutoReply(
   });
 
   if (!conversation) {
+    logger.warn("[auto-reply] abort: conversation not found", {
+      conversationId: input.conversationId,
+    });
     return;
   }
 
   const settings = conversation.lead.user.settings;
 
   if (!settings?.whatsappPhoneId || !settings.autoReplyEnabled) {
+    logger.warn("[auto-reply] abort: settings missing phoneId or disabled", {
+      hasPhoneId: Boolean(settings?.whatsappPhoneId),
+      autoReplyEnabled: settings?.autoReplyEnabled,
+    });
     return;
   }
 
   if (conversation.status !== "bot" && conversation.status !== "active") {
+    logger.warn("[auto-reply] abort: conversation status not bot/active", {
+      status: conversation.status,
+    });
     return;
   }
 
@@ -80,6 +96,10 @@ export async function processScheduledAutoReply(
   );
 
   if (!latestInbound || latestInbound.id !== input.triggerMessageId) {
+    logger.warn("[auto-reply] abort: trigger is not latest inbound", {
+      latestInboundId: latestInbound?.id,
+      triggerMessageId: input.triggerMessageId,
+    });
     return;
   }
 
@@ -94,8 +114,17 @@ export async function processScheduledAutoReply(
     data: { lastRepliedMessageId: input.triggerMessageId },
   });
   if (claimed.count === 0) {
+    logger.warn("[auto-reply] abort: claim failed (already replied)", {
+      triggerMessageId: input.triggerMessageId,
+    });
     return;
   }
+
+  logger.info("[auto-reply] claim ok, proceeding", {
+    hasAiKey: Boolean(settings.aiApiKey),
+    aiProvider: settings.aiProvider,
+    aiModel: settings.aiModel,
+  });
 
   if (conversation.awaitingCampaignResponse) {
     const messageText =
@@ -273,6 +302,12 @@ export async function processScheduledAutoReply(
       willUseVoice ? "recording" : "composing",
     );
 
+    logger.info("[auto-reply] calling generateAutoReply", {
+      messageCount: enrichedMessages.length,
+      propertiesCount: propertiesCatalog.length,
+      willUseVoice,
+    });
+
     const reply = await generateAutoReply(
       aiConfig,
       conversation.lead.user.name,
@@ -282,8 +317,11 @@ export async function processScheduledAutoReply(
     );
 
     if (!reply) {
+      logger.warn("[auto-reply] abort: generateAutoReply returned null/empty");
       return;
     }
+
+    logger.info("[auto-reply] AI reply generated", { length: reply.length });
 
     logger.info("AI raw reply", { reply });
     logger.error("[DEBUG] AI reply + catalog", {
@@ -322,12 +360,18 @@ export async function processScheduledAutoReply(
     }
 
     if (!sentAsVoice) {
+      logger.info("[auto-reply] sending text reply", {
+        phoneId: settings.whatsappPhoneId,
+        replyJid,
+        length: cleanReply.length,
+      });
       await sendTextReply(
         settings.whatsappPhoneId!,
         conversation.id,
         replyJid,
         cleanReply,
       );
+      logger.info("[auto-reply] text reply sent OK");
     }
 
     await sendPropertyPdfs(
@@ -372,4 +416,6 @@ export async function processScheduledAutoReply(
 
     return;
   }
+
+  logger.warn("[auto-reply] abort: no aiApiKey configured");
 }
