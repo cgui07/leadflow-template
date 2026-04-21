@@ -5,7 +5,6 @@ import type { AIConfig, MessageContent } from "@/lib/ai";
 import { generateAutoReply, qualifyLead } from "@/lib/ai";
 import { enrichMessageWithMedia } from "./enrich-messages";
 import { handleCampaignReply } from "@/lib/campaign-reply";
-import { sendWhatsAppMessage } from "@/lib/whatsapp-client";
 import { normalizeAutoReplyDelaySeconds } from "@/lib/auto-reply-delay";
 import { detectIntentSignals, getVoiceUsageThisMonth } from "@/lib/voice-reply";
 import {
@@ -164,29 +163,6 @@ export async function processScheduledAutoReply(
           settings.whatsappPhoneId!,
           aiConfig,
         );
-
-        if (
-          message.type === "audio" &&
-          typeof enrichedContent === "string" &&
-          enrichedContent.startsWith("[Transcrição do áudio]: ") &&
-          (settings as Record<string, unknown>).audioTranscriptionNotifyEnabled
-        ) {
-          const transcriptionText = enrichedContent.slice("[Transcrição do áudio]: ".length);
-          const userRecord = await prisma.user.findUnique({
-            where: { id: conversation.lead.userId },
-            select: { phone: true },
-          });
-          if (userRecord?.phone) {
-            const selfJid = `${userRecord.phone.replace(/\D/g, "")}@s.whatsapp.net`;
-            const whatsappCfg = getWhatsAppConfig(settings.whatsappPhoneId!);
-            await sendWhatsAppMessage(
-              whatsappCfg,
-              selfJid,
-              `Mensagem enviada de ${conversation.lead.name} por áudio: ${transcriptionText}`,
-            ).catch(() => null);
-          }
-        }
-
         enrichedMessages.push({
           direction: message.direction,
           content: enrichedContent,
