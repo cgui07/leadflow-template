@@ -39,3 +39,4 @@ evolution-docker-compose.yml
 db-migrations.local.txt
 melhorias-pendentes.txt
 
+.webhook-backup.txt
