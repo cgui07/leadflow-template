@@ -5,8 +5,10 @@ import type { AIConfig, MessageContent } from "@/lib/ai";
 import { generateAutoReply, qualifyLead } from "@/lib/ai";
 import { enrichMessageWithMedia } from "./enrich-messages";
 import { handleCampaignReply } from "@/lib/campaign-reply";
+import { findMatchingCustomAudio } from "@/lib/custom-audio-matcher";
 import { normalizeAutoReplyDelaySeconds } from "@/lib/auto-reply-delay";
 import { detectIntentSignals, getVoiceUsageThisMonth } from "@/lib/voice-reply";
+import { sendAndSaveAudioPTT } from "@/features/conversations/incoming-message";
 import {
   getWhatsAppConfig,
   resolveSendTarget,
@@ -232,6 +234,46 @@ export async function processScheduledAutoReply(
           content: message.content,
           sender: message.sender,
         });
+      }
+    }
+
+    // ── Custom audio check — uses enriched content so audio transcriptions are included
+    const customAudios = await prisma.customAudio.findMany({
+      where: { userId: conversation.lead.userId },
+      select: { id: true, context: true, audioBase64: true, mimeType: true },
+    });
+
+    logger.info("[custom-audio] check", { count: customAudios.length, userId: conversation.lead.userId });
+
+    if (customAudios.length > 0) {
+      const enrichedTrigger = enrichedMessages.find(
+        (m) => m.direction === "inbound",
+      );
+      const triggerContent = enrichedTrigger?.content ?? latestInbound.content;
+
+      logger.info("[custom-audio] evaluating", { triggerContent: typeof triggerContent === "string" ? triggerContent.slice(0, 100) : "[multipart]" });
+
+      const matched = await findMatchingCustomAudio(
+        aiConfig,
+        triggerContent,
+        enrichedMessages.map((m) => ({ direction: m.direction, content: m.content })),
+        customAudios,
+      );
+
+      if (matched) {
+        logger.info("[auto-reply] sending custom audio", { audioId: matched.id });
+        const whatsappCfg = getWhatsAppConfig(settings.whatsappPhoneId!);
+        await sendPresenceUpdate(whatsappCfg, replyJid, "recording");
+        await sendAndSaveAudioPTT(
+          whatsappCfg,
+          conversation.id,
+          replyJid,
+          "",
+          matched.audioBase64,
+          "bot",
+        );
+        replySent = true;
+        return;
       }
     }
 

@@ -4,6 +4,7 @@ import { Bot } from "lucide-react";
 import type { UserSettings } from "../contracts";
 import { AI_PROVIDER_OPTIONS } from "@/lib/ai-models";
 import { CampaignImageUpload } from "./CampaignImageUpload";
+import { CustomAudiosSection } from "./CustomAudiosSection";
 import { FollowUpSettingsSection } from "./FollowUpSettingsSection";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { WhatsAppConnection } from "@/components/domain/WhatsAppConnection";
@@ -137,6 +138,8 @@ export function AutomationSettingsSection({
         </SectionContainer>
 
         <FollowUpSettingsSection form={form} update={update} />
+
+        <CustomAudiosSection />
 
         {/* Voice reply section hidden temporarily */}
       </div>

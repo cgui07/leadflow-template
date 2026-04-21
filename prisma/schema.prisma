@@ -33,6 +33,7 @@ model User {
   settings               UserSettings?
   tenant                 Tenant?                @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   voiceReplyUsage        VoiceReplyUsage[]
+  customAudios           CustomAudio[]
 
   @@index([tenantId], map: "idx_users_tenant_id")
   @@map("users")
@@ -312,6 +313,20 @@ model appointments {
   @@index([lead_id], map: "idx_appointments_lead_id")
   @@index([user_id, scheduled_at], map: "idx_appointments_user_scheduled")
   @@index([user_id, status], map: "idx_appointments_user_status")
+}
+
+model CustomAudio {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  context     String
+  audioBase64 String   @map("audio_base64")
+  mimeType    String   @default("audio/webm") @map("mime_type")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([userId], map: "idx_custom_audios_user_id")
+  @@map("custom_audios")
 }
 
 model calendar_connections {
