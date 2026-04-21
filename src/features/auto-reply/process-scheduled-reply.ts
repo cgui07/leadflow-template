@@ -103,6 +103,8 @@ export async function processScheduledAutoReply(
     return;
   }
 
+  const previousLastRepliedMessageId = conversation.lastRepliedMessageId;
+
   const claimed = await prisma.conversation.updateMany({
     where: {
       id: input.conversationId,
@@ -126,19 +128,42 @@ export async function processScheduledAutoReply(
     aiModel: settings.aiModel,
   });
 
-  if (conversation.awaitingCampaignResponse) {
-    const messageText =
-      typeof latestInbound.content === "string" ? latestInbound.content : "";
-    const handled = await handleCampaignReply(
-      conversation.id,
-      messageText,
-      conversation.lead.user.id,
-      conversation.lead.id,
-      conversation.whatsappChatId ??
-        `${conversation.lead.phone}@s.whatsapp.net`,
-    );
-    if (handled) return;
+  async function releaseClaim(reason: string) {
+    const released = await prisma.conversation.updateMany({
+      where: {
+        id: input.conversationId,
+        lastRepliedMessageId: input.triggerMessageId,
+      },
+      data: {
+        lastRepliedMessageId: previousLastRepliedMessageId ?? null,
+      },
+    });
+
+    logger.warn("[auto-reply] claim released", {
+      conversationId: input.conversationId,
+      triggerMessageId: input.triggerMessageId,
+      reason,
+      released: released.count > 0,
+      previousLastRepliedMessageId,
+    });
   }
+
+  let replySent = false;
+
+  try {
+    if (conversation.awaitingCampaignResponse) {
+      const messageText =
+        typeof latestInbound.content === "string" ? latestInbound.content : "";
+      const handled = await handleCampaignReply(
+        conversation.id,
+        messageText,
+        conversation.lead.user.id,
+        conversation.lead.id,
+        conversation.whatsappChatId ??
+          `${conversation.lead.phone}@s.whatsapp.net`,
+      );
+      if (handled) return;
+    }
 
   // ── Appointment confirmation short-circuit ────────────────────────────────
   const replyJidEarly = resolveSendTarget(
@@ -170,6 +195,7 @@ export async function processScheduledAutoReply(
     logger.warn("Skipping reply because the target JID could not be resolved", {
       remoteJid: input.remoteJid,
     });
+    await releaseClaim("reply target could not be resolved");
     return;
   }
 
@@ -318,6 +344,7 @@ export async function processScheduledAutoReply(
 
     if (!reply) {
       logger.warn("[auto-reply] abort: generateAutoReply returned null/empty");
+      await releaseClaim("generateAutoReply returned null/empty");
       return;
     }
 
@@ -373,6 +400,7 @@ export async function processScheduledAutoReply(
       );
       logger.info("[auto-reply] text reply sent OK");
     }
+    replySent = true;
 
     await sendPropertyPdfs(
       pdfRequests,
@@ -417,5 +445,14 @@ export async function processScheduledAutoReply(
     return;
   }
 
-  logger.warn("[auto-reply] abort: no aiApiKey configured");
+    logger.warn("[auto-reply] abort: no aiApiKey configured");
+    await releaseClaim("no aiApiKey configured");
+  } catch (err) {
+    if (!replySent) {
+      await releaseClaim(
+        err instanceof Error ? err.message : "auto-reply failed before send",
+      );
+    }
+    throw err;
+  }
 }

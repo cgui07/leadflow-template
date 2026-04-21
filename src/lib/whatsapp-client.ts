@@ -75,6 +75,39 @@ function parseJsonResponse(raw: string) {
   }
 }
 
+function getProviderErrorMessage(data: unknown, fallback: string) {
+  if (!data || typeof data !== "object") {
+    return fallback;
+  }
+
+  if ("message" in data && typeof data.message === "string") {
+    return data.message;
+  }
+
+  if (
+    "response" in data &&
+    data.response &&
+    typeof data.response === "object" &&
+    "message" in data.response
+  ) {
+    const nestedMessage = data.response.message;
+
+    if (typeof nestedMessage === "string") {
+      return nestedMessage;
+    }
+
+    if (Array.isArray(nestedMessage) && nestedMessage.length > 0) {
+      return JSON.stringify(nestedMessage).slice(0, 300);
+    }
+  }
+
+  if ("error" in data && typeof data.error === "string") {
+    return data.error;
+  }
+
+  return fallback;
+}
+
 export async function sendPresenceUpdate(
   config: WhatsAppConfig,
   to: string,
@@ -134,10 +167,10 @@ export async function sendWhatsAppMessage(config: WhatsAppConfig, to: string, te
   const data = parseJsonResponse(raw);
 
   if (!res.ok) {
-    const message =
-      typeof data === "object" && data && "message" in data && typeof data.message === "string"
-        ? data.message
-        : "Failed to send WhatsApp message";
+    const message = getProviderErrorMessage(
+      data,
+      "Failed to send WhatsApp message",
+    );
     throw new Error(message);
   }
 
@@ -188,10 +221,10 @@ export async function sendWhatsAppMedia(
   const data = parseJsonResponse(raw);
 
   if (!res.ok) {
-    const message =
-      typeof data === "object" && data && "message" in data && typeof data.message === "string"
-        ? data.message
-        : "Failed to send WhatsApp media";
+    const message = getProviderErrorMessage(
+      data,
+      "Failed to send WhatsApp media",
+    );
     throw new Error(message);
   }
 
@@ -232,10 +265,10 @@ export async function sendWhatsAppAudioPTT(
   const data = parseJsonResponse(raw);
 
   if (!res.ok) {
-    const message =
-      typeof data === "object" && data && "message" in data && typeof data.message === "string"
-        ? data.message
-        : "Failed to send WhatsApp audio PTT";
+    const message = getProviderErrorMessage(
+      data,
+      "Failed to send WhatsApp audio PTT",
+    );
     throw new Error(message);
   }
 
