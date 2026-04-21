@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { generateConversationSummary } from "@/lib/ai";
+import { processScheduledAutoReply } from "@/lib/auto-reply";
 import { getWhatsAppConfig, resolveSendTarget } from "@/lib/whatsapp";
 import type {
   ConversationItem,
@@ -166,10 +167,52 @@ export async function updateConversationStatus(
     throw new Error("CONVERSATION_NOT_FOUND");
   }
 
-  return prisma.conversation.update({
+  const updated = await prisma.conversation.update({
     where: { id: conversationId },
     data: { status },
   });
+
+  if (
+    status === "bot" &&
+    conversation.status !== "bot" &&
+    conversation.whatsappChatId
+  ) {
+    const latestInbound = await prisma.message.findFirst({
+      where: { conversationId, direction: "inbound" },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (
+      latestInbound &&
+      latestInbound.id !== updated.lastRepliedMessageId
+    ) {
+      const settings = await prisma.userSettings.findUnique({
+        where: { userId },
+        select: { auto_reply_delay_seconds: true },
+      });
+
+      logger.info("[auto-reply] catch-up on bot re-activation", {
+        conversationId,
+        triggerMessageId: latestInbound.id,
+      });
+
+      processScheduledAutoReply({
+        conversationId,
+        triggerMessageId: latestInbound.id,
+        delaySeconds: settings?.auto_reply_delay_seconds ?? 0,
+        remoteJid: updated.whatsappChatId!,
+        remoteJidAlt: null,
+        wasActiveConversation: false,
+      }).catch((err) => {
+        logger.error("[auto-reply] catch-up failed", {
+          conversationId,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      });
+    }
+  }
+
+  return updated;
 }
 
 export async function sendConversationMessage(

@@ -149,11 +149,23 @@ export async function POST(req: NextRequest) {
       const conv = result.conversation;
       const wasActiveConversation = conv.status === "active";
 
-      if (
+      const autoReplyGatePasses =
         settings.autoReplyEnabled &&
         (conv.status === "bot" || wasActiveConversation) &&
-        event.mediaType !== "sticker"
-      ) {
+        event.mediaType !== "sticker";
+
+      if (!autoReplyGatePasses) {
+        logger.warn("[auto-reply] webhook gate aborted", {
+          conversationId: conv.id,
+          messageId: result.message.id,
+          autoReplyEnabled: settings.autoReplyEnabled,
+          convStatus: conv.status,
+          wasActiveConversation,
+          mediaType: event.mediaType,
+        });
+      }
+
+      if (autoReplyGatePasses) {
         if (wasActiveConversation) {
           await prisma.conversation.update({
             where: { id: conv.id },
