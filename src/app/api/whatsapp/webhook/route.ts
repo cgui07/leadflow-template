@@ -161,22 +161,28 @@ export async function POST(req: NextRequest) {
           });
         }
 
-        after(async () => {
-          try {
-            await processScheduledAutoReply({
-              conversationId: conv.id,
-              triggerMessageId: result.message.id,
-              delaySeconds: settings.auto_reply_delay_seconds,
-              remoteJid: event.remoteJid,
-              remoteJidAlt: event.remoteJidAlt,
-              wasActiveConversation,
-            });
-          } catch (err) {
-            logger.error("Auto-reply error", {
-              error: err instanceof Error ? err.message : String(err),
-            });
-          }
+        logger.info("Triggering auto-reply (sync)", {
+          conversationId: conv.id,
+          messageId: result.message.id,
+          delaySeconds: settings.auto_reply_delay_seconds,
+          wasActiveConversation,
         });
+
+        try {
+          await processScheduledAutoReply({
+            conversationId: conv.id,
+            triggerMessageId: result.message.id,
+            delaySeconds: settings.auto_reply_delay_seconds,
+            remoteJid: event.remoteJid,
+            remoteJidAlt: event.remoteJidAlt,
+            wasActiveConversation,
+          });
+        } catch (err) {
+          logger.error("Auto-reply error", {
+            error: err instanceof Error ? err.message : String(err),
+            stack: err instanceof Error ? err.stack : undefined,
+          });
+        }
 
         if (settings.followUpEnabled) {
           await scheduleFollowUp(result.lead.id, settings.followUpDelayHours);
