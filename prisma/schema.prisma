@@ -26,6 +26,7 @@ model User {
   activities             Activity[]
   appointments           appointments[]
   calendar_connections   calendar_connections[]
+  customAudios           CustomAudio[]
   facebookPages          FacebookPageMapping[]
   leadActions            LeadAction[]
   leads                  Lead[]
@@ -33,46 +34,48 @@ model User {
   settings               UserSettings?
   tenant                 Tenant?                @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   voiceReplyUsage        VoiceReplyUsage[]
-  customAudios           CustomAudio[]
 
   @@index([tenantId], map: "idx_users_tenant_id")
   @@map("users")
 }
 
 model UserSettings {
-  id                         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId                     String    @unique @map("user_id") @db.Uuid
-  whatsappPhoneId            String?   @map("whatsapp_phone_id")
-  whatsappToken              String?   @map("whatsapp_token")
-  whatsappWebhookToken       String?   @map("whatsapp_webhook_token")
-  aiProvider                 String    @default("openai") @map("ai_provider")
-  aiApiKey                   String?   @map("ai_api_key")
-  aiModel                    String    @default("gpt-4o-mini") @map("ai_model")
-  campaignOutreachMessage    String?   @map("campaign_outreach_message")
-  autoReplyEnabled           Boolean   @default(true) @map("auto_reply_enabled")
-  followUpEnabled            Boolean   @default(true) @map("follow_up_enabled")
-  followUpDelayHours         Int       @default(24) @map("follow_up_delay_hours")
-  maxFollowUps               Int       @default(3) @map("max_follow_ups")
-  auto_reply_delay_seconds   Int       @default(0)
-  facebookPageAccessToken    String?   @map("facebook_page_access_token")
-  facebookAutoOutreach       Boolean   @default(true) @map("facebook_auto_outreach")
-  openaiTranscriptionKey     String?   @map("openai_transcription_key")
-  elevenlabsVoiceId          String?   @map("elevenlabs_voice_id")
-  voiceReplyEnabled          Boolean   @default(false) @map("voice_reply_enabled")
-  voiceReplyMonthlyLimit     Int       @default(50) @map("voice_reply_monthly_limit")
-  whatsapp_provider          String    @default("evolution") @db.VarChar(30)
-  followUpCustomInstructions String?   @map("follow_up_custom_instructions")
-  canalProWebhookToken       String?   @unique @map("canal_pro_webhook_token") @db.VarChar
-  canalProAutoOutreach       Boolean   @default(true) @map("canal_pro_auto_outreach")
-  canalProAccountType        String    @default("own") @map("canal_pro_account_type") @db.VarChar(20)
-  audioTranscriptionEnabled  Boolean   @default(false) @map("audio_transcription_enabled")
-  gmailAccessToken           String?   @map("gmail_access_token")
-  gmailRefreshToken          String?   @map("gmail_refresh_token")
-  gmailTokenExpiresAt        DateTime? @map("gmail_token_expires_at") @db.Timestamptz(6)
-  campaignOutreachImageUrl   String?   @map("campaign_outreach_image_url")
-  campaignSecondMessage      String?   @map("campaign_second_message")
-  campaignSecondImageUrl     String?   @map("campaign_second_image_url")
-  user                       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                             String    @unique @map("user_id") @db.Uuid
+  whatsappPhoneId                    String?   @map("whatsapp_phone_id")
+  whatsappToken                      String?   @map("whatsapp_token")
+  whatsappWebhookToken               String?   @map("whatsapp_webhook_token")
+  aiProvider                         String    @default("openai") @map("ai_provider")
+  aiApiKey                           String?   @map("ai_api_key")
+  aiModel                            String    @default("gpt-4o-mini") @map("ai_model")
+  campaignOutreachMessage            String?   @map("campaign_outreach_message")
+  autoReplyEnabled                   Boolean   @default(true) @map("auto_reply_enabled")
+  followUpEnabled                    Boolean   @default(true) @map("follow_up_enabled")
+  followUpDelayHours                 Int       @default(24) @map("follow_up_delay_hours")
+  maxFollowUps                       Int       @default(3) @map("max_follow_ups")
+  auto_reply_delay_seconds           Int       @default(0)
+  facebookPageAccessToken            String?   @map("facebook_page_access_token")
+  facebookAutoOutreach               Boolean   @default(true) @map("facebook_auto_outreach")
+  openaiTranscriptionKey             String?   @map("openai_transcription_key")
+  elevenlabsVoiceId                  String?   @map("elevenlabs_voice_id")
+  voiceReplyEnabled                  Boolean   @default(false) @map("voice_reply_enabled")
+  voiceReplyMonthlyLimit             Int       @default(50) @map("voice_reply_monthly_limit")
+  whatsapp_provider                  String    @default("evolution") @db.VarChar(30)
+  followUpCustomInstructions         String?   @map("follow_up_custom_instructions")
+  canalProWebhookToken               String?   @unique @map("canal_pro_webhook_token") @db.VarChar
+  canalProAutoOutreach               Boolean   @default(true) @map("canal_pro_auto_outreach")
+  canalProAccountType                String    @default("own") @map("canal_pro_account_type") @db.VarChar(20)
+  gmailAccessToken                   String?   @map("gmail_access_token")
+  gmailRefreshToken                  String?   @map("gmail_refresh_token")
+  gmailTokenExpiresAt                DateTime? @map("gmail_token_expires_at") @db.Timestamptz(6)
+  campaignOutreachImageUrl           String?   @map("campaign_outreach_image_url")
+  campaignSecondMessage              String?   @map("campaign_second_message")
+  campaignSecondImageUrl             String?   @map("campaign_second_image_url")
+  audio_transcription_notify_enabled Boolean   @default(false)
+  audioTranscriptionEnabled          Boolean   @default(false) @map("audio_transcription_enabled")
+  botFlowEnabled                     Boolean   @default(false) @map("bot_flow_enabled")
+  botFlow                            Json?     @map("bot_flow")
+  user                               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
 }
@@ -139,6 +142,7 @@ model Conversation {
   updatedAt                DateTime  @updatedAt @map("updated_at")
   awaitingCampaignResponse Boolean   @default(false) @map("awaiting_campaign_response")
   lastRepliedMessageId     String?   @map("last_replied_message_id")
+  botCurrentNodeId         String?   @map("bot_current_node_id")
   lead                     Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
   messages                 Message[]
 
@@ -319,12 +323,12 @@ model appointments {
 model CustomAudio {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId      String   @map("user_id") @db.Uuid
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   context     String
   audioBase64 String   @map("audio_base64")
-  mimeType    String   @default("audio/webm") @map("mime_type")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  mimeType    String   @default("audio/webm") @map("mime_type") @db.VarChar(50)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([userId], map: "idx_custom_audios_user_id")
   @@map("custom_audios")

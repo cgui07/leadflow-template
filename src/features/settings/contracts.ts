@@ -1,3 +1,4 @@
+import type { BotFlow } from "@/lib/bot-flow-types";
 import type { TenantBranding } from "@/lib/branding";
 
 export interface UserSettings {
@@ -25,6 +26,8 @@ export interface UserSettings {
   voiceReplyEnabled: boolean;
   voiceReplyMonthlyLimit: number;
   audioTranscriptionEnabled: boolean;
+  botFlowEnabled: boolean;
+  botFlow: BotFlow | null;
 }
 
 export type UserSettingsUpdateInput = Partial<UserSettings>;

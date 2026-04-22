@@ -1,4 +1,5 @@
 export { FieldWrapper } from "./FieldWrapper";
+export { FileField } from "./FileField";
 export { Form } from "./Form";
 export { PasswordField } from "./PasswordField";
 export { TextField } from "./TextField";

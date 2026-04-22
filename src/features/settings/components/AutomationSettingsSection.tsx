@@ -2,6 +2,7 @@
 
 import { Bot } from "lucide-react";
 import type { UserSettings } from "../contracts";
+import { BotFlowSection } from "./BotFlowSection";
 import { AI_PROVIDER_OPTIONS } from "@/lib/ai-models";
 import { CampaignImageUpload } from "./CampaignImageUpload";
 import { CustomAudiosSection } from "./CustomAudiosSection";
@@ -150,6 +151,8 @@ export function AutomationSettingsSection({
         </SectionContainer>
 
         <FollowUpSettingsSection form={form} update={update} />
+
+        <BotFlowSection form={form} update={update} />
 
         <CustomAudiosSection />
 

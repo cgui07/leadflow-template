@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/db";
+import { parseBotFlow } from "@/lib/bot-flow";
+import { Prisma } from "@/generated/prisma/client";
 import { maskSecret, normalizeSettingsProvider } from "./utils";
 import { normalizeAutoReplyDelaySeconds } from "@/lib/auto-reply-delay";
 import type { TenantCustomizationSettings, UserSettings } from "./contracts";
@@ -38,6 +40,8 @@ const USER_SETTINGS_SELECT = {
   voiceReplyEnabled: true,
   voiceReplyMonthlyLimit: true,
   audioTranscriptionEnabled: true,
+  botFlowEnabled: true,
+  botFlow: true,
   userId: true,
 } as const;
 
@@ -77,6 +81,8 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   voiceReplyEnabled: false,
   voiceReplyMonthlyLimit: 50,
   audioTranscriptionEnabled: false,
+  botFlowEnabled: false,
+  botFlow: null,
 };
 
 type UserSettingsRecord = {
@@ -103,6 +109,8 @@ type UserSettingsRecord = {
   voiceReplyEnabled: boolean;
   voiceReplyMonthlyLimit: number;
   audioTranscriptionEnabled: boolean;
+  botFlowEnabled: boolean;
+  botFlow: unknown;
   userId: string;
 };
 
@@ -114,9 +122,10 @@ type TenantAccessContext = {
 type UserSettingsPayload = Partial<UserSettings>;
 type PrismaUserSettingsPayload = Omit<
   UserSettingsPayload,
-  "autoReplyDelaySeconds" | "facebookConnected" | "canalProConnected"
+  "autoReplyDelaySeconds" | "facebookConnected" | "canalProConnected" | "botFlow"
 > & {
   auto_reply_delay_seconds?: number;
+  botFlow?: Prisma.InputJsonValue | typeof Prisma.JsonNull;
 };
 
 export class TenantAccessError extends Error {
@@ -174,6 +183,8 @@ async function mapUserSettings(
     voiceReplyEnabled: settings.voiceReplyEnabled,
     voiceReplyMonthlyLimit: settings.voiceReplyMonthlyLimit,
     audioTranscriptionEnabled: settings.audioTranscriptionEnabled,
+    botFlowEnabled: settings.botFlowEnabled,
+    botFlow: parseBotFlow(settings.botFlow),
   };
 }
 
@@ -299,6 +310,18 @@ function pickAllowedSettings(
     next.voiceReplyMonthlyLimit = input.voiceReplyMonthlyLimit;
   }
 
+  if (typeof input.botFlowEnabled === "boolean") {
+    next.botFlowEnabled = input.botFlowEnabled;
+  }
+
+  if (typeof input.botFlowEnabled === "boolean") {
+    next.botFlowEnabled = input.botFlowEnabled;
+  }
+
+  if (input.botFlow !== undefined) {
+    next.botFlow = input.botFlow as typeof next.botFlow;
+  }
+
   return next;
 }
 
@@ -353,7 +376,7 @@ export async function updateUserSettings(
     currentSettings?.aiProvider,
   );
   const rawData = pickAllowedSettings(input);
-  const { autoReplyDelaySeconds, facebookConnected: _fc, canalProConnected: _cpc, ...restData } = rawData;
+  const { autoReplyDelaySeconds, facebookConnected: _fc, canalProConnected: _cpc, botFlow: rawBotFlow, ...restData } = rawData;
   const nextProvider = normalizeSettingsProvider(
     rawData.aiProvider,
     currentProvider,
@@ -362,6 +385,10 @@ export async function updateUserSettings(
     ...restData,
     aiProvider: nextProvider,
   };
+
+  if (rawBotFlow !== undefined) {
+    data.botFlow = rawBotFlow == null ? Prisma.JsonNull : (rawBotFlow as Prisma.InputJsonValue);
+  }
 
   if (typeof autoReplyDelaySeconds === "number") {
     data.auto_reply_delay_seconds = autoReplyDelaySeconds;

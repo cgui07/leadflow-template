@@ -5,6 +5,7 @@ import type { AIConfig, MessageContent } from "@/lib/ai";
 import { generateAutoReply, qualifyLead } from "@/lib/ai";
 import { enrichMessageWithMedia } from "./enrich-messages";
 import { handleCampaignReply } from "@/lib/campaign-reply";
+import { executeBotFlow, parseBotFlow } from "@/lib/bot-flow";
 import { findMatchingCustomAudio } from "@/lib/custom-audio-matcher";
 import { normalizeAutoReplyDelaySeconds } from "@/lib/auto-reply-delay";
 import { detectIntentSignals, getVoiceUsageThisMonth } from "@/lib/voice-reply";
@@ -153,6 +154,30 @@ export async function processScheduledAutoReply(
   let replySent = false;
 
   try {
+    // ── Bot flow gate ─────────────────────────────────────────────────────────
+    if (settings.botFlowEnabled && settings.botFlow) {
+      const flow = parseBotFlow(settings.botFlow);
+      if (flow) {
+        const replyJidBot = resolveSendTarget(
+          input.remoteJidAlt,
+          input.remoteJid,
+          conversation.whatsappChatId,
+          conversation.lead.phone,
+        );
+        if (replyJidBot) {
+          await executeBotFlow({
+            flow,
+            conversationId: conversation.id,
+            botCurrentNodeId: conversation.botCurrentNodeId ?? null,
+            inboundText: typeof latestInbound.content === "string" ? latestInbound.content : "",
+            whatsappPhoneId: settings.whatsappPhoneId!,
+            replyJid: replyJidBot,
+          });
+        }
+        return;
+      }
+    }
+
     if (conversation.awaitingCampaignResponse) {
       const messageText =
         typeof latestInbound.content === "string" ? latestInbound.content : "";
