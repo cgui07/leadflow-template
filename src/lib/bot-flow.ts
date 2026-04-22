@@ -101,8 +101,28 @@ export async function executeBotFlow(params: {
   let targetNode: BotNode | null = null;
 
   if (botCurrentNodeId === null) {
-    // First interaction — send first node
-    targetNode = flow.nodes[0];
+    const firstNode = flow.nodes[0];
+    const firstHasContent = firstNode.contents.some(
+      (c) => c.type !== "text" || (c as { value: string }).value.trim() !== "",
+    );
+
+    if (!firstHasContent && firstNode.conditions && firstNode.conditions.length > 0) {
+      // First node is a pure condition gateway (no content) —
+      // treat the incoming message as a response to it directly.
+      targetNode = findNextNode(firstNode, inboundText, flow.nodes);
+      if (!targetNode) {
+        // No condition matched — set state to first node and wait for a valid response
+        await prisma.conversation.update({
+          where: { id: conversationId },
+          data: { botCurrentNodeId: firstNode.id },
+        });
+        logger.info("[bot-flow] no condition matched on gateway node, waiting", { nodeId: firstNode.id });
+        return true;
+      }
+    } else {
+      // First node has content — send it as the opening message
+      targetNode = firstNode;
+    }
   } else {
     const currentNode = flow.nodes.find((n) => n.id === botCurrentNodeId);
     if (!currentNode) {

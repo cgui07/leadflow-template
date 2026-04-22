@@ -348,16 +348,19 @@ function ConditionEditor({
   onChange: (c: BotCondition) => void;
   onRemove: () => void;
 }) {
-  const nodeOptions = allNodes.map((n, idx) => {
-    const firstText =
-      n.contents[0]?.type === "text"
-        ? (n.contents[0] as { value: string }).value
-        : "";
-    return {
-      value: n.id,
-      label: `Mensagem ${idx + 1}${firstText ? ` — ${firstText.slice(0, 40)}` : ""}`,
-    };
-  });
+  const nodeOptions = [
+    { value: "", label: "— Fim do fluxo (sem resposta) —" },
+    ...allNodes.map((n, idx) => {
+      const firstText =
+        n.contents[0]?.type === "text"
+          ? (n.contents[0] as { value: string }).value
+          : "";
+      return {
+        value: n.id,
+        label: `Mensagem ${idx + 1}${firstText ? ` — ${firstText.slice(0, 40)}` : ""}`,
+      };
+    }),
+  ];
 
   return (
     <div className="rounded-lg border border-border bg-surface-alt p-3 space-y-2">
