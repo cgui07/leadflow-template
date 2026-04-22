@@ -111,13 +111,9 @@ export async function executeBotFlow(params: {
       // treat the incoming message as a response to it directly.
       targetNode = findNextNode(firstNode, inboundText, flow.nodes);
       if (!targetNode) {
-        // No condition matched — set state to first node and wait for a valid response
-        await prisma.conversation.update({
-          where: { id: conversationId },
-          data: { botCurrentNodeId: firstNode.id },
-        });
-        logger.info("[bot-flow] no condition matched on gateway node, waiting", { nodeId: firstNode.id });
-        return true;
+        // No condition matched and no default path — fall back to AI so the lead isn't left in silence.
+        logger.info("[bot-flow] no condition matched on gateway node, falling back to AI", { nodeId: firstNode.id });
+        return false;
       }
     } else {
       // First node has content — send it as the opening message

@@ -165,7 +165,7 @@ export async function processScheduledAutoReply(
           conversation.lead.phone,
         );
         if (replyJidBot) {
-          await executeBotFlow({
+          const handled = await executeBotFlow({
             flow,
             conversationId: conversation.id,
             botCurrentNodeId: conversation.botCurrentNodeId ?? null,
@@ -173,8 +173,10 @@ export async function processScheduledAutoReply(
             whatsappPhoneId: settings.whatsappPhoneId!,
             replyJid: replyJidBot,
           });
+          if (handled) return;
+        } else {
+          return;
         }
-        return;
       }
     }
 
