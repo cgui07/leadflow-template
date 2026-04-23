@@ -459,26 +459,31 @@ function AddContentButtons({ onAdd }: { onAdd: (c: BotContent) => void }) {
 function ConditionEditor({
   condition,
   allNodes,
+  currentNodeId,
   onChange,
   onRemove,
 }: {
   condition: BotCondition;
   allNodes: BotNode[];
+  currentNodeId: string;
   onChange: (c: BotCondition) => void;
   onRemove: () => void;
 }) {
   const nodeOptions = [
     { value: "", label: "— Fim do fluxo (sem resposta) —" },
-    ...allNodes.map((n, idx) => {
-      const firstText =
-        n.contents[0]?.type === "text"
-          ? (n.contents[0] as { value: string }).value
-          : "";
-      return {
-        value: n.id,
-        label: `Mensagem ${idx + 1}${firstText ? ` — ${firstText.slice(0, 40)}` : ""}`,
-      };
-    }),
+    ...allNodes
+      .filter((n) => n.id !== currentNodeId)
+      .map((n) => {
+        const realIdx = allNodes.indexOf(n);
+        const firstText =
+          n.contents[0]?.type === "text"
+            ? (n.contents[0] as { value: string }).value
+            : "";
+        return {
+          value: n.id,
+          label: `Mensagem ${realIdx + 1}${firstText ? ` — ${firstText.slice(0, 40)}` : ""}`,
+        };
+      }),
   ];
 
   return (
@@ -663,7 +668,8 @@ function NodeEditor({
               <ConditionEditor
                 key={cond.id}
                 condition={cond}
-                allNodes={otherNodes}
+                allNodes={allNodes}
+                currentNodeId={node.id}
                 onChange={(updated) => updateCondition(i, updated)}
                 onRemove={() => removeCondition(i)}
               />
