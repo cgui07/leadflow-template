@@ -30,7 +30,6 @@ import {
   Mic,
   Plus,
   Send,
-  Square,
   Trash2,
   Upload,
   X,
@@ -85,8 +84,10 @@ function BotAudioRecorder({ onUpload }: { onUpload: (url: string) => void }) {
 
   async function handleSend(blob: Blob, mimeType: string) {
     setUploadError(null);
-    const ext = mimeType.includes("ogg") ? "ogg" : "webm";
-    const file = new File([blob], `recording.${ext}`, { type: mimeType });
+    // Strip codec suffix (e.g. "audio/webm;codecs=opus" → "audio/webm")
+    const baseMime = mimeType.split(";")[0].trim();
+    const ext = baseMime.includes("ogg") ? "ogg" : "webm";
+    const file = new File([blob], `recording.${ext}`, { type: baseMime });
     try {
       const url = await uploadToR2(file);
       onUpload(url);
