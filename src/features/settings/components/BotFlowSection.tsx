@@ -29,9 +29,13 @@ import {
   Loader2,
   Mic,
   Plus,
+  Send,
+  Square,
   Trash2,
+  Upload,
   X,
 } from "lucide-react";
+import { useAudioRecorder } from "@/components/domain/chat/useAudioRecorder";
 
 interface BotFlowSectionProps {
   form: UserSettings;
@@ -70,6 +74,92 @@ async function uploadToR2(file: File): Promise<string> {
   return publicUrl;
 }
 
+function formatSeconds(s: number) {
+  const m = Math.floor(s / 60).toString().padStart(2, "0");
+  const sec = (s % 60).toString().padStart(2, "0");
+  return `${m}:${sec}`;
+}
+
+function BotAudioRecorder({ onUpload }: { onUpload: (url: string) => void }) {
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function handleSend(blob: Blob, mimeType: string) {
+    setUploadError(null);
+    const ext = mimeType.includes("ogg") ? "ogg" : "webm";
+    const file = new File([blob], `recording.${ext}`, { type: mimeType });
+    try {
+      const url = await uploadToR2(file);
+      onUpload(url);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Erro no upload.");
+      throw err;
+    }
+  }
+
+  const { state, seconds, error, start, cancel, send } = useAudioRecorder({ onSend: handleSend });
+
+  const isRecording = state === "recording";
+  const isSending = state === "sending";
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-surface p-3">
+        {isRecording && (
+          <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500" />
+        )}
+        {isSending && (
+          <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-teal-500" />
+        )}
+        {state === "idle" && <Mic className="h-4 w-4 shrink-0 text-neutral-muted" />}
+
+        <span className="flex-1 text-xs text-neutral">
+          {isSending ? "Enviando…" : isRecording ? "Gravando…" : "Grave o áudio aqui"}
+        </span>
+
+        <span className="font-mono text-xs tabular-nums text-neutral-muted">
+          {formatSeconds(seconds)}
+        </span>
+
+        {state === "idle" ? (
+          <Button
+            size="sm"
+            onClick={start}
+            icon={<Mic className="h-3.5 w-3.5" />}
+            className="h-7 rounded-full bg-red-500 text-white hover:bg-red-600 px-2.5"
+          >
+            Gravar
+          </Button>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={cancel}
+              disabled={isSending}
+              icon={<X className="h-3.5 w-3.5" />}
+              className="h-7 w-7 p-0"
+              title="Cancelar"
+            />
+            <Button
+              size="sm"
+              onClick={send}
+              loading={isSending}
+              disabled={!isRecording}
+              icon={<Send className="h-3.5 w-3.5" />}
+              className="h-7 rounded-full bg-whatsapp text-white hover:bg-whatsapp-dark px-2.5"
+            >
+              Enviar
+            </Button>
+          </>
+        )}
+      </div>
+      {(error || uploadError) && (
+        <p className="text-xs text-red-dark">{error ?? uploadError}</p>
+      )}
+    </div>
+  );
+}
+
 function ContentEditor({
   content,
   onChange,
@@ -82,6 +172,7 @@ function ContentEditor({
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [audioMode, setAudioMode] = useState<"upload" | "record">("record");
 
   async function handleFile(file: File, type: "image" | "audio" | "pdf") {
     setUploadError(null);
@@ -211,18 +302,45 @@ function ContentEditor({
               </Button>
             </div>
           ) : (
-            <div
-              className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-surface p-3 cursor-pointer hover:border-primary transition-colors text-xs text-neutral"
-              onClick={() => fileRef.current?.click()}
-            >
-              {uploading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Button
+                  variant={audioMode === "record" ? "primary" : "secondary"}
+                  size="sm"
+                  icon={<Mic className="h-3.5 w-3.5" />}
+                  onClick={() => setAudioMode("record")}
+                  className="flex-1"
+                >
+                  Gravar
+                </Button>
+                <Button
+                  variant={audioMode === "upload" ? "primary" : "secondary"}
+                  size="sm"
+                  icon={<Upload className="h-3.5 w-3.5" />}
+                  onClick={() => setAudioMode("upload")}
+                  className="flex-1"
+                >
+                  Enviar arquivo
+                </Button>
+              </div>
+
+              {audioMode === "record" ? (
+                <BotAudioRecorder
+                  onUpload={(url) => onChange({ type: "audio", url })}
+                />
               ) : (
-                <Mic className="h-4 w-4" />
+                <div
+                  className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-surface p-3 cursor-pointer hover:border-primary transition-colors text-xs text-neutral"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  {uploading ? "Enviando..." : "Clique para enviar áudio (MP3, OGG, WAV · máx 10MB)"}
+                </div>
               )}
-              {uploading
-                ? "Enviando..."
-                : "Clique para enviar áudio (MP3, OGG, WAV · máx 10MB)"}
             </div>
           )}
           <FileField
