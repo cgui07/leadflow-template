@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Send, Paperclip } from "lucide-react";
+import { Send, Paperclip, Mic } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { AudioRecorderBar } from "./AudioRecorderBar";
 
 interface MessageInputProps {
   onSend?: (message: string) => void | Promise<void>;
   onAttach?: () => void;
+  onSendAudio?: (blob: Blob, mimeType: string) => Promise<void>;
   placeholder?: string;
   disabled?: boolean;
   sending?: boolean;
@@ -17,6 +19,7 @@ interface MessageInputProps {
 export function MessageInput({
   onSend,
   onAttach,
+  onSendAudio,
   placeholder = "Mensagem",
   disabled,
   sending,
@@ -24,6 +27,7 @@ export function MessageInput({
 }: MessageInputProps) {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showRecorder, setShowRecorder] = useState(false);
 
   async function handleSend() {
     const trimmed = message.trim();
@@ -46,8 +50,23 @@ export function MessageInput({
     }
   }
 
+  async function handleSendAudio(blob: Blob, mimeType: string) {
+    await onSendAudio?.(blob, mimeType);
+    setShowRecorder(false);
+  }
+
   const isLoading = sending || submitting;
   const canSend = message.trim().length > 0 && !disabled && !isLoading;
+
+  if (showRecorder && onSendAudio) {
+    return (
+      <AudioRecorderBar
+        onSendAudio={handleSendAudio}
+        onClose={() => setShowRecorder(false)}
+        className={className}
+      />
+    );
+  }
 
   return (
     <div
@@ -81,6 +100,17 @@ export function MessageInput({
           "max-h-32",
         )}
       />
+      {onSendAudio && !message.trim() && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowRecorder(true)}
+          disabled={disabled || isLoading}
+          icon={<Mic className="h-5 w-5 text-neutral" />}
+          className="shrink-0"
+          title="Gravar áudio"
+        />
+      )}
       <Button
         onClick={handleSend}
         loading={isLoading}

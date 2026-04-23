@@ -3,6 +3,8 @@ export { ConversationHeader } from "./ConversationHeader";
 export { MessageList, DateSeparator } from "./MessageList";
 export { MessageBubble } from "./MessageBubble";
 export { MessageInput } from "./MessageInput";
+export { AudioRecorderBar } from "./AudioRecorderBar";
+export { useAudioRecorder } from "./useAudioRecorder";
 export { ActivityTimeline } from "./ActivityTimeline";
 export { NoteCard } from "./NoteCard";
 export { InteractionLogItem } from "./InteractionLogItem";

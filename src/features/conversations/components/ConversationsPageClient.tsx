@@ -159,6 +159,42 @@ export function ConversationsPageClient({
     syncConversationQuery(null);
   }, [resetSummaryState, syncConversationQuery]);
 
+  const handleSendAudio = useCallback(async (blob: Blob, mimeType: string) => {
+    if (!selected) return;
+
+    setSending(true);
+    setConversationError(null);
+
+    try {
+      const ext = mimeType.includes("ogg") ? "ogg" : "webm";
+      const formData = new FormData();
+      formData.append("file", blob, `audio.${ext}`);
+      formData.append("mediaType", "audio");
+
+      const response = await fetch(`/api/conversations/${selected}/media`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          await readErrorMessage(response, "Não foi possível enviar o áudio."),
+        );
+      }
+
+      await Promise.all([refetchMessages(), refetch()]);
+    } catch (error) {
+      setConversationError(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível enviar o áudio.",
+      );
+      throw error;
+    } finally {
+      setSending(false);
+    }
+  }, [selected, readErrorMessage, refetchMessages, refetch]);
+
   const handleSendMessage = useCallback(async (content: string) => {
     if (!selected) return;
 
@@ -290,6 +326,7 @@ export function ConversationsPageClient({
 
               <MessageInput
                 onSend={handleSendMessage}
+                onSendAudio={handleSendAudio}
                 disabled={!selected}
                 sending={sending}
               />
