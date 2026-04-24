@@ -42,7 +42,14 @@ export function formatPropertyForPrompt(p: PropertyCatalogItem, index: number) {
   return parts.join("\n");
 }
 
-export function getQualificationPrompt(agentName: string, properties?: PropertyCatalogItem[], isVoiceReply?: boolean) {
+export function getQualificationPrompt(agentName: string, properties?: PropertyCatalogItem[], isVoiceReply?: boolean, customInstructions?: string | null) {
+  if (customInstructions?.trim()) {
+    const catalogSection = properties && properties.length > 0
+      ? `\n\nCATÁLOGO DE IMÓVEIS DISPONÍVEIS:\n${properties.map(formatPropertyForPrompt).join("\n\n")}`
+      : ``;
+    return `${customInstructions.trim()}${catalogSection}\n\nResponda APENAS com a mensagem para o cliente. Nada de explicações, prefácios ou meta-comentários.`;
+  }
+
   const catalogSection = properties && properties.length > 0
     ? `\n\nCATÁLOGO DE IMÓVEIS DISPONÍVEIS:\n${properties.map(formatPropertyForPrompt).join("\n\n")}`
     : ``;

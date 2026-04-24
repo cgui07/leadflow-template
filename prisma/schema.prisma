@@ -75,6 +75,7 @@ model UserSettings {
   audioTranscriptionEnabled          Boolean   @default(false) @map("audio_transcription_enabled")
   botFlowEnabled                     Boolean   @default(false) @map("bot_flow_enabled")
   botFlow                            Json?     @map("bot_flow")
+  customAiInstructions               String?   @map("custom_ai_instructions")
   user                               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")

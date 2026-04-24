@@ -39,6 +39,7 @@ export async function generateAutoReply(
   }>,
   properties?: PropertyCatalogItem[],
   isVoiceReply?: boolean,
+  customInstructions?: string | null,
 ) {
   const messages = conversationMessages.map((message) => ({
     role: message.direction === "inbound" ? "user" : "assistant",
@@ -47,7 +48,7 @@ export async function generateAutoReply(
 
   return callAI(
     config,
-    getQualificationPrompt(agentName, properties, isVoiceReply),
+    getQualificationPrompt(agentName, properties, isVoiceReply, customInstructions),
     messages,
   );
 }

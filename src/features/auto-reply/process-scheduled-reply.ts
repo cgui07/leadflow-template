@@ -409,6 +409,7 @@ export async function processScheduledAutoReply(
       enrichedMessages,
       propertiesCatalog.length > 0 ? propertiesCatalog : undefined,
       willUseVoice,
+      settings.customAiInstructions,
     );
 
     if (!reply) {
