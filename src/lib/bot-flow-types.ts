@@ -38,6 +38,7 @@ export type BotNode = {
   contents: BotContent[];
   conditions?: BotCondition[];
   defaultNextNodeId?: string | null;
+  handoffToAI?: boolean;
 };
 
 export type BotFlow = {

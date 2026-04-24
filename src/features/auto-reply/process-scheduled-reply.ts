@@ -174,6 +174,7 @@ export async function processScheduledAutoReply(
             inboundText: typeof latestInbound.content === "string" ? latestInbound.content : "",
             whatsappPhoneId: settings.whatsappPhoneId!,
             replyJid: replyJidBot,
+            leadName: conversation.lead.name ?? undefined,
           });
           if (handled) return;
         } else {

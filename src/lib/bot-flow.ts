@@ -47,14 +47,17 @@ async function sendNodeContents(
   whatsappPhoneId: string,
   conversationId: string,
   replyJid: string,
+  leadName?: string,
 ) {
   const config = getWhatsAppConfig(whatsappPhoneId);
+  const resolveName = (text: string) =>
+    text.replace(/\[NOME\]/gi, leadName?.trim() || "");
 
   for (const content of contents) {
     if (content.type === "text") {
       if (!content.value.trim()) continue;
       await sendPresenceUpdate(config, replyJid, "composing");
-      await sendAndSaveMessage(config, conversationId, replyJid, content.value, "bot");
+      await sendAndSaveMessage(config, conversationId, replyJid, resolveName(content.value), "bot");
     } else if (content.type === "image") {
       await sendAndSaveMessage(config, conversationId, replyJid, content.caption ?? "", "bot", {
         type: "image",
@@ -93,8 +96,12 @@ export async function executeBotFlow(params: {
   inboundText: string;
   whatsappPhoneId: string;
   replyJid: string;
+  leadName?: string;
 }): Promise<boolean> {
-  const { flow, conversationId, botCurrentNodeId, inboundText, whatsappPhoneId, replyJid } = params;
+  const { flow, conversationId, botCurrentNodeId, inboundText, whatsappPhoneId, replyJid, leadName } = params;
+
+  // Sentinel: conversa já foi transferida para a IA
+  if (botCurrentNodeId === "__ai__") return false;
 
   if (!flow.nodes || flow.nodes.length === 0) return false;
 
@@ -153,15 +160,16 @@ export async function executeBotFlow(params: {
   }
 
   const lastSent = nodesToSend[nodesToSend.length - 1];
-  const willWait = !!(lastSent.conditions && lastSent.conditions.length > 0);
+  const handoff = !!lastSent.handoffToAI;
+  const willWait = !handoff && !!(lastSent.conditions && lastSent.conditions.length > 0);
 
   for (const node of nodesToSend) {
-    await sendNodeContents(node.contents, whatsappPhoneId, conversationId, replyJid);
+    await sendNodeContents(node.contents, whatsappPhoneId, conversationId, replyJid, leadName);
   }
 
   await prisma.conversation.update({
     where: { id: conversationId },
-    data: { botCurrentNodeId: willWait ? lastSent.id : null },
+    data: { botCurrentNodeId: handoff ? "__ai__" : willWait ? lastSent.id : null },
   });
 
   logger.info("[bot-flow] sent nodes", {
