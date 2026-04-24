@@ -38,6 +38,47 @@ function normalizeCategory(raw: string | undefined): string | undefined {
   return CATEGORY_NORMALIZE_MAP[upper] ?? upper;
 }
 
+export function extractImageTags(reply: string): {
+  cleanReply: string;
+  imageUrls: string[];
+} {
+  const regex = /\[ENVIAR_IMAGEM:([^\]]+)\]/gi;
+  const imageUrls: string[] = [];
+  let match;
+  while ((match = regex.exec(reply)) !== null) {
+    imageUrls.push(match[1].trim());
+  }
+  const cleanReply = reply.replace(regex, "").trim();
+  return { cleanReply, imageUrls };
+}
+
+export async function sendImages(
+  imageUrls: string[],
+  whatsappPhoneId: string,
+  conversationId: string,
+  replyJid: string,
+) {
+  if (imageUrls.length === 0) return;
+  const whatsappConfig = getWhatsAppConfig(whatsappPhoneId);
+  for (const url of imageUrls) {
+    try {
+      await sendAndSaveMessage(
+        whatsappConfig,
+        conversationId,
+        replyJid,
+        "",
+        "bot",
+        { type: "image", url, caption: "" },
+      );
+    } catch (err) {
+      logger.error("Failed to send image", {
+        url,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+}
+
 export function extractPdfTags(reply: string): {
   cleanReply: string;
   propertyIds: string[];

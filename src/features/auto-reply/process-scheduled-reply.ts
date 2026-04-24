@@ -21,10 +21,12 @@ import {
 } from "@/lib/scheduling-handler";
 import {
   extractPdfTags,
+  extractImageTags,
   wait,
   sendVoiceReply,
   sendTextReply,
   sendPropertyPdfs,
+  sendImages,
 } from "./reply-sender";
 
 export interface ProcessScheduledAutoReplyInput {
@@ -431,7 +433,8 @@ export async function processScheduledAutoReply(
       })),
     });
 
-    const { cleanReply, pdfRequests } = extractPdfTags(reply);
+    const { cleanReply: replyNoImages, imageUrls } = extractImageTags(reply);
+    const { cleanReply, pdfRequests } = extractPdfTags(replyNoImages);
 
     logger.error("[DEBUG] PDF extraction", { pdfRequests, cleanReply });
     logger.info("PDF extraction result", { pdfRequests, cleanReply });
@@ -475,6 +478,29 @@ export async function processScheduledAutoReply(
     await sendPropertyPdfs(
       pdfRequests,
       conversation.lead.userId,
+      settings.whatsappPhoneId!,
+      conversation.id,
+      replyJid,
+    );
+
+    const allImageUrls = [...imageUrls];
+
+    // Se há uma imagem de localização configurada e o cliente perguntou sobre localização, envia automaticamente
+    if (settings.customAiInstructions) {
+      const locationImageMatch = settings.customAiInstructions.match(/\[ENVIAR_IMAGEM:(https?:\/\/[^\]]+)\]/i);
+      if (locationImageMatch) {
+        const locationUrl = locationImageMatch[1];
+        const inboundText = (latestInbound.content as string ?? "").toLowerCase();
+        const locationKeywords = ["localiza", "endereço", "endereco", "onde fica", "onde é", "onde e", "mapa", "rua", "bairro", "ipanema", "garcia", "como chego", "como chegar"];
+        const askedForLocation = locationKeywords.some((kw) => inboundText.includes(kw));
+        if (askedForLocation && !allImageUrls.includes(locationUrl)) {
+          allImageUrls.push(locationUrl);
+        }
+      }
+    }
+
+    await sendImages(
+      allImageUrls,
       settings.whatsappPhoneId!,
       conversation.id,
       replyJid,
