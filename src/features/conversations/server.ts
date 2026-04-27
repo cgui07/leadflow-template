@@ -236,7 +236,7 @@ export async function sendConversationMessage(
     throw new Error("CONVERSATION_NOT_FOUND");
   }
 
-  if (conversation.status === "bot") {
+  if (conversation.status !== "human") {
     await prisma.conversation.update({
       where: { id: conversationId },
       data: { status: "human" },
