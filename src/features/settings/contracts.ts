@@ -6,7 +6,9 @@ export interface UserSettings {
   aiApiKey: string | null;
   aiModel: string;
   campaignOutreachMessage: string | null;
+  directWhatsAppGreetingEnabled: boolean;
   campaignOutreachImageUrl: string | null;
+  campaignOutreachVideoUrl: string | null;
   campaignSecondMessage: string | null;
   campaignSecondImageUrl: string | null;
   autoReplyEnabled: boolean;

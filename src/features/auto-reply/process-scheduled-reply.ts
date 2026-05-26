@@ -11,14 +11,15 @@ import { normalizeAutoReplyDelaySeconds } from "@/lib/auto-reply-delay";
 import { detectIntentSignals, getVoiceUsageThisMonth } from "@/lib/voice-reply";
 import { sendAndSaveAudioPTT } from "@/features/conversations/incoming-message";
 import {
-  getWhatsAppConfig,
-  resolveSendTarget,
-  sendPresenceUpdate,
-} from "@/lib/whatsapp";
-import {
   handleConfirmationReplyIfNeeded,
   handleSchedulingIfNeeded,
 } from "@/lib/scheduling-handler";
+import {
+  getWhatsAppConfig,
+  resolveSendTarget,
+  sendAndSaveMessage,
+  sendPresenceUpdate,
+} from "@/lib/whatsapp";
 import {
   extractPdfTags,
   extractImageTags,
@@ -156,6 +157,67 @@ export async function processScheduledAutoReply(
   let replySent = false;
 
   try {
+    const isFirstDirectWhatsAppMessage =
+      settings.directWhatsAppGreetingEnabled &&
+      Boolean(settings.campaignOutreachMessage?.trim()) &&
+      conversation.lead.source === "whatsapp" &&
+      conversation.messages.length === 1 &&
+      conversation.messages[0].id === input.triggerMessageId;
+
+    if (isFirstDirectWhatsAppMessage) {
+      const directGreetingTarget = resolveSendTarget(
+        input.remoteJidAlt,
+        input.remoteJid,
+        conversation.whatsappChatId,
+        conversation.lead.phone,
+      );
+
+      if (!directGreetingTarget) {
+        await releaseClaim("direct greeting target could not be resolved");
+        return;
+      }
+
+      const greeting = settings.campaignOutreachMessage!.trim().replace(
+        /\[NOME\]/gi,
+        conversation.lead.name || "",
+      );
+
+      await sendTextReply(
+        settings.whatsappPhoneId!,
+        conversation.id,
+        directGreetingTarget,
+        greeting,
+      );
+      replySent = true;
+
+      if (settings.campaignOutreachVideoUrl) {
+        try {
+          await sendAndSaveMessage(
+            getWhatsAppConfig(settings.whatsappPhoneId!),
+            conversation.id,
+            directGreetingTarget,
+            "",
+            "bot",
+            {
+              type: "video",
+              url: settings.campaignOutreachVideoUrl,
+              mimetype: "video/mp4",
+            },
+          );
+        } catch (err) {
+          logger.error("[auto-reply] Failed to send direct greeting video", {
+            conversationId: conversation.id,
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
+      }
+
+      logger.info("[auto-reply] direct WhatsApp greeting sent", {
+        conversationId: conversation.id,
+      });
+      return;
+    }
+
     // ── Bot flow gate ─────────────────────────────────────────────────────────
     if (settings.botFlowEnabled && settings.botFlow) {
       const flow = parseBotFlow(settings.botFlow);

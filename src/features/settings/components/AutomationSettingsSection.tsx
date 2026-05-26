@@ -5,6 +5,7 @@ import type { UserSettings } from "../contracts";
 import { BotFlowSection } from "./BotFlowSection";
 import { AI_PROVIDER_OPTIONS } from "@/lib/ai-models";
 import { CampaignImageUpload } from "./CampaignImageUpload";
+import { CampaignVideoUpload } from "./CampaignVideoUpload";
 import { CustomAudiosSection } from "./CustomAudiosSection";
 import { FollowUpSettingsSection } from "./FollowUpSettingsSection";
 import { SectionContainer } from "@/components/layout/SectionContainer";
@@ -122,11 +123,29 @@ export function AutomationSettingsSection({
                 rows={5}
                 placeholder={"Olá, [NOME], tudo bem?\n\nEstou retornando seu contato. 😉\n\n1- Quer receber por aqui mesmo ou\n2- Prefere que eu te ligue?"}
               />
+              <div className="flex items-start justify-between gap-4 rounded-lg border border-neutral-border bg-neutral-surface px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Usar na primeira resposta do WhatsApp</p>
+                  <p className="mt-0.5 text-xs text-neutral">
+                    Contatos que iniciarem a conversa pelo WhatsApp recebem esta mesma mensagem antes da IA.
+                  </p>
+                </div>
+                <CheckboxField
+                  variant="switch"
+                  checked={form.directWhatsAppGreetingEnabled}
+                  onChange={(checked) => update("directWhatsAppGreetingEnabled", checked)}
+                />
+              </div>
               <CampaignImageUpload
                 slot="outreach"
                 value={form.campaignOutreachImageUrl}
                 onChange={(url) => update("campaignOutreachImageUrl", url)}
                 label="Imagem opcional (enviada junto com a primeira mensagem)"
+              />
+              <CampaignVideoUpload
+                value={form.campaignOutreachVideoUrl}
+                onChange={(url) => update("campaignOutreachVideoUrl", url)}
+                label="Video opcional (enviado depois da primeira mensagem)"
               />
             </div>
 

@@ -62,6 +62,7 @@ export async function createPresignedUploadUrl(
 }
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_VIDEO_TYPES = ["video/mp4"];
 
 export async function createPresignedImageUploadUrl(
   userId: string,
@@ -85,6 +86,32 @@ export async function createPresignedImageUploadUrl(
 
   const url = await getSignedUrl(client, command, { expiresIn: 600 });
 
+  const publicUrl = `${env.R2_PUBLIC_URL}/${key}`;
+
+  return { key, url, publicUrl };
+}
+
+export async function createPresignedVideoUploadUrl(
+  userId: string,
+  folder: string,
+  filename: string,
+  contentType: string,
+): Promise<{ key: string; url: string; publicUrl: string }> {
+  if (!ALLOWED_VIDEO_TYPES.includes(contentType)) {
+    throw new Error("Tipo de arquivo nao permitido. Use MP4.");
+  }
+
+  const client = getR2Client();
+  const ext = filename.split(".").pop() ?? "mp4";
+  const key = `${userId}/${folder}/${Date.now()}.${ext}`;
+
+  const command = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ContentType: contentType,
+  });
+
+  const url = await getSignedUrl(client, command, { expiresIn: 600 });
   const publicUrl = `${env.R2_PUBLIC_URL}/${key}`;
 
   return { key, url, publicUrl };

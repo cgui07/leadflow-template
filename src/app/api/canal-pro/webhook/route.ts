@@ -149,6 +149,7 @@ async function processWebhook(token: string, body: unknown) {
       aiConfig,
       campaignOutreachMessage: settings.campaignOutreachMessage,
       campaignOutreachImageUrl: settings.campaignOutreachImageUrl,
+      campaignOutreachVideoUrl: settings.campaignOutreachVideoUrl,
       hasCampaignSecondMessage: !!settings.campaignSecondMessage?.trim(),
       whatsappPhoneId: settings.whatsappPhoneId!,
       leadOrigin: leadData.leadOrigin,

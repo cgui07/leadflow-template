@@ -22,7 +22,9 @@ const USER_SETTINGS_SELECT = {
   aiModel: true,
   openaiTranscriptionKey: true,
   campaignOutreachMessage: true,
+  directWhatsAppGreetingEnabled: true,
   campaignOutreachImageUrl: true,
+  campaignOutreachVideoUrl: true,
   campaignSecondMessage: true,
   campaignSecondImageUrl: true,
   autoReplyEnabled: true,
@@ -62,7 +64,9 @@ const DEFAULT_USER_SETTINGS: UserSettings = {
   aiModel: DEFAULT_AI_MODEL_BY_PROVIDER.openai,
   openaiTranscriptionKey: null,
   campaignOutreachMessage: null,
+  directWhatsAppGreetingEnabled: false,
   campaignOutreachImageUrl: null,
+  campaignOutreachVideoUrl: null,
   campaignSecondMessage: null,
   campaignSecondImageUrl: null,
   autoReplyEnabled: true,
@@ -91,7 +95,9 @@ type UserSettingsRecord = {
   aiModel: string;
   openaiTranscriptionKey: string | null;
   campaignOutreachMessage: string | null;
+  directWhatsAppGreetingEnabled: boolean;
   campaignOutreachImageUrl: string | null;
+  campaignOutreachVideoUrl: string | null;
   campaignSecondMessage: string | null;
   campaignSecondImageUrl: string | null;
   autoReplyEnabled: boolean;
@@ -162,7 +168,9 @@ async function mapUserSettings(
       ? maskSecret(settings.openaiTranscriptionKey)
       : settings.openaiTranscriptionKey,
     campaignOutreachMessage: settings.campaignOutreachMessage ?? null,
+    directWhatsAppGreetingEnabled: settings.directWhatsAppGreetingEnabled,
     campaignOutreachImageUrl: settings.campaignOutreachImageUrl ?? null,
+    campaignOutreachVideoUrl: settings.campaignOutreachVideoUrl ?? null,
     campaignSecondMessage: settings.campaignSecondMessage ?? null,
     campaignSecondImageUrl: settings.campaignSecondImageUrl ?? null,
     autoReplyEnabled: settings.autoReplyEnabled,
@@ -219,11 +227,22 @@ function pickAllowedSettings(
     next.campaignOutreachMessage = input.campaignOutreachMessage;
   }
 
+  if (typeof input.directWhatsAppGreetingEnabled === "boolean") {
+    next.directWhatsAppGreetingEnabled = input.directWhatsAppGreetingEnabled;
+  }
+
   if (
     typeof input.campaignOutreachImageUrl === "string" ||
     input.campaignOutreachImageUrl === null
   ) {
     next.campaignOutreachImageUrl = input.campaignOutreachImageUrl;
+  }
+
+  if (
+    typeof input.campaignOutreachVideoUrl === "string" ||
+    input.campaignOutreachVideoUrl === null
+  ) {
+    next.campaignOutreachVideoUrl = input.campaignOutreachVideoUrl;
   }
 
   if (
