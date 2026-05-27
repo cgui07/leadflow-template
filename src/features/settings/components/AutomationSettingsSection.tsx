@@ -145,7 +145,7 @@ export function AutomationSettingsSection({
               <CampaignVideoUpload
                 value={form.campaignOutreachVideoUrl}
                 onChange={(url) => update("campaignOutreachVideoUrl", url)}
-                label="Video opcional (enviado depois da primeira mensagem)"
+                label="Video opcional (enviado ao perguntarem sobre o anuncio do grupo ou Onda Carioca)"
               />
             </div>
 

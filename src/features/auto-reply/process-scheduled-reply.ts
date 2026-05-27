@@ -39,6 +39,25 @@ export interface ProcessScheduledAutoReplyInput {
   wasActiveConversation: boolean;
 }
 
+function isListingVideoInquiry(text: string): boolean {
+  const normalized = text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+  const propertyTerms =
+    /\b(apartamento|apto|imovel|unidade|venda|preco|valor|visita|quarto|quartos|suite|desocupado|condominio|construtora|repasse)\b/;
+  const adTerms = /\b(anuncio|postagem|video|postou|publicacao)\b/;
+  const mentionsOnda = /\bonda(?:\s+carioca)?\b/.test(normalized);
+  const mentionsGroup = /\bgrupo\b/.test(normalized);
+  const isRentalInquiry = /\b(aluguel|alugar|locacao|locar)\b/.test(normalized);
+
+  return (
+    !isRentalInquiry &&
+    ((mentionsOnda && (propertyTerms.test(normalized) || adTerms.test(normalized))) ||
+      (mentionsGroup && propertyTerms.test(normalized) && adTerms.test(normalized)))
+  );
+}
+
 export async function processScheduledAutoReply(
   input: ProcessScheduledAutoReplyInput,
 ) {
@@ -155,6 +174,45 @@ export async function processScheduledAutoReply(
   }
 
   let replySent = false;
+  const conversationId = conversation.id;
+  const whatsappPhoneId = settings.whatsappPhoneId;
+  const listingVideoUrl = settings.campaignOutreachVideoUrl;
+  const shouldSendListingVideo =
+    Boolean(listingVideoUrl) &&
+    isListingVideoInquiry(latestInbound.content) &&
+    !conversation.messages.some(
+      (message) =>
+        message.direction === "outbound" && message.type === "video",
+    );
+
+  async function sendListingVideoIfNeeded(replyJid: string) {
+    if (!shouldSendListingVideo || !listingVideoUrl) {
+      return;
+    }
+
+    try {
+      await sendAndSaveMessage(
+        getWhatsAppConfig(whatsappPhoneId),
+        conversationId,
+        replyJid,
+        "",
+        "bot",
+        {
+          type: "video",
+          url: listingVideoUrl,
+          mimetype: "video/mp4",
+        },
+      );
+      logger.info("[auto-reply] listing inquiry video sent", {
+        conversationId,
+      });
+    } catch (err) {
+      logger.error("[auto-reply] Failed to send listing inquiry video", {
+        conversationId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
 
   try {
     const isFirstDirectWhatsAppMessage =
@@ -190,27 +248,7 @@ export async function processScheduledAutoReply(
       );
       replySent = true;
 
-      if (settings.campaignOutreachVideoUrl) {
-        try {
-          await sendAndSaveMessage(
-            getWhatsAppConfig(settings.whatsappPhoneId!),
-            conversation.id,
-            directGreetingTarget,
-            "",
-            "bot",
-            {
-              type: "video",
-              url: settings.campaignOutreachVideoUrl,
-              mimetype: "video/mp4",
-            },
-          );
-        } catch (err) {
-          logger.error("[auto-reply] Failed to send direct greeting video", {
-            conversationId: conversation.id,
-            error: err instanceof Error ? err.message : String(err),
-          });
-        }
-      }
+      await sendListingVideoIfNeeded(directGreetingTarget);
 
       logger.info("[auto-reply] direct WhatsApp greeting sent", {
         conversationId: conversation.id,
@@ -365,6 +403,7 @@ export async function processScheduledAutoReply(
           "bot",
         );
         replySent = true;
+        await sendListingVideoIfNeeded(replyJid);
         return;
       }
     }
@@ -537,6 +576,7 @@ export async function processScheduledAutoReply(
       logger.info("[auto-reply] text reply sent OK");
     }
     replySent = true;
+    await sendListingVideoIfNeeded(replyJid);
 
     await sendPropertyPdfs(
       pdfRequests,

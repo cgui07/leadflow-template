@@ -17,7 +17,6 @@ interface CampaignOutreachOptions {
   aiConfig: AIConfig;
   campaignOutreachMessage: string | null | undefined;
   campaignOutreachImageUrl: string | null | undefined;
-  campaignOutreachVideoUrl: string | null | undefined;
   hasCampaignSecondMessage: boolean;
   whatsappPhoneId: string;
   leadOrigin?: string;
@@ -33,7 +32,6 @@ export async function sendCampaignOutreach(opts: CampaignOutreachOptions): Promi
     aiConfig,
     campaignOutreachMessage,
     campaignOutreachImageUrl,
-    campaignOutreachVideoUrl,
     hasCampaignSecondMessage,
     whatsappPhoneId,
     leadOrigin,
@@ -80,21 +78,6 @@ export async function sendCampaignOutreach(opts: CampaignOutreachOptions): Promi
     }
   } else {
     await sendAndSaveMessage(config, conversationId, whatsappChatId, message, "bot");
-  }
-
-  if (campaignOutreachVideoUrl) {
-    try {
-      await sendAndSaveMessage(config, conversationId, whatsappChatId, "", "bot", {
-        type: "video",
-        url: campaignOutreachVideoUrl,
-        mimetype: "video/mp4",
-      });
-    } catch (err) {
-      logger.error("[campaign-outreach] Failed to send outreach video", {
-        conversationId,
-        error: err instanceof Error ? err.message : String(err),
-      });
-    }
   }
 
   // Marca conversa como aguardando resposta apenas se há segunda mensagem configurada

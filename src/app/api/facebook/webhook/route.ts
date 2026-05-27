@@ -202,7 +202,6 @@ async function processLeadgen(pageId: string, leadgenId: string) {
       aiConfig,
       campaignOutreachMessage: settings.campaignOutreachMessage,
       campaignOutreachImageUrl: settings.campaignOutreachImageUrl,
-      campaignOutreachVideoUrl: settings.campaignOutreachVideoUrl,
       hasCampaignSecondMessage: !!settings.campaignSecondMessage?.trim(),
       whatsappPhoneId: settings.whatsappPhoneId,
     });

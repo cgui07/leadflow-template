@@ -351,7 +351,6 @@ export async function processGmailLeads(userId: string): Promise<number> {
             aiConfig,
             campaignOutreachMessage: settings.campaignOutreachMessage,
             campaignOutreachImageUrl: settings.campaignOutreachImageUrl,
-            campaignOutreachVideoUrl: settings.campaignOutreachVideoUrl,
             hasCampaignSecondMessage: !!settings.campaignSecondMessage?.trim(),
             whatsappPhoneId: settings.whatsappPhoneId!,
             leadOrigin: lead.portal ?? "portal imobiliário",
