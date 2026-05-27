@@ -125,9 +125,9 @@ export function AutomationSettingsSection({
               />
               <div className="flex items-start justify-between gap-4 rounded-lg border border-neutral-border bg-neutral-surface px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-foreground">Usar na primeira resposta do WhatsApp</p>
+                  <p className="text-sm font-medium text-foreground">Usar em conversas do WhatsApp</p>
                   <p className="mt-0.5 text-xs text-neutral">
-                    Contatos que iniciarem a conversa pelo WhatsApp recebem esta mesma mensagem antes da IA.
+                    Com video configurado, a mensagem e o video sao enviados juntos ao identificar pergunta sobre o anuncio.
                   </p>
                 </div>
                 <CheckboxField

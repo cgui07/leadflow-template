@@ -184,6 +184,10 @@ export async function processScheduledAutoReply(
       (message) =>
         message.direction === "outbound" && message.type === "video",
     );
+  const shouldSendListingReplyBundle =
+    settings.directWhatsAppGreetingEnabled &&
+    Boolean(settings.campaignOutreachMessage?.trim()) &&
+    shouldSendListingVideo;
 
   async function sendListingVideoIfNeeded(replyJid: string) {
     if (!shouldSendListingVideo || !listingVideoUrl) {
@@ -215,9 +219,44 @@ export async function processScheduledAutoReply(
   }
 
   try {
+    if (shouldSendListingReplyBundle) {
+      const listingReplyTarget = resolveSendTarget(
+        input.remoteJidAlt,
+        input.remoteJid,
+        conversation.whatsappChatId,
+        conversation.lead.phone,
+      );
+
+      if (!listingReplyTarget) {
+        await releaseClaim("listing reply target could not be resolved");
+        return;
+      }
+
+      const listingReply = settings.campaignOutreachMessage!.trim().replace(
+        /\[NOME\]/gi,
+        conversation.lead.name || "",
+      );
+
+      await sendTextReply(
+        settings.whatsappPhoneId!,
+        conversation.id,
+        listingReplyTarget,
+        listingReply,
+      );
+      replySent = true;
+
+      await sendListingVideoIfNeeded(listingReplyTarget);
+
+      logger.info("[auto-reply] contextual listing reply and video sent", {
+        conversationId: conversation.id,
+      });
+      return;
+    }
+
     const isFirstDirectWhatsAppMessage =
       settings.directWhatsAppGreetingEnabled &&
       Boolean(settings.campaignOutreachMessage?.trim()) &&
+      !listingVideoUrl &&
       conversation.lead.source === "whatsapp" &&
       conversation.messages.length === 1 &&
       conversation.messages[0].id === input.triggerMessageId;
