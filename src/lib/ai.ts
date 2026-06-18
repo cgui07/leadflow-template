@@ -29,6 +29,64 @@ import {
   getPropertyExtractionPrompt,
 } from "./ai-prompts";
 
+const AVAILABILITY_VERIFICATION_FALLBACK =
+  "Vou verificar certinho e te retorno mais tarde.";
+
+function normalizeForAvailabilityGuard(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function hasAvailabilityDenial(reply: string) {
+  const text = normalizeForAvailabilityGuard(reply);
+
+  return [
+    /\b(nao tenho|nao temos)\b[^.!?\n]{0,120}\b(disponivel|catalogo|tipo|opcao|opcoes|unidade|imovel|quarto|quartos|bairro|valor|preco)\b/,
+    /\b(nao tenho|nao temos)\b[^.!?\n]{0,120}\b(informacao|dados|acesso|como|cpf|email|e-mail|documento|arquivo|comprovante|contato|telefone)\b/,
+    /\b(nao encontrei|nao achei|nao localizei)\b[^.!?\n]{0,120}\b(disponivel|catalogo|tipo|opcao|opcoes|unidade|imovel|quarto|quartos|bairro|valor|preco)\b/,
+    /\b(nao ha|nao existe)\b[^.!?\n]{0,120}\b(disponivel|disponibilidade|tipo|opcao|opcoes|unidade|imovel)\b/,
+    /\bnao tenho acesso\b/,
+    /\bnao tenho como\b/,
+    /\b(nao consigo|nao posso)\b[^.!?\n]{0,120}\b(enviar|mandar|acessar|buscar|verificar|consultar|informar|confirmar|ajudar|fornecer|cpf|email|e-mail|documento|arquivo)\b/,
+    /\bnao sei\b[^.!?\n]{0,120}\b(informar|dizer|confirmar|responder|te passar)\b/,
+    /\bnao sou capaz\b/,
+    /\bsem\s+(disponibilidade|opcao|opcoes|unidade|imovel|esse tipo|este tipo)\b/,
+    /\b(indisponivel|fora do catalogo|nao esta no catalogo)\b/,
+  ].some((pattern) => pattern.test(text));
+}
+
+function sanitizeAvailabilityDenial(reply: string) {
+  return hasAvailabilityDenial(reply)
+    ? AVAILABILITY_VERIFICATION_FALLBACK
+    : reply;
+}
+
+// Frases genéricas de atendimento ("Como posso te ajudar?", "Em que posso ajudar?",
+// "Estou à disposição", etc.) soam formais/robóticas. O prompt já as proíbe, mas o
+// modelo às vezes as inclui mesmo assim, então removemos como rede de segurança.
+const GENERIC_HELPER_PHRASE =
+  /\s*(?:em que|no que|como)\s+(?:eu\s+)?(?:posso|poderia)\s+(?:te\s+|lhe\s+|os?\s+|as?\s+)?ajud[aá][^?!.\n]*[?!.]?/gi;
+
+const FORMAL_IDENTITY_PHRASE =
+  /\b(?:sou|sou eu)\s+eu\s+mesm[oa][^.!?\n]*[.!?]?/gi;
+
+const GENERIC_HELPER_FALLBACK =
+  "Tô por aqui, sim. Me diz o que você precisa que eu vejo pra você.";
+
+function sanitizeGenericHelperPhrase(reply: string) {
+  const cleaned = reply
+    .replace(FORMAL_IDENTITY_PHRASE, "")
+    .replace(GENERIC_HELPER_PHRASE, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([.!?])/g, "$1")
+    .trim();
+  // Se sobrar conteúdo útil, usa a versão limpa. Se a mensagem era só a frase
+  // formal, troca pela versão natural em vez de reenviar o texto formal.
+  return cleaned.length > 0 ? cleaned : GENERIC_HELPER_FALLBACK;
+}
+
 export async function generateAutoReply(
   config: AIConfig,
   agentName: string,
@@ -46,11 +104,13 @@ export async function generateAutoReply(
     content: message.content,
   }));
 
-  return callAI(
+  const reply = await callAI(
     config,
     getQualificationPrompt(agentName, properties, isVoiceReply, customInstructions),
     messages,
   );
+
+  return sanitizeGenericHelperPhrase(sanitizeAvailabilityDenial(reply));
 }
 
 export async function generateFacebookOutreachMessage(

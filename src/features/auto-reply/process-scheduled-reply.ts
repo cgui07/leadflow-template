@@ -128,6 +128,8 @@ export async function processScheduledAutoReply(
     return;
   }
 
+  const triggerInbound = latestInbound;
+
   const previousLastRepliedMessageId = conversation.lastRepliedMessageId;
 
   const claimed = await prisma.conversation.updateMany({
@@ -171,6 +173,44 @@ export async function processScheduledAutoReply(
       released: released.count > 0,
       previousLastRepliedMessageId,
     });
+  }
+
+  async function abortIfAgentTookOver(stage: string) {
+    const latestState = await prisma.conversation.findUnique({
+      where: { id: input.conversationId },
+      select: {
+        status: true,
+        messages: {
+          where: {
+            direction: "outbound",
+            sender: "agent",
+            createdAt: { gt: triggerInbound.createdAt },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          select: { id: true, createdAt: true },
+        },
+      },
+    });
+
+    const agentMessage = latestState?.messages[0];
+    if (latestState?.status === "human" || agentMessage) {
+      await releaseClaim(
+        agentMessage
+          ? `agent replied before auto-reply (${stage})`
+          : `conversation moved to human (${stage})`,
+      );
+      logger.info("[auto-reply] abort: agent took over", {
+        conversationId: input.conversationId,
+        triggerMessageId: input.triggerMessageId,
+        stage,
+        status: latestState?.status,
+        agentMessageId: agentMessage?.id,
+      });
+      return true;
+    }
+
+    return false;
   }
 
   let replySent = false;
@@ -237,6 +277,8 @@ export async function processScheduledAutoReply(
         conversation.lead.name || "",
       );
 
+      if (await abortIfAgentTookOver("listing-reply")) return;
+
       await sendTextReply(
         settings.whatsappPhoneId!,
         conversation.id,
@@ -279,6 +321,8 @@ export async function processScheduledAutoReply(
         conversation.lead.name || "",
       );
 
+      if (await abortIfAgentTookOver("direct-greeting")) return;
+
       await sendTextReply(
         settings.whatsappPhoneId!,
         conversation.id,
@@ -306,6 +350,8 @@ export async function processScheduledAutoReply(
           conversation.lead.phone,
         );
         if (replyJidBot) {
+          if (await abortIfAgentTookOver("bot-flow")) return;
+
           const handled = await executeBotFlow({
             flow,
             conversationId: conversation.id,
@@ -431,6 +477,8 @@ export async function processScheduledAutoReply(
 
       if (matched) {
         logger.info("[auto-reply] sending custom audio", { audioId: matched.id });
+        if (await abortIfAgentTookOver("custom-audio")) return;
+
         const whatsappCfg = getWhatsAppConfig(settings.whatsappPhoneId!);
         await sendPresenceUpdate(whatsappCfg, replyJid, "recording");
         await sendAndSaveAudioPTT(
@@ -533,6 +581,8 @@ export async function processScheduledAutoReply(
       }
     }
 
+    if (await abortIfAgentTookOver("before-presence")) return;
+
     const whatsappConfig = getWhatsAppConfig(settings.whatsappPhoneId!);
     await sendPresenceUpdate(
       whatsappConfig,
@@ -582,6 +632,8 @@ export async function processScheduledAutoReply(
 
     const messageCount = orderedMessages.length + 1;
     let sentAsVoice = false;
+
+    if (await abortIfAgentTookOver("before-send")) return;
 
     if (willUseVoice && elevenlabsApiKey && elevenlabsVoiceId) {
       sentAsVoice = await sendVoiceReply(

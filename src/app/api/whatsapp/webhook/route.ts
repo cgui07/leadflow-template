@@ -115,21 +115,19 @@ export async function POST(req: NextRequest) {
 
       // Owner sent a message from their phone → pause AI for this conversation
       if (event.isFromMe) {
-        after(async () => {
-          try {
-            await pauseConversationOnOwnerMessage(
-              userId,
-              event.remoteJid,
-              event.messageId,
-              event.text || null,
-              event.mediaType,
-            );
-          } catch (err) {
-            logger.error("Owner message handling error", {
-              error: err instanceof Error ? err.message : String(err),
-            });
-          }
-        });
+        try {
+          await pauseConversationOnOwnerMessage(
+            userId,
+            event.remoteJid,
+            event.messageId,
+            event.text || null,
+            event.mediaType,
+          );
+        } catch (err) {
+          logger.error("Owner message handling error", {
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
         return NextResponse.json({ ok: true });
       }
 

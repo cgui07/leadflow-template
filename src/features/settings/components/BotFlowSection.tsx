@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import type { UserSettings } from "../contracts";
 import { SectionContainer } from "@/components/layout/SectionContainer";
+import { useAudioRecorder } from "@/components/domain/chat/useAudioRecorder";
 import type {
   BotContent,
   BotCondition,
@@ -34,7 +35,6 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useAudioRecorder } from "@/components/domain/chat/useAudioRecorder";
 
 interface BotFlowSectionProps {
   form: UserSettings;
@@ -198,7 +198,7 @@ function ContentEditor({
     text: "Texto",
     image: "Imagem",
     audio: "Áudio",
-    pdf: "PDF",
+    pdf: "PDF / tabela",
   };
 
   const contentTypeIcon: Record<BotContent["type"], React.ReactNode> = {
@@ -376,8 +376,9 @@ function ContentEditor({
                 size="sm"
                 icon={<Trash2 className="h-3.5 w-3.5" />}
                 onClick={() => onChange({ type: "pdf", url: "", filename: "" })}
+                title="Remover PDF ou tabela deste flow"
               >
-                Remover
+                Remover PDF/tabela
               </Button>
             </div>
           ) : (
@@ -390,7 +391,7 @@ function ContentEditor({
               ) : (
                 <FileText className="h-4 w-4" />
               )}
-              {uploading ? "Enviando..." : "Clique para enviar PDF (máx 10MB)"}
+              {uploading ? "Enviando..." : "Clique para enviar PDF ou tabela (máx 10MB)"}
             </div>
           )}
           <FileField
@@ -450,7 +451,7 @@ function AddContentButtons({ onAdd }: { onAdd: (c: BotContent) => void }) {
         icon={<Plus className="h-3 w-3" />}
         onClick={() => onAdd({ type: "pdf", url: "", filename: "" })}
       >
-        PDF
+        PDF / tabela
       </Button>
     </div>
   );
