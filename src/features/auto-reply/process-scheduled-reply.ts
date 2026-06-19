@@ -39,6 +39,11 @@ export interface ProcessScheduledAutoReplyInput {
   wasActiveConversation: boolean;
 }
 
+// Every reply needs a short quiet window: people commonly split one thought
+// across two or three WhatsApp messages. Without it, each webhook starts an
+// independent AI reply and the contact can receive repeated text.
+const MIN_REPLY_DEBOUNCE_MS = 2_000;
+
 function isListingVideoInquiry(text: string): boolean {
   const normalized = text
     .toLowerCase()
@@ -69,9 +74,7 @@ export async function processScheduledAutoReply(
 
   const delaySeconds = normalizeAutoReplyDelaySeconds(input.delaySeconds);
 
-  if (delaySeconds > 0) {
-    await wait(delaySeconds * 1000);
-  }
+  await wait(Math.max(delaySeconds * 1000, MIN_REPLY_DEBOUNCE_MS));
 
   const conversation = await prisma.conversation.findUnique({
     where: { id: input.conversationId },
@@ -175,37 +178,66 @@ export async function processScheduledAutoReply(
     });
   }
 
-  async function abortIfAgentTookOver(stage: string) {
-    const latestState = await prisma.conversation.findUnique({
-      where: { id: input.conversationId },
-      select: {
-        status: true,
-        messages: {
-          where: {
-            direction: "outbound",
-            sender: "agent",
-            createdAt: { gt: triggerInbound.createdAt },
+  async function abortIfReplyShouldStop(stage: string) {
+    const [latestState, currentLatestInbound] = await Promise.all([
+      prisma.conversation.findUnique({
+        where: { id: input.conversationId },
+        select: {
+          status: true,
+          lastRepliedMessageId: true,
+          messages: {
+            where: {
+              direction: "outbound",
+              sender: "agent",
+              createdAt: { gt: triggerInbound.createdAt },
+            },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            select: { id: true, createdAt: true },
           },
-          orderBy: { createdAt: "desc" },
-          take: 1,
-          select: { id: true, createdAt: true },
         },
-      },
-    });
+      }),
+      prisma.message.findFirst({
+        where: {
+          conversationId: input.conversationId,
+          direction: "inbound",
+        },
+        orderBy: { createdAt: "desc" },
+        select: { id: true },
+      }),
+    ]);
 
     const agentMessage = latestState?.messages[0];
-    if (latestState?.status === "human" || agentMessage) {
-      await releaseClaim(
-        agentMessage
-          ? `agent replied before auto-reply (${stage})`
-          : `conversation moved to human (${stage})`,
-      );
-      logger.info("[auto-reply] abort: agent took over", {
+    const newerInbound =
+      currentLatestInbound?.id !== input.triggerMessageId
+        ? currentLatestInbound
+        : null;
+    const claimWasSuperseded =
+      latestState?.lastRepliedMessageId !== input.triggerMessageId;
+
+    if (
+      latestState?.status === "human" ||
+      agentMessage ||
+      newerInbound ||
+      claimWasSuperseded
+    ) {
+      const stopReason = agentMessage
+        ? `agent replied before auto-reply (${stage})`
+        : newerInbound
+          ? `newer inbound message arrived (${stage})`
+          : claimWasSuperseded
+            ? `reply claim was superseded (${stage})`
+            : `conversation moved to human (${stage})`;
+
+      await releaseClaim(stopReason);
+      logger.info("[auto-reply] abort: reply no longer current", {
         conversationId: input.conversationId,
         triggerMessageId: input.triggerMessageId,
         stage,
         status: latestState?.status,
         agentMessageId: agentMessage?.id,
+        latestInboundId: currentLatestInbound?.id,
+        claimedMessageId: latestState?.lastRepliedMessageId,
       });
       return true;
     }
@@ -277,7 +309,7 @@ export async function processScheduledAutoReply(
         conversation.lead.name || "",
       );
 
-      if (await abortIfAgentTookOver("listing-reply")) return;
+      if (await abortIfReplyShouldStop("listing-reply")) return;
 
       await sendTextReply(
         settings.whatsappPhoneId!,
@@ -321,7 +353,7 @@ export async function processScheduledAutoReply(
         conversation.lead.name || "",
       );
 
-      if (await abortIfAgentTookOver("direct-greeting")) return;
+      if (await abortIfReplyShouldStop("direct-greeting")) return;
 
       await sendTextReply(
         settings.whatsappPhoneId!,
@@ -350,7 +382,7 @@ export async function processScheduledAutoReply(
           conversation.lead.phone,
         );
         if (replyJidBot) {
-          if (await abortIfAgentTookOver("bot-flow")) return;
+          if (await abortIfReplyShouldStop("bot-flow")) return;
 
           const handled = await executeBotFlow({
             flow,
@@ -477,7 +509,7 @@ export async function processScheduledAutoReply(
 
       if (matched) {
         logger.info("[auto-reply] sending custom audio", { audioId: matched.id });
-        if (await abortIfAgentTookOver("custom-audio")) return;
+        if (await abortIfReplyShouldStop("custom-audio")) return;
 
         const whatsappCfg = getWhatsAppConfig(settings.whatsappPhoneId!);
         await sendPresenceUpdate(whatsappCfg, replyJid, "recording");
@@ -581,7 +613,7 @@ export async function processScheduledAutoReply(
       }
     }
 
-    if (await abortIfAgentTookOver("before-presence")) return;
+    if (await abortIfReplyShouldStop("before-presence")) return;
 
     const whatsappConfig = getWhatsAppConfig(settings.whatsappPhoneId!);
     await sendPresenceUpdate(
@@ -633,7 +665,7 @@ export async function processScheduledAutoReply(
     const messageCount = orderedMessages.length + 1;
     let sentAsVoice = false;
 
-    if (await abortIfAgentTookOver("before-send")) return;
+    if (await abortIfReplyShouldStop("before-send")) return;
 
     if (willUseVoice && elevenlabsApiKey && elevenlabsVoiceId) {
       sentAsVoice = await sendVoiceReply(

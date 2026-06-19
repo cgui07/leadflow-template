@@ -97,27 +97,48 @@ export async function processIncomingMessage(userId: string, message: {
     }
   }
 
+  const messageData = {
+    conversationId: conversation.id,
+    direction: "inbound",
+    sender: "lead",
+    content,
+    type:
+      message.type === "conversation" ||
+      message.type === "extendedTextMessage"
+        ? "text"
+        : message.type,
+    status: "delivered",
+    whatsappMsgId: message.id,
+    metadata: toInputJsonValue(message.metadata),
+  };
+
+  let savedMessage;
+  let isNewMessage = true;
+
   if (message.id) {
-    const existing = await prisma.message.findFirst({
-      where: { conversationId: conversation.id, whatsappMsgId: message.id },
+    // Evolution can redeliver the same webhook, including concurrently. Let the
+    // database unique constraint elect the single request that may trigger a reply.
+    const inserted = await prisma.message.createMany({
+      data: messageData,
+      skipDuplicates: true,
     });
-    if (existing) {
-      return { lead, conversation, message: existing };
-    }
+
+    isNewMessage = inserted.count === 1;
+    savedMessage = await prisma.message.findUniqueOrThrow({
+      where: {
+        conversationId_whatsappMsgId: {
+          conversationId: conversation.id,
+          whatsappMsgId: message.id,
+        },
+      },
+    });
+  } else {
+    savedMessage = await prisma.message.create({ data: messageData });
   }
 
-  const savedMessage = await prisma.message.create({
-    data: {
-      conversationId: conversation.id,
-      direction: "inbound",
-      sender: "lead",
-      content,
-      type: message.type === "conversation" || message.type === "extendedTextMessage" ? "text" : message.type,
-      status: "delivered",
-      whatsappMsgId: message.id,
-      metadata: toInputJsonValue(message.metadata),
-    },
-  });
+  if (!isNewMessage) {
+    return { lead, conversation, message: savedMessage, isNewMessage };
+  }
 
   await prisma.conversation.update({
     where: { id: conversation.id },
@@ -136,7 +157,7 @@ export async function processIncomingMessage(userId: string, message: {
     },
   });
 
-  return { lead, conversation, message: savedMessage };
+  return { lead, conversation, message: savedMessage, isNewMessage };
 }
 
 export async function sendAndSaveMessage(

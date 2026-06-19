@@ -63,28 +63,28 @@ function sanitizeAvailabilityDenial(reply: string) {
     : reply;
 }
 
-// Frases genéricas de atendimento ("Como posso te ajudar?", "Em que posso ajudar?",
-// "Estou à disposição", etc.) soam formais/robóticas. O prompt já as proíbe, mas o
-// modelo às vezes as inclui mesmo assim, então removemos como rede de segurança.
-const GENERIC_HELPER_PHRASE =
-  /\s*(?:em que|no que|como)\s+(?:eu\s+)?(?:posso|poderia)\s+(?:te\s+|lhe\s+|os?\s+|as?\s+)?ajud[aá][^?!.\n]*[?!.]?/gi;
-
-const FORMAL_IDENTITY_PHRASE =
-  /\b(?:sou|sou eu)\s+eu\s+mesm[oa][^.!?\n]*[.!?]?/gi;
-
-const GENERIC_HELPER_FALLBACK =
+const LEGACY_GENERIC_HELPER_REPLY =
   "Tô por aqui, sim. Me diz o que você precisa que eu vejo pra você.";
 
-function sanitizeGenericHelperPhrase(reply: string) {
-  const cleaned = reply
-    .replace(FORMAL_IDENTITY_PHRASE, "")
-    .replace(GENERIC_HELPER_PHRASE, "")
-    .replace(/[ \t]{2,}/g, " ")
-    .replace(/\s+([.!?])/g, "$1")
+function normalizeReplyForComparison(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
     .trim();
-  // Se sobrar conteúdo útil, usa a versão limpa. Se a mensagem era só a frase
-  // formal, troca pela versão natural em vez de reenviar o texto formal.
-  return cleaned.length > 0 ? cleaned : GENERIC_HELPER_FALLBACK;
+}
+
+function isLegacyGenericHelperReply(content: MessageContent) {
+  return (
+    typeof content === "string" &&
+    normalizeReplyForComparison(content) ===
+      normalizeReplyForComparison(LEGACY_GENERIC_HELPER_REPLY)
+  );
+}
+
+function prepareAutoReply(reply: string) {
+  return sanitizeAvailabilityDenial(reply).trim();
 }
 
 export async function generateAutoReply(
@@ -99,18 +99,68 @@ export async function generateAutoReply(
   isVoiceReply?: boolean,
   customInstructions?: string | null,
 ) {
-  const messages = conversationMessages.map((message) => ({
-    role: message.direction === "inbound" ? "user" : "assistant",
-    content: message.content,
-  }));
+  const messages = conversationMessages
+    // Remove the old canned fallback from the model context so conversations
+    // already affected by the bug do not keep teaching the model to repeat it.
+    .filter(
+      (message) =>
+        message.direction === "inbound" ||
+        !isLegacyGenericHelperReply(message.content),
+    )
+    .map((message) => ({
+      role: message.direction === "inbound" ? "user" : "assistant",
+      content: message.content,
+    }));
 
-  const reply = await callAI(
-    config,
-    getQualificationPrompt(agentName, properties, isVoiceReply, customInstructions),
-    messages,
+  const recentOutboundReplies = new Set(
+    conversationMessages
+      .filter(
+        (message) =>
+          message.direction !== "inbound" &&
+          typeof message.content === "string",
+      )
+      .map((message) =>
+        normalizeReplyForComparison(message.content as string),
+      )
+      .filter(Boolean),
+  );
+  const systemPrompt = getQualificationPrompt(
+    agentName,
+    properties,
+    isVoiceReply,
+    customInstructions,
   );
 
-  return sanitizeGenericHelperPhrase(sanitizeAvailabilityDenial(reply));
+  const reply = prepareAutoReply(await callAI(config, systemPrompt, messages));
+  if (!reply || !recentOutboundReplies.has(normalizeReplyForComparison(reply))) {
+    return reply;
+  }
+
+  logger.warn("AI generated a repeated auto-reply; retrying", {
+    repeatedReply: reply,
+  });
+
+  const retryPrompt = `${systemPrompt}\n\nANTI-REPETIÇÃO — CORREÇÃO OBRIGATÓRIA:
+- Sua resposta anterior repetiu uma mensagem já enviada nesta conversa.
+- Responda especificamente à ÚLTIMA mensagem do cliente, usando os dados e pedidos que ela contém.
+- Não reutilize esta resposta: "${reply.replace(/"/g, "'")}"
+- Se o cliente pediu oportunidades de um imóvel ou empreendimento, trate desse pedido diretamente e faça no máximo uma pergunta específica para avançar.`;
+  const retryReply = prepareAutoReply(
+    await callAI(config, retryPrompt, messages),
+  );
+
+  if (
+    retryReply &&
+    !recentOutboundReplies.has(normalizeReplyForComparison(retryReply))
+  ) {
+    return retryReply;
+  }
+
+  logger.error("AI repeated the auto-reply after retry; suppressing send", {
+    firstReply: reply,
+    retryReply,
+  });
+  return "";
 }
 
 export async function generateFacebookOutreachMessage(

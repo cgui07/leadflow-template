@@ -145,6 +145,14 @@ export async function POST(req: NextRequest) {
         metadata: event.mediaMetadata,
       });
 
+      if (!result.isNewMessage) {
+        logger.info("Ignoring duplicate incoming message webhook", {
+          conversationId: result.conversation.id,
+          whatsappMessageId: event.messageId,
+        });
+        return NextResponse.json({ ok: true, duplicate: true });
+      }
+
       const conv = result.conversation;
       const wasActiveConversation = conv.status === "active";
 
